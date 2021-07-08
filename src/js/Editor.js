@@ -79,15 +79,10 @@ class Editor {
             {type:'edit',   id:'b-undo', tag:'UNDO',  label:'Undo',           icon:Icons.undo},
             {type:'edit',   id:'b-redo', tag:'REDO',  label:'Redo',           icon:Icons.redo},
         ]
-        const customToolbar = toolbar.filter( item => {
-            if ( item.type == 'block' || item.type == 'list' || item.type == 'inline' ){
-                return options.elements.includes(item.tag)
-            } else {
-                return true
-            }
-            return false
+        this.toolbar = toolbar.filter( item => options.elements.includes(item.tag))
+        this.options.plugins.forEach( plugin => {
+            this.toolbar.push(plugin.button)
         })
-        this.toolbar = [...customToolbar,...options.plugins]
         console.log('toolbar',this.toolbar)
     }
 

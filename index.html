@@ -5,20 +5,28 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./src/css/styles.css">
+    <link rel="stylesheet" href="./src/css/mentions.css">
     <title>Another Javascript Editor</title>
     <script src='./public/js/AJE.js' charset="utf-8"></script>
 </head>
 <body>
 
-    <!-- This text will be replaced with  -->
+    <!-- The inner html will be replaced with the editor instance -->
     <div id="editor">
         <h1>Welcome to AJE AGAIN</h1>
         <p>I am AJE - <i>Another Javascript Editor</i>! My name is pronounced <b>Ajay</b>.</p>
-        <blockquote>This is a block quote and is not yet supported by AJE</blockquote>
+        <blockquote>I am a block quote and am not yet supported by AJE so you won't see me when the page is initialised.</blockquote>
     </div>
 
     <script type="text/javascript">
+        // Choose locatoin for editor and the default content
         const target = document.getElementById('editor')
+        let content = target.innerHTML
+        target.innerHTML = ''
+        // Setup plugins - required mentions.css to be included in head
+        const people = ['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian']
+        const mentions = new AJE.Mentions(AJE.Icons.person, people)
+        // Define editor options
         const options = {
             // Toolbar buttons required
             // Allowed values 'H1','H2','P','OL','UL','B','U','I','CLEAR','UNDO','REDO']
@@ -27,12 +35,11 @@
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
             headingNumbers: 'on', 
             // Custom plugs to add to the toolbar to enhance the editor
-            plugins: [],   
+            plugins: [mentions],   
             // Number of Undo operations supported, max 10       
             bufferSize: 10        
         }
-        let content = target.innerHTML
-        target.innerHTML = ''
+        // Create editor and add to dom in target position
         const editor = new AJE.Editor(target, content, options)
     </script>
     
