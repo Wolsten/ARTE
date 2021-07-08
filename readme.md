@@ -1,4 +1,4 @@
-Build ebvironment setup using these instructions:
+Build environment setup using these instructions:
 
 https://www.sitepoint.com/es6-babel-webpack/
 
