@@ -1,0 +1,42 @@
+.editor-container {
+    position: relative;
+}
+
+.editor-toolbar {
+    padding:0.5rem;
+}
+
+.editor-toolbar-group {
+    display:inline-block;
+}
+
+.editor-toolbar-group-separator {
+    margin:0 0.3rem;
+    color:rgb(200, 200, 200);
+    font-size: 1.4em;
+}
+
+.editor-body {
+    padding:0.5rem;
+    border: 1px solid rgb(200, 200, 200);;
+    min-height:200px;
+}
+
+.editor-body.heading-numbers { counter-reset: h1}
+.editor-body.heading-numbers h1 {counter-reset: h2}
+.editor-body.heading-numbers h2 {counter-reset: h3}
+.editor-body.heading-numbers h3 {counter-reset: h4}
+.editor-body.heading-numbers h4 {counter-reset: h5}
+.editor-body.heading-numbers h5 {counter-reset: h6}
+.editor-body.heading-numbers h1:before {counter-increment: h1; content: counter(h1) ". "}
+.editor-body.heading-numbers h2:before {counter-increment: h2; content: counter(h1) "." counter(h2) " "}
+.editor-body.heading-numbers h3:before {counter-increment: h3; content: counter(h1) "." counter(h2) "." counter(h3) " "}
+.editor-body.heading-numbers h4:before {counter-increment: h4; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) " "}
+.editor-body.heading-numbers h5:before {counter-increment: h5; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " "}
+.editor-body.heading-numbers h5:before {counter-increment: h6; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". " counter(h6)}
+
+
+#b-redo {
+    -webkit-transform: scale(-1, 1);
+            transform: scale(-1, 1);
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./src/css/styles.css">
+    <title>Another Javascript Editor</title>
+    <script src='./public/js/AJE.js' charset="utf-8"></script>
+</head>
+<body>
+
+    <!-- This text will be replaced with  -->
+    <div id="editor">
+        <h1>Welcome to AJE AGAIN</h1>
+        <p>I am AJE - <i>Another Javascript Editor</i>! My name is pronounced <b>Ajay</b>.</p>
+        <blockquote>This is a block quote and is not yet supported by AJE</blockquote>
+    </div>
+
+    <script type="text/javascript">
+        const target = document.getElementById('editor')
+        const options = {
+            // Toolbar buttons required
+            // Allowed values 'H1','H2','P','OL','UL','B','U','I','CLEAR','UNDO','REDO']
+            // All other elements are filtered out unless specified below in a plugin
+            elements: ['H1','P','OL','UL','B','U','CLEAR','UNDO','REDO'], 
+            // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
+            headingNumbers: 'on', 
+            // Custom plugs to add to the toolbar to enhance the editor
+            plugins: [],   
+            // Number of Undo operations supported, max 10       
+            bufferSize: 10        
+        }
+        let content = target.innerHTML
+        target.innerHTML = ''
+        const editor = new AJE.Editor(target, content, options)
+    </script>
+    
+</body>
+</html>
