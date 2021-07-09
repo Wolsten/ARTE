@@ -39,7 +39,7 @@ export default class ModalConfirm {
         this.panel.classList.add('modal-confirm')
         this.panel.innerHTML = this.form(title,message)
         this.panel.querySelector('button.cancel').addEventListener('click', event => {
-            event.preventPropagation()
+            event.stopPropagation()
             this.hide()
         })
         document.querySelector('body').appendChild(this.panel)

@@ -1,3 +1,12 @@
+/* Fonts */
+
+* {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    box-sizing: border-box;
+}
+
+/* Editor */
+
 .editor-container {
     position: relative;
 }
@@ -8,6 +17,10 @@
 
 .editor-toolbar-group {
     display:inline-block;
+}
+
+.editor-toolbar-group button.active {
+    background:rgb(230, 230, 230);
 }
 
 .editor-toolbar-group-separator {
@@ -35,8 +48,83 @@
 .editor-body.heading-numbers h5:before {counter-increment: h5; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " "}
 .editor-body.heading-numbers h5:before {counter-increment: h6; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". " counter(h6)}
 
-
-#b-redo {
+/* Rotate redo icon */
+button#REDO {
     -webkit-transform: scale(-1, 1);
             transform: scale(-1, 1);
 }
+
+/* Buttons */
+
+button {
+    background:white;
+    border: 1px solid rgb(200, 200, 200);
+    border-radius: 0.4rem;
+    padding:0.3rem 0.5rem;
+    -webkit-transition: all 0.5s ease;
+    transition:all 0.5s ease;
+}
+
+button:hover{
+    cursor:pointer;
+    background:rgb(100, 100, 100);
+    color:white;
+}
+
+
+/* Forms */
+
+label {
+    font-size: 0.8rem;
+}
+
+.form-input {
+    display:flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.form-input label {
+    flex-basis:25%;
+}
+
+.form-control {
+    flex-basis:75%;
+    background:white;
+    border: 1px solid rgb(200, 200, 200);
+    border-radius: 0.4rem;
+    padding:0.3rem;
+}
+
+/* Slide down edit panel */
+
+.edit-panel {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    background:rgba(100,100,100,0.5);
+}
+
+.edit-panel-container {
+    width:100%;
+    position:absolute;
+    top:0;
+    left:0;
+    padding:1rem;
+    background:white;
+    border-bottom:1px gray solid;
+    box-shadow: 2px 2px 2px gray;
+    transform: translateY(-100%);
+    transition: all 0.3s ease-in-out 0s;
+}
+
+.edit-panel.show .edit-panel-container{
+    transform: translateX(0);
+}
+
+.edit-panel-header {
+    width:100%;
+}
+

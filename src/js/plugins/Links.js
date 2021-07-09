@@ -24,7 +24,7 @@ class Links {
             label:'Link', 
             // The icon passed in should be a 16 x 16 svg tag
             icon:icon,
-            // The button click handler and reference to the instance
+            // The button click handler and reference to the Links instance
             click:this.click,
             that:this,
             //
@@ -41,22 +41,23 @@ class Links {
         }
     }
 
-    // initLinks(){
-    //     let links = this.target.querySelectorAll( 'a' )
-    //     links.forEach( link => format( link ))
-    // }
-
-
     insert(id){
         const link = document.createElement('a')
         link.id = id
         link.setAttribute('contenteditable', 'false')
         link.innerText = ' '
         const parent = this.range.startContainer.parentNode
-        const preText = this.range.startContainer.textContent.substring(0,this.range.startOffset)
+        let preText = this.range.startContainer.textContent.substring(0,this.range.startOffset)
         let postText
         if ( this.range.collapsed ){
             postText = this.range.startContainer.textContent.substring(this.range.startOffset)
+            // Insert leading and trailing spaces if needed
+            if ( preText.charAt(preText.length+1) != ' ' ){
+                preText = preText + ' '
+            }
+            if ( postText.charAt(0) != ' ' ){
+                postText = ' ' + postText
+            }
         } else {
             postText = this.range.startContainer.textContent.substring(this.range.endOffset)
         }
@@ -70,24 +71,28 @@ class Links {
         this.range.startContainer.remove()
     }
 
-    updateDomDelayed(id){
+    updateDomDelayed(){
         // Update dom
-        const userForm = this.panel.querySelector('form')
+        const form = this.panel.querySelector('form')
         const link = this.editor.querySelector(`a#${this.link.id}`)
-        link.href = userForm.querySelector('#href').value
-        link.innerText = userForm.querySelector('#label').value
+        link.href = form.querySelector('#href').value.trim()
+        let label = form.querySelector('#label').value.trim()
+        if ( label == '' ){
+            label = link.href
+        }
+        link.innerText = label
         // Add event handler
         this.format(link)
     }
 
-    saveChanges(){
+    save(){
         console.log('Save changes')
         // Create new link and add to the editor?
         if ( this.link.id == '' ){
             this.link.id = this.generateUid()
             this.insert(this.link.id)
         }
-        setTimeout( ()=>this.updateDomDelayed(this.link.id), 10)
+        setTimeout( ()=>this.updateDomDelayed(), 10)
         // Close the edit pane
         this.hide()
     } 
@@ -98,7 +103,7 @@ class Links {
             console.log('No range or link selected')
             return
         }
-        // Check content
+        // Check context
         const _this = this.that ? this.that : this
         console.log('this should be the link class', _this)
         let edit = true
@@ -107,12 +112,13 @@ class Links {
         _this.panel = document.createElement('DIV')
         _this.panel.id = 'link-edit'
         _this.panel.classList.add('edit-panel')
+        setTimeout( ()=>_this.panel.classList.add('show'),10 )
         // debugger
         if ( link == undefined ){
             edit = false
             let label = ''
             if ( _this.range.collapsed == false && 
-                _this.range.startContainer == _this.range.endContainer ){
+                 _this.range.startContainer == _this.range.endContainer ){
                 label = _this.range.endContainer.textContent.substring(_this.range.startOffset, _this.range.endOffset)  
             }
             _this.link = {
@@ -142,12 +148,23 @@ class Links {
         if ( edit ){
             _this.panel.querySelector('button.delete').addEventListener('click', () => {
                 const confirmBtn = _this.modal.show('Delete link', 'Do you really want to delete this link?')
-                confirmBtn.addEventListener( 'click', ()=>_this.deleteItem() )
+                confirmBtn.addEventListener( 'click', () => {
+                    _this.modal.hide()
+                    _this.deleteItem() 
+                })
             })
         }
-        _this.panel.querySelector('button.save').addEventListener('click', ()=>_this.saveChanges())
+        _this.panel.querySelector('form').addEventListener('submit', event => {
+            event.preventDefault()
+            _this.save()
+        })
+
         // Add to dom, position and focus the input
         document.querySelector('body').appendChild(_this.panel)
+        const href = _this.panel.querySelector('form #href')
+        href.focus()
+        href.setSelectionRange(href.value.length, href.value.length)
+
     }
 
     getNewNode(node){
@@ -163,9 +180,9 @@ class Links {
 
 
     editClickedObject(link){
-        // event.preventDefault()
-        // const linkNode = this.getNewNode(event.currentTarget)
-        // console.log('edit link', linkNode )
+        if ( this.panel ){
+            return
+        }
         this.link = {
             id: link.id,
             href: link.href,
@@ -182,6 +199,7 @@ class Links {
     }
 
     delayedRemove(){
+        console.log('removed pane')
         this.panel.remove()
         this.panel = null
     }
@@ -189,6 +207,8 @@ class Links {
 
     deleteItem(){
         // @todo Remove link from the editor
+        const link = this.editor.querySelector(`a#${this.link.id}`)
+        link.remove()
         this.hide()
     }
 
@@ -231,7 +251,7 @@ class Links {
     form(link,edit){
         let title = 'Create link'
         let delBtn = ''
-        let href = ''
+        let href = 'http://'
         let label = ''
         if ( edit) {
             title = 'Edit link'
@@ -240,25 +260,27 @@ class Links {
             label = link.label
         }
         return `
-            <div class="panel-header">
-                <h1 class="panel-title">${title}</h1>
-            </div>
-            <div class="panel-body">
-                <form>
-                    <div class="form-input">
-                        <input id="href" type="text" class="form-control" placeholder="URL" value="${href}">
-                        <label for="href">URL</label>
-                    </div>
-                    <div class="form-input">
-                        <input id="label" type="text" class="form-control" placeholder="Label" value="${label}">
-                        <label for="label">Label (optional)</label>
-                    </div>
-                    <div class="buttons">
-                        <button type="button" class="cancel">Cancel</button>
-                        ${delBtn}
-                        <button type="button" class="save">Save</button>
-                    </div>
-                </form>
+            <div class="edit-panel-container">
+                <div class="edit-panel-header">
+                    <h3 class="edit-panel-title">${title}</h3>
+                </div>
+                <div class="edit-panel-body">
+                    <form>
+                        <div class="form-input">
+                            <label for="href">URL</label>
+                            <input id="href" type="url" class="form-control" placeholder="URL" required value="${href}">
+                        </div>
+                        <div class="form-input">
+                            <label for="label">Label (optional)</label>
+                            <input id="label" type="text" class="form-control" placeholder="Label" value="${label}">
+                        </div>
+                        <div class="buttons">
+                            <button type="button" class="cancel">Cancel</button>
+                            ${delBtn}
+                            <button type="submit" class="save">Save</button>
+                        </div>
+                    </form>
+                </div>
             </div>`
     }
 

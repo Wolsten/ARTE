@@ -414,11 +414,11 @@ class Editor {
                     element.removeAttribute('data-active')
                     element.removeAttribute('aria-pressed')
                 }
-                if ( element.disabled ){
-                    console.log('setting element to be inactive', element.title)
-                } else {
-                    console.log('setting element to be active', element.title)
-                }
+                // if ( element.disabled ){
+                //     console.log('setting element to be inactive', element.title)
+                // } else {
+                //     console.log('setting element to be active', element.title)
+                // }
             }
         })
     }
