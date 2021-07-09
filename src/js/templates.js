@@ -1,5 +1,5 @@
 function editorToolbarButton(button){
-    const {type, id, label, icon} = button
+    const {type, tag, label, icon} = button
     if ( button.attr === undefined ){
         button.attr = ''
     }
@@ -7,7 +7,7 @@ function editorToolbarButton(button){
     // data-bs-toggle="button" allows the active state to be shown by adding
     // the class "active" and aria-pressed="true"(for assistive tech)
     return `
-        <button id="${id}" type="button" class="btn btn-light ${type}" 
+        <button id="${tag}" type="button" class="btn btn-light ${type}" 
             ${button.attr} aria-label="${label}" title=${label}>
             ${icon}
         </button>`

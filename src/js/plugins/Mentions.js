@@ -3,24 +3,35 @@
 class Mentions {
 
     constructor(icon, people){
-        this.people = people
+        this.people = people.sort()
         this.position = {x:0, y:0}
         this.filterInput = ''
         this.panel = null
-        // Buttons have a mandatory method "click" and two optional 
-        // methods "setup" and "clean". In this case only click is required
+        this.range = false
         this.button = {
+            //
             // Mandatory attributes
-            type:'custom', 
-            id:'b-mention', 
-            tag:'mention',
+            //
+            // The tag should be a valid html id that isn't already used
+            tag:'mention',  
+            // The tooltip label        
             label:'Mention', 
+            // The icon passed in should be a 16 x 16 svg tag
             icon:icon,
+            // The button click handler and reference to the instance
             click:this.click,
             that:this,
+            //
             // Optional attributes
+            //
+            // Keyboard shortcut
             shortcut:'@',
-            attr:'',
+            // Any pre setup required (this will probably move into the constructor)
+            // setup,
+            // Callback to initialise event handling for custom objects in the editor
+            // addEventHandlers,
+            // Call back for any custom data cleaning required on save
+            // clean,
         }
     }
 

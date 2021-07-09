@@ -19,13 +19,14 @@
     </div>
 
     <script type="text/javascript">
-        // Choose locatoin for editor and the default content
+        // Choose location for editor and the default content
         const target = document.getElementById('editor')
         let content = target.innerHTML
         target.innerHTML = ''
         // Setup plugins - required mentions.css to be included in head
         const people = ['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian']
         const mentions = new AJE.Mentions(AJE.Icons.person, people)
+        const links = new AJE.Links(target, AJE.Icons.link, AJE.ModalConfirm)
         // Define editor options
         const options = {
             // Toolbar buttons required
@@ -35,7 +36,7 @@
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
             headingNumbers: 'on', 
             // Custom plugs to add to the toolbar to enhance the editor
-            plugins: [mentions],   
+            plugins: [mentions, links],   
             // Number of Undo operations supported, max 10       
             bufferSize: 10        
         }

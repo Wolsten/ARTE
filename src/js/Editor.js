@@ -67,20 +67,21 @@ class Editor {
     initToolbar(){
         // Default toolbar
         const toolbar = [
-            {type:'block',  id:'b-h1',   tag:'H1',    label:'Heading 1',      icon:Icons.h1},
-            {type:'block',  id:'b-h2',   tag:'H2',    label:'Heading 2',      icon:Icons.h2},
-            {type:'block',  id:'b-p',    tag:'P',     label:'Paragraph',      icon:Icons.p},
-            {type:'list',   id:'b-ol',   tag:'OL',    label:'Ordered list',   icon:Icons.ol},
-            {type:'list',   id:'b-ul',   tag:'UL',    label:'Unordered list', icon:Icons.ul},
-            {type:'inline', id:'b-b',    tag:'B',     label:'Bold',           icon:Icons.b},
-            {type:'inline', id:'b-i',    tag:'I',     label:'Italic',         icon:Icons.i},
-            {type:'inline', id:'b-u',    tag:'U',     label:'Underline',      icon:Icons.u},
-            {type:'inline', id:'b-§',    tag:'CLEAR', label:'Clear',          icon:Icons.clear},
-            {type:'edit',   id:'b-undo', tag:'UNDO',  label:'Undo',           icon:Icons.undo},
-            {type:'edit',   id:'b-redo', tag:'REDO',  label:'Redo',           icon:Icons.redo},
+            {type:'block',  tag:'H1',    label:'Heading 1',      icon:Icons.h1},
+            {type:'block',  tag:'H2',    label:'Heading 2',      icon:Icons.h2},
+            {type:'block',  tag:'P',     label:'Paragraph',      icon:Icons.p},
+            {type:'list',   tag:'OL',    label:'Ordered list',   icon:Icons.ol},
+            {type:'list',   tag:'UL',    label:'Unordered list', icon:Icons.ul},
+            {type:'inline', tag:'B',     label:'Bold',           icon:Icons.b},
+            {type:'inline', tag:'I',     label:'Italic',         icon:Icons.i},
+            {type:'inline', tag:'U',     label:'Underline',      icon:Icons.u},
+            {type:'inline', tag:'CLEAR', label:'Clear',          icon:Icons.clear},
+            {type:'edit',   tag:'UNDO',  label:'Undo',           icon:Icons.undo},
+            {type:'edit',   tag:'REDO',  label:'Redo',           icon:Icons.redo},
         ]
         this.toolbar = toolbar.filter( item => options.elements.includes(item.tag))
         this.options.plugins.forEach( plugin => {
+            plugin.button.type = 'custom'
             this.toolbar.push(plugin.button)
         })
         console.log('toolbar',this.toolbar)
@@ -105,7 +106,7 @@ class Editor {
     
     listenForToolbarButtonClicks(){
         this.toolbar.forEach( button => {
-            button.element = this.toolbarNode.querySelector(`#${button.id}`)
+            button.element = this.toolbarNode.querySelector(`#${button.tag}`)
             button.element.disabled = true
             if ( "disable" in button ){
                 button.disable(button.element)
@@ -123,7 +124,7 @@ class Editor {
     }
 
     clickToolbarButton(element){
-        const clicked = this.toolbar.find( button => button.id==element.id )
+        const clicked = this.toolbar.find( button => button.tag==element.id )
         if ( clicked.type == 'block' ){
             Block.click(clicked, this.range, this.editorNode )
             this.updateEventHandlers()
@@ -284,9 +285,9 @@ class Editor {
         // Do any custom setup required
         this.toolbar.forEach( button => {
             if ( button.type === 'custom' ){
-                if ( "setup" in button ){
-                    button.setup(this.editorNode, true)
-                }
+                // if ( "setup" in button ){
+                //     button.setup(this.editorNode, true)
+                // }
                 if ( "shortcut" in button && "click" in button){
                     this.editorNode.addEventListener('keydown', event =>{
                         if ( event.key === button.shortcut ){
