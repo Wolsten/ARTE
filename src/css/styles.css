@@ -128,3 +128,36 @@ label {
     width:100%;
 }
 
+
+/* Modal confirm */
+
+.modal-confirm {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    background:rgba(100,100,100,0.5);
+}
+
+.modal-confirm-container {
+    width:80%;
+    position:absolute;
+    top:25%;
+    left:10%;
+    padding:1rem;
+    background:white;
+    border-bottom:1px gray solid;
+    box-shadow: 2px 2px 2px gray;
+    opacity:0;
+    transition: all 0.4s ease-in-out 0s;
+    border-radius: 0.5rem;
+}
+
+.modal-confirm.show .modal-confirm-container {
+    opacity:1;
+}
+
+.modal-confirm-buttons {
+    margin-top:2rem;
+}

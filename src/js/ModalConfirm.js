@@ -8,12 +8,12 @@ export default class ModalConfirm {
 
     form(title,message){
         return `
-            <div class="custom-modal-container">
-                <div class="header">
-                    <h5 class="custom-modal-title">${title}</h5>
-                </div>
-                <div class="custom-modal-message">${message}</div>
-                <div class="custom-modal-buttons">
+            <div class="modal-confirm-container">
+                <header class="modal-confirm-header">
+                    <h3 class="modal-confirm-title">${title}</h3>
+                </header>
+                <div class="modal-confirm-message">${message}</div>
+                <div class="modal-confirm-buttons">
                     <button type="button" class="cancel">No - stay here</button>
                     <button type="button" class="confirm">Yes - lose changes</button>
                 </div>
