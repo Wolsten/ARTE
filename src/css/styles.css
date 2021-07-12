@@ -65,7 +65,7 @@ button {
     transition:all 0.5s ease;
 }
 
-button:hover{
+button:not([disabled]):hover{
     cursor:pointer;
     background:rgb(100, 100, 100);
     color:white;

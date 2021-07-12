@@ -2,7 +2,7 @@
 // @section Arrays
 // -----------------------------------------------------------------------------
 
-import { i } from "./icons"
+// import { i } from "./plugins/icons"
 
 export const arraysEqual = function( a, b ){
     if ( a.length != 0 && b.length!= 0 && a.length != b.length ){

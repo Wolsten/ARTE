@@ -1,13 +1,18 @@
+let panel = null
+let form = null
+
 function remove(){
-    const panel = document.querySelector('.custom-panel').remove()
+    panel.remove()
+    panel = null
+    form = null
 }
 
 function hide(){
-    const form = document.querySelector('.custom-form').classList.remove('show')
+    form.remove('show')
 }
 
-function delayed(){
-    const form = document.querySelector('.custom-form')
+function showDelayed(){
+    form = document.querySelector('.custom-form')
     form.classList.add('show')
     form.querySelector('button').focus()
 }
@@ -26,14 +31,14 @@ function template(title, message){
 }
 
 export const show = function(title, message){
-    const panel = document.createElement('DIV')
+    panel = document.createElement('DIV')
     panel.classList.add('custom-panel')
     panel.innerHTML = template(title, message)
     const button = panel.querySelector('button')
-    panel.addEventListener('click', ()=>{
+    button.addEventListener('click', ()=>{
         hide()
         setTimeout( remove, 100 )
     })
     document.body.appendChild(panel)
-    setTimeout( delayed, 1)
+    setTimeout( showDelayed, 1)
 }

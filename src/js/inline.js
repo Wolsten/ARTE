@@ -1,5 +1,7 @@
 import * as Helpers from './helpers.js'
 import * as Phase from './phase.js'
+import * as Icons from './plugins/icons.js'
+import ToolbarButton from './plugins/ToolbarButton.js'
 
 let editorNode
 let formatAction = ''
@@ -197,16 +199,21 @@ function logCategorisedNodes(debug){
     }
 }
 
-export const click = function( button, rng, editor ){
-    // Initialisation
+const init = function(editor){
+    if ( editorNode == undefined ){
+        editorNode = editor
+    }
+}
+
+const click = function( rng ){
+    debugger
     range = rng
-    editorNode = editor
     formatAction = 'apply'
-    if ( button.tag == 'CLEAR' || button.element.getAttribute('data-active') ){
+    if ( this.tag == 'CLEAR' || this.element.getAttribute('data-active') ){
         formatAction = 'remove'
     }
     // console.log('Format action', formatAction)
-    newFormat = button.tag
+    newFormat = this.tag
     range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
     // The root node must be a block node (including list item LI) or an inline node
     if ( Helpers.isBlock(range.rootNode) == false &&
@@ -240,3 +247,11 @@ export const click = function( button, rng, editor ){
     // updateEventHandlers()
     // console.log('fragmentNode', fragmentNode)
 }
+
+const options = {init}
+const B = new ToolbarButton( 'inline', 'B', 'Bold', Icons.b, click, options)
+const I = new ToolbarButton( 'inline', 'I', 'Italic', Icons.i, click, options)
+const U = new ToolbarButton( 'inline', 'U',  'Underline', Icons.u, click, options)
+const CLEAR = new ToolbarButton( 'inline', 'CLEAR', 'Clear', Icons.clear, click, options)
+
+export const buttons = [ B, I, U, CLEAR ]

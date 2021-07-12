@@ -5,6 +5,8 @@ export default class Buffer {
         this.bufferIndex = 0
         this.target = target
         this.buffer = [this.target.innerHTML]
+        this.canUndo = () => this.buffer.length>0 && this.bufferIndex > 0
+        this.canRedo = () => this.bufferIndex + 1 < this.bufferLength 
     }
 
     update(){
@@ -38,7 +40,7 @@ export default class Buffer {
 
     redo(){
         console.log('handle redo with buffer index', this.bufferIndex)
-        if ( this.bufferIndex+1 < this.buffer.length ){
+        if ( this.bufferIndex + 1 < this.buffer.length ){
             this.bufferIndex ++
             this.target.innerHTML = this.buffer[this.bufferIndex]
             return true
@@ -47,11 +49,11 @@ export default class Buffer {
     }
 
     click( button ){
-        console.log('Handling edit')
-        switch (button.id ){
-            case 'b-undo':
+        console.log('Handling edit with button id', button.tag)
+        switch ( button.tag ){
+            case 'UNDO':
                 return this.undo()
-            case 'b-redo':
+            case 'REDO':
                 return this.redo()
         }
         return false

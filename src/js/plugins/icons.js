@@ -46,12 +46,9 @@ function icon( path, options ){
             height = height * scale
         }
     }
-    return `
-        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="currentColor">
-            <g transform="scale(${scale})">
-                ${path}
-            </g>
-        </svg>`
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="currentColor">
+                <g transform="scale(${scale})">${path}</g>
+            </svg>`
 }
 
 export const h1 = icon( `

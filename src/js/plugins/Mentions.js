@@ -1,164 +1,137 @@
 "use strict"
 
-class Mentions {
+import ToolbarButton from './ToolbarButton.js'
+import * as Icons from './icons.js'
 
-    constructor(icon, people){
-        this.people = people.sort()
-        this.position = {x:0, y:0}
-        this.filterInput = ''
-        this.panel = null
-        this.range = false
-        this.button = {
-            //
-            // Mandatory attributes
-            //
-            // The tag should be a valid html id that isn't already used
-            tag:'mention',  
-            // The tooltip label        
-            label:'Mention', 
-            // The icon passed in should be a 16 x 16 svg tag
-            icon:icon,
-            // The button click handler and reference to the instance
-            click:this.click,
-            that:this,
-            //
-            // Optional attributes
-            //
-            // Keyboard shortcut
-            shortcut:'@',
-            // Any pre setup required (this will probably move into the constructor)
-            // setup,
-            // Callback to initialise event handling for custom objects in the editor
-            // addEventHandlers,
-            // Call back for any custom data cleaning required on save
-            // clean,
-        }
-    }
+let dataListOptions = ''
+let range
+let panel = null
+let filterInput = ''
 
-    getPosition(dialogue, range){
-        let pos
-        // If this is not a text node then get the first text node
-        // Can happen at the start of a line when backspace to the start
-        if ( range.startContainer.nodeType !== 3 ){
-            if ( range.startContainer.childNodes.length>0 ){
-                let node = range.startContainer.childNodes[0]
-                pos = node.getBoundingClientRect()
-            } else {
-                pos = {x:editor.offsetLeft, y:editor.offsetTop}
-            }
-        // Text node
+function getPosition(dialogue, range){
+    let pos
+    // If this is not a text node then get the first text node
+    // Can happen at the start of a line when backspace to the start
+    if ( range.startContainer.nodeType !== 3 ){
+        if ( range.startContainer.childNodes.length>0 ){
+            let node = range.startContainer.childNodes[0]
+            pos = node.getBoundingClientRect()
         } else {
-            pos = range.getBoundingClientRect()
-            console.log('text node position',pos)
+            pos = {x:editor.offsetLeft, y:editor.offsetTop}
         }
-        if ( (pos.x + dialogue.outerWidth) > window.innerWidth ){
-            pos.x = window.innerWidth - dialogue.outerWidth - 20;
-        }
-        if ( (pos.y + dialogue.outerHeight) > window.innerHeight ){
-            pos.y = window.innerHeight - dialogue.outerHeight - 40;
-        }
-        return pos
-    } 
-
-    form(){
-        return `
-            <div class="mentions-content">
-                <input list="people-list" type="text"/>
-                <datalist id="people-list"></datalist>
-            </div>`
+    // Text node
+    } else {
+        pos = range.getBoundingClientRect()
+        console.log('text node const ',pos)
     }
-
-    handleKeyup(e){
-        console.log('key',e.target)
-        console.log('key',e.key)
-        console.log('shift',e.shiftKey)
-        e.stopPropagation()
-        if ( e.key=='Escape' ){
-            this.panel.remove()
-        } else if ( e.key=='Enter' ){
-            this.insert(this.filterInput.value.trim())
-            this.panel.remove()
-        }
+    if ( (pos.x + dialogue.outerWidth) > window.innerWidth ){
+        pos.x = window.innerWidth - dialogue.outerWidth - 20;
     }
-
-    click(range){
-        console.log('click mentions')
-        if ( range === false ){
-            console.log('No range selected')
-            return
-        }
-        const _this = this.that
-        _this.range = range
-        _this.panel = document.createElement('DIV')
-        _this.panel.id = 'mentions'
-        _this.panel.classList.add('mentions-panel')
-        _this.panel.innerHTML = _this.form()
-        _this.panel.addEventListener('click',()=>_this.hide())
-        _this.panel.addEventListener('keyup', e=>_this.handleKeyup(e))
-        // Filtering using native html approach
-        _this.filterInput = _this.panel.querySelector('input')
-        const datalist = _this.panel.querySelector('datalist')
-        people.forEach( item => {
-            const option = document.createElement('option')
-            option.innerText = item
-            datalist.appendChild(option)
-        })
-        // Add to dom, position and focus the input
-        document.querySelector('body').appendChild(_this.panel)
-        // Positioning
-        let dialogue = document.querySelector('.mentions-content')
-        _this.position = _this.getPosition(dialogue, range)
-        dialogue.style.top = `${_this.position.y}px`
-        dialogue.style.left = `${_this.position.x}px`
-        // Focus
-        _this.filterInput.focus()
+    if ( (pos.y + dialogue.outerHeight) > window.innerHeight ){
+        pos.y = window.innerHeight - dialogue.outerHeight - 40;
     }
+    return pos
+} 
 
-    hide(){
-        console.log('Hide panel')
-        this.panel.remove()
-    }
 
-    insert(event_or_person){
-        let person
-        if ( event_or_person.target != undefined ){
-        if ( "target" in event_or_person )
-            person = event_or_person.target.innerText
-        } else {
-            person = event_or_person
-        }
-        console.log('Insert person', person)
-        let contents = this.range.startContainer.textContent
-        let offset   = this.range.startOffset
-        let before   = contents.substring(0,offset)
-        let after    = contents.substring(offset)
-        // Add space before?
-        if ( contents.charCodeAt(offset-1) !== 32){
-            person = ' ' + person
-        }
-        // Add space after & optional remove @
-        if ( offset<contents.length && contents.charCodeAt(offset) !== 32){
-            if ( after != '' && after.charAt(0) === '@'){
-                after = after.slice(1, after.length-1)
-            }
-            person = person + ' '
-        }
-        this.range.startContainer.textContent = before + person + after
-        // Move offset to the end of the newly inserted person
-        offset += person.length
-        this.range = this.setCursor( this.range.startContainer, offset )
-        this.panel.remove()
-    }
+function form(){
+    return `
+        <div class="mentions-content">
+            <input list="people-list" type="text"/>
+            <datalist id="people-list">${dataListOptions}</datalist>
+        </div>`
+}
 
-    setCursor( node, offset ){
-        let range = document.createRange()
-        let sel = window.getSelection()
-        range.setStart(node, offset);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-        return range;
+function handleKeyup(e){
+    console.log('key',e.target)
+    console.log('key',e.key)
+    console.log('shift',e.shiftKey)
+    e.stopPropagation()
+    if ( e.key=='Escape' ){
+        hide()
+    } else if ( e.key=='Enter' ){
+        insert(filterInput.value.trim())
     }
 }
 
-export default Mentions
+function click(rng){
+    if ( rng === false ){
+        console.log('No range selected')
+        return
+    }
+    range = rng
+    panel = document.createElement('DIV')
+    panel.id = 'mentions'
+    panel.classList.add('mentions-panel')
+    panel.innerHTML = form()
+    panel.addEventListener('click',()=>hide())
+    panel.addEventListener('keyup', e=>handleKeyup(e))
+    // Filtering using native html approach
+    filterInput = panel.querySelector('input')
+    // Add to dom
+    document.querySelector('body').appendChild(panel)
+    // Position
+    let dialogue = document.querySelector('.mentions-content')
+    const position = getPosition(dialogue, range)
+    dialogue.style.top = `${position.y}px`
+    dialogue.style.left = `${position.x}px`
+    // Focus the input
+    filterInput.focus()
+}
+
+function hide(){
+    panel.remove()
+    panel = null
+}
+
+function insert(person){
+    let contents = range.startContainer.textContent
+    let offset   = range.startOffset
+    let before   = contents.substring(0,offset)
+    let after    = contents.substring(offset)
+    // Add space before?
+    if ( contents.charCodeAt(offset-1) !== 32){
+        person = ' ' + person
+    }
+    // Add space after & optional remove @
+    if ( offset<contents.length && contents.charCodeAt(offset) !== 32){
+        if ( after != '' && after.charAt(0) === '@'){
+            after = after.slice(1, after.length-1)
+        }
+        person = person + ' '
+    }
+    range.startContainer.textContent = before + person + after
+    // Move offset to the end of the newly inserted person
+    offset += person.length
+    range = setCursor( range.startContainer, offset )
+    hide()
+}
+
+function setCursor( node, offset ){
+    let rng = document.createRange()
+    let sel = window.getSelection()
+    rng.setStart(node, offset);
+    rng.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(rng);
+    return rng;
+}
+
+
+
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
+
+
+export const initPeople = function(people){
+    people = people.sort()
+    dataListOptions = ''
+    people.forEach( person => {
+        dataListOptions += `<option>${person}</option>`
+    })
+}
+
+const options = {shortcut:'@'}
+const button = new ToolbarButton( 'custom', 'mention', 'Mention', Icons.person, click, options ) 
+export const buttons = [button]

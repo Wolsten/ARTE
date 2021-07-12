@@ -1,5 +1,7 @@
 import * as Helpers from './helpers.js'
 import * as Phase from './phase.js'
+import * as Icons from './plugins/icons.js'
+import ToolbarButton from './plugins/ToolbarButton.js'
 
 let editorNode
 let formatType = ''
@@ -203,18 +205,26 @@ function parseListsAndBlocks( node, formats ){
     // console.log(`Finished this branch - processed ${children} children`)
 }
 
+const init = function(editor){
+    if ( editorNode == undefined ){
+        editorNode = editor
+    }
+}
 
-export const click = function( button, range, editor ){
+
+// export const click = function( button, range, editor ){
+const click = function( range ){
+    console.log('this',this)
+    console.log('range',range)
     // Initialisation
-    editorNode = editor
-    formatType = button.type
+    formatType = this.type
     formatAction = 'apply'
-    if ( button.tag == 'CLEAR' || button.element.getAttribute('data-active') ){
+    if ( this.tag == 'CLEAR' || this.element.getAttribute('data-active') ){
         formatAction = 'remove'
     }
     // console.log('Format action', formatAction)
-    newFormat = button.tag
-    if ( button.type == 'block' && formatAction == 'remove' ){
+    newFormat = this.tag
+    if ( this.type == 'block' && formatAction == 'remove' ){
         newFormat = 'P'
     }
     previousFormats = []
@@ -275,3 +285,12 @@ export const click = function( button, range, editor ){
         })
     }
 }
+
+const options = {init}
+const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click, options )
+const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click, options )
+const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click, options )
+const OL = new ToolbarButton( 'list',  'OL', 'Ordered list',   Icons.ol, click, options)
+const UL = new ToolbarButton( 'list',  'UL', 'Unordered list', Icons.ul, click, options)
+
+export const buttons = [ H1, H2, P, OL, UL ]

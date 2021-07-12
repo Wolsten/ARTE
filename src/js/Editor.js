@@ -1,12 +1,11 @@
 "use strict"
 
 import * as Templates from './templates.js'
-import * as Feedback from './feedback.js'
+import * as ModalFeedback from './plugins/modalFeedback.js'
 import * as Helpers from './helpers.js'
-import * as Block from './block.js'
+import * as Blocks from './blocks.js'
 import * as Inline from './inline.js'
-import * as Icons from './icons.js'
-import Buffer from './buffer.js'
+import * as Buffer from './plugins/buffer.js'
 
 class Editor {
 
@@ -17,7 +16,7 @@ class Editor {
     constructor( target, content, options ){
         // Initialise options & toolbar
         this.options = this.initOptions(options)
-        this.initToolbar()
+        this.toolbar = this.initToolbar()
         // Initialise the editor
         target.innerHTML = Templates.editor(this.toolbar, this.options)
         this.editorNode = target.querySelector('.editor-body')
@@ -31,11 +30,19 @@ class Editor {
         this.listenForMouseUpEvents()
         this.listenForKeydownEvents()
         this.listenForPasteEvents()
-        this.listenForKeyupEvents()
         this.listenForToolbarButtonClicks()
         this.listenForCustomEvents()
-        // Initialise paste buffer
-        setTimeout( () => this.buffer = new Buffer(this.options.bufferSize, this.editorNode), 100)
+        // Initialise standard and custom plugins
+        this.toolbar.forEach( button => {
+            if ( button.init ){
+                button.init(this.editorNode)
+            }
+        })
+        // Initialise paste disabled and event handling?
+        if ( this.options.bufferSize > 0 ){
+            this.listenForKeyupEvents()
+            setTimeout( () => Buffer.init({size:options.bufferSize, target:this.editorNode}), 100)
+        }
     }
 
     initOptions(options){   
@@ -65,26 +72,46 @@ class Editor {
     }
 
     initToolbar(){
-        // Default toolbar
-        const toolbar = [
-            {type:'block',  tag:'H1',    label:'Heading 1',      icon:Icons.h1},
-            {type:'block',  tag:'H2',    label:'Heading 2',      icon:Icons.h2},
-            {type:'block',  tag:'P',     label:'Paragraph',      icon:Icons.p},
-            {type:'list',   tag:'OL',    label:'Ordered list',   icon:Icons.ol},
-            {type:'list',   tag:'UL',    label:'Unordered list', icon:Icons.ul},
-            {type:'inline', tag:'B',     label:'Bold',           icon:Icons.b},
-            {type:'inline', tag:'I',     label:'Italic',         icon:Icons.i},
-            {type:'inline', tag:'U',     label:'Underline',      icon:Icons.u},
-            {type:'inline', tag:'CLEAR', label:'Clear',          icon:Icons.clear},
-            {type:'edit',   tag:'UNDO',  label:'Undo',           icon:Icons.undo},
-            {type:'edit',   tag:'REDO',  label:'Redo',           icon:Icons.redo},
-        ]
-        this.toolbar = toolbar.filter( item => options.elements.includes(item.tag))
-        this.options.plugins.forEach( plugin => {
-            plugin.button.type = 'custom'
-            this.toolbar.push(plugin.button)
+        // // Default toolbar
+        // let toolbar = [
+        //     {type:'block',  tag:'H1',    label:'Heading 1',      icon:Icons.h1},
+        //     {type:'block',  tag:'H2',    label:'Heading 2',      icon:Icons.h2},
+        //     {type:'block',  tag:'P',     label:'Paragraph',      icon:Icons.p},
+        //     {type:'list',   tag:'OL',    label:'Ordered list',   icon:Icons.ol},
+        //     {type:'list',   tag:'UL',    label:'Unordered list', icon:Icons.ul},
+        //     {type:'inline', tag:'B',     label:'Bold',           icon:Icons.b},
+        //     {type:'inline', tag:'I',     label:'Italic',         icon:Icons.i},
+        //     {type:'inline', tag:'U',     label:'Underline',      icon:Icons.u},
+        //     {type:'inline', tag:'CLEAR', label:'Clear',          icon:Icons.clear},
+        // ]
+        // // Filter normal formatting buttons according to options selected
+        // toolbar = toolbar.filter( item => options.elements.includes(item.tag))
+        let toolbar = []
+        Blocks.buttons.forEach( button => {
+            if ( options.elements.includes(button.tag) ){
+                toolbar.push(button)
+            }
         })
-        console.log('toolbar',this.toolbar)
+        Inline.buttons.forEach( button => {
+            if ( options.elements.includes(button.tag) ){
+                toolbar.push(button)
+            }
+        })
+
+        //toolbar = Blocks.buttons
+        // Add optional buffer handling
+        if ( this.options.bufferSize > 0 ){
+            toolbar = [...toolbar, ...Buffer.buttons]
+        }
+        // Add custom plugins
+        this.options.plugins.forEach( plugin => {
+            plugin.buttons.forEach( button => {
+                button.type = 'custom'
+                toolbar = [...toolbar, button]
+            })
+        })
+        console.log('toolbar',toolbar)
+        return toolbar
     }
 
 
@@ -108,39 +135,41 @@ class Editor {
         this.toolbar.forEach( button => {
             button.element = this.toolbarNode.querySelector(`#${button.tag}`)
             button.element.disabled = true
-            if ( "disable" in button ){
-                button.disable(button.element)
-            }
+            // if ( "disable" in button ){
+            //     button.disable(button.element)
+            // }
             button.element.addEventListener('click', event => {
-                // @todo This does not work for custom buttons where bootstrap gets in first
-                //       Therefore need to add relevant attributes on selection taking place
-                if ( this.range === false ){
+                if ( this.range === false && button.type !== 'buffer' ){
                     event.preventDefault()
                     return
                 }
-                this.clickToolbarButton(event.currentTarget)
+                this.clickToolbarButton(button)
             })
         })
     }
 
-    clickToolbarButton(element){
-        const clicked = this.toolbar.find( button => button.tag==element.id )
-        if ( clicked.type == 'block' ){
-            Block.click(clicked, this.range, this.editorNode )
+    clickToolbarButton(button){
+        //const button = this.toolbar.find( button => button.tag==element.id )
+        console.log('clicked button',button)
+        if ( button.type == 'block' ){
+            //Blocks.click(button, this.range, this.editorNode )
+            button.click(this.range)
             this.updateEventHandlers()
-        } else if ( clicked.type == 'list' ){
-            Block.click(clicked, this.range, this.editorNode )
+        } else if ( button.type == 'list' ){
+            button.click(this.range)
+            // Blocks.click(button, this.range, this.editorNode )
             this.updateEventHandlers()
-        } else if ( clicked.type == 'inline' ){
-            Inline.click(clicked, this.range, this.editorNode )
+        } else if ( button.type == 'inline' ){
+            button.click(this.range)
+            // Inline.click(button, this.range, this.editorNode )
             this.updateEventHandlers()
-        } else if ( clicked.type == 'edit' ){
-            if ( this.buffer.click(clicked) ){
+        } else if ( button.type == 'buffer' ){
+            if ( button.click() ){
                 this.updateEventHandlers()
             }
-        } else if ( clicked.type == 'custom' ){
-            console.log('clicked custom button', clicked.id,'with range',this.range)
-            clicked.click(this.range)
+        } else if ( button.type == 'custom' ){
+            console.log('Clicked custom button', button.id,'with range',this.range)
+            button.click(this.range)
         }
         this.range == false
     }
@@ -168,18 +197,22 @@ class Editor {
                 if ( this.handleDelete(event.key) ){
                     event.preventDefault()
                 }
-            // Capture undo/redo events
-            } else if ( (event.ctrlKey || event.metaKey) && event.key == 'z' ){
-                event.preventDefault()
-                // Redo
-                if ( event.shiftKey  ){
-                    if ( this.buffer.redo() ){
-                        this.updateEventHandlers()
-                    }
-                // Undo
-                } else {
-                    if ( this.buffer.undo() ){
-                        this.updateEventHandlers()
+            // Undo/redo events
+           } else if (this.bufferSize>0){
+                if ( (event.ctrlKey || event.metaKey) && event.key == 'z' ){
+                    event.preventDefault()
+                    // Redo
+                    if ( event.shiftKey  ){
+                        const button = this.toolbar.find( b => b.tag == 'REDO')
+                        if ( button.click() ){
+                            this.updateEventHandlers()
+                        }
+                    // Undo
+                    } else {
+                        const button = this.toolbar.find( b => b.tag == 'UNDO')
+                        if ( button.click() ){
+                            this.updateEventHandlers()
+                        }
                     }
                 }
             }
@@ -273,7 +306,7 @@ class Editor {
     handleKeyupDelayed(...args){
         //console.log('Updating buffer with arg[0]',args[0])
         const editor = args[0]
-        editor.buffer.update()
+        Buffer.update()
     }
 
 
@@ -307,7 +340,7 @@ class Editor {
     updateEventHandlers(){
         this.toolbar.forEach( button => {
             if ( 'addEventHandlers' in button ){
-                button.addEventHandlers(this.editorNode)
+                button.addEventHandlers()
             }
         })
     }
@@ -381,8 +414,14 @@ class Editor {
         }
         this.toolbar.forEach( button => {
             const element = button.element
-            // Ignore none ranges
+            // Reset active flags
             if ( this.range === false ){
+                element.classList.remove('active')
+            }
+            // Reset disabled flags
+            if ( button.type === 'buffer' ){
+                element.disabled = !Buffer.disabled(button.tag)
+            } else if ( this.range === false ){
                 element.disabled = true
             } else {
                 element.disabled = false
@@ -396,23 +435,19 @@ class Editor {
                         if ( this.range.blockParent == this.editorNode ){
                             console.log('setting element to be disabled', element.title)
                             element.disabled = true
-                        } else {
-                            element.removeAttribute('disabled')
+                        // } else {
+                        //     // element.removeAttribute('disabled')
                         }
                         break
-                    case 'custom':
-                        element.removeAttribute('disabled')
+                    // case 'custom':
+                    //     element.removeAttribute('disabled')
                         break
                 }
                 // Check whether selection means button should be shown as active or not
                 if ( formats.includes(button.tag) ){
                     element.classList.add('active')
-                    element.setAttribute('data-active',true)
-                    element.setAttribute('aria-pressed','true')
                 } else {
                     element.classList.remove('active')
-                    element.removeAttribute('data-active')
-                    element.removeAttribute('aria-pressed')
                 }
                 // if ( element.disabled ){
                 //     console.log('setting element to be inactive', element.title)

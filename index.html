@@ -24,21 +24,19 @@
         let content = target.innerHTML
         target.innerHTML = ''
         // Setup plugins - required mentions.css to be included in head
-        const people = ['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian']
-        const mentions = new AJE.Mentions(AJE.Icons.person, people)
-        const links = new AJE.Links(target, AJE.Icons.link, AJE.ModalConfirm)
+        AJE.Mentions.initPeople(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
         // Define editor options
         const options = {
             // Toolbar buttons required
             // Allowed values 'H1','H2','P','OL','UL','B','U','I','CLEAR','UNDO','REDO']
             // All other elements are filtered out unless specified below in a plugin
-            elements: ['H1','P','OL','UL','B','U','CLEAR','UNDO','REDO'], 
+            elements: ['H1','H2','P','OL','UL','B','I','U','CLEAR'], 
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
             headingNumbers: 'on', 
             // Custom plugs to add to the toolbar to enhance the editor
-            plugins: [mentions, links],   
+            plugins: [AJE.Mentions, AJE.Links],
             // Number of Undo operations supported, max 10       
-            bufferSize: 10        
+            bufferSize: 10     
         }
         // Create editor and add to dom in target position
         const editor = new AJE.Editor(target, content, options)
