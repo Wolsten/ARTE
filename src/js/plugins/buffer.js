@@ -5,6 +5,39 @@ let bufferIndex = 0
 let target = null
 let buffer = []
 
+function setButtonState(){
+    buttons[0].element.disabled = disabled('UNDO')
+    buttons[1].element.disabled = disabled('REDO')
+}
+
+function undo(){
+    let status = false
+    console.log('handle undo with buffer index', bufferIndex)
+    if ( bufferIndex > 0 ){
+        bufferIndex --
+        target.innerHTML = buffer[bufferIndex]
+        status = true
+    }
+    setButtonState()
+    return status
+}
+
+function redo(){
+    console.log('handle redo with buffer index', bufferIndex)
+    if ( bufferIndex + 1 < buffer.length ){
+        bufferIndex ++
+        target.innerHTML = buffer[bufferIndex]
+        return true
+    }
+    setButtonState()
+    return false
+}
+
+
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
+
 export const init = function( options ){
     size = options.size
     target = options.target
@@ -21,6 +54,7 @@ export const disabled = function( action ){
     return true
 }
 
+// @todo This doesn't filter keys so for example responds to arrow keys - need to filter out
 export const update = function(){
     if ( buffer.length > size ){
         // Remove first element
@@ -38,41 +72,13 @@ export const update = function(){
     buffer.push(target.innerHTML)
     bufferIndex = buffer.length - 1
     console.log('buffer', buffer)
+    // Update buttons
+    setButtonState()
 }
-
-function undo(){
-    console.log('handle undo with buffer index', bufferIndex)
-    if ( bufferIndex > 0 ){
-        bufferIndex --
-        target.innerHTML = buffer[bufferIndex]
-        return true
-    }
-    return false
-}
-
-function redo(){
-    console.log('handle redo with buffer index', bufferIndex)
-    if ( bufferIndex + 1 < buffer.length ){
-        bufferIndex ++
-        target.innerHTML = buffer[bufferIndex]
-        return true
-    }
-    return false
-}
-
-// export const click = function( tag ){
-//     console.log('Handling edit with button id', tag)
-//     switch ( tag ){
-//         case 'UNDO':
-//             return undo()
-//         case 'REDO':
-//             return redo()
-//     }
-//     return false
-// }
 
 export const buttons = [
     {
+        element: null, // Populated by the editor
         type:'buffer', 
         tag:'UNDO', 
         label:'Undo', 
@@ -80,6 +86,7 @@ export const buttons = [
         click: undo
     },
     {
+        element: null,
         type:'buffer', 
         tag:'REDO',
         label:'Redo', 

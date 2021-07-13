@@ -206,7 +206,6 @@ const init = function(editor){
 }
 
 const click = function( rng ){
-    debugger
     range = rng
     formatAction = 'apply'
     if ( this.tag == 'CLEAR' || this.element.getAttribute('data-active') ){

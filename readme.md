@@ -26,6 +26,11 @@ To use as is just download the following source file:
 
 To build your own version of AJE you can use Babel and Webpack as configured in the source here. Alternatively, feel free to use your own build tools based on the source files provided.
 
+## Todos
+
+* Filter keys triggering buffering - done 13/7/21
+* Confirm the Helpers.isCustom methiod is correctly defeind
+
 ## Acknowledgements
 
 I set up my initial build environment setup using these instructions:

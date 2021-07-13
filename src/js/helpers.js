@@ -50,18 +50,9 @@ export const isBlock = function( node ){
 }
 
 export const isCustom = function( node ){
-    // if ( node.tagName == undefined ){
-    //     return false
-    // }
-    // if ( isInline(node) || isBlock(node) || isList(node) ){
-    //     return false
-    // }
-    // if ( node.contenteditable == false ){
-    //     return false
-    // }
-    // return true
     // @todo Check this is the correct test - i.e. quotes required
-    return node.contenteditable == 'false'
+    // console.warn(`Checking isCustom node.contenteditable =[${node.contenteditable}]`)
+    return node.contenteditable === 'false'
  }
 
  export const getParentBlockNode = function(node){
@@ -73,9 +64,59 @@ export const isCustom = function( node ){
     return node
 }
 
+
+
+// let positions = []
+// export const getChildNodePosition = function( node, parent, firstTime ){
+//     if ( firstTime ) {
+//         positions = []
+//     }
+//     for( let i=0; i<parent.childNodes.length; i++ ){
+//         let child = parent.childNodes[i]
+//         if ( node == child ){
+//             positions = [i]
+//             break
+//         } else {
+//             const oldPositions = [...positions]
+//             getChildNodePosition( node, child, false )
+//             if ( positions.length > oldPositions.length ){
+//                 positions = [i, ...positions]
+//             }
+//         }
+//     }
+//     return positions
+// }
+
+/**
+ * Find the position of a node in a parent hierarchy as set of child indices
+ * @param {*} node The current node
+ * @param {*} parent A (grand-)parent node 
+ * @param {*} positions A list of indices moving down the tree of child positions
+ * to get to the initial node within the initial parent 
+ * @returns array of indices, may (but should not be) empty
+ */
+export const getChildNodePosition = function( node, parent, positions ){
+    for( let i=0; i<parent.childNodes.length; i++ ){
+        let child = parent.childNodes[i]
+        if ( node == child ){
+            return [i]
+        } else {
+            const newPositions = getChildNodePosition( node, child, positions )
+            if ( newPositions.length > positions.length ){
+                return [i, ...newPositions]
+            }
+        }
+    }
+    return positions
+}
+
+/**
+ * Get the top parent node for a child node 
+ * @param {*} node A child node
+ * @param {*} stopNode A parent node defining when to stop going back up the dom tree
+ * @returns {*} first node below the stop node (if there is one) otherwise the stopNode
+ */
 export const getTopParentNode = function( node, stopNode ){
-    // Return the stopNode if that is the first found
-    // Otherwise return the immediately below the stop node
     let saved = node
     while ( node != stopNode ){
         saved = node
@@ -152,9 +193,16 @@ export const getRange = function(){
     return false
 }
 
+export const setCursorWithPosition = function( node, positions, offset ){
+    positions.forEach( position => {
+        node = node.childNodes[position]
+    })
+    return setCursor( node, offset )
+}
+
 export const setCursor = function( node, offset ){
-    let range = document.createRange()
-    let selection = window.getSelection()
+    const range = document.createRange()
+    const selection = window.getSelection()
     range.setStart(node, offset)
     range.collapse(true)
     selection.removeAllRanges()
@@ -172,7 +220,7 @@ export const debounce = function(fn, delay) {
         // Set new timeout
         timeOutId = setTimeout(() => {
             fn(...args)
-        }, delay);
+        }, delay)
     }
 }
 

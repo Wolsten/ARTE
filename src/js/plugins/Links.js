@@ -3,7 +3,6 @@
 import * as Modal from './modalConfirm.js'
 import ToolbarButton from './ToolbarButton.js'
 import * as Icons from './icons.js'
-// import * as Feedback from './feedback.js'
 
 let editorNode
 let dirty

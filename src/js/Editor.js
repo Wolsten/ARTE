@@ -30,15 +30,10 @@ class Editor {
         this.listenForMouseUpEvents()
         this.listenForKeydownEvents()
         this.listenForPasteEvents()
-        this.listenForToolbarButtonClicks()
-        this.listenForCustomEvents()
-        // Initialise standard and custom plugins
-        this.toolbar.forEach( button => {
-            if ( button.init ){
-                button.init(this.editorNode)
-            }
-        })
-        // Initialise paste disabled and event handling?
+
+        // Initialise buttons for standard and custom plugins
+        this.initialiseButtons()
+        // Initialise buffer handling
         if ( this.options.bufferSize > 0 ){
             this.listenForKeyupEvents()
             setTimeout( () => Buffer.init({size:options.bufferSize, target:this.editorNode}), 100)
@@ -46,60 +41,46 @@ class Editor {
     }
 
     initOptions(options){   
-        const elements = ['H1','H2','P', 'OL','UL', 'B', 'I', 'U']
+        // All standard supported tags
+        const tags = ['H1','H2','P', 'OL','UL', 'B', 'I', 'U']
         const plugins = []
         const headingNumbers = 'off'
         const bufferSize = 10     
         if ( options ){
-            options.elements = options.elements !== undefined ? options.elements : elements
+            options.tags = options.tags !== undefined ? options.tags : tags
             options.plugins = options.plugins !== undefined ? options.plugins : plugins
             options.headingNumbers = options.headingNumbers !== undefined ? options.headingNumbers : headingNumbers
             options.bufferSize = options.bufferSize !== undefined ? Math.max(parseInt(options.bufferSize),bufferSize) : bufferSize
         } else {
             options = {
-                elements,
+                tags: tags,
                 plugins,
                 headingNumbers,
                 bufferSize
             }
         }
         // Make sure all upper case
-        for( let i=0; i<options.elements.length; i++){
-            options.elements[i] = options.elements[i].toUpperCase()
+        for( let i=0; i<options.tags.length; i++){
+            options.tags[i] = options.tags[i].toUpperCase()
         }
         console.log('options',options)
         return options
     }
 
     initToolbar(){
-        // // Default toolbar
-        // let toolbar = [
-        //     {type:'block',  tag:'H1',    label:'Heading 1',      icon:Icons.h1},
-        //     {type:'block',  tag:'H2',    label:'Heading 2',      icon:Icons.h2},
-        //     {type:'block',  tag:'P',     label:'Paragraph',      icon:Icons.p},
-        //     {type:'list',   tag:'OL',    label:'Ordered list',   icon:Icons.ol},
-        //     {type:'list',   tag:'UL',    label:'Unordered list', icon:Icons.ul},
-        //     {type:'inline', tag:'B',     label:'Bold',           icon:Icons.b},
-        //     {type:'inline', tag:'I',     label:'Italic',         icon:Icons.i},
-        //     {type:'inline', tag:'U',     label:'Underline',      icon:Icons.u},
-        //     {type:'inline', tag:'CLEAR', label:'Clear',          icon:Icons.clear},
-        // ]
-        // // Filter normal formatting buttons according to options selected
-        // toolbar = toolbar.filter( item => options.elements.includes(item.tag))
         let toolbar = []
+        // Add (filtered) standard buttons
         Blocks.buttons.forEach( button => {
-            if ( options.elements.includes(button.tag) ){
+            if ( options.tags.includes(button.tag) ){
                 toolbar.push(button)
             }
         })
         Inline.buttons.forEach( button => {
-            if ( options.elements.includes(button.tag) ){
+            if ( options.tags.includes(button.tag) ){
                 toolbar.push(button)
             }
         })
-
-        //toolbar = Blocks.buttons
-        // Add optional buffer handling
+        // Add optional copy-paste buffering
         if ( this.options.bufferSize > 0 ){
             toolbar = [...toolbar, ...Buffer.buttons]
         }
@@ -114,10 +95,53 @@ class Editor {
         return toolbar
     }
 
+    initialiseButtons(){
+        // Do any custom setup required
+        this.toolbar.forEach( button => {
+            // Add dom element to the button
+            button.element = this.toolbarNode.querySelector(`#${button.tag}`)
+            // Set disabled flag using custom function if available, other set to true
+            if ( "disabled" in button ){
+                button.disabled(button.tag)
+            } else {
+                button.element.disabled = true
+            }
+            if ( "init" in button ){
+                button.init(this.editorNode)
+            }
+            if ( "shortcut" in button && "click" in button){
+                this.editorNode.addEventListener('keydown', event =>{
+                    if ( event.key === button.shortcut ){
+                        // Prevent default so key not echo'd to the screen
+                        event.preventDefault()
+                        // Stop propagation to prevent other event handlers responding
+                        event.stopPropagation()
+                        // Trigger the dialogue
+                        button.click(this.range)
+                    }
+                })
+            }
+            if ( "click" in button ){
+                button.element.addEventListener('click', event => {
+                    // Prevent default action for all buttons when have no range 
+                    // and not the undo-redo buffer buttons
+                    if ( this.range === false && button.type !== 'buffer' ){
+                        event.preventDefault()
+                        return
+                    }
+                    this.debugRange(this.range)
+                    this.clickToolbarButton(button)
+                })
+            } else {
+                console.debug(`The ${button.tag} button is missing a mandatory click handler`)
+            }
+        })
+    }
 
     // -----------------------------------------------------------------------------
     // @section Mouse up events
     // -----------------------------------------------------------------------------
+   
     listenForMouseUpEvents(){
         this.editorNode.addEventListener('mouseup', () => this.handleMouseUp(true))
         // Use timeout on blur so buttons still active when first clicked from editor
@@ -126,52 +150,72 @@ class Editor {
         })
     }
 
-
-    // -----------------------------------------------------------------------------
-    // @section Toolbar button events
-    // -----------------------------------------------------------------------------
-    
-    listenForToolbarButtonClicks(){
+    handleMouseUp(focus){
+        console.log('Handle mouse up with focus = ', focus)
+        this.range = false
+        if ( focus ){
+            this.range = Helpers.getRange()
+        }
+        console.log('handleMouseUp range=',this.range)
+        this.debugRange(this.range)
+        let formats = []
+        if ( this.range !== false ){
+            // If enter cursor in an empty editor then make this a paragraph
+            // rather than raw text
+            if ( this.range.blockParent == this.editorNode && this.editorNode.innerText == ''){
+                this.insertParagraph()
+            }
+            // Highlight "selected" custom blocks - in practice this won't be triggered
+            // since the custom click functions will intervene
+            if ( Helpers.isCustom(this.range.blockParent) ){
+                this.highlightCustomNode(this.range.blockParent)
+            }
+            // Get the applied formats for the range selected (all way up to the highest parent 
+            // inside the editor)
+            formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
+            console.log('Applied formats',formats)
+        }
         this.toolbar.forEach( button => {
-            button.element = this.toolbarNode.querySelector(`#${button.tag}`)
-            button.element.disabled = true
-            // if ( "disable" in button ){
-            //     button.disable(button.element)
-            // }
-            button.element.addEventListener('click', event => {
-                if ( this.range === false && button.type !== 'buffer' ){
-                    event.preventDefault()
-                    return
+            // Buffering is handled separately
+            if ( button.type !== 'buffer' ){
+                // Reset flags
+                if ( this.range === false ){
+                    button.element.disabled = true
+                    button.element.classList.remove('active')
+                } else {
+                    button.element.disabled = false
+                    // Check whether selection means button should be shown as active or not
+                    if ( formats.includes(button.tag) ){
+                        button.element.classList.add('active')
+                    } else {
+                        button.element.classList.remove('active')
+                    }
                 }
-                this.clickToolbarButton(button)
-            })
+            }
         })
     }
 
+    insertParagraph(){
+        let p = document.createElement('P')
+        // Create a placeholder to ensure set cursor works
+        p.innerText = '\n'
+        p = this.editorNode.appendChild(p)
+        Helpers.setCursor( p, 0)
+    }
+
+    // -----------------------------------------------------------------------------
+    // @section Toolbar button clicks
+    // -----------------------------------------------------------------------------
+    
     clickToolbarButton(button){
         //const button = this.toolbar.find( button => button.tag==element.id )
-        console.log('clicked button',button)
-        if ( button.type == 'block' ){
-            //Blocks.click(button, this.range, this.editorNode )
-            button.click(this.range)
-            this.updateEventHandlers()
-        } else if ( button.type == 'list' ){
-            button.click(this.range)
-            // Blocks.click(button, this.range, this.editorNode )
-            this.updateEventHandlers()
-        } else if ( button.type == 'inline' ){
-            button.click(this.range)
-            // Inline.click(button, this.range, this.editorNode )
-            this.updateEventHandlers()
-        } else if ( button.type == 'buffer' ){
-            if ( button.click() ){
-                this.updateEventHandlers()
-            }
-        } else if ( button.type == 'custom' ){
-            console.log('Clicked custom button', button.id,'with range',this.range)
-            button.click(this.range)
-        }
-        this.range == false
+        console.log('clicked button',button.tag)
+        // All buttons must have a click method so invoke
+        button.click(this.range)
+        // Reset event handlers for any buttons that require it
+        this.updateEventHandlers()
+        // Reset the selected range
+        this.range = false
     }
 
 
@@ -183,8 +227,8 @@ class Editor {
         this.editorNode.addEventListener('keydown', event => {
             console.log('control key?',event.ctrlKey)
             console.log('key',event.key)
-            // Custom panel shown - ignore key entry?
-            if ( document.querySelector('.custom-panel') != null ){
+            // CCheck if a modal dialogue is shown - ignore key entry?
+            if ( document.querySelectorAll('.show').length > 0 ){
                 event.preventDefault()
             // Override normal browser enter key action
             } else if ( event.key == 'Enter' ) {
@@ -220,23 +264,27 @@ class Editor {
     }
 
     handleEnter(){
-        const range = Helpers.getRange()
-        if ( range === false ){
+        this.range = Helpers.getRange()
+        this.debugRange(this.range)
+        if ( this.range === false ){
             return
         }
-        const custom = Helpers.isCustom(range.blockParent) 
-        const endNormal = range.endContainer.textContent.trim().length == range.endOffset
+        const custom = Helpers.isCustom(this.range.blockParent) 
+        const endNormal = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
         if ( custom || endNormal ) {
             let p = document.createElement('P')
             p.innerText = '\n'
-            p = Helpers.insertAfter( p, range.blockParent )
+            p = Helpers.insertAfter( p, this.range.blockParent )
             Helpers.setCursor( p, 0 )
             handled = true
         }
         if ( custom ){
             this.highlightCustomNode(false)
         }
+        // Get the new range
+        this.range = Helpers.getRange()
+        this.debugRange(this.range)
         return handled
     }
 
@@ -249,6 +297,7 @@ class Editor {
             key = 'Delete'
         }
         const range = Helpers.getRange()
+        this.debugRange(range)
         console.log('range=',range)
         if ( range ){
             const example = this.toolbar.find(button => button.type==='custom')
@@ -300,12 +349,17 @@ class Editor {
     
     listenForKeyupEvents(){
         this.handleKeyup = Helpers.debounce(this.handleKeyupDelayed,500)
-        this.editorNode.addEventListener( 'keyup', () => this.handleKeyup(this) )
+        this.editorNode.addEventListener( 'keyup', event => {
+            console.log('event',event)
+            const ignore = ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','End','Home']
+            if ( ignore.includes(event.key) === false ){
+                this.handleKeyup() 
+            }
+        })
     }
 
     handleKeyupDelayed(...args){
-        //console.log('Updating buffer with arg[0]',args[0])
-        const editor = args[0]
+        console.log('args',args)
         Buffer.update()
     }
 
@@ -314,28 +368,7 @@ class Editor {
     // @section Custom events
     // -----------------------------------------------------------------------------
     
-    listenForCustomEvents(){
-        // Do any custom setup required
-        this.toolbar.forEach( button => {
-            if ( button.type === 'custom' ){
-                // if ( "setup" in button ){
-                //     button.setup(this.editorNode, true)
-                // }
-                if ( "shortcut" in button && "click" in button){
-                    this.editorNode.addEventListener('keydown', event =>{
-                        if ( event.key === button.shortcut ){
-                            // Prevent default so key not echo'd to the screen
-                            event.preventDefault()
-                            // Stop propagation to prevent other event handlers responding
-                            event.stopPropagation()
-                            // Trigger the dialogue
-                            button.click(this.range)
-                        }
-                    })
-                }
-            }
-        })
-    }
+
 
     updateEventHandlers(){
         this.toolbar.forEach( button => {
@@ -366,6 +399,7 @@ class Editor {
     handleCutCopyPaste(){
         console.log('Detected cut-copy-paste event')
         const range = Helpers.getRange()
+        this.debugRange(range)
         // Ensure have a range that is not collapsed
         if ( range==false || range.collapsed ){
             return false
@@ -388,86 +422,6 @@ class Editor {
 
 
     // -----------------------------------------------------------------------------
-    // @section Mouseup events
-    // -----------------------------------------------------------------------------
-    
-    handleMouseUp(focus){
-        console.log('Handle mouse up with focus = ', focus)
-        this.range = false
-        if ( focus ){
-            this.range = Helpers.getRange()
-        }
-        let formats
-        if ( this.range !== false ){
-            // If enter cursor in an empty editor then make this a paragraph
-            // rather than raw text
-            if ( this.range.blockParent == this.editorNode && this.editorNode.innerText == ''){
-                this.insertParagraph()
-            }
-            // Highlight custom blocks
-            if ( Helpers.isCustom(this.range.blockParent) ){
-                this.highlightCustomNode(this.range.blockParent)
-            }
-            console.log('handleMouseUp range=',this.range)
-            formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
-            console.log('Applied formats',formats)
-        }
-        this.toolbar.forEach( button => {
-            const element = button.element
-            // Reset active flags
-            if ( this.range === false ){
-                element.classList.remove('active')
-            }
-            // Reset disabled flags
-            if ( button.type === 'buffer' ){
-                element.disabled = !Buffer.disabled(button.tag)
-            } else if ( this.range === false ){
-                element.disabled = true
-            } else {
-                element.disabled = false
-                switch (button.type){
-                    case 'block':
-                        formats.push(this.range.blockParent.tagName)
-                    case 'list':
-                        element.removeAttribute('disabled')
-                        break
-                    case 'inline':
-                        if ( this.range.blockParent == this.editorNode ){
-                            console.log('setting element to be disabled', element.title)
-                            element.disabled = true
-                        // } else {
-                        //     // element.removeAttribute('disabled')
-                        }
-                        break
-                    // case 'custom':
-                    //     element.removeAttribute('disabled')
-                        break
-                }
-                // Check whether selection means button should be shown as active or not
-                if ( formats.includes(button.tag) ){
-                    element.classList.add('active')
-                } else {
-                    element.classList.remove('active')
-                }
-                // if ( element.disabled ){
-                //     console.log('setting element to be inactive', element.title)
-                // } else {
-                //     console.log('setting element to be active', element.title)
-                // }
-            }
-        })
-    }
-
-    insertParagraph(){
-        let p = document.createElement('P')
-        // Create a placeholder to ensure set cursor works
-        p.innerText = '\n'
-        p = this.editorNode.appendChild(p)
-        Helpers.setCursor( p, 0)
-    }
-
-
-    // -----------------------------------------------------------------------------
     // @section Other methods
     // -----------------------------------------------------------------------------
     
@@ -485,10 +439,32 @@ class Editor {
     }
  
     highlightCustomNode(node){
+        // Remove "selected" class from all custom elements and then add back into this one
         const customs = this.editorNode.querySelectorAll('[contenteditable=false]')
         customs.forEach(custom=>custom.classList.remove('selected'))
         if ( node ){
             node.classList.add('selected')
+        }
+    }
+
+    debugRange(range){
+        const debug = document.getElementById('debug')
+        if ( debug == null ){
+            return
+        }
+        console.warn('debugRange',range)
+        if ( range === false ){
+            debug.innerHTML = 'No range selected'
+        } else {
+            debug.innerHTML = `
+                <p>Block parent: ${range.blockParent.tagName}</p>
+                <p>commonAncestorContainer: ${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</p>
+                <p>rootNode: ${range.rootNode.tagName}</p>
+                <p>collapsed: ${range.collapsed}</p>
+                <p>startContainer: ${range.startContainer.tagName ? range.startContainer.tagName : range.startContainer.textContent}</p>
+                <p>startOffset: ${range.startOffset}</p>
+                <p>endContainer: ${range.endContainer.tagName ? range.endContainer.tagName : range.endContainer.textContent}</p>
+                <p>endOffset: ${range.endOffset}</p>`
         }
     }
 

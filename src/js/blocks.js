@@ -15,7 +15,8 @@ function getListAndBlockFormats( node, formats ){
     // Always set old formats to the original
     const oldFormats = [...formats.oldFormats, node.tagName]
     let newFormats = []
-    // Pre and post phases
+    // Pre and post phases set the new format to be the 
+    // same as the old format
     if ( Phase.pre() || Phase.post() ){
         // console.log(`1. Pushing ${node.tagName} to formats`)
         newFormats = [...formats.newFormats, node.tagName]
@@ -23,16 +24,16 @@ function getListAndBlockFormats( node, formats ){
     }
     // During phase
     //
-    // New block formatting (not list)
+    // New block formatting (not list) - apply new format
     if ( formatType == 'block' ){
         // console.log(`Format type = ${this.formatType}`)
         // console.log(`2. new block format ${this.newFormat}`)
         newFormats = [ newFormat ]
         return {newFormats,oldFormats}
     }
+    //
     // New list formatting
     if ( Phase.first() ){
-
         // console.log(`3. First node with new list format ${newFormat}`)
         // Reformatting a list item?
         if ( node.tagName == 'LI' ){
@@ -41,6 +42,7 @@ function getListAndBlockFormats( node, formats ){
             // First in list - in which case modify list type
             if ( parentListContainer.firstElementChild == node ){
                 // console.log( '3.1.1 First item in a list - replace existing list')
+                // Pop off the old list format and replace with the new one plus the LI
                 newFormats.pop()
                 newFormats.push(newFormat)
                 newFormats.push('LI')
@@ -62,13 +64,19 @@ function getListAndBlockFormats( node, formats ){
         }
         return {newFormats,oldFormats}
     }
-    // During but not first node phase - reuse previously define list formats
+    // During but not first node phase - reuse previously defined list formats
+    // Slice produces a shallow copy (in this case of all elements)
     newFormats = previousFormats.slice()
     // console.log(`4. Reusing initial list formatting ${formats.newFormats.join(' ')}`)
     return {newFormats,oldFormats}
 }
     
-// @todo Could go into Helpers
+/**
+ * Returns the html content of a node including its child nodes
+ * @todo Could go into Helpers but not used elsewhere yet
+ * @param {*} node 
+ * @returns string html content
+ */
 function getBlockHTML(node){
     let html = ''
     // Extract all text, inline formats and protected node content from the node
@@ -81,8 +89,8 @@ function getBlockHTML(node){
                 text = text.trim()
             }
             html += text
-        // Inline or custom node
-        } else if ( Helpers.isInline(child) || Helpers.isCustom(child) ){
+        // Inline, custom node or line break
+        } else if ( Helpers.isInline(child) || Helpers.isCustom(child) || child.tagName==='BR'){
             html += child.outerHTML 
         }
     })
@@ -181,12 +189,10 @@ function parseListsAndBlocks( node, formats ){
     if ( node != editorNode ){
         Phase.set( node )
         // Get the old and new formats
-        //nodeFormats = { ... getListAndBlockFormats( node, {...formats} ) }
         nodeFormats = getListAndBlockFormats( node, formats )
-        // console.log( `old node formats`,nodeFormats.oldFormats)
-        // console.log( `new node formats`,nodeFormats.newFormats)
+        console.log( `old node formats`,nodeFormats.oldFormats)
+        console.log( `new node formats`,nodeFormats.newFormats)
         // Save content of text nodes and protected nodes
-        // saveBlockContent( node, {...nodeFormats} )
         saveBlockContent( node, nodeFormats )
     }
     if ( node.childNodes.length == 0 ){
@@ -198,7 +204,6 @@ function parseListsAndBlocks( node, formats ){
                 Helpers.isInline(child) == false &&
                 Helpers.isCustom(child) == false ){
             // console.log(`Moving to child[${children}] ${child.tagName}`)
-            // parseListsAndBlocks( child, {...odeFormats}  ) 
             parseListsAndBlocks( child, nodeFormats  ) 
         }
     })
@@ -211,11 +216,9 @@ const init = function(editor){
     }
 }
 
-
-// export const click = function( button, range, editor ){
 const click = function( range ){
-    console.log('this',this)
-    console.log('range',range)
+    console.warn('range',range)
+    const offset = range.endOffset
     // Initialisation
     formatType = this.type
     formatAction = 'apply'
@@ -230,8 +233,15 @@ const click = function( range ){
     previousFormats = []
     lastNodeAdded = false
     range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
-    const firstParentNode = Helpers.getTopParentNode( range.startContainer, editorNode  )
-    const endParentNode = Helpers.getTopParentNode( range.endContainer, editorNode  )
+    const firstParentNode = Helpers.getTopParentNode( range.startContainer, editorNode )
+    const endParentNode = Helpers.getTopParentNode( range.endContainer, editorNode )
+    // get the position of the end of the selection in the hierarchy so can reset the cursor
+    // after formatting
+    const positions = Helpers.getChildNodePosition(range.endContainer, endParentNode, [])
+    console.warn('POSITIONS',positions)
+    //console.warn('New root node',range.rootNode)
+    // console.warn('firstParentNode',firstParentNode)
+    // console.warn('endParentNode',endParentNode)
     // Init phase for block formatting
     Phase.init(range, true)
     // console.log(`%creFormatBlock with new format ${button.tag}`,'background-color:red;color:white;padding:0.5rem')
@@ -240,12 +250,18 @@ const click = function( range ){
     if ( firstParentNode == endParentNode ){
         fragmentNode = document.createElement('DIV')
         parseListsAndBlocks( range.rootNode, {oldFormats:[], newFormats:[]} )
+        let newNode
         // console.log( 'fragment', fragmentNode.innerHTML)
         if ( range.rootNode == editorNode ){
             range.rootNode.innerHTML = fragmentNode.innerHTML
+            newNode = range.rootNode
         } else {
-            range.rootNode.outerHTML = fragmentNode.innerHTML
+            newNode = document.createElement(fragmentNode.childNodes[0].tagName)
+            newNode.innerHTML = fragmentNode.childNodes[0].innerHTML
+            newNode = Helpers.insertAfter( newNode, range.rootNode)
+            range.rootNode.remove()
         }
+        Helpers.setCursorWithPosition(newNode,positions,offset)
     } else {
         let startNodeFound = false
         let endNodeFound = false
