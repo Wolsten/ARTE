@@ -29,7 +29,10 @@ To build your own version of AJE you can use Babel and Webpack as configured in 
 ## Todos
 
 * Filter keys triggering buffering - done 13/7/21
-* Confirm the Helpers.isCustom methiod is correctly defeind
+* Confirm the Helpers.isCustom methiod is correctly defined
+* Can make inline work across blocks - should be limited to single blocks
+* Make reselection work after block formatting - requires extension to set cursor to pass in two blocks
+* Reinstate active buttons when formatted
 
 ## Acknowledgements
 

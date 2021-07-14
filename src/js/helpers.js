@@ -24,6 +24,32 @@ export const insertAfter = function(newNode, existingNode) {
     return existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
 
+/**
+ * Find a text node containing the given marker text
+ * @param node parent The node to start searching from
+ * @param node marker The marker text to locate
+ * @returns node|false 
+ */
+export const findMarkerNode = function( parent, marker ){
+    for( let i=0; i<parent.childNodes.length; i++ ){
+        const child = parent.childNodes[i]
+        if ( child.nodeType === 1 ){
+            const node = findMarkerNode( child, marker )
+            if ( node !== false ){
+                node.textContent = node.textContent.replace(marker,'')
+                return node
+            }
+        } else if ( child.nodeType === 3 ){
+            if ( child.textContent.includes(marker) ){
+                return child
+            }
+        }
+    }
+    return false
+}
+
+
+
 export const isInline = function( node ){
     if ( node.tagName == undefined ){
         return false
@@ -39,6 +65,9 @@ export const isList = function( node ){
     const tags = ['UL','OL','LI']
     return tags.includes(node.tagName)
 }
+
+// @todo These need to be dynamically registered
+// Note the addition of LI in both sets and DIV in blocks
 
 export const isBlock = function( node ){
     if ( node.tagName == undefined ){
@@ -95,19 +124,33 @@ export const isCustom = function( node ){
  * to get to the initial node within the initial parent 
  * @returns array of indices, may (but should not be) empty
  */
-export const getChildNodePosition = function( node, parent, positions ){
-    for( let i=0; i<parent.childNodes.length; i++ ){
-        let child = parent.childNodes[i]
-        if ( node == child ){
-            return [i]
-        } else {
-            const newPositions = getChildNodePosition( node, child, positions )
-            if ( newPositions.length > positions.length ){
-                return [i, ...newPositions]
-            }
+// export const getChildNodePosition = function( node, parent, positions ){
+//     for( let i=0; i<parent.childNodes.length; i++ ){
+//         let child = parent.childNodes[i]
+//         if ( node == child ){
+//             return [i]
+//         } else {
+//             const newPositions = getChildNodePosition( node, child, positions )
+//             if ( newPositions.length > positions.length ){
+//                 return [i, ...newPositions]
+//             }
+//         }
+//     }
+//     return positions
+// }
+
+export const getChildNode = function( node, marker ){
+    found = false
+    if ( node.nodeType === 3 ){
+        if ( child.textContent.contains(marker) ){
+            found = child
         }
+    } else {
+        node.childNodes.forEach( child => {
+            found = getChildNode(child,marker)
+        })
     }
-    return positions
+    return found
 }
 
 /**
@@ -195,7 +238,9 @@ export const getRange = function(){
 
 export const setCursorWithPosition = function( node, positions, offset ){
     positions.forEach( position => {
-        node = node.childNodes[position]
+        if ( node.childNodes[position] != undefined ){
+            node = node.childNodes[position]
+        }
     })
     return setCursor( node, offset )
 }
@@ -203,8 +248,26 @@ export const setCursorWithPosition = function( node, positions, offset ){
 export const setCursor = function( node, offset ){
     const range = document.createRange()
     const selection = window.getSelection()
+    // Check the offset is in range
+    if ( offset > node.textContent.length - 1 ){
+        offset = 0
+    }
     range.setStart(node, offset)
     range.collapse(true)
+    selection.removeAllRanges()
+    selection.addRange(range)
+    return range
+}
+
+export const resetSelection = function( startNode, startOffset, endNode, endOffset ){
+    const range = document.createRange()
+    const selection = window.getSelection()
+    range.setStart(startNode, startOffset)
+    if ( startNode==endNode && startOffset==endOffset){
+        range.collapse(true)
+    } else {
+        range.setEnd(endNode, endOffset)
+    }
     selection.removeAllRanges()
     selection.addRange(range)
     return range

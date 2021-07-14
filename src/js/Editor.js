@@ -143,19 +143,22 @@ class Editor {
     // -----------------------------------------------------------------------------
    
     listenForMouseUpEvents(){
-        this.editorNode.addEventListener('mouseup', () => this.handleMouseUp(true))
+        this.editorNode.addEventListener('mouseup', () => this.handleMouseUp() )
+        // this.editorNode.addEventListener('mouseup', () => this.handleMouseUp(true))
         // Use timeout on blur so buttons still active when first clicked from editor
-        this.editorNode.addEventListener('blur', () => {
-            setTimeout( ()=>this.handleMouseUp(false), 500)
-        })
+        // this.editorNode.addEventListener('blur', () => {
+        //     setTimeout( ()=>this.handleMouseUp(false), 500)
+        // })
     }
 
-    handleMouseUp(focus){
-        console.log('Handle mouse up with focus = ', focus)
-        this.range = false
-        if ( focus ){
-            this.range = Helpers.getRange()
-        }
+    handleMouseUp(){
+    // handleMouseUp(focus){
+        console.log('Handle mouse up')
+        // this.range = false
+        // if ( focus ){
+        //     this.range = Helpers.getRange()
+        // }
+        this.range = Helpers.getRange()
         console.log('handleMouseUp range=',this.range)
         this.debugRange(this.range)
         let formats = []
@@ -211,11 +214,12 @@ class Editor {
         //const button = this.toolbar.find( button => button.tag==element.id )
         console.log('clicked button',button.tag)
         // All buttons must have a click method so invoke
-        button.click(this.range)
+        const range = button.click(this.range)
         // Reset event handlers for any buttons that require it
         this.updateEventHandlers()
-        // Reset the selected range
-        this.range = false
+        // Reset the button states
+        console.log('range',range)
+        this.handleMouseUp()
     }
 
 

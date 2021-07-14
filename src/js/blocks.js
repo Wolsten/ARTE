@@ -195,15 +195,15 @@ function parseListsAndBlocks( node, formats ){
         // Save content of text nodes and protected nodes
         saveBlockContent( node, nodeFormats )
     }
-    if ( node.childNodes.length == 0 ){
-        //console.log('Finished parsing this branch')
-        return
-    }
+    // if ( node.childNodes.length == 0 ){
+    //     //console.log('Finished parsing this branch')
+    //     return
+    // }
     node.childNodes.forEach( child => {
         if ( child.nodeType !== 3 &&
-                Helpers.isInline(child) == false &&
-                Helpers.isCustom(child) == false ){
-            // console.log(`Moving to child[${children}] ${child.tagName}`)
+             Helpers.isInline(child) == false &&
+             Helpers.isCustom(child) == false ){
+            // console.log(`Moving to child ${child.tagName}`)
             parseListsAndBlocks( child, nodeFormats  ) 
         }
     })
@@ -232,36 +232,37 @@ const click = function( range ){
     }
     previousFormats = []
     lastNodeAdded = false
+    // Save start and end offsets as these will be reset when add the text markers next
+    const startOffset = range.startOffset
+    const endOffset = range.endOffset
+    // Add markers to the start and end nodes so the selection can be reset after formatting
+    range.startContainer.textContent += '§'
+    range.endContainer.textContent += '±'
+    // Ensure start from a block node
     range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
     const firstParentNode = Helpers.getTopParentNode( range.startContainer, editorNode )
     const endParentNode = Helpers.getTopParentNode( range.endContainer, editorNode )
-    // get the position of the end of the selection in the hierarchy so can reset the cursor
-    // after formatting
-    const positions = Helpers.getChildNodePosition(range.endContainer, endParentNode, [])
-    console.warn('POSITIONS',positions)
-    //console.warn('New root node',range.rootNode)
+    // console.warn('POSITIONS',positions)
+    // console.warn('New root node',range.rootNode)
     // console.warn('firstParentNode',firstParentNode)
     // console.warn('endParentNode',endParentNode)
     // Init phase for block formatting
     Phase.init(range, true)
     // console.log(`%creFormatBlock with new format ${button.tag}`,'background-color:red;color:white;padding:0.5rem')
-    //
     // Just parse the root node if the start and end belong to the same parent
     if ( firstParentNode == endParentNode ){
+
         fragmentNode = document.createElement('DIV')
         parseListsAndBlocks( range.rootNode, {oldFormats:[], newFormats:[]} )
-        let newNode
         // console.log( 'fragment', fragmentNode.innerHTML)
         if ( range.rootNode == editorNode ){
             range.rootNode.innerHTML = fragmentNode.innerHTML
-            newNode = range.rootNode
+            // newNode = range.rootNode
         } else {
-            newNode = document.createElement(fragmentNode.childNodes[0].tagName)
-            newNode.innerHTML = fragmentNode.childNodes[0].innerHTML
-            newNode = Helpers.insertAfter( newNode, range.rootNode)
-            range.rootNode.remove()
+            range.rootNode.outerHTML = fragmentNode.innerHTML
+            // newNode = Helpers.changeNodeTag(fragmentNode.childNodes[0], range.rootNode)
         }
-        Helpers.setCursorWithPosition(newNode,positions,offset)
+        //Helpers.setCursorWithPosition(newNode,positions,offset)
     } else {
         let startNodeFound = false
         let endNodeFound = false
@@ -273,33 +274,45 @@ const click = function( range ){
             if ( node == firstParentNode ){
                 startNodeFound = true
             } 
+            // Start processing once start node found
             if ( startNodeFound && endNodeFound==false ) {
                 // console.log( `%cparse top level node ${node.tagName}`,'background:orange;color:white;padding:0.5rem')
-                // Check for block (as opposed to list formatting)
+                // Check for block (as opposed to list formatting) and start a new fragment
                 if ( formatType == 'block' ){
                     previousFormats = []
                     lastNodeAdded = false
                     fragmentNode = document.createElement('DIV')
                 }
                 parseListsAndBlocks( node, {oldFormats:[], newFormats:[]} )
-                if ( button.type == 'block' ){
+                if ( this.type == 'block' ){
                     // console.log( 'fragment', this.fragmentNode.innerHTML)
-                    node.outerHTML = fragmentNode.innerHTML   
+                    node.outerHTML = fragmentNode.innerHTML
+                    // newNode = Helpers.changeNodeTag(fragmentNode.childNodes[0], node)
                 } else {
                     node.setAttribute('data-remove',true)
                 }
             }
+            // Stop processing when end node found. If formatting a list write out the 
+            // fragment
             if ( node == endParentNode ){
                 endNodeFound = true 
-                if ( button.type == 'list' ){
-                    // console.log( 'fragment', this.fragmentNode.innerHTML)
+                if ( formatType == 'list' ){
+                    console.log( 'fragment', fragmentNode.innerHTML)
                     node.outerHTML = fragmentNode.innerHTML
+                    // newNode = Helpers.changeNodeTag(fragmentNode.childNodes[0], node)
                 }
                 let removeNodes = editorNode.querySelectorAll('[data-remove=true]')
                 removeNodes.forEach( removeNode => removeNode.remove() )
             }
         })
+
     }
+    // Reset the selection, returning the new range
+    const startNode = Helpers.findMarkerNode( editorNode, '§' )
+    const endNode = Helpers.findMarkerNode( editorNode, '±' )
+    // console.log('startNode',startNode)
+    // console.log('endNode',endNode)
+    return Helpers.resetSelection(startNode, startOffset, endNode, endOffset)
 }
 
 const options = {init}
