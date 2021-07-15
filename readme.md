@@ -27,12 +27,14 @@ To use as is just download the following source file:
 To build your own version of AJE you can use Babel and Webpack as configured in the source here. Alternatively, feel free to use your own build tools based on the source files provided.
 
 ## Todos
-
-* Filter keys triggering buffering - done 13/7/21
 * Confirm the Helpers.isCustom methiod is correctly defined
 * Can make inline work across blocks - should be limited to single blocks
-* Make reselection work after block formatting - requires extension to set cursor to pass in two blocks
-* Reinstate active buttons when formatted
+* Do same reselection/reactivating for inline formatting as for blocks
+
+### Done
+* Filter keys triggering buffering - 13/7/21
+* Make reselection work after block formatting - requires extension to set cursor to pass in two blocks - 14/7/21
+* Reinstate active buttons when formatted - 14/7/21
 
 ## Acknowledgements
 

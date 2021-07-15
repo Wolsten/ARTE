@@ -214,11 +214,13 @@ class Editor {
         //const button = this.toolbar.find( button => button.tag==element.id )
         console.log('clicked button',button.tag)
         // All buttons must have a click method so invoke
-        const range = button.click(this.range)
+        this.range = button.click(this.range)
         // Reset event handlers for any buttons that require it
         this.updateEventHandlers()
-        // Reset the button states
-        console.log('range',range)
+        if ( this.range == undefined ){
+            this.range = false
+        }
+        console.log('range',this.range)
         this.handleMouseUp()
     }
 

@@ -2,8 +2,6 @@
 // @section Arrays
 // -----------------------------------------------------------------------------
 
-// import { i } from "./plugins/icons"
-
 export const arraysEqual = function( a, b ){
     if ( a.length != 0 && b.length!= 0 && a.length != b.length ){
         return false
@@ -23,32 +21,6 @@ export const arraySubset = function( a, b ){
 export const insertAfter = function(newNode, existingNode) {
     return existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
-
-/**
- * Find a text node containing the given marker text
- * @param node parent The node to start searching from
- * @param node marker The marker text to locate
- * @returns node|false 
- */
-export const findMarkerNode = function( parent, marker ){
-    for( let i=0; i<parent.childNodes.length; i++ ){
-        const child = parent.childNodes[i]
-        if ( child.nodeType === 1 ){
-            const node = findMarkerNode( child, marker )
-            if ( node !== false ){
-                node.textContent = node.textContent.replace(marker,'')
-                return node
-            }
-        } else if ( child.nodeType === 3 ){
-            if ( child.textContent.includes(marker) ){
-                return child
-            }
-        }
-    }
-    return false
-}
-
-
 
 export const isInline = function( node ){
     if ( node.tagName == undefined ){
@@ -93,65 +65,6 @@ export const isCustom = function( node ){
     return node
 }
 
-
-
-// let positions = []
-// export const getChildNodePosition = function( node, parent, firstTime ){
-//     if ( firstTime ) {
-//         positions = []
-//     }
-//     for( let i=0; i<parent.childNodes.length; i++ ){
-//         let child = parent.childNodes[i]
-//         if ( node == child ){
-//             positions = [i]
-//             break
-//         } else {
-//             const oldPositions = [...positions]
-//             getChildNodePosition( node, child, false )
-//             if ( positions.length > oldPositions.length ){
-//                 positions = [i, ...positions]
-//             }
-//         }
-//     }
-//     return positions
-// }
-
-/**
- * Find the position of a node in a parent hierarchy as set of child indices
- * @param {*} node The current node
- * @param {*} parent A (grand-)parent node 
- * @param {*} positions A list of indices moving down the tree of child positions
- * to get to the initial node within the initial parent 
- * @returns array of indices, may (but should not be) empty
- */
-// export const getChildNodePosition = function( node, parent, positions ){
-//     for( let i=0; i<parent.childNodes.length; i++ ){
-//         let child = parent.childNodes[i]
-//         if ( node == child ){
-//             return [i]
-//         } else {
-//             const newPositions = getChildNodePosition( node, child, positions )
-//             if ( newPositions.length > positions.length ){
-//                 return [i, ...newPositions]
-//             }
-//         }
-//     }
-//     return positions
-// }
-
-export const getChildNode = function( node, marker ){
-    found = false
-    if ( node.nodeType === 3 ){
-        if ( child.textContent.contains(marker) ){
-            found = child
-        }
-    } else {
-        node.childNodes.forEach( child => {
-            found = getChildNode(child,marker)
-        })
-    }
-    return found
-}
 
 /**
  * Get the top parent node for a child node 
@@ -259,18 +172,82 @@ export const setCursor = function( node, offset ){
     return range
 }
 
-export const resetSelection = function( startNode, startOffset, endNode, endOffset ){
-    const range = document.createRange()
-    const selection = window.getSelection()
-    range.setStart(startNode, startOffset)
-    if ( startNode==endNode && startOffset==endOffset){
-        range.collapse(true)
-    } else {
-        range.setEnd(endNode, endOffset)
+export const START_MARKER = '§'
+export const END_MARKER = '±'
+let startNode = null
+let startOffset = 0
+let endNode = null
+let endOffset = 0
+
+export const addStartMarker = function( textNode, sOffset ){
+    return textNode.textContent.substring(0,sOffset) + 
+            Helpers.START_MARKER + 
+            textNode.textContent.substring(sOffset)
+}
+
+export const addEndMarker = function( textNode, eOffset ){
+    return textNode.textContent.substring(0,eOffset-1) + 
+           Helpers.END_MARKER +
+           textNode.textContent.substring(eOffset)
+}
+
+export const getStartNode = function(parent){
+    return findMarkerNode( parent, START_MARKER)
+}
+
+export const getEndNode = function(parent){
+    return findMarkerNode( parent, END_MARKER)
+}
+
+/**
+ * Find a text node containing the given marker text
+ * @param node parent The node to end searching from
+ * @param node marker The marker text to locate
+ * @returns {node,offset}|false 
+ */
+function findMarkerNode( parent, marker ){
+    for( let i=0; i<parent.childNodes.length; i++ ){
+        const child = parent.childNodes[i]
+        if ( child.nodeType === 1 ){
+            if ( findMarkerNode( child, marker ) ){
+                return true
+            }
+        } else if ( child.nodeType === 3 ){
+            const index = child.textContent.indexOf(marker)
+            if ( index != -1 ){
+                console.log('Found node with marker', marker)
+                child.textContent = child.textContent.replace(marker,'')
+                if ( marker == START_MARKER ){
+                    startNode = child
+                    startOffset = index
+                } else {
+                    endNode = child
+                    endOffset = index
+                }
+                return true
+            }
+        }
     }
-    selection.removeAllRanges()
-    selection.addRange(range)
-    return range
+    return false
+}
+
+export const resetSelection = function( editorNode ){
+    if ( getStartNode( editorNode ) && getEndNode( editorNode ) ){
+        console.log('startNode',startNode)
+        console.log('endNode',endNode)
+        const range = document.createRange()
+        const selection = window.getSelection()
+        range.setStart(startNode, startOffset)
+        if ( startNode==endNode && startOffset==endOffset){
+            range.collapse(true)
+        } else {
+            range.setEnd(endNode, endOffset)
+        }
+        selection.removeAllRanges()
+        selection.addRange(range)
+        return range
+    }
+    return false
 }
 
 export const debounce = function(fn, delay) {

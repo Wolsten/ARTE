@@ -145,18 +145,23 @@ function processCategorisedNodes(){
 
 function getTextNodes( node ){
     // Before, during and after texts
+    let text
     let texts = []
     if ( Phase.both() ) {
         texts.push( node.textContent.substring(0,range.startOffset) )
-        texts.push( node.textContent.substring(range.startOffset,range.endOffset) )
+        text = Helpers.START_MARKER + node.textContent.substring(range.startOffset,range.endOffset) + Helpers.END_MARKER
+        texts.push( text )
+        // endOffset = text.length - 2
         texts.push( node.textContent.substring(range.endOffset) )
     } else if ( Phase.first() ){
         texts.push( node.textContent.substring(0,range.startOffset) )
-        texts.push( node.textContent.substring(range.startOffset) )
+        texts.push( Helpers.START_MARKER + node.textContent.substring(range.startOffset))
         texts.push( '' )
     } else if ( Phase.last() ){
         texts.push( '' )
-        texts.push( node.textContent.substring(0,range.endOffset) )
+        text = node.textContent.substring(0,range.endOffset) + Helpers.END_MARKER
+        texts.push( text )
+        // endOffset = range.endOffset
         texts.push( node.textContent.substring(range.endOffset) )
     } else if ( Phase.during() ){
         texts.push( '' )
@@ -171,11 +176,11 @@ function getTextNodes( node ){
         texts.push( '' )
         texts.push( node.textContent )
     }
-    // Check for trailing spaces
-    if ( texts[2] == ' ' ){
-        texts[2] = ''
-        texts[1] += ' '
-    }
+    // // Check for trailing spaces
+    // if ( texts[2] == ' ' ){
+    //     texts[2] = ''
+    //     texts[1] += ' '
+    // }
     return texts
 }
 
@@ -205,14 +210,18 @@ const init = function(editor){
     }
 }
 
+let startOffset = 0
+let endOffset = 0
+
 const click = function( rng ){
     range = rng
     formatAction = 'apply'
-    if ( this.tag == 'CLEAR' || this.element.getAttribute('data-active') ){
+    if ( this.tag == 'CLEAR' || this.element.classList.contains('active') ){
         formatAction = 'remove'
     }
     // console.log('Format action', formatAction)
     newFormat = this.tag
+    startOffset = range.startOffset
     range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
     // The root node must be a block node (including list item LI) or an inline node
     if ( Helpers.isBlock(range.rootNode) == false &&
@@ -243,8 +252,14 @@ const click = function( rng ){
     } else {
         range.rootNode.innerHTML = fragmentNode.innerHTML
     }
-    // updateEventHandlers()
-    // console.log('fragmentNode', fragmentNode)
+    // If clearing the text format then just have a single text node so
+    // set end offset to the end, minus the two markers
+    // if ( formatAction == 'remove'){
+    //     endOffset = fragmentNode.innerText.length - 2
+    // }
+    // Reset the selection, returning the new range
+    //return Helpers.resetSelection(editorNode, startOffset, endOffset, formatAction=='remove')
+    return Helpers.resetSelection(editorNode)
 }
 
 const options = {init}

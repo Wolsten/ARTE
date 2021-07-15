@@ -235,17 +235,19 @@ const click = function( range ){
     // Save start and end offsets as these will be reset when add the text markers next
     const startOffset = range.startOffset
     const endOffset = range.endOffset
+    //
     // Add markers to the start and end nodes so the selection can be reset after formatting
-    range.startContainer.textContent += '§'
-    range.endContainer.textContent += '±'
+    range.startContainer.textContent = Helpers.addStartMarker( range.startContainer, startOffset )
+    // If containers are the same node then inc the endOffset due to the start marker inserted
+    if ( range.collapsed ){
+        endOffset ++
+    }
+    range.endContainer.textContent = Helpers.addEndMarker( range.endContainer, endOffset )
+    //
     // Ensure start from a block node
     range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
     const firstParentNode = Helpers.getTopParentNode( range.startContainer, editorNode )
     const endParentNode = Helpers.getTopParentNode( range.endContainer, editorNode )
-    // console.warn('POSITIONS',positions)
-    // console.warn('New root node',range.rootNode)
-    // console.warn('firstParentNode',firstParentNode)
-    // console.warn('endParentNode',endParentNode)
     // Init phase for block formatting
     Phase.init(range, true)
     // console.log(`%creFormatBlock with new format ${button.tag}`,'background-color:red;color:white;padding:0.5rem')
@@ -257,12 +259,9 @@ const click = function( range ){
         // console.log( 'fragment', fragmentNode.innerHTML)
         if ( range.rootNode == editorNode ){
             range.rootNode.innerHTML = fragmentNode.innerHTML
-            // newNode = range.rootNode
         } else {
             range.rootNode.outerHTML = fragmentNode.innerHTML
-            // newNode = Helpers.changeNodeTag(fragmentNode.childNodes[0], range.rootNode)
         }
-        //Helpers.setCursorWithPosition(newNode,positions,offset)
     } else {
         let startNodeFound = false
         let endNodeFound = false
@@ -287,7 +286,6 @@ const click = function( range ){
                 if ( this.type == 'block' ){
                     // console.log( 'fragment', this.fragmentNode.innerHTML)
                     node.outerHTML = fragmentNode.innerHTML
-                    // newNode = Helpers.changeNodeTag(fragmentNode.childNodes[0], node)
                 } else {
                     node.setAttribute('data-remove',true)
                 }
@@ -299,7 +297,6 @@ const click = function( range ){
                 if ( formatType == 'list' ){
                     console.log( 'fragment', fragmentNode.innerHTML)
                     node.outerHTML = fragmentNode.innerHTML
-                    // newNode = Helpers.changeNodeTag(fragmentNode.childNodes[0], node)
                 }
                 let removeNodes = editorNode.querySelectorAll('[data-remove=true]')
                 removeNodes.forEach( removeNode => removeNode.remove() )
@@ -308,11 +305,7 @@ const click = function( range ){
 
     }
     // Reset the selection, returning the new range
-    const startNode = Helpers.findMarkerNode( editorNode, '§' )
-    const endNode = Helpers.findMarkerNode( editorNode, '±' )
-    // console.log('startNode',startNode)
-    // console.log('endNode',endNode)
-    return Helpers.resetSelection(startNode, startOffset, endNode, endOffset)
+    return Helpers.resetSelection(editorNode)
 }
 
 const options = {init}
