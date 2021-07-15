@@ -30,9 +30,13 @@
 }
 
 .editor-body {
-    padding:0.5rem;
+    padding:1rem;
     border: 1px solid rgb(200, 200, 200);;
     min-height:200px;
+}
+
+.editor-body p {
+    margin:0.5rem 0
 }
 
 .editor-body.heading-numbers { counter-reset: h1}

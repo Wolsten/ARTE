@@ -210,6 +210,7 @@ function parseListsAndBlocks( node, formats ){
     // console.log(`Finished this branch - processed ${children} children`)
 }
 
+// Optional initialisation method that takes in the editor node
 const init = function(editor){
     if ( editorNode == undefined ){
         editorNode = editor
@@ -218,7 +219,7 @@ const init = function(editor){
 
 const click = function( range ){
     console.warn('range',range)
-    const offset = range.endOffset
+    // const offset = range.endOffset
     // Initialisation
     formatType = this.type
     formatAction = 'apply'
@@ -232,35 +233,28 @@ const click = function( range ){
     }
     previousFormats = []
     lastNodeAdded = false
-    // Save start and end offsets as these will be reset when add the text markers next
-    const startOffset = range.startOffset
-    const endOffset = range.endOffset
-    //
-    // Add markers to the start and end nodes so the selection can be reset after formatting
-    range.startContainer.textContent = Helpers.addStartMarker( range.startContainer, startOffset )
-    // If containers are the same node then inc the endOffset due to the start marker inserted
-    if ( range.collapsed ){
-        endOffset ++
-    }
-    range.endContainer.textContent = Helpers.addEndMarker( range.endContainer, endOffset )
-    //
     // Ensure start from a block node
     range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
     const firstParentNode = Helpers.getTopParentNode( range.startContainer, editorNode )
     const endParentNode = Helpers.getTopParentNode( range.endContainer, editorNode )
+    // Find the end target as the next node following the last in the selection
+    // Use this at the end to reset the selection
+    let endTarget = editorNode
+    if ( endParentNode != editorNode.lastElementChild ){
+        endTarget = endParentNode.nextElementSibling
+    }
     // Init phase for block formatting
     Phase.init(range, true)
     // console.log(`%creFormatBlock with new format ${button.tag}`,'background-color:red;color:white;padding:0.5rem')
     // Just parse the root node if the start and end belong to the same parent
     if ( firstParentNode == endParentNode ){
-
         fragmentNode = document.createElement('DIV')
         parseListsAndBlocks( range.rootNode, {oldFormats:[], newFormats:[]} )
         // console.log( 'fragment', fragmentNode.innerHTML)
         if ( range.rootNode == editorNode ){
-            range.rootNode.innerHTML = fragmentNode.innerHTML
+            range.rootNode.innerHTML = fragmentNode.innerHTML //+ Helpers.BLOCK_END_MARKER
         } else {
-            range.rootNode.outerHTML = fragmentNode.innerHTML
+            range.rootNode.outerHTML = fragmentNode.innerHTML //+ Helpers.BLOCK_END_MARKER
         }
     } else {
         let startNodeFound = false
@@ -289,14 +283,17 @@ const click = function( range ){
                 } else {
                     node.setAttribute('data-remove',true)
                 }
+
             }
             // Stop processing when end node found. If formatting a list write out the 
             // fragment
             if ( node == endParentNode ){
+
                 endNodeFound = true 
+                
                 if ( formatType == 'list' ){
                     console.log( 'fragment', fragmentNode.innerHTML)
-                    node.outerHTML = fragmentNode.innerHTML
+                    node.outerHTML = fragmentNode.innerHTML 
                 }
                 let removeNodes = editorNode.querySelectorAll('[data-remove=true]')
                 removeNodes.forEach( removeNode => removeNode.remove() )
@@ -304,10 +301,11 @@ const click = function( range ){
         })
 
     }
-    // Reset the selection, returning the new range
-    return Helpers.resetSelection(editorNode)
+    // Reset the selection
+    Helpers.setCursorToTargetNode(editorNode, endTarget)
 }
 
+// Define optional methods - these are added in by the ToolbarButton constructor
 const options = {init}
 const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click, options )
 const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click, options )

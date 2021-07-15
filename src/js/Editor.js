@@ -1,7 +1,7 @@
 "use strict"
 
 import * as Templates from './templates.js'
-import * as ModalFeedback from './plugins/modalFeedback.js'
+// import * as ModalFeedback from './plugins/modalFeedback.js'
 import * as Helpers from './helpers.js'
 import * as Blocks from './blocks.js'
 import * as Inline from './inline.js'
@@ -17,6 +17,7 @@ class Editor {
         // Initialise options & toolbar
         this.options = this.initOptions(options)
         this.toolbar = this.initToolbar()
+        // this.clicked = false
         // Initialise the editor
         target.innerHTML = Templates.editor(this.toolbar, this.options)
         this.editorNode = target.querySelector('.editor-body')
@@ -30,7 +31,6 @@ class Editor {
         this.listenForMouseUpEvents()
         this.listenForKeydownEvents()
         this.listenForPasteEvents()
-
         // Initialise buttons for standard and custom plugins
         this.initialiseButtons()
         // Initialise buffer handling
@@ -100,15 +100,15 @@ class Editor {
         this.toolbar.forEach( button => {
             // Add dom element to the button
             button.element = this.toolbarNode.querySelector(`#${button.tag}`)
-            // Set disabled flag using custom function if available, other set to true
-            if ( "disabled" in button ){
-                button.disabled(button.tag)
-            } else {
-                button.element.disabled = true
-            }
+            // Set disabled flag on element. Requires range and button to be passed in
+            // The toolbarButton class defaults has default method which can be overridden
+            // by adding a disabled method in the button options
+            button.disabled(false)
+            // Perform any button initialisation by passing in the editorNode
             if ( "init" in button ){
                 button.init(this.editorNode)
             }
+            // Some button have shortcuts in which case listen for
             if ( "shortcut" in button && "click" in button){
                 this.editorNode.addEventListener('keydown', event =>{
                     if ( event.key === button.shortcut ){
@@ -116,11 +116,12 @@ class Editor {
                         event.preventDefault()
                         // Stop propagation to prevent other event handlers responding
                         event.stopPropagation()
-                        // Trigger the dialogue
+                        // Trigger the dialogue witht he then current range
                         button.click(this.range)
                     }
                 })
             }
+            // All button have a click method
             if ( "click" in button ){
                 button.element.addEventListener('click', event => {
                     // Prevent default action for all buttons when have no range 
@@ -142,22 +143,57 @@ class Editor {
     // @section Mouse up events
     // -----------------------------------------------------------------------------
    
+    
+
     listenForMouseUpEvents(){
-        this.editorNode.addEventListener('mouseup', () => this.handleMouseUp() )
+        this.editorNode.addEventListener('mouseup', event => {
+            if ( this.editorOrtoolbar( event.target ) ){
+                this.handleMouseUp() 
+            } else {
+                this.handleEditorBlur()
+            }
+        })
         // this.editorNode.addEventListener('mouseup', () => this.handleMouseUp(true))
         // Use timeout on blur so buttons still active when first clicked from editor
         // this.editorNode.addEventListener('blur', () => {
-        //     setTimeout( ()=>this.handleMouseUp(false), 500)
+        //     setTimeout( ()=>this.handleEditorBlur(), 200 )
+        // })
+        // this.editorNode.addEventListener('blur', event => {
+        //     console.log('target', event.target)
+        //     if ( editorOrtoolbarButtonParent( event.target ){
+        //     this.handleEditorBlur()
+        // })
+
+        // document.body.addEventListener('mouseup', event => {
+        //     console.log('moused up with target', event.target)
         // })
     }
 
-    handleMouseUp(){
-    // handleMouseUp(focus){
-        console.log('Handle mouse up')
-        // this.range = false
-        // if ( focus ){
-        //     this.range = Helpers.getRange()
+    handleEditorBlur( event ){
+        // if ( this.clicked == false ) {
+            console.log('editor blurred')
+            this.toolbar.forEach( button => {
+                button.disabled( false )
+                button.element.classList.remove('active')
+            })
         // }
+        // this.clicked = false
+    }
+
+    editorOrtoolbar(node){
+        while ( node != document.body ){
+            if ( node == this.editorNode || node == this.toolbarNode ){
+                return true
+            }
+            node = node.parentNode
+        }
+        return false
+    }
+
+    handleMouseUp(){
+
+        // this.clicked = true
+        console.log('Handle mouse up')
         this.range = Helpers.getRange()
         console.log('handleMouseUp range=',this.range)
         this.debugRange(this.range)
@@ -179,22 +215,36 @@ class Editor {
             console.log('Applied formats',formats)
         }
         this.toolbar.forEach( button => {
-            // Buffering is handled separately
-            if ( button.type !== 'buffer' ){
-                // Reset flags
-                if ( this.range === false ){
-                    button.element.disabled = true
-                    button.element.classList.remove('active')
-                } else {
-                    button.element.disabled = false
-                    // Check whether selection means button should be shown as active or not
-                    if ( formats.includes(button.tag) ){
-                        button.element.classList.add('active')
-                    } else {
-                        button.element.classList.remove('active')
-                    }
-                }
+            // Trigger disabled method on each button
+            button.disabled( this.range )
+            // Set active state of button
+            if ( formats.includes(button.tag) ){
+                button.element.classList.add('active')
+            } else {
+                button.element.classList.remove('active')
             }
+
+
+            // // Buffering is handled separately
+            // if ( button.type !== 'buffer' ){
+            //     // Reset flags
+            //     if ( this.range === false ){
+            //         button.element.disabled = true
+            //         button.element.classList.remove('active')
+            //     } else {
+            //         button.element.disabled = button.disabled(this.range)
+
+                    
+            //         // false
+            //         // if ( "disabled")
+            //         // Check whether selection means button should be shown as active or not
+            //         if ( formats.includes(button.tag) ){
+            //             button.element.classList.add('active')
+            //         } else {
+            //             button.element.classList.remove('active')
+            //         }
+            //     }
+            // }
         })
     }
 

@@ -6,10 +6,15 @@ class ToolbarButton {
         this.label = label
         this.icon = icon
         this.click = click
+        this.disabled = this.disabled
+        this.element = null // Populated by editor
         // Optional parameters
         if ( options != undefined ){
             if ( options.init != undefined ){
                 this.init = options.init
+            }
+            if ( options.disabled != undefined ){
+                this.disabled = options.disabled
             }
             if ( options.shortcut != undefined ){
                 this.shortcut = options.shortcut
@@ -23,8 +28,14 @@ class ToolbarButton {
         }
     }
 
+    // Default disabled method
     disabled(range){
-        return true
+        if ( range === false ){
+            this.element.disabled = true
+            this.element.classList.remove('active')
+        } else {
+            this.element.disabled = false
+        }
     }
 
 }

@@ -2,6 +2,7 @@
 
 import ToolbarButton from './ToolbarButton.js'
 import * as Icons from './icons.js'
+import {setCursor} from '../helpers.js'
 
 let dataListOptions = ''
 let range
@@ -107,15 +108,15 @@ function insert(person){
     hide()
 }
 
-function setCursor( node, offset ){
-    let rng = document.createRange()
-    let sel = window.getSelection()
-    rng.setStart(node, offset);
-    rng.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(rng);
-    return rng;
-}
+// function setCursor( node, offset ){
+//     let rng = document.createRange()
+//     let sel = window.getSelection()
+//     rng.setStart(node, offset);
+//     rng.collapse(true);
+//     sel.removeAllRanges();
+//     sel.addRange(rng);
+//     return rng;
+// }
 
 
 

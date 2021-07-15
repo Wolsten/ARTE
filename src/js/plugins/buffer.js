@@ -1,4 +1,5 @@
 import * as Icons from './icons.js'
+import ToolbarButton from './ToolbarButton.js'
 
 let size = 10
 let bufferIndex = 0
@@ -6,13 +7,12 @@ let target = null
 let buffer = []
 
 function setButtonState(){
-    buttons[0].element.disabled = disabled('UNDO')
-    buttons[1].element.disabled = disabled('REDO')
+    UNDO.disabled()
+    REDO.disabled()
 }
 
 function undo(){
     let status = false
-    console.log('handle undo with buffer index', bufferIndex)
     if ( bufferIndex > 0 ){
         bufferIndex --
         target.innerHTML = buffer[bufferIndex]
@@ -23,7 +23,6 @@ function undo(){
 }
 
 function redo(){
-    console.log('handle redo with buffer index', bufferIndex)
     if ( bufferIndex + 1 < buffer.length ){
         bufferIndex ++
         target.innerHTML = buffer[bufferIndex]
@@ -31,6 +30,14 @@ function redo(){
     }
     setButtonState()
     return false
+}
+
+const undoDisabled = function(){
+    this.element.disabled = buffer.length==0 || bufferIndex==0
+}
+
+const redoDisabled = function(){
+    this.element.disabled = bufferIndex >= buffer.length - 1
 }
 
 
@@ -44,17 +51,6 @@ export const init = function( options ){
     buffer = [target.innerHTML]
 }
 
-export const disabled = function( action ){
-    if ( action == 'UNDO' ){
-        return buffer.length==0 || bufferIndex==0
-    }
-    if ( action == 'REDO' ){
-        return bufferIndex >= buffer.length - 1
-    }
-    return true
-}
-
-// @todo This doesn't filter keys so for example responds to arrow keys - need to filter out
 export const update = function(){
     if ( buffer.length > size ){
         // Remove first element
@@ -76,22 +72,11 @@ export const update = function(){
     setButtonState()
 }
 
-export const buttons = [
-    {
-        element: null, // Populated by the editor
-        type:'buffer', 
-        tag:'UNDO', 
-        label:'Undo', 
-        icon:Icons.undo,
-        click: undo
-    },
-    {
-        element: null,
-        type:'buffer', 
-        tag:'REDO',
-        label:'Redo', 
-        icon:Icons.redo,
-        click: redo
-    }
-]
+const uOptions = {disabled:undoDisabled}
+const rOptions = {disabled:redoDisabled}
+const UNDO = new ToolbarButton('buffer','UNDO','Undo', Icons.undo, undo, uOptions)
+const REDO = new ToolbarButton('buffer','REDO','Redo', Icons.redo, redo, rOptions)
+
+export const buttons = [UNDO, REDO]
+
 

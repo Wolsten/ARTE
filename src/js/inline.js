@@ -210,8 +210,16 @@ const init = function(editor){
     }
 }
 
-let startOffset = 0
-let endOffset = 0
+const disabled = function(range){
+    if ( range === false ){
+        this.element.disabled = true
+    } else if ( this.tag == 'CLEAR' ){
+        this.element.disabled = false
+    // Inline formatting only applies to single blocks
+    } else {
+        this.element.disabled = range.startContainer != range.endContainer
+    }
+}
 
 const click = function( rng ){
     range = rng
@@ -221,7 +229,6 @@ const click = function( rng ){
     }
     // console.log('Format action', formatAction)
     newFormat = this.tag
-    startOffset = range.startOffset
     range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
     // The root node must be a block node (including list item LI) or an inline node
     if ( Helpers.isBlock(range.rootNode) == false &&
@@ -246,23 +253,27 @@ const click = function( rng ){
     logCategorisedNodes(true)
     // Process saved nodes
     processCategorisedNodes()
+    // Check for text only content being applied to the editor,
+    // in which case wrap with a paragraph
+    if ( range.rootNode == editorNode && 
+         fragmentNode.childNodes.length == 1 && fragmentNode.childNodes[0].nodeType === 3 ){
+        const paragraph = document.createElement('P')
+        paragraph.innerHTML = fragmentNode.innerHTML.trim()
+        fragmentNode.innerHTML = paragraph.outerHTML
+    }
     // Write out changes
     if ( Helpers.isInline(range.rootNode) ){
         range.rootNode.outerHTML = fragmentNode.innerHTML
     } else {
         range.rootNode.innerHTML = fragmentNode.innerHTML
     }
-    // If clearing the text format then just have a single text node so
-    // set end offset to the end, minus the two markers
-    // if ( formatAction == 'remove'){
-    //     endOffset = fragmentNode.innerText.length - 2
-    // }
     // Reset the selection, returning the new range
-    //return Helpers.resetSelection(editorNode, startOffset, endOffset, formatAction=='remove')
     return Helpers.resetSelection(editorNode)
 }
 
-const options = {init}
+
+
+const options = {init,disabled}
 const B = new ToolbarButton( 'inline', 'B', 'Bold', Icons.b, click, options)
 const I = new ToolbarButton( 'inline', 'I', 'Italic', Icons.i, click, options)
 const U = new ToolbarButton( 'inline', 'U',  'Underline', Icons.u, click, options)

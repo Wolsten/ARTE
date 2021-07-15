@@ -149,20 +149,33 @@ export const getRange = function(){
     return false
 }
 
-export const setCursorWithPosition = function( node, positions, offset ){
-    positions.forEach( position => {
-        if ( node.childNodes[position] != undefined ){
-            node = node.childNodes[position]
-        }
-    })
-    return setCursor( node, offset )
+export const setCursorToTargetNode = function(editor, target){
+    // If the target node isn't the editor make it the one before
+    if ( target != editor ){
+        target = target.previousElementSibling
+    }
+    // Look for the last child - cannot use lastElementChild because that ignores text nodes
+    while ( target.lastChild != null ){
+        target = target.lastChild
+    }
+    // If found and it is a text node set the cursor to the end
+    if ( target.nodeType === 3 ){
+        console.warn('Found target',target)
+        console.warn('Found length',target.textContent.length)
+        setCursor(target,target.textContent.length)
+    // Else set to the start
+    } else {
+        setCursor(target,0)
+    }
 }
+
 
 export const setCursor = function( node, offset ){
     const range = document.createRange()
     const selection = window.getSelection()
     // Check the offset is in range
-    if ( offset > node.textContent.length - 1 ){
+    // if ( offset > node.textContent.length - 1 ){
+    if ( offset > node.textContent.length ){
         offset = 0
     }
     range.setStart(node, offset)
@@ -172,23 +185,41 @@ export const setCursor = function( node, offset ){
     return range
 }
 
+// Mark text with "unusual" none-keyboard characters
+// https://www.w3schools.com/charsets/ref_utf_math.asp
+// const START_MARKER = '&isin;' // Is in (i.e. from here)
+// const END_MARKER = '&ni;'     // Not in (i.e. from here)
+
 export const START_MARKER = '§'
 export const END_MARKER = '±'
+const END_MARKER_CLASS = 'end-marker'
+
+
+export const blockEndMarker = function(){
+    const span = document.createElement('span')
+    span.classList.add(END_MARKER_CLASS)
+    span.contentEditable = 'false'
+    span.innerHTML = END_MARKER
+    return span
+}
+
 let startNode = null
 let startOffset = 0
 let endNode = null
 let endOffset = 0
 
-export const addStartMarker = function( textNode, sOffset ){
-    return textNode.textContent.substring(0,sOffset) + 
-            Helpers.START_MARKER + 
-            textNode.textContent.substring(sOffset)
+
+
+export const addStartMarker = function( text, offset ){
+    return text.substring(0,offset) + 
+            START_MARKER + 
+            text.substring(offset)
 }
 
-export const addEndMarker = function( textNode, eOffset ){
-    return textNode.textContent.substring(0,eOffset-1) + 
-           Helpers.END_MARKER +
-           textNode.textContent.substring(eOffset)
+export const addEndMarker = function( text, offset ){
+    return text.substring(0,offset-1) + 
+           END_MARKER +
+           text.substring(offset)
 }
 
 export const getStartNode = function(parent){
