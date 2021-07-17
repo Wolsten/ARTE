@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="./src/css/styles.css">
     <link rel="stylesheet" href="./src/css/mentions.css">
     <title>Another Javascript Editor</title>
-    <script src='./public/js/AJE.js' charset="utf-8"></script>
 </head>
 <body>
 
@@ -19,7 +18,9 @@
     </div>
     <div id="debug"></div>
 
-    <script type="text/javascript">
+    <!-- Bundled version -->
+    <!-- <script src='./public/js/AJE.js' charset="utf-8"></script> 
+        <script type="text/javascript">
         // Choose location for editor and the default content
         const target = document.getElementById('editor')
         let content = target.innerHTML
@@ -41,6 +42,35 @@
         }
         // Create editor and add to dom in target position
         const editor = new AJE.Editor(target, content, options)
+    </script> -->
+
+    <!-- None-bundled version -->
+    <script type="module" charset="utf-8">
+        // Imports
+        import Editor from './src/js/Editor.js'
+        import * as Mentions from './src/js/plugins/mentions.js'
+        import * as Links from './src/js/plugins/links.js'
+        // Choose location for editor and the default content
+        const target = document.getElementById('editor')
+        let content = target.innerHTML
+        target.innerHTML = ''
+        // Setup plugins - required mentions.css to be included in head
+        Mentions.initPeople(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
+        // Define editor options
+        const options = {
+            // Toolbar buttons required
+            // Allowed values 'H1','H2','P','OL','UL','B','U','I','CLEAR','UNDO','REDO']
+            // All other elements are filtered out unless specified below in a plugin
+            tags: ['H1','H2','P','OL','UL','B','I','U','CLEAR'], 
+            // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
+            headingNumbers: 'on', 
+            // Custom plugs to add to the toolbar to enhance the editor
+            plugins: [Mentions, Links],
+            // Number of Undo operations supported, max 10       
+            bufferSize: 10     
+        }
+        // Create editor and add to dom in target position
+        const editor = new Editor(target, content, options)
     </script>
     
 </body>

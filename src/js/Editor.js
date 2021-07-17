@@ -1,7 +1,6 @@
 "use strict"
 
 import * as Templates from './templates.js'
-// import * as ModalFeedback from './plugins/modalFeedback.js'
 import * as Helpers from './helpers.js'
 import * as Blocks from './blocks.js'
 import * as Inline from './inline.js'
@@ -41,8 +40,8 @@ class Editor {
     }
 
     initOptions(options){   
-        // All standard supported tags
-        const tags = ['H1','H2','P', 'OL','UL', 'B', 'I', 'U']
+        // All standard supported tags - use these if not set in options
+        const tags = ['H1','H2','P', 'OL','UL', 'B', 'I', 'U', 'CLEAR']
         const plugins = []
         const headingNumbers = 'off'
         const bufferSize = 10     
@@ -71,12 +70,14 @@ class Editor {
         let toolbar = []
         // Add (filtered) standard buttons
         Blocks.buttons.forEach( button => {
-            if ( options.tags.includes(button.tag) ){
+            if ( this.options.tags.includes(button.tag) ){
+                Helpers.registerTag(button.type, button.tag)
                 toolbar.push(button)
             }
         })
         Inline.buttons.forEach( button => {
-            if ( options.tags.includes(button.tag) ){
+            if ( this.options.tags.includes(button.tag) ){
+                Helpers.registerTag(button.type, button.tag)
                 toolbar.push(button)
             }
         })
@@ -147,40 +148,23 @@ class Editor {
 
     listenForMouseUpEvents(){
         this.editorNode.addEventListener('mouseup', event => {
-            if ( this.editorOrtoolbar( event.target ) ){
+            if ( this.editorOrToolbar( event.target ) ){
                 this.handleMouseUp() 
             } else {
                 this.handleEditorBlur()
             }
         })
-        // this.editorNode.addEventListener('mouseup', () => this.handleMouseUp(true))
-        // Use timeout on blur so buttons still active when first clicked from editor
-        // this.editorNode.addEventListener('blur', () => {
-        //     setTimeout( ()=>this.handleEditorBlur(), 200 )
-        // })
-        // this.editorNode.addEventListener('blur', event => {
-        //     console.log('target', event.target)
-        //     if ( editorOrtoolbarButtonParent( event.target ){
-        //     this.handleEditorBlur()
-        // })
-
-        // document.body.addEventListener('mouseup', event => {
-        //     console.log('moused up with target', event.target)
-        // })
     }
 
     handleEditorBlur( event ){
-        // if ( this.clicked == false ) {
-            console.log('editor blurred')
-            this.toolbar.forEach( button => {
-                button.disabled( false )
-                button.element.classList.remove('active')
-            })
-        // }
-        // this.clicked = false
+        console.log('editor blurred')
+        this.toolbar.forEach( button => {
+            button.disabled( false )
+            button.element.classList.remove('active')
+        })
     }
 
-    editorOrtoolbar(node){
+    editorOrToolbar(node){
         while ( node != document.body ){
             if ( node == this.editorNode || node == this.toolbarNode ){
                 return true
@@ -190,14 +174,35 @@ class Editor {
         return false
     }
 
-    handleMouseUp(){
+    setToolbarStates(range){
+        if ( range === false ){
+            this.toolbar.forEach( button => {
+                button.element.classList.remove('active')
+            })
+            return
+        }
+        // Get the applied formats for the range selected (all way up to the highest parent 
+        // inside the editor)
+        const formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
+        console.log('Applied formats',formats)
+        this.toolbar.forEach( button => {
+            // Trigger disabled method on each button
+            button.disabled( range )
+            // Set active state of button
+            if ( formats.includes(button.tag) ){
+                button.element.classList.add('active')
+            } else {
+                button.element.classList.remove('active')
+            }
+        })
+    }
 
-        // this.clicked = true
+    handleMouseUp(){
         console.log('Handle mouse up')
         this.range = Helpers.getRange()
         console.log('handleMouseUp range=',this.range)
         this.debugRange(this.range)
-        let formats = []
+        // let formats = []
         if ( this.range !== false ){
             // If enter cursor in an empty editor then make this a paragraph
             // rather than raw text
@@ -209,43 +214,22 @@ class Editor {
             if ( Helpers.isCustom(this.range.blockParent) ){
                 this.highlightCustomNode(this.range.blockParent)
             }
-            // Get the applied formats for the range selected (all way up to the highest parent 
-            // inside the editor)
-            formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
-            console.log('Applied formats',formats)
+            // // Get the applied formats for the range selected (all way up to the highest parent 
+            // // inside the editor)
+            // formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
+            // console.log('Applied formats',formats)
         }
-        this.toolbar.forEach( button => {
-            // Trigger disabled method on each button
-            button.disabled( this.range )
-            // Set active state of button
-            if ( formats.includes(button.tag) ){
-                button.element.classList.add('active')
-            } else {
-                button.element.classList.remove('active')
-            }
-
-
-            // // Buffering is handled separately
-            // if ( button.type !== 'buffer' ){
-            //     // Reset flags
-            //     if ( this.range === false ){
-            //         button.element.disabled = true
-            //         button.element.classList.remove('active')
-            //     } else {
-            //         button.element.disabled = button.disabled(this.range)
-
-                    
-            //         // false
-            //         // if ( "disabled")
-            //         // Check whether selection means button should be shown as active or not
-            //         if ( formats.includes(button.tag) ){
-            //             button.element.classList.add('active')
-            //         } else {
-            //             button.element.classList.remove('active')
-            //         }
-            //     }
-            // }
-        })
+        this.setToolbarStates(this.range)
+        // this.toolbar.forEach( button => {
+        //     // Trigger disabled method on each button
+        //     button.disabled( this.range )
+        //     // Set active state of button
+        //     if ( formats.includes(button.tag) ){
+        //         button.element.classList.add('active')
+        //     } else {
+        //         button.element.classList.remove('active')
+        //     }
+        // })
     }
 
     insertParagraph(){
@@ -406,17 +390,22 @@ class Editor {
     listenForKeyupEvents(){
         this.handleKeyup = Helpers.debounce(this.handleKeyupDelayed,500)
         this.editorNode.addEventListener( 'keyup', event => {
-            console.log('event',event)
-            const ignore = ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','End','Home']
-            if ( ignore.includes(event.key) === false ){
-                this.handleKeyup() 
-            }
+            console.log('handle key up event',event)
+            this.handleKeyup(event.key,this) 
         })
     }
 
     handleKeyupDelayed(...args){
-        console.log('args',args)
-        Buffer.update()
+        const ignore = ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','End','Home']
+        let key = args[0]
+        const editor = args[1]
+        // If arrow key jyst refresh the range and button states (active or inactive)
+        if ( ignore.includes(key) ){
+            editor.range = Helpers.getRange()
+            editor.setToolbarStates(editor.range)
+        } else {
+            Buffer.update()
+        }
     }
 
 

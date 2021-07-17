@@ -179,7 +179,7 @@ function saveBlockContent( node, formats ){
     
 function parseListsAndBlocks( node, formats ){
     // console.log( `%cparseListsAndBlocks ${node.tagName}`,'background:green;color:white;padding:0.5rem')
-    // console.log( `HTML [${node.innerHTML.trim()}]`)
+    // console.log( `Inner HTML [${node.innerHTML.trim()}]`)
     // console.log( `node formats on entry`,formats.oldFormats)
     // Define the formats for this node only
     let nodeFormats = {
@@ -190,24 +190,28 @@ function parseListsAndBlocks( node, formats ){
         Phase.set( node )
         // Get the old and new formats
         nodeFormats = getListAndBlockFormats( node, formats )
-        console.log( `old node formats`,nodeFormats.oldFormats)
-        console.log( `new node formats`,nodeFormats.newFormats)
+        // console.log( `old node formats`,nodeFormats.oldFormats)
+        // console.log( `new node formats`,nodeFormats.newFormats)
         // Save content of text nodes and protected nodes
         saveBlockContent( node, nodeFormats )
     }
-    // if ( node.childNodes.length == 0 ){
-    //     //console.log('Finished parsing this branch')
-    //     return
-    // }
+    // Loop through all child blocks 
+    // node.childNodes.forEach( child => {
+    //     if ( child.nodeType !== 3 &&
+    //          child.tagName != 'BR' &&
+    //          Helpers.isInline(child) == false &&
+    //          Helpers.isCustom(child) == false ){
+    //         console.log(`Moving to child ${child.tagName}`)
+    //         parseListsAndBlocks( child, nodeFormats  ) 
+    //     }
+    // })
     node.childNodes.forEach( child => {
-        if ( child.nodeType !== 3 &&
-             Helpers.isInline(child) == false &&
-             Helpers.isCustom(child) == false ){
-            // console.log(`Moving to child ${child.tagName}`)
+        if ( Helpers.isBlock(child) ){
+            console.log(`Moving to child ${child.tagName}`)
             parseListsAndBlocks( child, nodeFormats  ) 
         }
     })
-    // console.log(`Finished this branch - processed ${children} children`)
+    console.log(`Finished this branch - processed children`, node.childNodes)
 }
 
 // Optional initialisation method that takes in the editor node
@@ -252,9 +256,9 @@ const click = function( range ){
         parseListsAndBlocks( range.rootNode, {oldFormats:[], newFormats:[]} )
         // console.log( 'fragment', fragmentNode.innerHTML)
         if ( range.rootNode == editorNode ){
-            range.rootNode.innerHTML = fragmentNode.innerHTML //+ Helpers.BLOCK_END_MARKER
+            range.rootNode.innerHTML = fragmentNode.innerHTML
         } else {
-            range.rootNode.outerHTML = fragmentNode.innerHTML //+ Helpers.BLOCK_END_MARKER
+            range.rootNode.outerHTML = fragmentNode.innerHTML
         }
     } else {
         let startNodeFound = false

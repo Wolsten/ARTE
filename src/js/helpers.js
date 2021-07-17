@@ -22,32 +22,34 @@ export const insertAfter = function(newNode, existingNode) {
     return existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
 
+let tags = { block: ['DIV','P','LI'], list: ['LI'], inline: []}
+
+export const registerTag = function(type,tag){
+    if ( tags[type].includes(tag) == false && tag!='CLEAR'){
+        tags[type].push(tag)
+        console.log('registered tag', tag)
+    }
+}
+
 export const isInline = function( node ){
     if ( node.tagName == undefined ){
         return false
     }
-    const tags = ['B','I','U']
-    return tags.includes(node.tagName)
+    return tags.inline.includes(node.tagName)
 }
 
 export const isList = function( node ){
     if ( node.tagName == undefined ){
         return false
     }
-    const tags = ['UL','OL','LI']
-    return tags.includes(node.tagName)
+    return tags.list.includes(node.tagName)
 }
-
-// @todo These need to be dynamically registered
-// Note the addition of LI in both sets and DIV in blocks
 
 export const isBlock = function( node ){
     if ( node.tagName == undefined ){
         return false
     }
-    // const tags = ['DIV','H1','H2','H3','H4','H5','H6','P','LI']
-    const tags = ['DIV','H1','H2','P','LI']
-    return tags.includes(node.tagName)
+    return tags.block.includes(node.tagName)
 }
 
 export const isCustom = function( node ){
@@ -64,7 +66,6 @@ export const isCustom = function( node ){
     }
     return node
 }
-
 
 /**
  * Get the top parent node for a child node 
