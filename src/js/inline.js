@@ -24,9 +24,9 @@ function categoriseTextNode( node ){
     console.log( `Categorise text node [${node.textContent}]`)
     // Get the [0] pre, [1]selected and [2]post text
     const texts = getTextNodes( node )
-    // console.log(`texts = [${texts.join(', ')}]`)
+    console.log(`texts = [${texts.join(', ')}]`)
     let formats = Helpers.appliedFormats(node, editorNode, range.rootNode, 'inline' )
-    // console.log(`current formats = [${formats.join(' ')}]`)
+    console.log(`current formats = [${formats.join(' ')}]`)
     // Pre text
     if ( texts[0] ){
         console.log(`Adding pre text [${texts[0]}]`)
@@ -41,7 +41,7 @@ function categoriseTextNode( node ){
         let newFormats = formats.slice()
         if ( formatAction == 'apply'  ){
             if ( newFormats.includes(newFormat) == false ){
-                // console.log( `Adding new format [${newFormat}] in phase [${Phase.get()}]`)
+                console.log( `Adding new format [${newFormat}] in phase [${Phase.get()}]`)
                 newFormats.push(newFormat)
             }
         } else if ( formatAction == 'remove' ){
@@ -60,7 +60,7 @@ function categoriseTextNode( node ){
     }
     // Post text
     if ( texts[2] ){
-        // console.log(`Adding post text [${texts[2]}]`)
+        console.log(`Adding post text [${texts[2]}]`)
         categorisedTextNodes.push({
             node:false,
             text:texts[2],
@@ -217,7 +217,13 @@ const disabled = function(range){
         this.element.disabled = false
     // Inline formatting only applies to single blocks
     } else {
-        this.element.disabled = range.startContainer != range.endContainer
+        // The rootNode (the common ancestor or it's parent if text) should not be a 
+        // DIV (the editor) and must be a block or inline node
+        console.log('rootNode', range.rootNode.tagName)
+        this.element.disabled = range.rootNode.tagName == 'DIV' || 
+                                (Helpers.isBlock(range.rootNode) === false &&  
+                                 Helpers.isInline(range.rootNode) === false)
+        console.log('disabled', this.element.disabled)
     }
 }
 
@@ -229,16 +235,17 @@ const click = function( rng ){
     }
     // console.log('Format action', formatAction)
     newFormat = this.tag
-    range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
-    // The root node must be a block node (including list item LI) or an inline node
-    if ( Helpers.isBlock(range.rootNode) == false &&
-         Helpers.isInline(range.rootNode) == false ){
-       return
-    }
+    // @todo check whether this is still required to filter out custom blocks
+    // // Get the top parent node which cannot be a custom node
+    // const topParent = Helpers.getTopParentNode( range.rootNode, editorNode )
+    // if ( Helpers.isCustom(topParent) ){
+    //     console.log('skipping custom node', topParent)
+    //     return
+    // }
     // Look for inline parent nodes that only have one child
     // to ensure can clear all formats from selected text
     while ( Helpers.isInline(range.rootNode.parentNode) && 
-            range.rootNode.parentNode.childNodes.length === 1){
+    range.rootNode.parentNode.childNodes.length === 1){
         range.rootNode = range.rootNode.parentNode
     }
     // Reset fragment and categorised nodes
@@ -271,7 +278,9 @@ const click = function( rng ){
     return Helpers.resetSelection(editorNode)
 }
 
-
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
 
 const options = {init,disabled}
 const B = new ToolbarButton( 'inline', 'B', 'Bold', Icons.b, click, options)

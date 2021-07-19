@@ -31,6 +31,12 @@ export const registerTag = function(type,tag){
     }
 }
 
+export const debugTags = function(){
+    console.warn('blocks',tags.block.join(', '))
+    console.warn('lists',tags.list.join(', '))
+    console.warn('inline',tags.inline.join(', '))
+}
+
 export const isInline = function( node ){
     if ( node.tagName == undefined ){
         return false

@@ -15,6 +15,19 @@
         <h1>Welcome to <u>AJE</u> AGAIN</h1>
         <p>I am AJE - <i>Another <b>Javascript</b> Editor</i>! My name is pronounced <b>Ajay</b>.</p>
         <blockquote>I am a block quote and am not yet supported by AJE so you won't see me when the page is initialised.</blockquote>
+        <h2>Lists</h2>
+        <ul>
+            <li>I am an unordered list</li>
+            <li>I am an unordered list</li>
+            <li>I am an unordered list</li>
+            <li>I am an unordered list</li>
+        </ul>
+        <ol>
+            <li>I am an ordered list</li>
+            <li>I am an ordered list</li>
+            <li>I am an ordered list</li>
+            <li>I am an ordered list</li>
+        </ol>
     </div>
     <div id="debug"></div>
 
@@ -50,6 +63,7 @@
         import Editor from './src/js/Editor.js'
         import * as Mentions from './src/js/plugins/mentions.js'
         import * as Links from './src/js/plugins/links.js'
+        import * as Customs from './src/js/plugins/customPlugin.js'
         // Choose location for editor and the default content
         const target = document.getElementById('editor')
         let content = target.innerHTML
@@ -65,7 +79,7 @@
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
             headingNumbers: 'on', 
             // Custom plugs to add to the toolbar to enhance the editor
-            plugins: [Mentions, Links],
+            plugins: [Mentions, Links, Customs],
             // Number of Undo operations supported, max 10       
             bufferSize: 10     
         }

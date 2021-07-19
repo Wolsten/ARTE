@@ -165,3 +165,37 @@ label {
 .modal-confirm-buttons {
     margin-top:2rem;
 }
+
+/* Example styling for a custom plugin */
+
+custom {
+    display:block;
+    padding:0.5rem;
+    margin: 0.3rem 0;
+    border-radius:0.3rem;
+    cursor: pointer;
+}
+custom, custom > * {
+    background-color: rgb(240, 245, 240);
+}
+
+custom .title {
+    display:block;
+    font-weight: bold;
+    margin-bottom:0.3rem;
+}
+
+custom .label {
+    display:inline-block;
+    font-style: italic;
+}
+
+custom .property1 {
+    color:red;
+}
+custom .property2 {
+    color:rgb(88, 49, 226);
+}
+custom .property3 {
+    color:rgb(106, 190, 98);
+}
