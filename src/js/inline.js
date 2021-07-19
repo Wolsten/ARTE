@@ -24,12 +24,12 @@ function categoriseTextNode( node ){
     console.log( `Categorise text node [${node.textContent}]`)
     // Get the [0] pre, [1]selected and [2]post text
     const texts = getTextNodes( node )
-    console.log(`texts = [${texts.join(', ')}]`)
+    //console.log(`texts = [${texts.join(', ')}]`)
     let formats = Helpers.appliedFormats(node, editorNode, range.rootNode, 'inline' )
-    console.log(`current formats = [${formats.join(' ')}]`)
+    //console.log(`current formats = [${formats.join(' ')}]`)
     // Pre text
     if ( texts[0] ){
-        console.log(`Adding pre text [${texts[0]}]`)
+        //console.log(`Adding pre text [${texts[0]}]`)
         categorisedTextNodes.push({
             node: false,
             text: texts[0],
@@ -41,7 +41,7 @@ function categoriseTextNode( node ){
         let newFormats = formats.slice()
         if ( formatAction == 'apply'  ){
             if ( newFormats.includes(newFormat) == false ){
-                console.log( `Adding new format [${newFormat}] in phase [${Phase.get()}]`)
+                //console.log( `Adding new format [${newFormat}] in phase [${Phase.get()}]`)
                 newFormats.push(newFormat)
             }
         } else if ( formatAction == 'remove' ){
@@ -60,7 +60,7 @@ function categoriseTextNode( node ){
     }
     // Post text
     if ( texts[2] ){
-        console.log(`Adding post text [${texts[2]}]`)
+        //console.log(`Adding post text [${texts[2]}]`)
         categorisedTextNodes.push({
             node:false,
             text:texts[2],

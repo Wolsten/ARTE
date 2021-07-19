@@ -9,7 +9,8 @@ let dirty
 let range
 let panel = null
 let data 
-const TAG = 'custom'
+// A custom tag must be in upper case
+const TAG = 'CUSTOM'
 
 function init( target ){
     editorNode = target
@@ -162,15 +163,23 @@ function hide(){
 }
 
 function clean(node){
-    console.log('clean link',node)
-    node.removeAttribute('id')
+    console.log('clean custom element',node)
     node.removeAttribute('contenteditable')
     return node
 }
 
 function format( node ){
-    // Click event handling - first time and after reformatting
-    node.id = generateUid()
+    const id = node.id
+    if ( node.id == false ){
+        node.id = generateUid()
+    }
+    data = {
+        id: node.id,
+        property1: node.querySelector('.property1').innerText,
+        property1: node.querySelector('.property1').innerText,
+        property1: node.querySelector('.property1').innerText,
+    }
+    node.innerHTML = template(data)
     node.setAttribute('contenteditable',false)
     node.addEventListener('click', event => {
         event.preventDefault()
@@ -228,7 +237,7 @@ function generateUid(){
 
 function template(props){
     return `
-        <span class="title">I am a custom object with 3 properties:</span>
+        <span class="title">I am a custom object with 3 properties (click me to edit):</span>
         <span class="label">Property 1: </span><span class="prop property1">${props.property1}</span>
         <span class="label">Property 2: </span><span class="prop property2">${props.property2}</span>
         <span class="label">Property 3: </span><span class="prop property3">${props.property3}</span>

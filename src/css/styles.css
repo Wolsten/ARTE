@@ -5,6 +5,7 @@
     box-sizing: border-box;
 }
 
+
 /* Editor */
 
 .editor-container {
@@ -198,4 +199,18 @@ custom .property2 {
 }
 custom .property3 {
     color:rgb(106, 190, 98);
+}
+
+
+/* index.html */
+
+body > button#save {
+    margin-top:1rem;
+}
+
+
+body > h5 {
+    padding-top:0.5rem;
+    margin-top:1rem;
+    border-top: grey solid 1px;
 }

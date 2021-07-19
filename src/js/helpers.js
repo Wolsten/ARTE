@@ -22,7 +22,7 @@ export const insertAfter = function(newNode, existingNode) {
     return existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
 
-let tags = { block: ['DIV','P','LI'], list: ['LI'], inline: []}
+let tags = { block: ['DIV','P','LI'], list: ['LI'], inline: [], custom:[]}
 
 export const registerTag = function(type,tag){
     if ( tags[type].includes(tag) == false && tag!='CLEAR'){
@@ -35,6 +35,7 @@ export const debugTags = function(){
     console.warn('blocks',tags.block.join(', '))
     console.warn('lists',tags.list.join(', '))
     console.warn('inline',tags.inline.join(', '))
+    console.warn('customs',tags.custom.join(', '))
 }
 
 export const isInline = function( node ){
@@ -61,7 +62,11 @@ export const isBlock = function( node ){
 export const isCustom = function( node ){
     // @todo Check this is the correct test - i.e. quotes required
     // console.warn(`Checking isCustom node.contenteditable =[${node.contenteditable}]`)
-    return node.contenteditable === 'false'
+    // return node.contenteditable === 'false'
+    if ( node.tagName == undefined ){
+        return false
+    }
+    return tags.custom.includes(node.tagName)
  }
 
  export const getParentBlockNode = function(node){
@@ -109,6 +114,7 @@ export const cleanForSaving = function( node, buttons ){
          isList(node) === false && 
          isInline(node) === false && 
          isCustom(node) === false ){
+        //console.warn('removing node',node)
         node.remove()
         return
     }

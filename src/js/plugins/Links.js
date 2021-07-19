@@ -9,11 +9,12 @@ let dirty
 let range
 let panel = null
 let linkData 
+const TAG = 'A'
 
 function init( target ){
     editorNode = target
     dirty = false
-    let links = editorNode.querySelectorAll( 'a' )
+    let links = editorNode.querySelectorAll( TAG )
     links.forEach( link => format( link ))
 }
 
@@ -110,7 +111,7 @@ function save(){
 } 
 
 function insert(){
-    const domLink = document.createElement('a')
+    const domLink = document.createElement(TAG)
     domLink.id = linkData.id
     domLink.href = linkData.href
     domLink.setAttribute('contenteditable', 'false')
@@ -174,30 +175,12 @@ function deleteItem(){
 // -----------------------------------------------------------------------------
 
 
-// function delayedRemove(){
-//     panel.remove()
-//     panel = null
-// }
-
 function hide(){
     panel.classList.remove('show')
     panel.remove()
     panel = null
-    // setTimeout( ()=>delayedRemove(), 500 )
+
 }
-
-// function getNewNode(node){
-//     let matched = false
-//     while ( !matched  ){
-//         if ( node.tagName === 'A' ){
-//             matched = node
-//         }
-//         node = node.parentNode
-//     }
-//     return matched
-// }
-
-
 
 function clean(node){
     console.log('clean link',node)
@@ -217,7 +200,7 @@ function format( domLink ){
 }
 
 function addEventHandlers(){
-    const domLinks = editorNode.querySelectorAll('a')
+    const domLinks = editorNode.querySelectorAll(TAG)
     domLinks.forEach( domLink => domLink.addEventListener('click', event => {
         event.preventDefault()
         edit(domLink) 
@@ -269,5 +252,5 @@ function generateUid(){
 
 
 const options = {init, addEventHandlers, clean}
-const button = new ToolbarButton( 'custom', 'A', 'Link', Icons.link, click, options ) 
+const button = new ToolbarButton( 'custom', TAG, 'Link', Icons.link, click, options ) 
 export const buttons = [button]

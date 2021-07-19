@@ -24,8 +24,9 @@ class Editor {
         // Reset global range
         this.range = false
         // Add the content
-        const clean = this.getCleanData(content)
-        this.editorNode.innerHTML = clean
+        // const clean = this.getCleanData(content)
+        // this.editorNode.innerHTML = clean
+        this.editorNode.innerHTML = content
         // Events
         this.listenForMouseUpEvents()
         this.listenForKeydownEvents()
@@ -37,6 +38,8 @@ class Editor {
             this.listenForKeyupEvents()
             setTimeout( () => Buffer.init({size:options.bufferSize, target:this.editorNode}), 100)
         }
+        this.save = this.getCleanData
+        this.update = this.updateEditor
     }
 
     initOptions(options){   
@@ -89,6 +92,7 @@ class Editor {
         this.options.plugins.forEach( plugin => {
             plugin.buttons.forEach( button => {
                 button.type = 'custom'
+                Helpers.registerTag(button.type, button.tag)
                 toolbar = [...toolbar, button]
             })
         })
@@ -472,16 +476,21 @@ class Editor {
     // -----------------------------------------------------------------------------
     
     getCleanData(content){
-        let node
-        if ( content !== undefined ){
-            node = document.createElement('div')
-            node.innerHTML = content
-        } else {
-            node = this.editorNode.cloneNode(true)
-        }
+        // let node
+        // if ( content !== undefined ){
+        //     node = document.createElement('div')
+        //     node.innerHTML = content
+        // } else {
+        //     node = this.editorNode.cloneNode(true)
+        // }
+        let node = this.editorNode.cloneNode(true)
         const customButtons = this.toolbar.filter( button => button.type==='custom')
         Helpers.cleanForSaving(node, customButtons)
         return node.innerHTML
+    }
+
+    updateEditor(content){
+        this.editorNode.innerHTML = content
     }
  
     highlightCustomNode(node){
