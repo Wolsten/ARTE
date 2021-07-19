@@ -2,7 +2,13 @@
 
 let panel = null
 
-function form(title,message){
+function form(title,message,cancel,confirm){
+    if ( cancel == undefined ){
+        cancel = 'No - stay here'
+    }
+    if ( confirm == undefined ){
+        confirm = 'Yes - lose changes'
+    }
     return `
         <div class="modal-confirm-container">
             <header class="modal-confirm-header">
@@ -10,8 +16,8 @@ function form(title,message){
             </header>
             <div class="modal-confirm-message">${message}</div>
             <div class="modal-confirm-buttons">
-                <button type="button" class="cancel">No - stay here</button>
-                <button type="button" class="confirm">Yes - lose changes</button>
+                <button type="button" class="cancel">${cancel}</button>
+                <button type="button" class="confirm">${confirm}</button>
             </div>
         </div>`
 }
@@ -35,10 +41,16 @@ export const hide = function(){
     setTimeout( ()=>delayedRemove(), 500 )
 }
 
-export const show = function( title, message ){
+export const show = function( title, message, cancel, confirm){
+    if ( cancel == undefined ){
+        cancel = 'No - stay here'
+    }
+    if ( confirm == undefined ){
+        confirm = 'Yes - lose changes'
+    }
     panel = document.createElement('DIV')
     panel.classList.add('modal-confirm')
-    panel.innerHTML = form(title,message)
+    panel.innerHTML = form(title,message, cancel, confirm)
     panel.querySelector('button.cancel').addEventListener('click', event => {
         event.stopPropagation()
         hide()

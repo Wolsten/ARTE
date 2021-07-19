@@ -8,12 +8,16 @@ let editorNode
 let dirty
 let range
 let panel = null
-let data 
+let data
+let buffer = false
 // A custom tag must be in upper case
 const TAG = 'CUSTOM'
 
-function init( target ){
+function init( target, bufferUpdate ){
     editorNode = target
+    if ( bufferUpdate != undefined ){
+        buffer = bufferUpdate
+    }
     dirty = false
     let customs = editorNode.querySelectorAll( TAG )
     customs.forEach( custom => format( custom ))
@@ -78,7 +82,7 @@ function show( edit ){
     })
     if ( edit ){
         panel.querySelector('button.delete').addEventListener('click', () => {
-            const confirmBtn = Modal.show('Delete custom item', 'Do you really want to delete this custom item?')
+            const confirmBtn = Modal.show('Delete custom item', 'Do you really want to delete this custom item?', 'No - keep', 'Yes - delete')
             confirmBtn.addEventListener( 'click', () => {
                 Modal.hide()
                 deleteItem() 
@@ -136,6 +140,10 @@ function updateDomDelayed(){
     format(node)
     // Close the edit pane
     hide()
+    // Update the buffer
+    if ( buffer ){
+        buffer()
+    }
 }
 
 
@@ -146,9 +154,13 @@ function updateDomDelayed(){
 
 function deleteItem(){
     // @todo Remove link from the editor
-    const domLink = editorNode.querySelector(`a#${data.id}`)
-    domLink.remove()
+    const node = editorNode.querySelector(`${TAG}#${data.id}`)
+    node.remove()
     hide()
+    // Update the buffer
+    if ( buffer ){
+        buffer()
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -162,9 +174,18 @@ function hide(){
     panel = null
 }
 
+/**
+ * Optional method to reformat/clean the custom element as it should be saved in a file or database
+ * @param {} node 
+ * @returns node as cleaned
+ */
 function clean(node){
     console.log('clean custom element',node)
+    // Remove the content editable flag and the ornamentation
     node.removeAttribute('contenteditable')
+    node.querySelector('.title').remove()
+    node.querySelector('.advice').remove()
+    node.querySelector('.label').remove()
     return node
 }
 
@@ -188,7 +209,7 @@ function format( node ){
 }
 
 function addEventHandlers(){
-    const nodes = editorNode.querySelectorAll('TAG')
+    const nodes = editorNode.querySelectorAll(TAG)
     nodes.forEach( node => node.addEventListener('click', event => {
         event.preventDefault()
         edit(node) 
@@ -237,10 +258,11 @@ function generateUid(){
 
 function template(props){
     return `
-        <span class="title">I am a custom object with 3 properties (click me to edit):</span>
-        <span class="label">Property 1: </span><span class="prop property1">${props.property1}</span>
-        <span class="label">Property 2: </span><span class="prop property2">${props.property2}</span>
-        <span class="label">Property 3: </span><span class="prop property3">${props.property3}</span>
+        <span class="title">I am a custom object with 3 properties:</span>
+        <span class="label">Property 1:</span><span class="prop property1">${props.property1}</span>
+        <span class="label">Property 2:</span><span class="prop property2">${props.property2}</span>
+        <span class="label">Property 3:</span><span class="prop property3">${props.property3}</span>
+        <span class="advice">Click anywhere inside to edit. Select end of preceding text and then the Enter key to add block line after this custom element.</span>
     `
 }
 

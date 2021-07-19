@@ -27,7 +27,7 @@ let tags = { block: ['DIV','P','LI'], list: ['LI'], inline: [], custom:[]}
 export const registerTag = function(type,tag){
     if ( tags[type].includes(tag) == false && tag!='CLEAR'){
         tags[type].push(tag)
-        console.log('registered tag', tag)
+        // console.log('registered tag', tag)
     }
 }
 

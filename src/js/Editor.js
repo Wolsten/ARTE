@@ -36,7 +36,11 @@ class Editor {
         // Initialise buffer handling
         if ( this.options.bufferSize > 0 ){
             this.listenForKeyupEvents()
-            setTimeout( () => Buffer.init({size:options.bufferSize, target:this.editorNode}), 100)
+            setTimeout( () => Buffer.init({
+                size: options.bufferSize, 
+                target: this.editorNode,
+                updateEventHandlers: () => this.updateEventHandlers()
+            }), 100)
         }
         this.save = this.getCleanData
         this.update = this.updateEditor
@@ -65,7 +69,7 @@ class Editor {
         for( let i=0; i<options.tags.length; i++){
             options.tags[i] = options.tags[i].toUpperCase()
         }
-        console.log('options',options)
+        // console.log('options',options)
         return options
     }
 
@@ -96,7 +100,7 @@ class Editor {
                 toolbar = [...toolbar, button]
             })
         })
-        console.log('toolbar',toolbar)
+        // console.log('toolbar',toolbar)
         return toolbar
     }
 
@@ -111,7 +115,12 @@ class Editor {
             button.disabled(false)
             // Perform any button initialisation by passing in the editorNode
             if ( "init" in button ){
-                button.init(this.editorNode)
+                let buffer = false
+                // If buffering - pass in the update mmethod to the button
+                if ( this.options.bufferSize > 0 ){
+                    buffer = Buffer.update
+                }
+                button.init(this.editorNode, buffer)
             }
             // Some button have shortcuts in which case listen for
             if ( "shortcut" in button && "click" in button){
@@ -126,7 +135,7 @@ class Editor {
                     }
                 })
             }
-            // All button have a click method
+            // All buttons have a click method
             if ( "click" in button ){
                 button.element.addEventListener('click', event => {
                     // Prevent default action for all buttons when have no range 
@@ -188,7 +197,7 @@ class Editor {
         // Get the applied formats for the range selected (all way up to the highest parent 
         // inside the editor)
         const formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
-        console.log('Applied formats',formats)
+        // console.log('Applied formats',formats)
         this.toolbar.forEach( button => {
             // Trigger disabled method on each button
             button.disabled( range )
@@ -202,9 +211,9 @@ class Editor {
     }
 
     handleMouseUp(){
-        console.log('Handle mouse up')
+        // console.log('Handle mouse up')
         this.range = Helpers.getRange()
-        console.log('handleMouseUp range=',this.range)
+        // console.log('handleMouseUp range=',this.range)
         this.debugRange(this.range)
         // let formats = []
         if ( this.range !== false ){
@@ -343,7 +352,6 @@ class Editor {
         }
         const range = Helpers.getRange()
         this.debugRange(range)
-        console.log('range=',range)
         if ( range ){
             const example = this.toolbar.find(button => button.type==='custom')
             const title = 'Information'
@@ -421,8 +429,10 @@ class Editor {
 
 
     updateEventHandlers(){
+        //console.log('Updating event handlers')
         this.toolbar.forEach( button => {
             if ( 'addEventHandlers' in button ){
+                console.log('Updating event handler for button',button)
                 button.addEventHandlers()
             }
         })
@@ -475,17 +485,11 @@ class Editor {
     // @section Other methods
     // -----------------------------------------------------------------------------
     
-    getCleanData(content){
-        // let node
-        // if ( content !== undefined ){
-        //     node = document.createElement('div')
-        //     node.innerHTML = content
-        // } else {
-        //     node = this.editorNode.cloneNode(true)
-        // }
+    getCleanData(){
         let node = this.editorNode.cloneNode(true)
         const customButtons = this.toolbar.filter( button => button.type==='custom')
         Helpers.cleanForSaving(node, customButtons)
+        node.innerHTML = node.innerHTML.replace(/\n[\n ]*?</gm, '<')
         return node.innerHTML
     }
 

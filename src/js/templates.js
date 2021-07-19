@@ -16,19 +16,19 @@ function editorToolBarGroup(title,html){
 function editorToolbar(buttons){
     let buttonsHtml = ''
     let groups = []
-    console.log('buttons.length',buttons.length)
+    // console.log('buttons.length',buttons.length)
     buttons.forEach((button,index)=>{
         buttonsHtml += editorToolbarButton(button)
         const nextType = index==buttons.length-1 ? '' : buttons[index+1].type
         // Found end of a group?
         if ( button.type != nextType ){
-            console.log('found new group at button',button.tag)
+            // console.log('found new group at button',button.tag)
             const title = `${button.type} buttons`
             groups.push( editorToolBarGroup(title,buttonsHtml) )
             buttonsHtml = ''
         }
     })
-    console.log('groups',groups)
+    // console.log('groups',groups)
     return groups.join('<span class="editor-toolbar-group-separator">|</span>')
 }
 

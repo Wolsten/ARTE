@@ -31,10 +31,9 @@
         <h2>Custom elements</h2>
         <p>This paragraph contains a custom element
             <custom id="kranj6hr0745u1oxn7du">
-                <span class="title">I am a custom object with 3 properties:</span>
-                <span class="label">Property 1: </span><span class="prop property1">a</span>
-                <span class="label">Property 2: </span><span class="prop property2">b</span>
-                <span class="label">Property 3: </span><span class="prop property3">c</span>
+                <span class="property1">a</span>
+                <span class="property2">b</span>
+                <span class="property3">c</span>
             </custom>
         </p>
     </div>
@@ -100,9 +99,9 @@
         const save = document.getElementById('save')
         save.addEventListener('click', ()=>{
             const xml = editor.save()
-            editor.update(xml)
-            console.warn('Cleaned and saved editor content:\n'+xml)
-            //window.alert('Cleaned and saved editor content:\n'+xml)
+            //editor.update(xml)
+            console.warn('Cleaned editor content:\n'+xml)
+            window.alert('Cleaned editor content:\n'+xml)
         })
     </script>
     

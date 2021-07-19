@@ -219,11 +219,11 @@ const disabled = function(range){
     } else {
         // The rootNode (the common ancestor or it's parent if text) should not be a 
         // DIV (the editor) and must be a block or inline node
-        console.log('rootNode', range.rootNode.tagName)
+        // console.log('rootNode', range.rootNode.tagName)
         this.element.disabled = range.rootNode.tagName == 'DIV' || 
                                 (Helpers.isBlock(range.rootNode) === false &&  
                                  Helpers.isInline(range.rootNode) === false)
-        console.log('disabled', this.element.disabled)
+        // console.log('disabled', this.element.disabled)
     }
 }
 

@@ -1,10 +1,11 @@
 import * as Icons from './icons.js'
 import ToolbarButton from './ToolbarButton.js'
 
-let size = 10
+let size = 0
 let bufferIndex = 0
 let target = null
 let buffer = []
+let updateEventHandlers
 
 function setButtonState(){
     UNDO.disabled()
@@ -19,6 +20,8 @@ function undo(){
         status = true
     }
     setButtonState()
+    // Redo event handlers
+    updateEventHandlers()
     return status
 }
 
@@ -29,6 +32,8 @@ function redo(){
         return true
     }
     setButtonState()
+    // Redo event handlers
+    updateEventHandlers()
     return false
 }
 
@@ -48,10 +53,14 @@ const redoDisabled = function(){
 export const init = function( options ){
     size = options.size
     target = options.target
+    updateEventHandlers = options.updateEventHandlers
     buffer = [target.innerHTML]
 }
 
 export const update = function(){
+    if ( size == 0 ){
+        return
+    }
     if ( buffer.length > size ){
         // Remove first element
         buffer.shift()

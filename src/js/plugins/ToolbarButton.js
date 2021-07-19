@@ -19,8 +19,8 @@ class ToolbarButton {
             if ( options.shortcut != undefined ){
                 this.shortcut = options.shortcut
             }
-            if ( options.eventHandlers != undefined ){
-                this.eventHandlers = options.eventHandlers
+            if ( options.addEventHandlers != undefined ){
+                this.addEventHandlers = options.addEventHandlers
             }
             if ( options.clean != undefined ){
                 this.clean = options.clean

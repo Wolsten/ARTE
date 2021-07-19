@@ -9,10 +9,14 @@ let dirty
 let range
 let panel = null
 let linkData 
+let buffer = false
 const TAG = 'A'
 
-function init( target ){
+function init( target, bufferUpdate ){
     editorNode = target
+    if ( bufferUpdate != undefined ){
+        buffer = bufferUpdate
+    }
     dirty = false
     let links = editorNode.querySelectorAll( TAG )
     links.forEach( link => format( link ))
@@ -155,6 +159,10 @@ function updateDomDelayed(){
     format(domLink)
     // Close the edit pane
     hide()
+    // Update the buffer
+    if ( buffer ){
+        buffer()
+    }
 }
 
 
@@ -165,9 +173,13 @@ function updateDomDelayed(){
 
 function deleteItem(){
     // @todo Remove link from the editor
-    const domLink = editorNode.querySelector(`a#${linkData.id}`)
+    const domLink = editorNode.querySelector(`${TAG}#${linkData.id}`)
     domLink.remove()
     hide()
+    // Update the buffer
+    if ( buffer ){
+        buffer()
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -200,10 +212,10 @@ function format( domLink ){
 }
 
 function addEventHandlers(){
-    const domLinks = editorNode.querySelectorAll(TAG)
-    domLinks.forEach( domLink => domLink.addEventListener('click', event => {
+    const nodes = editorNode.querySelectorAll(TAG)
+    nodes.forEach( node => node.addEventListener('click', event => {
         event.preventDefault()
-        edit(domLink) 
+        edit(node) 
     }))
 }
 
