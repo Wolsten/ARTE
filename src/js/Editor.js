@@ -313,10 +313,11 @@ class Editor {
         const endNormal = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
         if ( custom || endNormal ) {
-            let p = document.createElement('P')
-            p.innerText = '\n'
-            p = Helpers.insertAfter( p, this.range.blockParent )
-            Helpers.setCursor( p, 0 )
+            console.log(`Creating a ${this.range.blockParent.tagName} node`)
+            let n = document.createElement(this.range.blockParent.tagName)
+            n.innerText = '\n'
+            n = Helpers.insertAfter( n, this.range.blockParent )
+            Helpers.setCursor( n, 0 )
             handled = true
         }
         if ( custom ){
