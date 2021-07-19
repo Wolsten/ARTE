@@ -48,9 +48,9 @@ function edit( node ){
     }
     data = {
         id: node.id,
-        property1:node.querySelector('.property1').innerText.trim(),
-        property2:node.querySelector('.property2').innerText.trim(),
-        property3:node.querySelector('.property3').innerText.trim(),
+        property1: node.querySelector('.property1').innerText.trim(),
+        property2: node.querySelector('.property2').innerText.trim(),
+        property3: node.querySelector('.property3').innerText.trim(),
     }
     show(true)
 }
@@ -176,8 +176,8 @@ function format( node ){
     data = {
         id: node.id,
         property1: node.querySelector('.property1').innerText,
-        property1: node.querySelector('.property1').innerText,
-        property1: node.querySelector('.property1').innerText,
+        property2: node.querySelector('.property2').innerText,
+        property3: node.querySelector('.property3').innerText,
     }
     node.innerHTML = template(data)
     node.setAttribute('contenteditable',false)
