@@ -67,7 +67,7 @@ export default class Buffer {
         } else {
             button.element.disabled = this.bufferIndex >= this.buffer.length - 1
         }
-        console.warn(`set button ${button.tag} disabled flag to be ${button.element.disabled}`)
+        //console.warn(`set button ${button.tag} disabled flag to be ${button.element.disabled}`)
     }
 
     update(){

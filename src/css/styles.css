@@ -70,7 +70,7 @@ button {
     transition:all 0.5s ease;
 }
 
-button:not([disabled]):hover{
+button:not([disabled]):hover {
     cursor:pointer;
     background:rgb(100, 100, 100);
     color:white;
@@ -236,6 +236,23 @@ custom button.edit {
     position: absolute;
     top:0.5rem;
     right:0.5rem;
+}
+
+/* Example styling for a colour button */
+input[type=color] {
+    height:30px;
+    width:34px;
+
+    background:white;
+    border: 1px solid rgb(200, 200, 200);
+    border-radius: 0.4rem;
+    padding:0.3rem 0.5rem;
+    -webkit-transition: all 0.5s ease;
+    transition:all 0.5s ease;
+}
+
+input[type=color]:not([disabled]):hover {
+    cursor:pointer;
 }
 
 /* debugging */

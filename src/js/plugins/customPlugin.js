@@ -266,7 +266,7 @@ function template(props){
 // -----------------------------------------------------------------------------
 
 export const init = function( editor ){
-    console.log('Initialising custom plugin')
+    //console.log('Initialising custom plugin')
     const customElements = editor.editorNode.querySelectorAll( TAG )
     customElements.forEach( element => format( element ) )
 }

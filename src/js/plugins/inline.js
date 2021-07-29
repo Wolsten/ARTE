@@ -1,3 +1,5 @@
+"use strict"
+
 import * as Helpers from '../helpers.js'
 import * as Phase from '../phase.js'
 import * as Icons from './icons.js'
@@ -223,15 +225,9 @@ const disabled = function(range){
 }
 
 
-const click = function( editor ){
+export const inline = function(editor){
     range = editor.range
     editorNode = editor.editorNode
-    formatAction = 'apply'
-    if ( this.tag == 'CLEAR' || this.element.classList.contains('active') ){
-        formatAction = 'remove'
-    }
-    // console.log('Format action', formatAction)
-    newFormat = this.tag
     // @todo check whether this is still required to filter out custom blocks
     // // Get the top parent node which cannot be a custom node
     // const topParent = Helpers.getTopParentNode( range.rootNode, editorNode )
@@ -271,15 +267,45 @@ const click = function( editor ){
     } else {
         range.rootNode.innerHTML = fragmentNode.innerHTML
     }
-    // Reset the selection
-    Helpers.resetSelection(editorNode)
+    // Reset the selection (and return the range in case needed)
+    return Helpers.resetSelection(editorNode)
 }
 
-const options = {disabled}
+
+/**
+ * Foreign button click handler where the button requires inline formatting and
+ * then some form of post processing
+ * @param Editor editor 
+ * @param string format 
+ */
+export const otherClick = function( editor, format ){
+    formatAction = 'apply'
+    newFormat = format
+    return inline( editor )
+}
+
+
+/**
+ * The native button click handle belonging to the button
+ * @param Editor editor 
+ */
+const click = function( editor ){
+    formatAction = 'apply'
+    if ( this.tag == 'CLEAR' || this.element.classList.contains('active') ){
+        formatAction = 'remove'
+    }
+    // console.log('Format action', formatAction)
+    newFormat = this.tag
+    inline( editor )
+}
+
+let options = {disabled}
 const B = new ToolbarButton( 'inline', 'B', 'Bold', Icons.b, click, options)
 const I = new ToolbarButton( 'inline', 'I', 'Italic', Icons.i, click, options)
 const U = new ToolbarButton( 'inline', 'U',  'Underline', Icons.u, click, options)
 const CLEAR = new ToolbarButton( 'inline', 'CLEAR', 'Clear', Icons.clear, click, options)
+
+
 
 // -----------------------------------------------------------------------------
 // @section Exports

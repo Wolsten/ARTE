@@ -1,12 +1,16 @@
 function editorToolbarButton(button){
-    const {type, tag, label, icon} = button
+    const {type, tag, label, icon, input} = button
     // e.g. icon "bi-eye"
     // data-bs-toggle="button" allows the active state to be shown by adding
     // the class "active" and aria-pressed="true"(for assistive tech)
-    return `
-        <button id="${tag}" type="button" class="btn btn-light ${type}" title="${label}">
-            ${icon}
-        </button>`
+    if ( input == 'button' ){
+        return `
+            <button id="${tag}" type="button" class="btn btn-light ${type}" title="${label}">
+                ${icon}
+            </button>`
+    } else {
+        return `<input id="${tag}" type="${input}" class="btn btn-light ${type}" title="${label}"/>`
+    }
 }
 
 function editorToolBarGroup(title,html){
@@ -19,11 +23,11 @@ function editorToolbar(buttons){
     // console.log('buttons.length',buttons.length)
     buttons.forEach((button,index)=>{
         buttonsHtml += editorToolbarButton(button)
-        const nextType = index==buttons.length-1 ? '' : buttons[index+1].type
+        const nextGroup = index==buttons.length-1 ? '' : buttons[index+1].group
         // Found end of a group?
-        if ( button.type != nextType ){
+        if ( button.group != nextGroup ){
             // console.log('found new group at button',button.tag)
-            const title = `${button.type} buttons`
+            const title = `${button.group} buttons`
             groups.push( editorToolBarGroup(title,buttonsHtml) )
             buttonsHtml = ''
         }

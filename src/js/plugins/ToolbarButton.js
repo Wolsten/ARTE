@@ -4,9 +4,11 @@ class ToolbarButton {
         this.type = type
         this.tag = tag
         this.label = label
+        this.input = 'button'
         this.icon = icon
         this.click = click  // Undefined for buffer buttons but must be here
         this.element = null // Populated by editor
+        this.group = type
         // default disabled method
         this.disabled = range => {
             if ( range === false ){
@@ -33,19 +35,17 @@ class ToolbarButton {
             if ( options.clean != undefined ){
                 this.clean = options.clean
             }
+            if ( options.input != undefined ){
+                this.input = options.input
+            }
+            if ( options.group != undefined ){
+                this.group = options.group
+            }
+            if ( options.changed != undefined ){
+                this.changed = options.changed
+            }
         }
     }
-
-    // // Default disabled method
-    // disabled(range){
-    //     if ( range === false ){
-    //         this.element.disabled = true
-    //         this.element.classList.remove('active')
-    //     } else {
-    //         this.element.disabled = false
-    //     }
-    // }
-
 }
 
 export default ToolbarButton

@@ -120,7 +120,7 @@ class Editor {
         // Add custom plugin buttons
         this.options.plugins.forEach( plugin => {
             plugin.buttons.forEach( button => {
-                button.type = 'custom'
+                //button.type = 'custom'
                 Helpers.registerTag(button.type, button.tag)
                 toolbar = [...toolbar, button]
             })
@@ -173,6 +173,10 @@ class Editor {
                     this.debugRange(this.range)
                     this.clickToolbarButton(button)
                 })
+            }
+            if ( "changed" in button ){
+                button.element.addEventListener('input', () => button.changed() )
+                button.element.addEventListener('cancel', () => console.log('cancelled') )
             }
         })
     }
@@ -231,7 +235,7 @@ class Editor {
     // }
 
     nodeInEditor(node){
-        while ( node != document.body ){
+        while ( node.nodeType == 3 || node.tagName != 'HTML' ){
             if ( node == this.editorNode ){
                 return true
             }
@@ -241,7 +245,7 @@ class Editor {
     }
 
     nodeInToolbar(node){
-        while ( node != document.body ){
+        while ( node.nodeType == 3 || node.tagName != 'HTML' ){
             if ( node == this.toolbarNode ){
                 return true
             }
@@ -284,12 +288,13 @@ class Editor {
         this.debugRange(this.range)
         // let formats = []
         if ( this.range !== false ){
+            this.buffer.ignore = false
             // If enter cursor in an empty editor then make this a paragraph
             // rather than raw text
             if ( this.range.blockParent == this.editorNode && this.editorNode.innerText == ''){
                 this.insertParagraph()
             }
-            // Unselect custom blocks and hightlight this one if custom 
+            // Unselect custom blocks and highlight this one if custom 
             this.highlightCustomNode(false)
             const custom =  Helpers.getCustomParent(this.range)
             if ( custom ){
