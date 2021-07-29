@@ -181,10 +181,27 @@ class Editor {
     // @section Mouse up events
     // -----------------------------------------------------------------------------
 
+
+    // listenForMouseUpEvents(){
+    //     document.addEventListener('mouseup', event => {
+    //         console.warn('mouseup on',event.target)
+    //         // Must test for clicks on toolbar since otherwise 
+    //         // blur will be triggered deactivating most buttons
+    //         if ( this.editorOrToolbar( event.target ) ){
+    //             this.handleMouseUp() 
+    //         } else {
+    //             this.handleEditorBlur()
+    //         }
+    //     })
+    // }
+
     listenForMouseUpEvents(){
-        this.editorNode.addEventListener('mouseup', event => {
-            if ( this.editorOrToolbar( event.target ) ){
+        document.addEventListener('mouseup', event => {
+            console.warn('mouseup on',event.target)
+            if ( this.nodeInEditor( event.target ) ){
                 this.handleMouseUp() 
+            } else if ( this.nodeInToolbar( event.target) ) {
+                return   
             } else {
                 this.handleEditorBlur()
             }
@@ -203,9 +220,29 @@ class Editor {
         })
     }
 
-    editorOrToolbar(node){
+    // editorOrToolbar(node){
+    //     while ( node != document.body ){
+    //         if ( node == this.editorNode || node == this.toolbarNode ){
+    //             return true
+    //         }
+    //         node = node.parentNode
+    //     }
+    //     return false
+    // }
+
+    nodeInEditor(node){
         while ( node != document.body ){
-            if ( node == this.editorNode || node == this.toolbarNode ){
+            if ( node == this.editorNode ){
+                return true
+            }
+            node = node.parentNode
+        }
+        return false
+    }
+
+    nodeInToolbar(node){
+        while ( node != document.body ){
+            if ( node == this.toolbarNode ){
                 return true
             }
             node = node.parentNode
@@ -241,7 +278,7 @@ class Editor {
     }
 
     handleMouseUp(){
-        // console.log('Handle mouse up')
+        console.log('Handle mouse up')
         this.range = Helpers.getRange()
         // console.log('handleMouseUp range=',this.range)
         this.debugRange(this.range)
@@ -252,10 +289,11 @@ class Editor {
             if ( this.range.blockParent == this.editorNode && this.editorNode.innerText == ''){
                 this.insertParagraph()
             }
-            // Highlight "selected" custom blocks - in practice this won't be triggered
-            // since the custom click functions will intervene
-            if ( Helpers.isCustom(this.range.blockParent) ){
-                this.highlightCustomNode(this.range.blockParent)
+            // Unselect custom blocks and hightlight this one if custom 
+            this.highlightCustomNode(false)
+            const custom =  Helpers.getCustomParent(this.range)
+            if ( custom ){
+                this.highlightCustomNode(custom)
             }
         }
         this.setToolbarStates(this.range)
@@ -279,15 +317,19 @@ class Editor {
         if ( button.type == 'buffer' ){
             this.buffer.click(button)
         } else {
-            this.range = button.click(this)
+            this.range = Helpers.getRange()
+            button.click(this)
         }
-        // Reset event handlers for any buttons that require it
-        this.updateEventHandlers()
-        if ( this.range == undefined ){
-            this.range = false
-        }
-        console.log('range',this.range)
-        this.handleMouseUp()
+        // @todo - is it right to comment this out? Some clicks are completed immediately
+        // i.e. block, inline formatting but not links, mentions and custom plugins
+        // // Reset event handlers for any buttons that require it. As now pass in the editor this
+        // can ve done selectively so presumably ok
+        // this.updateEventHandlers()
+        // if ( this.range == undefined ){
+        //     this.range = false
+        // }
+        // console.log('range',this.range)
+        // this.handleMouseUp()
     }
 
 
@@ -338,7 +380,7 @@ class Editor {
         if ( this.range === false ){
             return
         }
-        const custom = Helpers.isCustom(this.range.blockParent) 
+        const custom =  Helpers.getCustomParent(this.range)
         const endNormal = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
         if ( custom || endNormal ) {
@@ -514,6 +556,10 @@ class Editor {
         this.editorNode.innerHTML = content
     }
  
+    /**
+     * 
+     * @param node|false node 
+     */
     highlightCustomNode(node){
         // Remove "selected" class from all custom elements and then add back into this one
         const customs = this.editorNode.querySelectorAll('[contenteditable=false]')

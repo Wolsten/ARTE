@@ -85,7 +85,7 @@ label {
 
 .form-input {
     display:flex;
-    justify-content: space-between;
+    justify-content:flex-start;
     margin-bottom: 1rem;
 }
 
@@ -100,6 +100,22 @@ label {
     border-radius: 0.4rem;
     padding:0.3rem;
 }
+
+.form-control.with-button {
+    flex-basis:70%;
+}
+
+.form-input a {
+    flex-basis: 5%;
+    padding-left:0.5rem;
+    cursor:pointer;
+}
+
+.form-input a,
+.form-input a:visited {
+    color:inherit;
+}
+
 
 /* Slide down edit panel */
 
@@ -170,16 +186,22 @@ label {
 /* Example styling for a custom plugin */
 
 custom {
+    position:relative;
     display:block;
     padding:0.5rem;
     margin: 0.3rem 0;
     border-radius:0.3rem;
-    cursor: pointer;
     font-size: 1rem;
     font-weight:normal;
+    border:3px solid rgb(240, 245, 240);
+    transition: border 500ms ease-in-out;
 }
 custom, custom > * {
     background-color: rgb(240, 245, 240);
+}
+
+custom.selected {
+    border:3px solid blue;
 }
 
 custom .title {
@@ -208,6 +230,12 @@ custom .advice {
     display:block;
     margin-top:0.5rem;
     color: rgb(67, 66, 66);
+}
+
+custom button.edit {
+    position: absolute;
+    top:0.5rem;
+    right:0.5rem;
 }
 
 /* debugging */

@@ -222,14 +222,6 @@ const disabled = function(range){
     }
 }
 
-// export const init = function(editor){
-//     if ( editorNode == undefined ){
-//         editorNode = editor
-//     }
-//     if ( bufferUpdateCallback == undefined ){
-//         bufferUpdateCallback = buffer
-//     }
-// }
 
 const click = function( editor ){
     range = editor.range
@@ -279,21 +271,18 @@ const click = function( editor ){
     } else {
         range.rootNode.innerHTML = fragmentNode.innerHTML
     }
-    // Update the buffer (ignored if no buffering set) and event handlers
-    editor.buffer.update()
-    editor.updateEventHandlers()
-    // Reset the selection, returning the new range
-    return Helpers.resetSelection(editorNode)
+    // Reset the selection
+    Helpers.resetSelection(editorNode)
 }
-
-// -----------------------------------------------------------------------------
-// @section Exports
-// -----------------------------------------------------------------------------
 
 const options = {disabled}
 const B = new ToolbarButton( 'inline', 'B', 'Bold', Icons.b, click, options)
 const I = new ToolbarButton( 'inline', 'I', 'Italic', Icons.i, click, options)
 const U = new ToolbarButton( 'inline', 'U',  'Underline', Icons.u, click, options)
 const CLEAR = new ToolbarButton( 'inline', 'CLEAR', 'Clear', Icons.clear, click, options)
+
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
 
 export const buttons = [ B, I, U, CLEAR ]

@@ -165,12 +165,13 @@ function clean(n){
     n.querySelector('.title').remove()
     n.querySelector('.advice').remove()
     n.querySelector('.label').remove()
+    n.querySelector('button').remove()
     return n
 }
 
 /**
  * Format the given custom node and add click event handler
- * @param {node} n The custom node
+ * @param node n The custom node
  */
 function format( n ){
     const id = n.id
@@ -185,17 +186,23 @@ function format( n ){
     }
     n.innerHTML = template(data)
     n.setAttribute('contenteditable',false)
-    n.addEventListener('click', event => {
+    // Add edit button and listener
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.classList.add('edit')
+    button.innerText = 'Edit'
+    button.addEventListener('click', event => {
         event.preventDefault()
         edit(n) 
     })
+    n.appendChild(button)
 }
 
 /**
- * Add event handlers to all custom nodes
+ * Add event handlers to all custom node edit buttons
  */
 function addEventHandlers(editor){
-    const nodes = editor.editorNode.querySelectorAll(TAG)
+    const nodes = editor.editorNode.querySelectorAll(TAG + ' button')
     nodes.forEach( n => n.addEventListener('click', event => {
         event.preventDefault()
         edit(n) 
@@ -204,9 +211,9 @@ function addEventHandlers(editor){
 
 /**
  * Form template
- * @param {*} props The form properties to be edited
- * @param {boolean} edit The edit flag used to configure title and add delete button 
- * @returns {string} Generated html
+ * @param {property1, property2, property3} props The form properties to be edited
+ * @param boolean edit The edit flag used to configure title and add delete button 
+ * @returns string Generated html
  */
 function form(props,edit){
     let title = 'Create custom element'
@@ -223,15 +230,15 @@ function form(props,edit){
             <div class="edit-panel-body">
                 <form>
                     <div class="form-input">
-                        <label for="property1">URL</label>
+                        <label for="property1">Property 1</label>
                         <input id="property1" type="text" class="form-control" placeholder="Property 1" required value="${props.property1}">
                     </div>
                     <div class="form-input">
-                        <label for="property2">URL</label>
+                        <label for="property2">Property 2</label>
                         <input id="property2" type="text" class="form-control" placeholder="Property 2" required value="${props.property2}">
                     </div>
                     <div class="form-input">
-                        <label for="property3">URL</label>
+                        <label for="property3">Property 3</label>
                         <input id="property3" type="text" class="form-control" placeholder="Property 3" required value="${props.property3}">
                     </div>
                     <div class="buttons">
@@ -244,17 +251,13 @@ function form(props,edit){
         </div>`
 }
 
-// function generateUid(){
-//     return Date.now().toString(36) + Math.random().toString(36).substr(2);
-// }
-
 function template(props){
     return `
         <span class="title">I am a custom object with 3 properties:</span>
         <span class="label">Property 1:</span><span class="prop property1">${props.property1}</span>
         <span class="label">Property 2:</span><span class="prop property2">${props.property2}</span>
         <span class="label">Property 3:</span><span class="prop property3">${props.property3}</span>
-        <span class="advice">Click anywhere inside to edit. Select end of preceding text and then the Enter key to add block line after this custom element.</span>
+        <span class="advice">Click the top right-hand button to edit. Select anywherw in the element and then the Enter key to add a new line after this custom element.</span>
     `
 }
 

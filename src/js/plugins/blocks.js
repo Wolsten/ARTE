@@ -79,7 +79,7 @@ function getListAndBlockFormats( node, formats ){
     
 /**
  * Returns the html content of a node including its child nodes
- * @param {*} node 
+ * @param node node 
  * @returns string html content
  */
 function getBlockHTML(node){
@@ -211,21 +211,6 @@ function parseListsAndBlocks( node, formats ){
     console.log(`Finished this branch - processed children`, node.childNodes)
 }
 
-
-// -----------------------------------------------------------------------------
-// @section Interface
-// -----------------------------------------------------------------------------
-
-
-// export const init = function(editor, bufferCB){
-//     if ( editorNode == undefined ){
-//         editorNode = editor
-//     }
-//     if ( bufferCB != undefined ){
-//         bufferCallback = bufferCB
-//     }
-// }
-
 const click = function( editor ){
     editorNode = editor.editorNode
     range = editor.range
@@ -310,9 +295,6 @@ const click = function( editor ){
             }
         })
     }
-    // Update the buffer (ignored if no buffering set) and event handlers
-    editor.buffer.update()
-    editor.updateEventHandlers()
     // Reset the selection
     Helpers.setCursorToTargetNode(editorNode, endTarget)
 }
@@ -322,5 +304,9 @@ const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click )
 const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click )
 const OL = new ToolbarButton( 'list',  'OL', 'Ordered list',   Icons.ol, click )
 const UL = new ToolbarButton( 'list',  'UL', 'Unordered list', Icons.ul, click )
+
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
 
 export const buttons = [ H1, H2, P, OL, UL ]

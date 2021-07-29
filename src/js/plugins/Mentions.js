@@ -9,7 +9,7 @@ let dataListOptions = ''
 let panel = null
 let filterInput = ''
 
-function getPosition(dialogue, range){
+function getPosition(dialogue){
     let pos
     // If this is not a text node then get the first text node
     // Can happen at the start of a line when backspace to the start
@@ -23,7 +23,7 @@ function getPosition(dialogue, range){
     // Text node
     } else {
         pos = editor.range.getBoundingClientRect()
-        console.log('text node const ',pos)
+        //console.log('text node const ',pos)
     }
     if ( (pos.x + dialogue.outerWidth) > window.innerWidth ){
         pos.x = window.innerWidth - dialogue.outerWidth - 20;
@@ -56,6 +56,7 @@ function handleKeyup(e){
 }
 
 function click(editorInstance){
+    console.log('editor instance', editorInstance)
     if ( editorInstance.range === false ){
         console.log('No range selected')
         return
@@ -73,7 +74,7 @@ function click(editorInstance){
     document.querySelector('body').appendChild(panel)
     // Position
     let dialogue = document.querySelector('.mentions-content')
-    const position = getPosition(dialogue, editor.range)
+    const position = getPosition(dialogue)
     dialogue.style.top = `${position.y}px`
     dialogue.style.left = `${position.x}px`
     // Focus the input

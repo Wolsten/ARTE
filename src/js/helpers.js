@@ -59,6 +59,14 @@ export const isBlock = function( node ){
     return tags.block.includes(node.tagName)
 }
 
+export const getCustomParent = function( range ){
+    const firstElementChild = range.blockParent.firstElementChild
+    if ( firstElementChild != null && isCustom(firstElementChild) ){
+        return firstElementChild
+    }
+    return false
+}
+
 export const isCustom = function( node ){
     // @todo Check this is the correct test - i.e. quotes required
     // console.warn(`Checking isCustom node.contenteditable =[${node.contenteditable}]`)
@@ -87,9 +95,9 @@ export const getEditorNode = function( node ){
 
 /**
  * Get the top parent node for a child node 
- * @param {*} node A child node
- * @param {*} stopNode A parent node defining when to stop going back up the dom tree
- * @returns {*} first node below the stop node (if there is one) otherwise the stopNode
+ * @param node node A child node
+ * @param node stopNode A parent node defining when to stop going back up the dom tree
+ * @returns node first node below the stop node (if there is one) otherwise the stopNode
  */
 export const getTopParentNode = function( node, stopNode ){
     let saved = node
