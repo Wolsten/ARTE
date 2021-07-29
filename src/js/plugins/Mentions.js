@@ -4,8 +4,8 @@ import ToolbarButton from './ToolbarButton.js'
 import * as Icons from './icons.js'
 import {setCursor} from '../helpers.js'
 
+let editor
 let dataListOptions = ''
-let range
 let panel = null
 let filterInput = ''
 
@@ -13,16 +13,16 @@ function getPosition(dialogue, range){
     let pos
     // If this is not a text node then get the first text node
     // Can happen at the start of a line when backspace to the start
-    if ( range.startContainer.nodeType !== 3 ){
-        if ( range.startContainer.childNodes.length>0 ){
-            let node = range.startContainer.childNodes[0]
+    if ( editor.range.startContainer.nodeType !== 3 ){
+        if ( editor.range.startContainer.childNodes.length>0 ){
+            let node = editor.range.startContainer.childNodes[0]
             pos = node.getBoundingClientRect()
         } else {
-            pos = {x:editor.offsetLeft, y:editor.offsetTop}
+            pos = {x:editor.editorNode.offsetLeft, y:editor.editorNode.offsetTop}
         }
     // Text node
     } else {
-        pos = range.getBoundingClientRect()
+        pos = editor.range.getBoundingClientRect()
         console.log('text node const ',pos)
     }
     if ( (pos.x + dialogue.outerWidth) > window.innerWidth ){
@@ -55,12 +55,12 @@ function handleKeyup(e){
     }
 }
 
-function click(rng){
-    if ( rng === false ){
+function click(editorInstance){
+    if ( editorInstance.range === false ){
         console.log('No range selected')
         return
     }
-    range = rng
+    editor = editorInstance
     panel = document.createElement('DIV')
     panel.id = 'mentions'
     panel.classList.add('mentions-panel')
@@ -73,7 +73,7 @@ function click(rng){
     document.querySelector('body').appendChild(panel)
     // Position
     let dialogue = document.querySelector('.mentions-content')
-    const position = getPosition(dialogue, range)
+    const position = getPosition(dialogue, editor.range)
     dialogue.style.top = `${position.y}px`
     dialogue.style.left = `${position.x}px`
     // Focus the input
@@ -86,8 +86,8 @@ function hide(){
 }
 
 function insert(person){
-    let contents = range.startContainer.textContent
-    let offset   = range.startOffset
+    let contents = editor.range.startContainer.textContent
+    let offset   = editor.range.startOffset
     let before   = contents.substring(0,offset)
     let after    = contents.substring(offset)
     // Add space before?
@@ -101,22 +101,14 @@ function insert(person){
         }
         person = person + ' '
     }
-    range.startContainer.textContent = before + person + after
+    editor.range.startContainer.textContent = before + person + after
     // Move offset to the end of the newly inserted person
     offset += person.length
-    range = setCursor( range.startContainer, offset )
+    editor.range = setCursor( editor.range.startContainer, offset )
     hide()
+    // Update the buffer. Ignored if no buffering set
+    editor.buffer.update()
 }
-
-// function setCursor( node, offset ){
-//     let rng = document.createRange()
-//     let sel = window.getSelection()
-//     rng.setStart(node, offset);
-//     rng.collapse(true);
-//     sel.removeAllRanges();
-//     sel.addRange(rng);
-//     return rng;
-// }
 
 
 

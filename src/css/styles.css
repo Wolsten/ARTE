@@ -210,6 +210,22 @@ custom .advice {
     color: rgb(67, 66, 66);
 }
 
+/* debugging */
+
+div.debug {
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+div.debug label {
+    font-weight: bold;
+    flex-basis: 25%;
+}
+div.debug span {
+    color: green;
+    flex-basis: 75%;
+}
+
 
 /* index.html */
 

@@ -3,55 +3,36 @@
 import * as Modal from './modalConfirm.js'
 import ToolbarButton from './ToolbarButton.js'
 import * as Icons from './icons.js'
+import * as Helpers from '../helpers.js'
 
+// Tag name for this plugin
+const TAG = 'A'
+
+// Set in init method
 let editorNode
 let dirty
 let range
 let panel = null
-let linkData 
-let buffer = false
-const TAG = 'A'
+let data 
+let node
 
-function init( target, bufferUpdate ){
-    editorNode = target
-    if ( bufferUpdate != undefined ){
-        buffer = bufferUpdate
-    }
-    dirty = false
-    let links = editorNode.querySelectorAll( TAG )
-    links.forEach( link => format( link ))
-}
 
-function click( rng ){
-    console.log('click link')
-    if ( range === false){
-        console.log('No range selected')
-        return
-    }
-    range = rng
-    // Get default label if range not collapsed
-    let label = ''
-    if ( range.collapsed == false && 
-         range.startContainer == range.endContainer ){
-        label = range.endContainer.textContent.substring(range.startOffset, range.endOffset)  
-    }
-    linkData = {
-        id:'',
-        href:'', 
-        label, 
-    }
-    show(false)
-}
 
-function edit( domLink ){
+// -----------------------------------------------------------------------------
+// @section Private methods
+// -----------------------------------------------------------------------------
+
+function edit( n ){
     // If we already have an active panel - ignore clicks on links
     if ( panel ){
         return
     }
-    linkData = {
-        id: domLink.id,
-        href: domLink.href,
-        label: domLink.innerText.trim(),
+    node = n
+    editorNode = Helpers.getEditorNode(node)
+    data = {
+        id: node.id,
+        href: node.href,
+        label: node.innerText.trim(),
     }
     show(true)
 }
@@ -60,7 +41,7 @@ function show( edit ){
     panel = document.createElement('DIV')
     panel.id = 'link-edit'
     panel.classList.add('edit-panel')
-    panel.innerHTML = form(linkData, edit)
+    panel.innerHTML = form(data, edit)
     // Initialise confirmation module and dirty data detection
     dirty = false
     const inputs = panel.querySelectorAll('form input')
@@ -99,27 +80,23 @@ function show( edit ){
     setTimeout( ()=>panel.classList.add('show'),10 )
 }
 
-// -----------------------------------------------------------------------------
-// @section Save changes
-// -----------------------------------------------------------------------------
-
 function save(){
     console.log('Save changes')
     // Create new link and add to the editor?
-    if ( linkData.id == '' ){
-        linkData.id = generateUid()
-        linkData.href = panel.querySelector('form #href').value.trim()
+    if ( data.id == '' ){
+        data.id = generateUid()
+        data.href = panel.querySelector('form #href').value.trim()
         insert()
     }
-    setTimeout( ()=>updateDomDelayed(), 10)
+    setTimeout( ()=>updateDom(), 10)
 } 
 
 function insert(){
-    const domLink = document.createElement(TAG)
-    domLink.id = linkData.id
-    domLink.href = linkData.href
-    domLink.setAttribute('contenteditable', 'false')
-    domLink.innerText = ' '
+    node = document.createElement(TAG)
+    node.id = data.id
+    node.href = data.href
+    node.setAttribute('contenteditable', 'false')
+    node.innerText = ' '
     const parent = range.startContainer.parentNode
     let preText = range.startContainer.textContent.substring(0,range.startOffset)
     let postText
@@ -138,54 +115,36 @@ function insert(){
     if ( preText ) {
         parent.insertBefore(document.createTextNode(preText), range.startContainer)
     }
-    parent.insertBefore(domLink, range.startContainer)
+    parent.insertBefore(node, range.startContainer)
     if ( postText ) {
         parent.insertBefore(document.createTextNode(postText), range.startContainer)
     }
     range.startContainer.remove()
 }
 
-function updateDomDelayed(){
-    // Update dom
+function updateDom(){
     const form = panel.querySelector('form')
-    const domLink = editorNode.querySelector(`a#${linkData.id}`)
-    domLink.href = form.querySelector('#href').value.trim()
+    node.href = form.querySelector('#href').value.trim()
     let label = form.querySelector('#label').value.trim()
     if ( label == '' ){
         label = domLink.href
     }
-    domLink.innerText = label
+    node.innerText = label
     // Add event handler
-    format(domLink)
+    format(node)
     // Close the edit pane
     hide()
-    // Update the buffer
-    if ( buffer ){
-        buffer()
-    }
+    // Update the buffer. Ignored if no buffering set
+    editorNode.dataset.editor.buffer.update()
 }
-
-
-
-// -----------------------------------------------------------------------------
-// @section Delete link
-// -----------------------------------------------------------------------------
 
 function deleteItem(){
-    // @todo Remove link from the editor
-    const domLink = editorNode.querySelector(`${TAG}#${linkData.id}`)
-    domLink.remove()
+    const node = editorNode.querySelector(`${TAG}#${data.id}`)
+    node.remove()
     hide()
-    // Update the buffer
-    if ( buffer ){
-        buffer()
-    }
+    // Update the buffer. Ignored if no buffering set
+    editorNode.dataset.editor.buffer.update()
 }
-
-// -----------------------------------------------------------------------------
-// @section Clear panel
-// -----------------------------------------------------------------------------
-
 
 function hide(){
     panel.classList.remove('show')
@@ -194,30 +153,18 @@ function hide(){
 
 }
 
-function clean(node){
-    console.log('clean link',node)
-    node.removeAttribute('id')
-    node.removeAttribute('contenteditable')
-    return node
-}
 
-function format( domLink ){
+function format( node ){
     // Click event handling - first time and after reformatting
-    domLink.id = generateUid()
-    domLink.setAttribute('contenteditable',false)
-    domLink.addEventListener('click', event => {
+    node.id = generateUid()
+    node.setAttribute('contenteditable',false)
+    node.addEventListener('click', event => {
         event.preventDefault()
-        edit(domLink) 
+        edit(node) 
     })
 }
 
-function addEventHandlers(){
-    const nodes = editorNode.querySelectorAll(TAG)
-    nodes.forEach( node => node.addEventListener('click', event => {
-        event.preventDefault()
-        edit(node) 
-    }))
-}
+
 
 function form(link,edit){
     let title = 'Create link'
@@ -259,10 +206,51 @@ function generateUid(){
 }
 
 // -----------------------------------------------------------------------------
-// @section Exports
+// @section Interface
 // -----------------------------------------------------------------------------
 
+export const init = function( editor ){
+    editorNode = editor.editorNode
+    let links = editorNode.querySelectorAll( TAG )
+    links.forEach( link => format( link ))
+}
 
-const options = {init, addEventHandlers, clean}
+function click( editor ){
+    console.log('click link')
+    if ( editor.range === false){
+        console.log('No range selected')
+        return
+    }
+    range = editor.range
+    // Get default label if range not collapsed
+    let label = ''
+    if ( range.collapsed == false && 
+         range.startContainer == range.endContainer ){
+        label = range.endContainer.textContent.substring(range.startOffset, range.endOffset)  
+    }
+    data = {
+        id:'',
+        href:'', 
+        label, 
+    }
+    show(false)
+}
+
+function addEventHandlers(editor){
+    const nodes = editor.editorNode.querySelectorAll(TAG)
+    nodes.forEach( node => node.addEventListener('click', event => {
+        event.preventDefault()
+        edit(node) 
+    }))
+}
+
+function clean(node){
+    console.log('clean link',node)
+    node.removeAttribute('id')
+    node.removeAttribute('contenteditable')
+    return node
+}
+
+const options = {addEventHandlers, clean}
 const button = new ToolbarButton( 'custom', TAG, 'Link', Icons.link, click, options ) 
 export const buttons = [button]

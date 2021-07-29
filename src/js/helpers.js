@@ -78,6 +78,13 @@ export const isCustom = function( node ){
     return node
 }
 
+export const getEditorNode = function( node ){
+    while ( node.getAttribute('contenteditable') !== "true" ) {
+        node = node.parentNode
+    }
+    return node
+}
+
 /**
  * Get the top parent node for a child node 
  * @param {*} node A child node
@@ -334,6 +341,15 @@ export const appliedFormats = function( node, editorNode, rootNode , formatType)
     }
     //console.log(`Applied formats = [${formats.join(' => ')}]`)
     return formats
+}
+
+
+// -----------------------------------------------------------------------------
+// @section Miscellaneous
+// -----------------------------------------------------------------------------
+
+export const generateUid = function(){
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 

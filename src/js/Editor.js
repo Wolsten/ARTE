@@ -2,9 +2,9 @@
 
 import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
-import * as Blocks from './blocks.js'
-import * as Inline from './inline.js'
-import * as Buffer from './plugins/buffer.js'
+import * as Blocks from './plugins/blocks.js'
+import * as Inline from './plugins/inline.js'
+import Buffer from './plugins/buffer.js'
 
 class Editor {
 
@@ -12,43 +12,67 @@ class Editor {
     // @section Initialisation
     // -----------------------------------------------------------------------------
 
+    /**
+     * 
+     * @param node target The dom node to populate with the toolbar and editor
+     * @param string content The initial HTML content for the editor
+     * @param {*} options Options, such as the buffer size for undo/redo operations
+     */
     constructor( target, content, options ){
-        // Initialise options & toolbar
+        // Initialise options
         this.options = this.initOptions(options)
+        // initialise buffering
+        this.buffer = new Buffer(options.bufferSize, this.updateEventHandlers)
+        // Initialise the toolbar
         this.toolbar = this.initToolbar()
-        // this.clicked = false
         // Initialise the editor
         target.innerHTML = Templates.editor(this.toolbar, this.options)
+        // Grab dom elements
         this.editorNode = target.querySelector('.editor-body')
         this.toolbarNode = target.querySelector('.editor-toolbar')
+        // Save this instance against the editor node
+        // this.editorNode.dataset.editor = this
+        // Add the content
+        this.editorNode.innerHTML = content
+        // Initialise plugins
+        this.initialisePlugins()
         // Reset global range
         this.range = false
-        // Add the content
-        // const clean = this.getCleanData(content)
-        // this.editorNode.innerHTML = clean
-        this.editorNode.innerHTML = content
-        // Events
+        // Set up event handling
         this.listenForMouseUpEvents()
         this.listenForKeydownEvents()
         this.listenForPasteEvents()
-        // Initialise buttons for standard and custom plugins
         this.initialiseButtons()
-        // Initialise buffer handling
         if ( this.options.bufferSize > 0 ){
+            this.buffer.init(this.editorNode)
             this.listenForKeyupEvents()
-            setTimeout( () => Buffer.init({
-                size: options.bufferSize, 
-                target: this.editorNode,
-                updateEventHandlers: () => this.updateEventHandlers()
-            }), 100)
         }
+        // Public methods to support saving and updating hte editor content
         this.save = this.getCleanData
         this.update = this.updateEditor
+        // Observe changes in the editor
+        const config = { attributes: false, childList: true, subtree: true }
+        const observer = new MutationObserver(()=>this.handleMutation())
+        observer.observe(this.editorNode,config)
+
+    }
+
+    /**
+     * Handle mutations to the editor node as a result of dom insertions or removals
+     * Keyboard entry is handled separately
+     * 
+     */
+    handleMutation() {
+        if ( this.buffer.ignoreMutation() === false ){
+            console.log('MUTATED')
+            this.buffer.update()
+            this.updateEventHandlers()
+        }
     }
 
     initOptions(options){   
         // All standard supported tags - use these if not set in options
-        const tags = ['H1','H2','P', 'OL','UL', 'B', 'I', 'U', 'CLEAR']
+        const tags = ['H1','H2','P','OL','UL','B','I','U','CLEAR']
         const plugins = []
         const headingNumbers = 'off'
         const bufferSize = 10     
@@ -69,12 +93,12 @@ class Editor {
         for( let i=0; i<options.tags.length; i++){
             options.tags[i] = options.tags[i].toUpperCase()
         }
-        // console.log('options',options)
         return options
     }
 
     initToolbar(){
         let toolbar = []
+        const bufferCallback = this.options.bufferSize > 0 ? Buffer.update : false
         // Add (filtered) standard buttons
         Blocks.buttons.forEach( button => {
             if ( this.options.tags.includes(button.tag) ){
@@ -90,9 +114,10 @@ class Editor {
         })
         // Add optional copy-paste buffering
         if ( this.options.bufferSize > 0 ){
-            toolbar = [...toolbar, ...Buffer.buttons]
+            toolbar.push(this.buffer.undoButton)
+            toolbar.push(this.buffer.redoButton)
         }
-        // Add custom plugins
+        // Add custom plugin buttons
         this.options.plugins.forEach( plugin => {
             plugin.buttons.forEach( button => {
                 button.type = 'custom'
@@ -104,23 +129,24 @@ class Editor {
         return toolbar
     }
 
+    initialisePlugins(){
+        this.options.plugins.forEach( plugin => {
+            if ( "init" in plugin ){
+                plugin.init( this )
+            }
+        })
+    }
+
     initialiseButtons(){
         // Do any custom setup required
         this.toolbar.forEach( button => {
             // Add dom element to the button
             button.element = this.toolbarNode.querySelector(`#${button.tag}`)
             // Set disabled flag on element. Requires range and button to be passed in
-            // The toolbarButton class defaults has default method which can be overridden
+            // The toolbarButton class has default method which can be overridden
             // by adding a disabled method in the button options
-            button.disabled(false)
-            // Perform any button initialisation by passing in the editorNode
-            if ( "init" in button ){
-                let buffer = false
-                // If buffering - pass in the update mmethod to the button
-                if ( this.options.bufferSize > 0 ){
-                    buffer = Buffer.update
-                }
-                button.init(this.editorNode, buffer)
+            if ( button.type === 'buffer' ){
+                this.buffer.disabled(button)
             }
             // Some button have shortcuts in which case listen for
             if ( "shortcut" in button && "click" in button){
@@ -131,11 +157,11 @@ class Editor {
                         // Stop propagation to prevent other event handlers responding
                         event.stopPropagation()
                         // Trigger the dialogue witht he then current range
-                        button.click(this.range)
+                        button.click(this)
                     }
                 })
             }
-            // All buttons have a click method
+            // All buttons have a click method (but undefined for buffer buttons)
             if ( "click" in button ){
                 button.element.addEventListener('click', event => {
                     // Prevent default action for all buttons when have no range 
@@ -147,8 +173,6 @@ class Editor {
                     this.debugRange(this.range)
                     this.clickToolbarButton(button)
                 })
-            } else {
-                console.debug(`The ${button.tag} button is missing a mandatory click handler`)
             }
         })
     }
@@ -156,8 +180,6 @@ class Editor {
     // -----------------------------------------------------------------------------
     // @section Mouse up events
     // -----------------------------------------------------------------------------
-   
-    
 
     listenForMouseUpEvents(){
         this.editorNode.addEventListener('mouseup', event => {
@@ -172,7 +194,11 @@ class Editor {
     handleEditorBlur( event ){
         console.log('editor blurred')
         this.toolbar.forEach( button => {
-            button.disabled( false )
+            if ( button.type === 'buffer' ){
+                this.buffer.disabled(button)
+            } else {
+                button.disabled( false )
+            }
             button.element.classList.remove('active')
         })
     }
@@ -200,9 +226,13 @@ class Editor {
         // console.log('Applied formats',formats)
         this.toolbar.forEach( button => {
             // Trigger disabled method on each button
-            button.disabled( range )
+            if ( button.type === 'buffer' ){
+                this.buffer.disabled( button )
+            } else {
+                button.disabled( range )
+            }
             // Set active state of button
-            if ( formats.includes(button.tag) ){
+            if ( formats.includes( button.tag ) ){
                 button.element.classList.add('active')
             } else {
                 button.element.classList.remove('active')
@@ -227,22 +257,8 @@ class Editor {
             if ( Helpers.isCustom(this.range.blockParent) ){
                 this.highlightCustomNode(this.range.blockParent)
             }
-            // // Get the applied formats for the range selected (all way up to the highest parent 
-            // // inside the editor)
-            // formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
-            // console.log('Applied formats',formats)
         }
         this.setToolbarStates(this.range)
-        // this.toolbar.forEach( button => {
-        //     // Trigger disabled method on each button
-        //     button.disabled( this.range )
-        //     // Set active state of button
-        //     if ( formats.includes(button.tag) ){
-        //         button.element.classList.add('active')
-        //     } else {
-        //         button.element.classList.remove('active')
-        //     }
-        // })
     }
 
     insertParagraph(){
@@ -258,10 +274,13 @@ class Editor {
     // -----------------------------------------------------------------------------
     
     clickToolbarButton(button){
-        //const button = this.toolbar.find( button => button.tag==element.id )
         console.log('clicked button',button.tag)
         // All buttons must have a click method so invoke
-        this.range = button.click(this.range)
+        if ( button.type == 'buffer' ){
+            this.buffer.click(button)
+        } else {
+            this.range = button.click(this)
+        }
         // Reset event handlers for any buttons that require it
         this.updateEventHandlers()
         if ( this.range == undefined ){
@@ -299,18 +318,15 @@ class Editor {
                 if ( (event.ctrlKey || event.metaKey) && event.key == 'z' ){
                     event.preventDefault()
                     // Redo
+                    let button
                     if ( event.shiftKey  ){
-                        const button = this.toolbar.find( b => b.tag == 'REDO')
-                        if ( button.click() ){
-                            this.updateEventHandlers()
-                        }
+                        button = this.toolbar.find( b => b.tag == 'REDO')
                     // Undo
                     } else {
-                        const button = this.toolbar.find( b => b.tag == 'UNDO')
-                        if ( button.click() ){
-                            this.updateEventHandlers()
-                        }
+                        button = this.toolbar.find( b => b.tag == 'UNDO')
                     }
+                    this.buffer.click(button)
+                    this.updateEventHandlers()
                 }
             }
         })
@@ -412,35 +428,36 @@ class Editor {
         const ignore = ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','End','Home']
         let key = args[0]
         const editor = args[1]
-        // If arrow key jyst refresh the range and button states (active or inactive)
+        // If arrow key just refresh the range and button states (active or inactive)
         if ( ignore.includes(key) ){
             editor.range = Helpers.getRange()
             editor.setToolbarStates(editor.range)
         } else {
-            Buffer.update()
+            editor.buffer.update()
         }
     }
 
-
     // -----------------------------------------------------------------------------
-    // @section Custom events
+    // @section Custom event handlers
     // -----------------------------------------------------------------------------
     
-
-
+    /**
+     * Active custom elements may require their click event handles to be reset
+     * after updates to the dom
+     */
     updateEventHandlers(){
         //console.log('Updating event handlers')
         this.toolbar.forEach( button => {
             if ( 'addEventHandlers' in button ){
-                console.log('Updating event handler for button',button)
-                button.addEventHandlers()
+                console.log('Updating event handlers for button',button.tag)
+                button.addEventHandlers(this)
             }
+
         })
     }
 
-
     // -----------------------------------------------------------------------------
-    // @section Paste events
+    // @section Cut, Copy and Paste events
     // -----------------------------------------------------------------------------
     
     listenForPasteEvents(){
@@ -516,18 +533,23 @@ class Editor {
             debug.innerHTML = 'No range selected'
         } else {
             debug.innerHTML = `
-                <p>Block parent: ${range.blockParent.tagName}</p>
-                <p>commonAncestorContainer: ${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</p>
-                <p>rootNode: ${range.rootNode.tagName}</p>
-                <p>collapsed: ${range.collapsed}</p>
-                <p>startContainer: ${range.startContainer.tagName ? range.startContainer.tagName : range.startContainer.textContent}</p>
-                <p>startOffset: ${range.startOffset}</p>
-                <p>endContainer: ${range.endContainer.tagName ? range.endContainer.tagName : range.endContainer.textContent}</p>
-                <p>endOffset: ${range.endOffset}</p>`
+                <div class="debug">
+                    <label>Block parent</label><span>${range.blockParent.tagName}</span>
+                    <label>commonAncestorC</label><span>${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</span>
+                    <label>rootNode</label><span>${range.rootNode.tagName}</span>
+                    <label>collapsed</label><span>${range.collapsed}</span>
+                    <label>startC</label><span>${range.startContainer.tagName ? range.startContainer.tagName : range.startContainer.textContent}</span>
+                    <label>startOffset</label><span>${range.startOffset}</span>
+                    <label>endC</label><span>${range.endContainer.tagName ? range.endContainer.tagName : range.endContainer.textContent}</span>
+                    <label>endOffset</label><span>${range.endOffset}</span>
+                </div>`
         }
     }
 
 }
 
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
 
 export default Editor

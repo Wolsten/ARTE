@@ -1,91 +1,96 @@
 import * as Icons from './icons.js'
 import ToolbarButton from './ToolbarButton.js'
 
-let size = 0
-let bufferIndex = 0
-let target = null
-let buffer = []
-let updateEventHandlers
 
-function setButtonState(){
-    UNDO.disabled()
-    REDO.disabled()
-}
+export default class Buffer {
 
-function undo(){
-    let status = false
-    if ( bufferIndex > 0 ){
-        bufferIndex --
-        target.innerHTML = buffer[bufferIndex]
-        status = true
+    constructor( size, updateEventHandlers ){
+        this.size = size
+        this.bufferIndex = 0
+        this.buffer = []
+        // Buttons 
+        this.undoButton = new ToolbarButton('buffer','UNDO','Undo', Icons.undo)
+        this.redoButton = new ToolbarButton('buffer','REDO','Redo', Icons.redo)
+        // Set this to true when undoing/redoing so can ignore mutations 
+        // due to these actions
+        this.ignore = false
     }
-    setButtonState()
-    // Redo event handlers
-    updateEventHandlers()
-    return status
-}
 
-function redo(){
-    if ( bufferIndex + 1 < buffer.length ){
-        bufferIndex ++
-        target.innerHTML = buffer[bufferIndex]
-        return true
+    init(target){
+        this.target = target
+        this.buffer = [this.target.innerHTML]
+        this.target.addEventListener('editor-updated', () => {
+            this.update()
+        })
     }
-    setButtonState()
-    // Redo event handlers
-    updateEventHandlers()
-    return false
-}
 
-const undoDisabled = function(){
-    this.element.disabled = buffer.length==0 || bufferIndex==0
-}
-
-const redoDisabled = function(){
-    this.element.disabled = bufferIndex >= buffer.length - 1
-}
-
-
-// -----------------------------------------------------------------------------
-// @section Exports
-// -----------------------------------------------------------------------------
-
-export const init = function( options ){
-    size = options.size
-    target = options.target
-    updateEventHandlers = options.updateEventHandlers
-    buffer = [target.innerHTML]
-}
-
-export const update = function(){
-    if ( size == 0 ){
-        return
+    setButtonStates(){
+        this.disabled(this.undoButton)
+        this.disabled(this.redoButton)
     }
-    if ( buffer.length > size ){
-        // Remove first element
-        buffer.shift()
-    }
-    // Check buffer index in case need to reset buffer when the user had
-    // undone and then made new changes
-    if ( (bufferIndex + 1) < buffer.length ){
-        const items = buffer.length - (bufferIndex + 1)
-        for( let i=0; i<items; i++){
-            buffer.pop()
+
+    undo(){
+        if ( this.bufferIndex > 0 ){
+            this.bufferIndex --
+            this.target.innerHTML = this.buffer[this.bufferIndex]
         }
+        this.setButtonStates()
     }
-    // Add the new one
-    buffer.push(target.innerHTML)
-    bufferIndex = buffer.length - 1
-    console.log('buffer', buffer)
-    // Update buttons
-    setButtonState()
+
+    redo(){
+        if ( this.bufferIndex + 1 < this.buffer.length ){
+            this.bufferIndex ++
+            this.target.innerHTML = this.buffer[this.bufferIndex]
+        }
+        this.setButtonStates()
+    }
+
+    click(button){
+        if ( button.tag == 'UNDO' ){
+            this.undo()
+        } else {
+            this.redo()
+        }
+        this.disabled(button)
+        this.ignore = true
+    }
+
+    ignoreMutation(){
+        let result = this.ignore
+        this.ignore = false
+        return result
+    }
+
+    disabled(button){
+        if ( button.tag == 'UNDO' ){
+            button.element.disabled = this.buffer.length==0 || this.bufferIndex==0
+        } else {
+            button.element.disabled = this.bufferIndex >= this.buffer.length - 1
+        }
+        console.warn(`set button ${button.tag} disabled flag to be ${button.element.disabled}`)
+    }
+
+    update(){
+        if ( this.size == 0 ){
+            return
+        }
+        if ( this.buffer.length > this.size ){
+            // Remove first element
+            this.buffer.shift()
+        }
+        // Check buffer index in case need to reset buffer when the user had
+        // undone and then made new changes
+        if ( (this.bufferIndex + 1) < this.buffer.length ){
+            const items = this.buffer.length - (this.bufferIndex + 1)
+            for( let i=0; i<items; i++){
+                this.buffer.pop()
+            }
+        }
+        // Add the new one
+        this.buffer.push(this.target.innerHTML)
+        this.bufferIndex = this.buffer.length - 1
+        console.log('buffer', this.buffer)
+        // Update buttons
+        this.setButtonStates()
+    }
 }
-
-const uOptions = {disabled:undoDisabled}
-const rOptions = {disabled:redoDisabled}
-const UNDO = new ToolbarButton('buffer','UNDO','Undo', Icons.undo, undo, uOptions)
-const REDO = new ToolbarButton('buffer','REDO','Redo', Icons.redo, redo, rOptions)
-
-export const buttons = [UNDO, REDO]
-
-

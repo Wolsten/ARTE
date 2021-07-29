@@ -1,8 +1,9 @@
-import * as Helpers from './helpers.js'
-import * as Phase from './phase.js'
-import * as Icons from './plugins/icons.js'
-import ToolbarButton from './plugins/ToolbarButton.js'
+import * as Helpers from '../helpers.js'
+import * as Phase from '../phase.js'
+import * as Icons from './icons.js'
+import ToolbarButton from './ToolbarButton.js'
 
+// Global variables reset on each click
 let editorNode
 let formatAction = ''
 let newFormat = ''
@@ -10,9 +11,8 @@ let categorisedTextNodes = []
 let range
 let fragmentNode
 
-
 function categoriseProtectedNode( node ){
-    const formats = Helpers.appliedFormats(node, editorNode, range.rootNode, 'inline' )
+    const formats = Helpers.appliedFormats(node, range.rootNode, 'inline' )
     categorisedTextNodes.push({
         node: node.cloneNode(true),
         text:'',
@@ -204,12 +204,7 @@ function logCategorisedNodes(debug){
     }
 }
 
-const init = function(editor){
-    if ( editorNode == undefined ){
-        editorNode = editor
-    }
-}
-
+// Method attached to a button in the toolbar
 const disabled = function(range){
     if ( range === false ){
         this.element.disabled = true
@@ -227,8 +222,18 @@ const disabled = function(range){
     }
 }
 
-const click = function( rng ){
-    range = rng
+// export const init = function(editor){
+//     if ( editorNode == undefined ){
+//         editorNode = editor
+//     }
+//     if ( bufferUpdateCallback == undefined ){
+//         bufferUpdateCallback = buffer
+//     }
+// }
+
+const click = function( editor ){
+    range = editor.range
+    editorNode = editor.editorNode
     formatAction = 'apply'
     if ( this.tag == 'CLEAR' || this.element.classList.contains('active') ){
         formatAction = 'remove'
@@ -274,6 +279,9 @@ const click = function( rng ){
     } else {
         range.rootNode.innerHTML = fragmentNode.innerHTML
     }
+    // Update the buffer (ignored if no buffering set) and event handlers
+    editor.buffer.update()
+    editor.updateEventHandlers()
     // Reset the selection, returning the new range
     return Helpers.resetSelection(editorNode)
 }
@@ -282,7 +290,7 @@ const click = function( rng ){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-const options = {init,disabled}
+const options = {disabled}
 const B = new ToolbarButton( 'inline', 'B', 'Bold', Icons.b, click, options)
 const I = new ToolbarButton( 'inline', 'I', 'Italic', Icons.i, click, options)
 const U = new ToolbarButton( 'inline', 'U',  'Underline', Icons.u, click, options)
