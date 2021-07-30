@@ -9,8 +9,8 @@ export default class Buffer {
         this.bufferIndex = 0
         this.buffer = []
         // Buttons 
-        this.undoButton = new ToolbarButton('buffer','UNDO','Undo', Icons.undo)
-        this.redoButton = new ToolbarButton('buffer','REDO','Redo', Icons.redo)
+        this.undoButton = new ToolbarButton(5, 'buffer','UNDO','Undo', Icons.undo)
+        this.redoButton = new ToolbarButton(5, 'buffer','REDO','Redo', Icons.redo)
         // Set this to true when undoing/redoing so can ignore mutations 
         // due to these actions
         this.ignore = false

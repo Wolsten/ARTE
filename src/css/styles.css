@@ -14,6 +14,10 @@
 
 .editor-toolbar {
     padding:0.5rem;
+    position:sticky;
+    top:0rem;
+    background:white;
+    border:1px solid gray;
 }
 
 .editor-toolbar-group {
@@ -31,8 +35,8 @@
 }
 
 .editor-body {
-    padding:1rem;
-    border: 1px solid rgb(200, 200, 200);;
+    padding:1.4rem;
+    border-bottom: 1px solid rgb(200, 200, 200);;
     min-height:200px;
 }
 
@@ -183,6 +187,49 @@ label {
     margin-top:2rem;
 }
 
+/* Popup inplace panel */
+
+.inplace-panel {
+    box-sizing: border-box;
+    display: block;
+    position: fixed;
+    /* Stay in place */
+    z-index: 9999;
+    /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.3);
+    /* Black w/ opacity */
+}
+  
+.inplace-panel .inplace-content {
+    position: absolute;
+    background-color: #fefefe;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #888;
+    max-height: 200px;
+    width: 200px;
+    -webkit-box-shadow: 5px 5px 10px #5e5c5c;
+            box-shadow: 5px 5px 10px #5e5c5c;
+}
+  
+.inplace-panel input {
+    width: 100%;
+    padding:0.3rem;
+}
+
+.inplace-panel option {
+    min-height:0;
+    height:1.2rem;
+}
+
 /* Example styling for a custom plugin */
 
 custom {
@@ -257,18 +304,30 @@ input[type=color]:not([disabled]):hover {
 
 /* debugging */
 
+div#debug h5 {
+    font-size:1.2rem;
+    padding:0.4rem 0;
+    margin:0;
+}
+
 div.debug {
+    width:100%;
     display:flex;
     flex-direction: row;
-    flex-wrap: wrap;
 }
-div.debug label {
+
+div.debug div.col {
+    width: 50%;
+}
+
+div.debug div.col label {
+    display:block;
     font-weight: bold;
-    flex-basis: 25%;
 }
-div.debug span {
+
+div.debug div.col span {
     color: green;
-    flex-basis: 75%;
+    font-size: 1rem;
 }
 
 

@@ -60,6 +60,13 @@ export const isInline = function( node ){
     return tags.inline.includes(node.tagName)
 }
 
+const isStyle = function( node ){
+    if ( node.tagName == undefined ){
+        return false
+    }
+    return node.tagName === 'SPAN'
+}
+
 export const isList = function( node ){
     if ( node.tagName === undefined ){
         return false
@@ -142,7 +149,7 @@ export const cleanForSaving = function( node, buttons ){
     // Remove anything we don't recognise
     if ( isBlock(node) === false && 
          isList(node) === false && 
-         isInline(node) === false && 
+         isStyle(node) === false && 
          isCustom(node) === false ){
         //console.warn('removing node',node)
         node.remove()
@@ -338,35 +345,35 @@ export const debounce = function(fn, delay) {
     }
 }
 
-export const appliedFormats = function( node, editorNode, rootNode , formatType){
-    let formats = []
+// export const appliedFormats = function( node, editorNode, rootNode , formatType){
+//     let formats = []
 
-    // Collect tags of appropriate type
-    while ( node != editorNode && node != null ){
-        if ( node.nodeType === 1 ){   
-            if ( formatType == '' ){
-                formats.unshift( node.tagName )
-            } else if ( formatType == 'inline' ){
-                if ( isInline(node) ){
+//     // Collect tags of appropriate type
+//     while ( node != editorNode && node != null ){
+//         if ( node.nodeType === 1 ){   
+//             if ( formatType == '' ){
+//                 formats.unshift( node.tagName )
+//             } else if ( formatType == 'inline' ){
+//                 if ( isInline(node) ){
 
-                    formats.unshift( node.tagName )
-                }
-            } else if ( formatType == 'block' ){
-                if ( isBlock(node)){
-                    formats.unshift( node.tagName )
-                }
-            } else if ( formatType == 'enter' ){
-                formats.unshift( node )
-                if ( node == rootNode ){
-                    break
-                }
-            }
-        }
-        node = node.parentNode
-    }
-    //console.log(`Applied formats = [${formats.join(' => ')}]`)
-    return formats
-}
+//                     formats.unshift( node.tagName )
+//                 }
+//             } else if ( formatType == 'block' ){
+//                 if ( isBlock(node)){
+//                     formats.unshift( node.tagName )
+//                 }
+//             } else if ( formatType == 'enter' ){
+//                 formats.unshift( node )
+//                 if ( node == rootNode ){
+//                     break
+//                 }
+//             }
+//         }
+//         node = node.parentNode
+//     }
+//     //console.log(`Applied formats = [${formats.join(' => ')}]`)
+//     return formats
+// }
 
 
 // -----------------------------------------------------------------------------

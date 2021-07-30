@@ -327,14 +327,15 @@ const click = function( editor ){
 }
 
 const options = {setState}
-const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click, options )
-const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click, options )
-const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click, options )
-const OL = new ToolbarButton( 'list',  'OL', 'Ordered list',   Icons.ol, click, options )
-const UL = new ToolbarButton( 'list',  'UL', 'Unordered list', Icons.ul, click, options )
+const H1 = new ToolbarButton( 1, 'block', 'H1', 'Heading 1', Icons.h1, click, options )
+const H2 = new ToolbarButton( 1, 'block', 'H2', 'Heading 2', Icons.h2, click, options )
+const H3 = new ToolbarButton( 1, 'block', 'H3', 'Heading 3', Icons.h3, click, options )
+const P  = new ToolbarButton( 1, 'block', 'P',  'Paragraph', Icons.p,  click, options )
+const OL = new ToolbarButton( 2, 'list',  'OL', 'Ordered list',   Icons.ol, click, options )
+const UL = new ToolbarButton( 2, 'list',  'UL', 'Unordered list', Icons.ul, click, options )
 
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
-export const buttons = [ H1, H2, P, OL, UL ]
+export const buttons = [ H1, H2, H3, P, OL, UL ]

@@ -1,6 +1,7 @@
 class ToolbarButton {
 
-    constructor( type, tag, label, icon, click, options ){
+    constructor( group, type, tag, label, icon, click, options ){
+        this.group = group
         this.type = type
         this.tag = tag
         this.label = label
@@ -8,7 +9,6 @@ class ToolbarButton {
         this.icon = icon
         this.click = click  // Undefined for buffer buttons but must be here
         this.element = null // Populated by editor
-        this.group = type
         // Default setState method (may be overriden in options next)
         this.setState = range => {
             if ( range === false ){
@@ -25,32 +25,6 @@ class ToolbarButton {
             })
         }
         console.log('Created new button', this)
-        // if ( options != undefined ){
-        //     if ( options.init != undefined ){
-        //         this.init = options.init
-        //     }
-        //     if ( options.disabled != undefined ){
-        //         this.disabled = options.disabled
-        //     }
-        //     if ( options.shortcut != undefined ){
-        //         this.shortcut = options.shortcut
-        //     }
-        //     if ( options.addEventHandlers != undefined ){
-        //         this.addEventHandlers = options.addEventHandlers
-        //     }
-        //     if ( options.clean != undefined ){
-        //         this.clean = options.clean
-        //     }
-        //     if ( options.input != undefined ){
-        //         this.input = options.input
-        //     }
-        //     if ( options.group != undefined ){
-        //         this.group = options.group
-        //     }
-        //     if ( options.changed != undefined ){
-        //         this.changed = options.changed
-        //     }
-        // }
     }
 }
 

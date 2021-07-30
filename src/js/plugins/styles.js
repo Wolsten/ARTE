@@ -103,6 +103,8 @@ function parseTextNode( node, styles ) {
 
 /**
  * Parse a block node, saving inline styles as traverse down the tree
+ * Cannot set the styles here as need to get to the text nodes to know when the 
+ * start end end containers have been found.
  * @param node node 
  * @param [] styles 
  * @returns 
@@ -131,7 +133,12 @@ function parseBlockNode(node, styles){
     return html
 }
 
-
+/**
+ * Parse nodes recursively and generates updated html
+ * @param node node 
+ * @param array styles 
+ * @returns string of the new html generated
+ */
 function parseNode(node, styles){
     console.log('Parsing node',node)
     // Text node
@@ -203,15 +210,15 @@ const setState = function(range){
 
 
 options = {setState, style:'font-weight:bold', removeStyle:'font-weight:400'}
-const B = new ToolbarButton( 'style', 'B', 'Bold', Icons.b, click, options)
+const B = new ToolbarButton( 3, 'style', 'B', 'Bold', Icons.b, click, options)
 
 options = {setState, style:'font-style:italic', removeStyle:'font-style:normal'}
-const I = new ToolbarButton( 'style', 'I', 'Italic', Icons.i, click, options)
+const I = new ToolbarButton( 3, 'style', 'I', 'Italic', Icons.i, click, options)
 
 options = {setState, style:'text-decoration:underline', removeStyle:'text-decoration:none'}
-const U = new ToolbarButton( 'style', 'U',  'Underline', Icons.u, click, options)
+const U = new ToolbarButton( 3, 'style', 'U',  'Underline', Icons.u, click, options)
 
 options = {setState, style:'CLEAR'}
-const CLEAR = new ToolbarButton( 'style', 'CLEAR', 'Clear', Icons.clear, click, options)
+const CLEAR = new ToolbarButton( 3, 'style', 'CLEAR', 'Clear', Icons.clear, click, options)
 
 export const buttons = [ B, I, U, CLEAR ]

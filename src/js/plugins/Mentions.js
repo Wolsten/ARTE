@@ -37,7 +37,7 @@ function getPosition(dialogue){
 
 function form(){
     return `
-        <div class="mentions-content">
+        <div class="inplace-content">
             <input list="people-list" type="text"/>
             <datalist id="people-list">${dataListOptions}</datalist>
         </div>`
@@ -55,16 +55,15 @@ function handleKeyup(e){
     }
 }
 
-function click(editorInstance){
-    console.log('editor instance', editorInstance)
-    if ( editorInstance.range === false ){
+function click(edt){
+    if ( edt.range === false ){
         console.log('No range selected')
         return
     }
-    editor = editorInstance
+    editor = edt
     panel = document.createElement('DIV')
     panel.id = 'mentions'
-    panel.classList.add('mentions-panel')
+    panel.classList.add('inplace-panel')
     panel.innerHTML = form()
     panel.addEventListener('click',()=>hide())
     panel.addEventListener('keyup', e=>handleKeyup(e))
@@ -73,7 +72,7 @@ function click(editorInstance){
     // Add to dom
     document.querySelector('body').appendChild(panel)
     // Position
-    let dialogue = document.querySelector('.mentions-content')
+    let dialogue = document.querySelector('.inplace-content')
     const position = getPosition(dialogue)
     dialogue.style.top = `${position.y}px`
     dialogue.style.left = `${position.x}px`
@@ -127,5 +126,5 @@ export const initPeople = function(people){
 }
 
 const options = {shortcut:'@'}
-const button = new ToolbarButton( 'custom', 'mention', 'Mention', Icons.person, click, options ) 
+const button = new ToolbarButton( 4, 'custom', 'mention', 'Mention', Icons.person, click, options ) 
 export const buttons = [button]

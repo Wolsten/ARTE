@@ -5,7 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./src/css/styles.css">
-    <link rel="stylesheet" href="./src/css/mentions.css">
     <title>Another Javascript Editor</title>
 </head>
 <body>
@@ -21,13 +20,11 @@
             <li>I am an unordered list A</li>
             <li>I am an unordered list B</li>
             <li>I am an unordered list C</li>
-            <li>I am an unordered list D</li>
         </ul>
         <ol>
             <li>I am an ordered list 1</li>
             <li>I am an ordered list 2</li>
             <li>I am an ordered list 3</li>
-            <li>I am an ordered list 4</li>
         </ol>
         <h2>Custom elements</h2>
         <h3>Block level elements</h3>
@@ -42,7 +39,6 @@
         <p>This is an inline element with a link to the <a href="https://bbc.co.uk" data-display="2" data-label="BBC"></a> website.</p>
     </div>
     <button type="button" id="save">Save</button>
-    <h5>Selection info for debugging:</h5>
     <div id="debug"></div>
 
     <!-- Bundled version -->
@@ -76,6 +72,7 @@
         import Editor from './src/js/Editor.js'
         import * as Mentions from './src/js/plugins/mentions.js'
         import * as Links from './src/js/plugins/links.js'
+        import * as Colours from './src/js/plugins/colours.js'
         import * as Custom from './src/js/plugins/customPlugin.js'
         // Choose location for editor and the default content
         const target = document.getElementById('editor')
@@ -86,13 +83,13 @@
         // Define editor options
         const options = {
             // Toolbar buttons required
-            // Allowed values 'H1','H2','P','OL','UL','B','U','I','CLEAR','UNDO','REDO']
+            // Allowed values 'H1','H2','H3','P','OL','UL','B','U','I','CLEAR','UNDO','REDO']
             // All other elements are filtered out unless specified below in a plugin
-            tags: ['H1','H2','P','OL','UL','B','I','U','CLEAR'],
+            tags: ['H1','H2','H3','P','OL','UL','B','I','U','CLEAR'],
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
             headingNumbers: 'on', 
             // Custom plugs to add to the toolbar to enhance the editor
-            plugins: [Mentions, Links, Custom],
+            plugins: [Mentions, Links, Custom, Colours],
             // Number of Undo operations supported, max 10       
             bufferSize: 10     
         }

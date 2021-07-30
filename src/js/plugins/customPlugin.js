@@ -294,5 +294,5 @@ function click( editor ){
 }
 
 const options = {addEventHandlers, clean}
-const button = new ToolbarButton( 'custom', TAG, 'Custom', Icons.plugin, click, options ) 
+const button = new ToolbarButton( 4, 'custom', TAG, 'Custom', Icons.plugin, click, options ) 
 export const buttons = [button]

@@ -2,6 +2,7 @@
 
 import * as Helpers from '../helpers.js'
 import * as Inline from './inline.js'
+import * as Icons from './icons.js'
 import ToolbarButton from './ToolbarButton.js'
 
 let range
@@ -9,11 +10,15 @@ let editor
 let handleChange
 
 const click = function( edtr ){
+    if ( edt.range === false ){
+        console.log('No range selected')
+        return
+    }
     editor = edtr
-    handleChange = Helpers.debounce(handleChangeDelayed,1000)
-    editor.buffer.ignore = true
-    range = Inline.otherClick(editor,this.tag)
-    console.log('New colour range is',range)
+    // handleChange = Helpers.debounce(handleChangeDelayed,1000)
+    // editor.buffer.ignore = true
+    // range = Inline.otherClick(editor,this.tag)
+    // console.log('New colour range is',range)
 }
 
 const fgColourChanged = function( ){
@@ -69,14 +74,11 @@ const disabled = function(range){
 }
 
 
-// A colour picker is an example of an inline control which returns a value that needs to 
-// be saved against a type of output - in this case the style
-// The empty icon is replaced with the input of type color
-const fgOptions = {disabled, changed:fgColourChanged, input:'color', group:'colours'}
-const FGC = new ToolbarButton( 'inline', 'FGC', 'Foreground colour', '', click, fgOptions)
+const fgOptions = {disabled, changed:fgColourChanged}
+const FGC = new ToolbarButton( 3, 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, fgOptions)
 
-const bgOptions = {disabled, changed:bgColourChanged, input:'color', group:'colours'}
-const BGC = new ToolbarButton( 'inline', 'BGC', 'Background colour', '', click, bgOptions)
+const bgOptions = {disabled, changed:bgColourChanged}
+const BGC = new ToolbarButton( 3, 'inline', 'BGC', 'Background colour', Icons.colourBackground, click, bgOptions)
 
 // -----------------------------------------------------------------------------
 // @section Exports

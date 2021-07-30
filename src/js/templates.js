@@ -1,16 +1,9 @@
 function editorToolbarButton(button){
-    const {type, tag, label, icon, input} = button
-    // e.g. icon "bi-eye"
-    // data-bs-toggle="button" allows the active state to be shown by adding
-    // the class "active" and aria-pressed="true"(for assistive tech)
-    if ( input == 'button' ){
-        return `
-            <button id="${tag}" type="button" class="btn btn-light ${type}" title="${label}">
-                ${icon}
-            </button>`
-    } else {
-        return `<input id="${tag}" type="${input}" class="btn btn-light ${type}" title="${label}"/>`
-    }
+    const {type, tag, label, icon} = button
+    return `
+        <button id="${tag}" type="button" class="btn btn-light ${type}" title="${label}">
+            ${icon}
+        </button>`
 }
 
 function editorToolBarGroup(title,html){
@@ -51,4 +44,32 @@ export const editor = function(buttons,options){
                 ...
             </div>
         </div>`
+}
+
+export const debugRange = function(range){
+    const debug = document.getElementById('debug')
+    if ( debug == null ){
+        return
+    }
+    console.warn('debugRange',range)
+    if ( range === false ){
+        debug.innerHTML = 'No range selected'
+    } else {
+        debug.innerHTML = `
+            <h5>Selection info:</h5>
+            <div class="debug">
+                <div class="col">
+                    <label>Block parent</label><span>${range.blockParent.tagName}</span>
+                    <label>commonAncestorC</label><span>${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</span>
+                    <label>rootNode</label><span>${range.rootNode.tagName}</span>
+                    <label>collapsed</label><span>${range.collapsed}</span>
+                </div>
+                <div class="col">
+                    <label>startC</label><span>${range.startContainer.tagName ? range.startContainer.tagName : range.startContainer.textContent}</span>
+                    <label>startOffset</label><span>${range.startOffset}</span>
+                    <label>endC</label><span>${range.endContainer.tagName ? range.endContainer.tagName : range.endContainer.textContent}</span>
+                    <label>endOffset</label><span>${range.endOffset}</span>
+                </div>
+            </div>`
+    }
 }

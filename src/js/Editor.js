@@ -97,8 +97,9 @@ class Editor {
     }
 
     initToolbar(){
-        let toolbar = []
         const bufferCallback = this.options.bufferSize > 0 ? Buffer.update : false
+        // Combine buttons so they can be sorted by grouping
+        let toolbar = []
         // Add (filtered) standard buttons
         Blocks.buttons.forEach( button => {
             if ( this.options.tags.includes(button.tag) ){
@@ -106,12 +107,6 @@ class Editor {
                 toolbar.push(button)
             }
         })
-        // Inline.buttons.forEach( button => {
-        //     if ( this.options.tags.includes(button.tag) ){
-        //         Helpers.registerTag(button.type, button.tag)
-        //         toolbar.push(button)
-        //     }
-        // })
         Styles.buttons.forEach( button => {
             if ( this.options.tags.includes(button.tag) ){
                 toolbar.push(button)
@@ -129,7 +124,7 @@ class Editor {
                 toolbar = [...toolbar, button]
             })
         })
-        // console.log('toolbar',toolbar)
+        toolbar = toolbar.sort( (a,b) => a.group - b.group )
         return toolbar
     }
 
@@ -174,11 +169,14 @@ class Editor {
                         event.preventDefault()
                         return
                     }
-                    this.debugRange(this.range)
+                    Templates.debugRange(this.range)
                     this.clickToolbarButton(button)
-                    this.range = Helpers.getRange()
-                    if ( this.range !== false && "setState" in button ){
-                        button.setState( this.range )
+                    if ( "setState" in button ){
+                        this.range = Helpers.getRange()
+                        if ( this.range !== false ) { 
+                            Templates.debugRange( this.range )
+                            button.setState( this.range )
+                        }
                     }
                 })
             }
@@ -192,20 +190,6 @@ class Editor {
     // -----------------------------------------------------------------------------
     // @section Mouse up events
     // -----------------------------------------------------------------------------
-
-
-    // listenForMouseUpEvents(){
-    //     document.addEventListener('mouseup', event => {
-    //         console.warn('mouseup on',event.target)
-    //         // Must test for clicks on toolbar since otherwise 
-    //         // blur will be triggered deactivating most buttons
-    //         if ( this.editorOrToolbar( event.target ) ){
-    //             this.handleMouseUp() 
-    //         } else {
-    //             this.handleEditorBlur()
-    //         }
-    //     })
-    // }
 
     listenForMouseUpEvents(){
         document.addEventListener('mouseup', event => {
@@ -231,16 +215,6 @@ class Editor {
             button.element.classList.remove('active')
         })
     }
-
-    // editorOrToolbar(node){
-    //     while ( node != document.body ){
-    //         if ( node == this.editorNode || node == this.toolbarNode ){
-    //             return true
-    //         }
-    //         node = node.parentNode
-    //     }
-    //     return false
-    // }
 
     nodeInEditor(node){
         while ( node.nodeType == 3 || node.tagName != 'HTML' ){
@@ -271,8 +245,7 @@ class Editor {
         }
         // Get the applied formats for the range selected (all way up to the highest parent 
         // inside the editor)
-        const {formats, styles} = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
-        // console.log('Applied formats',formats)
+        //const formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
         this.toolbar.forEach( button => {
             // Trigger disabled method on each button
             if ( button.type === 'buffer' ){
@@ -280,12 +253,6 @@ class Editor {
             } else {
                 button.setState( range )
             }
-            // // Set active state of button
-            // if ( formats.includes( button.tag ) ){
-            //     button.element.classList.add('active')
-            // } else {
-            //     button.element.classList.remove('active')
-            // }
         })
     }
 
@@ -293,7 +260,7 @@ class Editor {
         console.log('Handle mouse up')
         this.range = Helpers.getRange()
         // console.log('handleMouseUp range=',this.range)
-        this.debugRange(this.range)
+        Templates.debugRange(this.range)
         // let formats = []
         if ( this.range !== false ){
             this.buffer.ignore = false
@@ -579,29 +546,6 @@ class Editor {
         customs.forEach(custom=>custom.classList.remove('selected'))
         if ( node ){
             node.classList.add('selected')
-        }
-    }
-
-    debugRange(range){
-        const debug = document.getElementById('debug')
-        if ( debug == null ){
-            return
-        }
-        console.warn('debugRange',range)
-        if ( range === false ){
-            debug.innerHTML = 'No range selected'
-        } else {
-            debug.innerHTML = `
-                <div class="debug">
-                    <label>Block parent</label><span>${range.blockParent.tagName}</span>
-                    <label>commonAncestorC</label><span>${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</span>
-                    <label>rootNode</label><span>${range.rootNode.tagName}</span>
-                    <label>collapsed</label><span>${range.collapsed}</span>
-                    <label>startC</label><span>${range.startContainer.tagName ? range.startContainer.tagName : range.startContainer.textContent}</span>
-                    <label>startOffset</label><span>${range.startOffset}</span>
-                    <label>endC</label><span>${range.endContainer.tagName ? range.endContainer.tagName : range.endContainer.textContent}</span>
-                    <label>endOffset</label><span>${range.endOffset}</span>
-                </div>`
         }
     }
 

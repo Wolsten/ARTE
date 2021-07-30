@@ -283,5 +283,5 @@ function clean(node){
 }
 
 const options = {addEventHandlers, clean}
-const button = new ToolbarButton( 'custom', TAG, 'Link', Icons.link, click, options ) 
+const button = new ToolbarButton( 4, 'custom', TAG, 'Link', Icons.link, click, options ) 
 export const buttons = [button]
