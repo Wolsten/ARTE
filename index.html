@@ -12,8 +12,9 @@
 
     <!-- The inner html will be replaced with the editor instance -->
     <div id="editor">
-        <h1>Welcome to <u>AJE</u> AGAIN</h1>
-        <p>I am AJE - <i>Another <b>Javascript</b> Editor</i>! My name is pronounced <b>Ajay</b>.</p>
+        <h1>Welcome to <span style="text-decoration:underline;">AJE</span> AGAIN</h1>
+        <p>I am some plain text for formatting</p>
+        <p>I am AJE - <span style="font-style:italic;">Another <span style="font-weight:bold;">Javascript</span> Editor</span>! My name is pronounced <span style="font-weight:bold;">Ajay</span>.</p>
         <blockquote>I am a block quote and am not yet supported by AJE so you won't see me when the page is saved.</blockquote>
         <h2>Lists</h2>
         <ul>
@@ -76,7 +77,6 @@
         import * as Mentions from './src/js/plugins/mentions.js'
         import * as Links from './src/js/plugins/links.js'
         import * as Custom from './src/js/plugins/customPlugin.js'
-        import * as Colours from './src/js/plugins/colours.js'
         // Choose location for editor and the default content
         const target = document.getElementById('editor')
         let content = target.innerHTML
@@ -88,11 +88,11 @@
             // Toolbar buttons required
             // Allowed values 'H1','H2','P','OL','UL','B','U','I','CLEAR','UNDO','REDO']
             // All other elements are filtered out unless specified below in a plugin
-            tags: ['H1','H2','P','OL','UL','B','I','U','CLEAR'], 
+            tags: ['H1','H2','P','OL','UL','B','I','U','CLEAR'],
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
             headingNumbers: 'on', 
             // Custom plugs to add to the toolbar to enhance the editor
-            plugins: [Mentions, Links, Custom, Colours],
+            plugins: [Mentions, Links, Custom],
             // Number of Undo operations supported, max 10       
             bufferSize: 10     
         }

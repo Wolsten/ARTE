@@ -4,6 +4,7 @@ import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
 import * as Blocks from './plugins/blocks.js'
 import * as Inline from './plugins/inline.js'
+import * as Styles from './plugins/styles.js'
 import Buffer from './plugins/buffer.js'
 
 class Editor {
@@ -54,7 +55,6 @@ class Editor {
         const config = { attributes: false, childList: true, subtree: true }
         const observer = new MutationObserver(()=>this.handleMutation())
         observer.observe(this.editorNode,config)
-
     }
 
     /**
@@ -106,9 +106,14 @@ class Editor {
                 toolbar.push(button)
             }
         })
-        Inline.buttons.forEach( button => {
+        // Inline.buttons.forEach( button => {
+        //     if ( this.options.tags.includes(button.tag) ){
+        //         Helpers.registerTag(button.type, button.tag)
+        //         toolbar.push(button)
+        //     }
+        // })
+        Styles.buttons.forEach( button => {
             if ( this.options.tags.includes(button.tag) ){
-                Helpers.registerTag(button.type, button.tag)
                 toolbar.push(button)
             }
         })
@@ -120,7 +125,6 @@ class Editor {
         // Add custom plugin buttons
         this.options.plugins.forEach( plugin => {
             plugin.buttons.forEach( button => {
-                //button.type = 'custom'
                 Helpers.registerTag(button.type, button.tag)
                 toolbar = [...toolbar, button]
             })
@@ -218,7 +222,7 @@ class Editor {
             if ( button.type === 'buffer' ){
                 this.buffer.disabled(button)
             } else {
-                button.disabled( false )
+                button.setState( false )
             }
             button.element.classList.remove('active')
         })
@@ -263,21 +267,21 @@ class Editor {
         }
         // Get the applied formats for the range selected (all way up to the highest parent 
         // inside the editor)
-        const formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
+        const {formats, styles} = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
         // console.log('Applied formats',formats)
         this.toolbar.forEach( button => {
             // Trigger disabled method on each button
             if ( button.type === 'buffer' ){
                 this.buffer.disabled( button )
             } else {
-                button.disabled( range )
+                button.setState( range )
             }
-            // Set active state of button
-            if ( formats.includes( button.tag ) ){
-                button.element.classList.add('active')
-            } else {
-                button.element.classList.remove('active')
-            }
+            // // Set active state of button
+            // if ( formats.includes( button.tag ) ){
+            //     button.element.classList.add('active')
+            // } else {
+            //     button.element.classList.remove('active')
+            // }
         })
     }
 

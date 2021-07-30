@@ -23,11 +23,11 @@ function categoriseProtectedNode( node ){
 }
 
 function categoriseTextNode( node ){
-    console.log( `Categorise text node [${node.textContent}]`)
+    console.log( `Categorise text node`,node)
     // Get the [0] pre, [1]selected and [2]post text
     const texts = getTextNodes( node )
     //console.log(`texts = [${texts.join(', ')}]`)
-    let formats = Helpers.appliedFormats(node, editorNode, range.rootNode, 'inline' )
+    const formats = Helpers.appliedFormats(node, editorNode, range.rootNode, 'inline' )
     //console.log(`current formats = [${formats.join(' ')}]`)
     // Pre text
     if ( texts[0] ){
@@ -41,10 +41,12 @@ function categoriseTextNode( node ){
     // Selected text
     if ( texts[1] ){
         let newFormats = formats.slice()
+        let newStyles = styles.slice()
         if ( formatAction == 'apply'  ){
             if ( newFormats.includes(newFormat) == false ){
                 //console.log( `Adding new format [${newFormat}] in phase [${Phase.get()}]`)
                 newFormats.push(newFormat)
+
             }
         } else if ( formatAction == 'remove' ){
             if ( newFormat == 'CLEAR' ){
@@ -104,7 +106,7 @@ function processCategorisedNodes(){
             if ( previous.sorted == current.sorted /* || current.text == ' ' */) {
                 // Combine texts in current node
                 current.text = previous.text + current.text
-                // Bring formats forwad in case current text was a space (with no formats)
+                // Bring formats forward in case current text was a space (with no formats)
                 current.formats = previous.formats
                 // Clear previous text
                 previous.text = ''
@@ -122,6 +124,7 @@ function processCategorisedNodes(){
             // Build up format nodes
             node.formats.forEach( format => {
                 const temp = document.createElement(format)
+
                 if ( n ){
                     n = n.appendChild(temp)
                 } else {
@@ -207,11 +210,13 @@ function logCategorisedNodes(debug){
 }
 
 // Method attached to a button in the toolbar
-const disabled = function(range){
+const setState = function(range){
     if ( range === false ){
         this.element.disabled = true
+        this.element.classList.remove('active')
     } else if ( this.tag == 'CLEAR' ){
         this.element.disabled = false
+        this.element.classList.remove('active')
     // Inline formatting only applies to single blocks
     } else {
         // The rootNode (the common ancestor or it's parent if text) should not be a 
@@ -273,19 +278,6 @@ export const inline = function(editor){
 
 
 /**
- * Foreign button click handler where the button requires inline formatting and
- * then some form of post processing
- * @param Editor editor 
- * @param string format 
- */
-export const otherClick = function( editor, format ){
-    formatAction = 'apply'
-    newFormat = format
-    return inline( editor )
-}
-
-
-/**
  * The native button click handle belonging to the button
  * @param Editor editor 
  */
@@ -299,7 +291,7 @@ const click = function( editor ){
     inline( editor )
 }
 
-let options = {disabled}
+let options = {setState}
 const B = new ToolbarButton( 'inline', 'B', 'Bold', Icons.b, click, options)
 const I = new ToolbarButton( 'inline', 'I', 'Italic', Icons.i, click, options)
 const U = new ToolbarButton( 'inline', 'U',  'Underline', Icons.u, click, options)

@@ -299,11 +299,39 @@ const click = function( editor ){
     Helpers.setCursorToTargetNode(editorNode, endTarget)
 }
 
-const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click )
-const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click )
-const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click )
-const OL = new ToolbarButton( 'list',  'OL', 'Ordered list',   Icons.ol, click )
-const UL = new ToolbarButton( 'list',  'UL', 'Unordered list', Icons.ul, click )
+/**
+ * Set the disabled and active states of a button
+ * @param range Standard range object with addition of a rootNode which is always a block
+ * and is either the same as the commonAncestor ior the parent node of this when it is a text node
+ */
+ const setState = function(range){
+    if ( range === false ){
+        this.element.disabled = true
+        this.element.classList.remove('active')
+    } else if ( this.tag == 'clear' ){
+        this.element.disabled = false
+        this.element.classList.remove('active')
+    } else {
+        // The rootNode should not be a DIV (the editor) or list container - (implying 
+        // multiple blocks selected) or a custom element
+        this.element.disabled = range.rootNode.tagName === 'DIV' || 
+                                Helpers.isList(range.rootNode) ||
+                                Helpers.isCustom(range.rootNode)
+        const block = Helpers.getParentBlockNode(range.rootNode)
+        if ( block.tagName === this.tag ){
+            this.element.classList.add('active')
+        } else {
+            this.element.classList.remove('active')
+        }
+    }
+}
+
+const options = {setState}
+const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click, options )
+const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click, options )
+const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click, options )
+const OL = new ToolbarButton( 'list',  'OL', 'Ordered list',   Icons.ol, click, options )
+const UL = new ToolbarButton( 'list',  'UL', 'Unordered list', Icons.ul, click, options )
 
 // -----------------------------------------------------------------------------
 // @section Exports

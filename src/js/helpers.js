@@ -24,12 +24,25 @@ export const insertAfter = function(newNode, existingNode) {
     return existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
 
+export const insertBefore = function(newNode, existingNode) {
+    return existingNode.parentNode.insertBefore(newNode, existingNode);
+}
+
+export const replaceNode = function(existingNode, tag, html){
+    const replacementNode = document.createElement(tag)
+    replacementNode.innerHTML = html
+    const node = existingNode.parentNode.insertBefore(replacementNode, existingNode)
+    existingNode.parentNode.removeChild(existingNode)
+    return node
+}
+
+
 let tags = { block: ['DIV','P','LI'], list: ['LI'], inline: [], custom:[]}
 
 export const registerTag = function(type,tag){
     if ( tags[type].includes(tag) == false && tag!='CLEAR'){
         tags[type].push(tag)
-        // console.log('registered tag', tag)
+        console.log('registered tag', tag, 'in type', type)
     }
 }
 
@@ -48,10 +61,10 @@ export const isInline = function( node ){
 }
 
 export const isList = function( node ){
-    if ( node.tagName == undefined ){
+    if ( node.tagName === undefined ){
         return false
     }
-    return tags.list.includes(node.tagName)
+    return node.tagName === 'OL' || node.tagName === 'UL' 
 }
 
 export const isBlock = function( node ){
@@ -327,6 +340,7 @@ export const debounce = function(fn, delay) {
 
 export const appliedFormats = function( node, editorNode, rootNode , formatType){
     let formats = []
+
     // Collect tags of appropriate type
     while ( node != editorNode && node != null ){
         if ( node.nodeType === 1 ){   
@@ -334,6 +348,7 @@ export const appliedFormats = function( node, editorNode, rootNode , formatType)
                 formats.unshift( node.tagName )
             } else if ( formatType == 'inline' ){
                 if ( isInline(node) ){
+
                     formats.unshift( node.tagName )
                 }
             } else if ( formatType == 'block' ){

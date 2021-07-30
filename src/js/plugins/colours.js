@@ -74,6 +74,7 @@ const disabled = function(range){
 // The empty icon is replaced with the input of type color
 const fgOptions = {disabled, changed:fgColourChanged, input:'color', group:'colours'}
 const FGC = new ToolbarButton( 'inline', 'FGC', 'Foreground colour', '', click, fgOptions)
+
 const bgOptions = {disabled, changed:bgColourChanged, input:'color', group:'colours'}
 const BGC = new ToolbarButton( 'inline', 'BGC', 'Background colour', '', click, bgOptions)
 
