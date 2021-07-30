@@ -5,7 +5,6 @@ import ToolbarButton from './ToolbarButton.js'
 import * as Icons from './icons.js'
 import * as Phase from '../phase.js'
 
-let editor
 let range
 let style
 let value
@@ -81,17 +80,17 @@ function parseTextNode( node, styles ) {
     }
     if ( Phase.both() ){
         preText = node.textContent.substring(0,range.startOffset)
-        text = node.textContent.substring(range.startOffset, range.endOffset)
+        text = Helpers.START_MARKER + node.textContent.substring(range.startOffset, range.endOffset) + Helpers.END_MARKER
         postText = node.textContent.substring( range.endOffset )
         return preText + openSpan + text + closeSpan + postText
     }
     if ( Phase.first() ){
         preText = node.textContent.substring(0,range.startOffset)
-        text = node.textContent.substring(range.startOffset)
+        text = Helpers.START_MARKER + node.textContent.substring(range.startOffset)
         return preText + openSpan + text + closeSpan
     }
     if ( Phase.last() ){
-        text = node.textContent.substring(0,range.endOffset)
+        text = node.textContent.substring(0,range.endOffset) + Helpers.END_MARKER
         postText = node.textContent.substring(range.endOffset)
         return openSpan + text + closeSpan + postText
     }
@@ -151,8 +150,7 @@ function parseNode(node, styles){
  * Button click function, where "this" = button instance
  * @param {*} ed The editor object
  */
-const click = function( ed ){
-    editor = ed
+const click = function( editor ){
     range = editor.range
     removeStyle = this.removeStyle
     // Adjust rootNode if required
@@ -170,6 +168,8 @@ const click = function( ed ){
     const html = parseNode(range.rootNode, [])
     console.log('html',html)
     const node = Helpers.replaceNode( range.rootNode, range.rootNode.tagName, html )
+    // Reset the selection
+    Helpers.resetSelection(editor.editorNode)
 }
 
 /**
@@ -192,10 +192,6 @@ const setState = function(range){
                                 Helpers.isCustom(range.rootNode)
         // Check whether the computed style matches the button
         setStyle( this.style )
-        
-        // const computedStyles = window.getComputedStyle(range.startContainer.parentNode)
-        // const buttonStyleValue = computedStyles.getPropertyValue(style)
-        //if ( buttonStyleValue.includes(value) ) {
         const inlineStyles = getInlineStyles( range.startContainer )
         if ( inlineStyles.includes(this.style) ){
             this.element.classList.add('active')

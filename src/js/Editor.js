@@ -160,7 +160,7 @@ class Editor {
                         event.preventDefault()
                         // Stop propagation to prevent other event handlers responding
                         event.stopPropagation()
-                        // Trigger the dialogue witht he then current range
+                        // Trigger the dialogue with the then current range
                         button.click(this)
                     }
                 })
@@ -176,6 +176,10 @@ class Editor {
                     }
                     this.debugRange(this.range)
                     this.clickToolbarButton(button)
+                    this.range = Helpers.getRange()
+                    if ( this.range !== false && "setState" in button ){
+                        button.setState( this.range )
+                    }
                 })
             }
             if ( "changed" in button ){
