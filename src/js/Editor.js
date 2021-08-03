@@ -148,7 +148,7 @@ class Editor {
                 this.buffer.disabled(button)
             }
             // Some button have shortcuts in which case listen for
-            if ( "shortcut" in button && "click" in button){
+            if ( "shortcut" in button ){
                 this.editorNode.addEventListener('keydown', event =>{
                     if ( event.key === button.shortcut ){
                         // Prevent default so key not echo'd to the screen
@@ -161,29 +161,33 @@ class Editor {
                 })
             }
             // All buttons have a click method (but undefined for buffer buttons)
-            if ( "click" in button ){
-                button.element.addEventListener('click', event => {
-                    // Prevent default action for all buttons when have no range 
-                    // and not the undo-redo buffer buttons
-                    if ( this.range === false && button.type !== 'buffer' ){
-                        event.preventDefault()
-                        return
-                    }
-                    Templates.debugRange(this.range)
-                    this.clickToolbarButton(button)
-                    if ( "setState" in button ){
-                        this.range = Helpers.getRange()
-                        if ( this.range !== false ) { 
-                            Templates.debugRange( this.range )
-                            button.setState( this.range )
-                        }
-                    }
-                })
-            }
-            if ( "changed" in button ){
-                button.element.addEventListener('input', () => button.changed() )
-                button.element.addEventListener('cancel', () => console.log('cancelled') )
-            }
+            button.element.addEventListener('click', event => {
+                // Prevent default action for all buttons when have no range 
+                // and not the undo-redo buffer buttons
+                if ( this.range === false && button.type !== 'buffer' ){
+                    event.preventDefault()
+                    return
+                }
+                Templates.debugRange(this.range)
+                // this.clickToolbarButton(button)
+                if ( button.type == 'buffer' ){
+                    this.buffer.click(button)
+                } else {
+                    this.range = Helpers.getRange()
+                    button.click(this)
+                }
+                // if ( "setState" in button ){
+                //     this.range = Helpers.getRange()
+                //     if ( this.range !== false ) { 
+                //         Templates.debugRange( this.range )
+                //         button.setState( this.range )
+                //     }
+                // }
+            })
+            // if ( "changed" in button ){
+            //     button.element.addEventListener('input', () => button.changed() )
+            //     button.element.addEventListener('cancel', () => console.log('cancelled') )
+            // }
         })
     }
 
@@ -291,26 +295,26 @@ class Editor {
     // @section Toolbar button clicks
     // -----------------------------------------------------------------------------
     
-    clickToolbarButton(button){
-        console.log('clicked button',button.tag)
-        // All buttons must have a click method so invoke
-        if ( button.type == 'buffer' ){
-            this.buffer.click(button)
-        } else {
-            this.range = Helpers.getRange()
-            button.click(this)
-        }
-        // @todo - is it right to comment this out? Some clicks are completed immediately
-        // i.e. block, inline formatting but not links, mentions and custom plugins
-        // // Reset event handlers for any buttons that require it. As now pass in the editor this
-        // can ve done selectively so presumably ok
-        // this.updateEventHandlers()
-        // if ( this.range == undefined ){
-        //     this.range = false
-        // }
-        // console.log('range',this.range)
-        // this.handleMouseUp()
-    }
+    // clickToolbarButton(button){
+    //     console.log('clicked button',button.tag)
+    //     // All buttons must have a click method so invoke
+    //     if ( button.type == 'buffer' ){
+    //         this.buffer.click(button)
+    //     } else {
+    //         this.range = Helpers.getRange()
+    //         button.click(this)
+    //     }
+    //     // @todo - is it right to comment this out? Some clicks are completed immediately
+    //     // i.e. block, inline formatting but not links, mentions and custom plugins
+    //     // // Reset event handlers for any buttons that require it. As now pass in the editor this
+    //     // can ve done selectively so presumably ok
+    //     // this.updateEventHandlers()
+    //     // if ( this.range == undefined ){
+    //     //     this.range = false
+    //     // }
+    //     // console.log('range',this.range)
+    //     // this.handleMouseUp()
+    // }
 
 
     // -----------------------------------------------------------------------------
@@ -356,7 +360,7 @@ class Editor {
 
     handleEnter(){
         this.range = Helpers.getRange()
-        this.debugRange(this.range)
+        Templates.debugRange(this.range)
         if ( this.range === false ){
             return
         }
@@ -376,7 +380,7 @@ class Editor {
         }
         // Get the new range
         this.range = Helpers.getRange()
-        this.debugRange(this.range)
+        Templates.debugRange(this.range)
         return handled
     }
 
@@ -389,7 +393,7 @@ class Editor {
             key = 'Delete'
         }
         const range = Helpers.getRange()
-        this.debugRange(range)
+        Templates.debugRange(range)
         if ( range ){
             const example = this.toolbar.find(button => button.type==='custom')
             const title = 'Information'
@@ -498,7 +502,7 @@ class Editor {
     handleCutCopyPaste(){
         console.log('Detected cut-copy-paste event')
         const range = Helpers.getRange()
-        this.debugRange(range)
+        Templates.debugRange(range)
         // Ensure have a range that is not collapsed
         if ( range==false || range.collapsed ){
             return false

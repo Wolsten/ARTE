@@ -6,8 +6,11 @@ import * as Icons from './icons.js'
 import ToolbarButton from './ToolbarButton.js'
 
 let range
-let editor 
-let handleChange
+let style
+let value
+let removeStyle
+let options
+let action
 
 const click = function( edtr ){
     if ( edt.range === false ){
@@ -53,32 +56,52 @@ const handleChangeDelayed = function(){
     editor.buffer.update()
 }
 
-// Method attached to a button in the toolbar
-const disabled = function(range){
-    let disabled = false
+/**
+ * Split the style stype property into style:value parts
+ * @param string tag in format style or style:value
+ */
+ function setStyle(styleProp){
+    const styleParts = styleProp.split(':')
+    style = styleParts[0]
+    value = styleParts[1] !== undefined ? styleParts[1] : ''
+}
+
+/**
+ * Set the disabled and active states of a button
+ * @param range Standard range object with addition of a rootNode which is always a block
+ * and is either the same as the commonAncestor ior the parent node of this when it is a text node
+ */
+ const setState = function(range){
     if ( range === false ){
-        disabled = true
-    } else if ( range.collapsed ) {
-        disabled = true
-    } else if ( range.rootNode.tagName === 'DIV' ){
-        disabled = true
-    } else if ( Helpers.isBlock(range.rootNode) || Helpers.isInline(range.rootNode)){
-        disabled = false
-    // } else if ( range.rootNode.tagName === 'FGC' || range.rootNode.tagName === 'BGC'){
-    //     disabled = false
+        this.element.disabled = true
+        this.element.classList.remove('active')
+    } else if ( this.tag == 'CLEAR' ){
+        this.element.disabled = false
+        this.element.classList.remove('active')
     } else {
-        disabled = true
+        // The rootNode should not be a DIV (the editor) or list container - (implying 
+        // multiple blocks selected) or a custom element
+        this.element.disabled = range.rootNode.tagName === 'DIV' || 
+                                Helpers.isList(range.rootNode) ||
+                                Helpers.isCustom(range.rootNode)
+        // Check whether the computed style matches the button
+        setStyle( this.style )
+        const computedStyles = window.getComputedStyle( range.startContainer.parentNode )
+        const property = computedStyles.getPropertyValue(style)
+        if ( property ){
+            this.element.style = `${this.style}:${property}`
+        } else {
+            this.element.style.remove()
+        }
     }
-    this.element.disabled = disabled
-    console.log('disabled', disabled)
 }
 
 
-const fgOptions = {disabled, changed:fgColourChanged}
-const FGC = new ToolbarButton( 3, 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, fgOptions)
+options = {setState, style:'color:', removeStyle:'color:black'}
+const FGC = new ToolbarButton( 3, 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, options)
 
-const bgOptions = {disabled, changed:bgColourChanged}
-const BGC = new ToolbarButton( 3, 'inline', 'BGC', 'Background colour', Icons.colourBackground, click, bgOptions)
+options = {setState, style:'color:', removeStyle:'color:white'}
+const BGC = new ToolbarButton( 3, 'inline', 'BGC', 'Background colour', Icons.colourBackground, click, options)
 
 // -----------------------------------------------------------------------------
 // @section Exports

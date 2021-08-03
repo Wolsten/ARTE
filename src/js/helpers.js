@@ -90,14 +90,31 @@ export const getCustomParent = function( range ){
 }
 
 export const isCustom = function( node ){
-    // @todo Check this is the correct test - i.e. quotes required
-    // console.warn(`Checking isCustom node.contenteditable =[${node.contenteditable}]`)
-    // return node.contenteditable === 'false'
     if ( node.tagName == undefined ){
         return false
     }
     return tags.custom.includes(node.tagName)
  }
+
+ /**
+ * Get the inline styles for all nodes in the tree from the lowest to the highest that
+ * isn;t a block node. In practice these are attached only to SPANs
+ * @param node node 
+ * @returns string of styles separated by semi-colons
+ */
+export const getInlineStyles = function(node){
+    let styles = ''
+    while ( isBlock(node) == false ){
+        if ( node.nodeType === 1 ){
+            const inlineStyles = node.getAttribute('style')
+            if ( inlineStyles != null && inlineStyles != '' ){
+                styles += ';' + inlineStyles
+            }
+        }
+        node = node.parentNode
+    }
+    return styles
+}
 
  export const getParentBlockNode = function(node){
     // Keep going up the tree while the node is not a block node

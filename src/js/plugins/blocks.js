@@ -6,6 +6,7 @@ import ToolbarButton from './ToolbarButton.js'
 // Global variables reset on each click
 let editorNode
 let range
+let button
 
 let formatType = ''
 let formatAction = ''
@@ -13,7 +14,6 @@ let newFormat = ''
 let previousFormats = []
 let lastNodeAdded = false
 let fragmentNode
-
 
 function getListAndBlockFormats( node, formats ){
     // Always set old formats to the original
@@ -214,17 +214,18 @@ function parseListsAndBlocks( node, formats ){
 const click = function( editor ){
     editorNode = editor.editorNode
     range = editor.range
+    button = this
     console.warn('range',range)
     // const offset = range.endOffset
     // Initialisation
-    formatType = this.type
+    formatType = button.type
     formatAction = 'apply'
-    if ( this.tag == 'CLEAR' || this.element.getAttribute('data-active') ){
+    if ( button.tag == 'CLEAR' || button.element.getAttribute('data-active') ){
         formatAction = 'remove'
     }
     // console.log('Format action', formatAction)
-    newFormat = this.tag
-    if ( this.type == 'block' && formatAction == 'remove' ){
+    newFormat = button.tag
+    if ( button.type == 'block' && formatAction == 'remove' ){
         newFormat = 'P'
     }
     previousFormats = []
@@ -242,7 +243,7 @@ const click = function( editor ){
     console.log('End target node =',endTarget)
     // Init phase for block formatting
     Phase.init(range, true)
-    console.log(`%creFormatBlock with new format ${this.tag}`,'background-color:red;color:white;padding:0.5rem')
+    console.log(`%creFormatBlock with new format ${button.tag}`,'background-color:red;color:white;padding:0.5rem')
     // Just parse the root node if the start and end belong to the same parent
     if ( firstParentNode == endParentNode ){
         fragmentNode = document.createElement('DIV')
@@ -297,6 +298,9 @@ const click = function( editor ){
     }
     // Reset the selection
     Helpers.setCursorToTargetNode(editorNode, endTarget)
+    // Reset state
+    range = Helpers.getRange()
+    setState(range)
 }
 
 /**
@@ -305,23 +309,28 @@ const click = function( editor ){
  * and is either the same as the commonAncestor ior the parent node of this when it is a text node
  */
  const setState = function(range){
+    // If have a "this" defined then it is a button click, otherwise invoked from 
+    // the insert method after the text insertion, in which case reuse the button value
+    if ( this !== undefined ){
+        button = this
+    }
     if ( range === false ){
-        this.element.disabled = true
-        this.element.classList.remove('active')
-    } else if ( this.tag == 'clear' ){
-        this.element.disabled = false
-        this.element.classList.remove('active')
+        button.element.disabled = true
+        button.element.classList.remove('active')
+    } else if ( button.tag == 'CLEAR' ){
+        button.element.disabled = false
+        button.element.classList.remove('active')
     } else {
         // The rootNode should not be a DIV (the editor) or list container - (implying 
         // multiple blocks selected) or a custom element
-        this.element.disabled = range.rootNode.tagName === 'DIV' || 
+        button.element.disabled = range.rootNode.tagName === 'DIV' || 
                                 Helpers.isList(range.rootNode) ||
                                 Helpers.isCustom(range.rootNode)
         const block = Helpers.getParentBlockNode(range.rootNode)
-        if ( block.tagName === this.tag ){
-            this.element.classList.add('active')
+        if ( block.tagName === button.tag ){
+            button.element.classList.add('active')
         } else {
-            this.element.classList.remove('active')
+            button.element.classList.remove('active')
         }
     }
 }

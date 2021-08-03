@@ -15,6 +15,7 @@ let node
 let editorNode
 let dirty
 let range
+let selectedText = ''
 let panel = null
 
 
@@ -36,7 +37,7 @@ function show( edit ){
     if ( edit == false ){
         node = document.createElement(TAG)
         node.href = ''
-        node.dataset.label = ''
+        node.dataset.label = selectedText
         node.dataset.display = 0
     }
     panel = document.createElement('DIV')
@@ -89,17 +90,11 @@ function save( edit ){
     if ( edit==false ){
         insert()
     }
-    //setTimeout( ()=>updateDom(), 10)
     // Format link and add event handler
     format(node)
     hide()
 } 
 
-// function updateDom(){
-//     // Format link and add event handler
-//     format(node)
-//     hide()
-// }
 
 
 
@@ -256,10 +251,10 @@ function click( editor ){
     }
     range = editor.range
     // Get default label if range not collapsed
-    let label = ''
+    selectedText = ''
     if ( range.collapsed == false && 
          range.startContainer == range.endContainer ){
-        label = range.endContainer.textContent.substring(range.startOffset, range.endOffset)  
+            selectedText = range.endContainer.textContent.substring(range.startOffset, range.endOffset)  
     }
     show( false )
 }

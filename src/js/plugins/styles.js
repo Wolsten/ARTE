@@ -7,30 +7,11 @@ import * as Phase from '../phase.js'
 
 let range
 let style
+let button
 let value
 let removeStyle
 let options
 let action
-
-/**
- * Get the inline styles for all nodes in the tree from the lowest to the highest that
- * isn;t a block node. In practice these are attached only to SPANs
- * @param node node 
- * @returns 
- */
-function getInlineStyles(node){
-    let styles = ''
-    while ( Helpers.isBlock(node) == false ){
-        if ( node.nodeType === 1 ){
-            const inlineStyles = node.getAttribute('style')
-            if ( inlineStyles != null && inlineStyles != '' ){
-                styles += ';' + inlineStyles
-            }
-        }
-        node = node.parentNode
-    }
-    return styles
-}
 
 /**
  * Split the style stype property into style:value parts
@@ -159,15 +140,16 @@ function parseNode(node, styles){
  */
 const click = function( editor ){
     range = editor.range
-    removeStyle = this.removeStyle
+    button = this
+    removeStyle = button.removeStyle
     // Adjust rootNode if required
     if ( Helpers.isBlock(range.rootNode) == false ){
         range.rootNode = Helpers.getParentBlockNode( range.rootNode )
     }
-    setStyle(this.style)
+    setStyle(button.style)
     // Determine the action
     action = 'apply'
-    if ( this.element.classList.contains('active') || style == 'CLEAR') {
+    if ( button.element.classList.contains('active') || style == 'CLEAR') {
         action = 'remove'
     }
     // Initialise phase detection and parse the root node
@@ -185,25 +167,30 @@ const click = function( editor ){
  * and is either the same as the commonAncestor ior the parent node of this when it is a text node
  */
 const setState = function(range){
+    // If have a "this" defined then it is a button click, otherwise invoked from 
+    // the insert method after the text insertion, in which case reuse the button value
+    if ( this !== undefined ){
+        button = this
+    }
     if ( range === false ){
-        this.element.disabled = true
-        this.element.classList.remove('active')
-    } else if ( this.tag == 'CLEAR' ){
-        this.element.disabled = false
-        this.element.classList.remove('active')
+        button.element.disabled = true
+        button.element.classList.remove('active')
+    } else if ( button.tag == 'CLEAR' ){
+        button.element.disabled = false
+        button.element.classList.remove('active')
     } else {
         // The rootNode should not be a DIV (the editor) or list container - (implying 
         // multiple blocks selected) or a custom element
-        this.element.disabled = range.rootNode.tagName === 'DIV' || 
+        button.element.disabled = range.rootNode.tagName === 'DIV' || 
                                 Helpers.isList(range.rootNode) ||
                                 Helpers.isCustom(range.rootNode)
         // Check whether the computed style matches the button
-        setStyle( this.style )
-        const inlineStyles = getInlineStyles( range.startContainer )
-        if ( inlineStyles.includes(this.style) ){
-            this.element.classList.add('active')
+        setStyle( button.style )
+        const inlineStyles = Helpers.getInlineStyles( range.startContainer )
+        if ( inlineStyles.includes(button.style) ){
+            button.element.classList.add('active')
         } else {
-            this.element.classList.remove('active')
+            button.element.classList.remove('active')
         }
     }
 }
