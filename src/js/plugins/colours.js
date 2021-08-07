@@ -1,27 +1,43 @@
 "use strict"
 
 import * as Helpers from '../helpers.js'
-import * as Inline from './inline.js'
-import * as Icons from './icons.js'
-import ToolbarButton from './ToolbarButton.js'
+import * as Styles from './styles.js'
+import * as Icons from '../icons.js'
+import ToolbarButton from '../ToolbarButton.js'
 
 let range
 let style
 let value
-let removeStyle
 let options
-let action
+let input
 
-const click = function( edtr ){
-    if ( edt.range === false ){
-        console.log('No range selected')
+
+function show(editor, btn){
+    input = document.createElement('input')
+    input.type = 'color'
+    input.style = "display:none;"
+    document.body.appendChild(input)
+    input.click()
+    input.addEventListener('input', event => {
+        console.log('colour changed',event.target.value)
+        const colour = event.target.value
+        const button = {style:`${btn.style}:${colour}`, removeStyle:btn.removeStyle, element:btn.element}
+        Styles.click( editor, button )
+        hide()
+    })
+}
+
+function hide(){
+    input.remove()
+}
+
+
+const click = function( editor, btn ){
+    if ( editor.range === false || editor.range.collapsed ){
+        console.log('No non-collapsed range selected')
         return
     }
-    editor = edtr
-    // handleChange = Helpers.debounce(handleChangeDelayed,1000)
-    // editor.buffer.ignore = true
-    // range = Inline.otherClick(editor,this.tag)
-    // console.log('New colour range is',range)
+    show(editor, btn)
 }
 
 const fgColourChanged = function( ){
@@ -38,40 +54,14 @@ const fgColourChanged = function( ){
     handleChange()
 }
 
-const bgColourChanged = function( ){
-    console.log('range', range)
-    console.log('change in background colour', this.element.value)
-    // Apply colour change to start container first
-    let node = range.startContainer.parentNode
-    node.style = `background-color:${this.element.value};`
-    // Apply colour to end container if it is different
-    if ( range.endContainer != range.startContainer ){
-        node = range.endContainer.parentNode
-        node.style = `background-color:${this.element.value};`
-    }
-    handleChange()
-}
-
-const handleChangeDelayed = function(){
-    editor.buffer.update()
-}
-
-/**
- * Split the style stype property into style:value parts
- * @param string tag in format style or style:value
- */
- function setStyle(styleProp){
-    const styleParts = styleProp.split(':')
-    style = styleParts[0]
-    value = styleParts[1] !== undefined ? styleParts[1] : ''
-}
 
 /**
  * Set the disabled and active states of a button
  * @param range Standard range object with addition of a rootNode which is always a block
  * and is either the same as the commonAncestor ior the parent node of this when it is a text node
  */
- const setState = function(range){
+const setState = function(range){
+    console.log('setting colour state')
     if ( range === false ){
         this.element.disabled = true
         this.element.classList.remove('active')
@@ -84,23 +74,37 @@ const handleChangeDelayed = function(){
         this.element.disabled = range.rootNode.tagName === 'DIV' || 
                                 Helpers.isList(range.rootNode) ||
                                 Helpers.isCustom(range.rootNode)
-        // Check whether the computed style matches the button
-        setStyle( this.style )
-        const computedStyles = window.getComputedStyle( range.startContainer.parentNode )
-        const property = computedStyles.getPropertyValue(style)
-        if ( property ){
-            this.element.style = `${this.style}:${property}`
-        } else {
-            this.element.style.remove()
+        // Get the inline styles of the selected range
+        let value = ''
+        let styles = []
+        const inlineStyles = range.startContainer.parentNode.getAttribute('style')
+        if ( inlineStyles != null ){
+            styles = inlineStyles.split(';')
+            console.log('styles',styles)
+            styles.forEach( item => {
+                // Ignore empty styles (split creates an empty element for last ;)
+                if ( item !== '' ){
+                    const parts = item.split(':')
+                    // Does the inline style match the button?
+                    // If so set the button styling to match
+                    if ( parts[0].trim() === this.style ){
+                        value = parts[1].trim()
+                        this.element.setAttribute('style',`${this.style}:${value};`)
+                    }
+                }
+            })
+        }
+        if ( value == '' ){
+            this.element.setAttribute('style', this.removeStyle)
         }
     }
 }
 
 
-options = {setState, style:'color:', removeStyle:'color:black'}
+options = {setState, style:'color', removeStyle:'color:black;'}
 const FGC = new ToolbarButton( 3, 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, options)
 
-options = {setState, style:'color:', removeStyle:'color:white'}
+options = {setState, style:'background-color', removeStyle:'background-color:white;'}
 const BGC = new ToolbarButton( 3, 'inline', 'BGC', 'Background colour', Icons.colourBackground, click, options)
 
 // -----------------------------------------------------------------------------

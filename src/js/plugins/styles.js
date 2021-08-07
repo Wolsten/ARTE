@@ -1,8 +1,8 @@
 "use strict"
 
 import * as Helpers from '../helpers.js'
-import ToolbarButton from './ToolbarButton.js'
-import * as Icons from './icons.js'
+import ToolbarButton from '../ToolbarButton.js'
+import * as Icons from '../icons.js'
 import * as Phase from '../phase.js'
 
 let range
@@ -33,17 +33,31 @@ function parseTextNode( node, styles ) {
     let openSpan = ''
     let closeSpan = ''
     if ( Phase.during() ){
-        let newStyle = `${style}:${value}`
         if ( action == 'apply' ){
             // If not already present - add the new style
-            if ( styles.includes(newStyle) == false ) {
-                styles = [...styles, newStyle]
+            let found = ''
+            let idx = -1
+            styles.forEach( (item,index) => {
+                const parts = item.split(':')
+                if ( parts[0].trim() == style ){
+                    idx = index
+                }
+            })
+            // Remove style with old value
+            if ( idx != -1 ){
+                styles = styles.filter( (item,index) => index != idx )
             }
+            // Add style with new value
+            const newStyle = `${style}:${value}`
+            styles = [...styles, newStyle]
             openSpan = `<span style="${styles.join(';')}">`
             closeSpan = '</span>'
         } else if ( style != 'CLEAR' ) {
             // Remove the style
-            styles = styles.filter( item => item != newStyle )
+            styles = styles.filter( item => {
+                const parts = item.split(':')
+                return parts[0].trim() != style
+            })
             if ( styles.length > 0 ){
                 openSpan = `<span style="${styles.join(';')};${removeStyle}">`
                 closeSpan = '</span>'
@@ -98,7 +112,8 @@ function parseBlockNode(node, styles){
             let inlineStylesArray = inlineStyles.split(';')
             inlineStylesArray.forEach( item => {
                 if ( item != '' ){
-                    if ( styles.includes( item ) == false ){
+                    const parts = item.split(':')
+                    if ( styles.includes( parts[0].trim() ) == false ){
                         styles = [...styles, item]
                     }
                 }
@@ -136,11 +151,11 @@ function parseNode(node, styles){
 
 /**
  * Button click function, where "this" = button instance
- * @param {*} ed The editor object
+ * @param {*} editor The editor object
  */
-const click = function( editor ){
+export const click = function( editor, btn ){
     range = editor.range
-    button = this
+    button = btn
     removeStyle = button.removeStyle
     // Adjust rootNode if required
     if ( Helpers.isBlock(range.rootNode) == false ){

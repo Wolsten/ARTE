@@ -35,8 +35,8 @@ class Editor {
         // this.editorNode.dataset.editor = this
         // Add the content
         this.editorNode.innerHTML = content
-        // Initialise plugins
-        this.initialisePlugins()
+        // // Initialise plugins
+        // this.initialisePlugins()
         // Reset global range
         this.range = false
         // Set up event handling
@@ -72,7 +72,7 @@ class Editor {
 
     initOptions(options){   
         // All standard supported tags - use these if not set in options
-        const tags = ['H1','H2','P','OL','UL','B','I','U','CLEAR']
+        const tags = ['H1','H2','H3','P','OL','UL','B','I','U','CLEAR']
         const plugins = []
         const headingNumbers = 'off'
         const bufferSize = 10     
@@ -117,7 +117,7 @@ class Editor {
             toolbar.push(this.buffer.undoButton)
             toolbar.push(this.buffer.redoButton)
         }
-        // Add custom plugin buttons
+        // Add other plugins
         this.options.plugins.forEach( plugin => {
             plugin.buttons.forEach( button => {
                 Helpers.registerTag(button.type, button.tag)
@@ -128,13 +128,13 @@ class Editor {
         return toolbar
     }
 
-    initialisePlugins(){
-        this.options.plugins.forEach( plugin => {
-            if ( "init" in plugin ){
-                plugin.init( this )
-            }
-        })
-    }
+    // initialisePlugins(){
+    //     this.options.plugins.forEach( plugin => {
+    //         if ( "init" in plugin ){
+    //             plugin.init( this )
+    //         }
+    //     })
+    // }
 
     initialiseButtons(){
         // Do any custom setup required
@@ -156,7 +156,7 @@ class Editor {
                         // Stop propagation to prevent other event handlers responding
                         event.stopPropagation()
                         // Trigger the dialogue with the then current range
-                        button.click(this)
+                        button.click(this,button)
                     }
                 })
             }
@@ -174,7 +174,7 @@ class Editor {
                     this.buffer.click(button)
                 } else {
                     this.range = Helpers.getRange()
-                    button.click(this)
+                    button.click(this,button)
                 }
                 // if ( "setState" in button ){
                 //     this.range = Helpers.getRange()

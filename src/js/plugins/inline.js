@@ -2,8 +2,8 @@
 
 import * as Helpers from '../helpers.js'
 import * as Phase from '../phase.js'
-import * as Icons from './icons.js'
-import ToolbarButton from './ToolbarButton.js'
+import * as Icons from '../icons.js'
+import ToolbarButton from '../ToolbarButton.js'
 
 // Global variables reset on each click
 let editorNode

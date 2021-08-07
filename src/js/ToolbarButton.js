@@ -1,3 +1,5 @@
+"user strict"
+
 class ToolbarButton {
 
     constructor( group, type, tag, label, icon, click, options ){

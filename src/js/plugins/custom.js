@@ -1,8 +1,8 @@
 "use strict"
 
-import * as Modal from './modalConfirm.js'
-import ToolbarButton from './ToolbarButton.js'
-import * as Icons from './icons.js'
+import * as Modal from '../modalConfirm.js'
+import ToolbarButton from '../ToolbarButton.js'
+import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 
 // A custom tag must be in upper case
@@ -271,7 +271,7 @@ export const init = function( editor ){
     customElements.forEach( element => format( element ) )
 }
 
-function click( editor ){
+function click( editor, btn ){
     if ( editor.range === false ){
         console.log('No range selected')
         return

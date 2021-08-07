@@ -1,7 +1,7 @@
 "use strict"
 
-import ToolbarButton from './ToolbarButton.js'
-import * as Icons from './icons.js'
+import ToolbarButton from '../ToolbarButton.js'
+import * as Icons from '../icons.js'
 import {setCursor} from '../helpers.js'
 
 let editor
@@ -55,7 +55,7 @@ function handleKeyup(e){
     }
 }
 
-function click(edt){
+function click(edt,btn){
     if ( edt.range === false ){
         console.log('No range selected')
         return

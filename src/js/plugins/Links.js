@@ -2,9 +2,9 @@
 
 /** Create active links, ie. links which can be edited rather than a normal html */
 
-import * as Modal from './modalConfirm.js'
-import ToolbarButton from './ToolbarButton.js'
-import * as Icons from './icons.js'
+import * as Modal from '../modalConfirm.js'
+import ToolbarButton from '../ToolbarButton.js'
+import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 
 // Tag name for this plugin
@@ -243,7 +243,7 @@ export const init = function( editor ){
     links.forEach( link => format( link ))
 }
 
-function click( editor ){
+function click( editor, btn ){
     console.log('click link')
     if ( editor.range === false){
         console.log('No range selected')

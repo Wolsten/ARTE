@@ -1,7 +1,9 @@
+"use strict"
+
 import * as Helpers from '../helpers.js'
 import * as Phase from '../phase.js'
-import * as Icons from './icons.js'
-import ToolbarButton from './ToolbarButton.js'
+import * as Icons from '../icons.js'
+import ToolbarButton from '../ToolbarButton.js'
 
 // Global variables reset on each click
 let editorNode
@@ -211,10 +213,10 @@ function parseListsAndBlocks( node, formats ){
     console.log(`Finished this branch - processed children`, node.childNodes)
 }
 
-const click = function( editor ){
+const click = function( editor, btn ){
     editorNode = editor.editorNode
     range = editor.range
-    button = this
+    button = btn
     console.warn('range',range)
     // const offset = range.endOffset
     // Initialisation

@@ -1,5 +1,5 @@
-import * as Icons from './icons.js'
-import ToolbarButton from './ToolbarButton.js'
+import * as Icons from '../icons.js'
+import ToolbarButton from '../ToolbarButton.js'
 
 
 export default class Buffer {
