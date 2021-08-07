@@ -51,7 +51,7 @@ export const debugRange = function(range){
     if ( debug == null ){
         return
     }
-    console.warn('debugRange',range)
+    // console.warn('debugRange',range)
     if ( range === false ){
         debug.innerHTML = 'No range selected'
     } else {

@@ -26,7 +26,7 @@ class ToolbarButton {
                 this[key] = options[key]
             })
         }
-        console.log('Created new button', this)
+        // console.log('Created new button', this)
     }
 }
 

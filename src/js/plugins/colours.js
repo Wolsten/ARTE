@@ -5,12 +5,8 @@ import * as Styles from './styles.js'
 import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
 
-let range
-let style
-let value
 let options
 let input
-
 
 function show(editor, btn){
     input = document.createElement('input')
@@ -31,7 +27,6 @@ function hide(){
     input.remove()
 }
 
-
 const click = function( editor, btn ){
     if ( editor.range === false || editor.range.collapsed ){
         console.log('No non-collapsed range selected')
@@ -39,21 +34,6 @@ const click = function( editor, btn ){
     }
     show(editor, btn)
 }
-
-const fgColourChanged = function( ){
-    console.log('range', range)
-    console.log('change in colour', this.element.value)
-    // Apply colour change to start container first
-    let node = range.startContainer.parentNode
-    node.style = `color:${this.element.value};`
-    // Apply colour to end container if it is different
-    if ( range.endContainer != range.startContainer ){
-        node = range.endContainer.parentNode
-        node.style = `color:${this.element.value};`
-    }
-    handleChange()
-}
-
 
 /**
  * Set the disabled and active states of a button
@@ -80,7 +60,7 @@ const setState = function(range){
         const inlineStyles = range.startContainer.parentNode.getAttribute('style')
         if ( inlineStyles != null ){
             styles = inlineStyles.split(';')
-            console.log('styles',styles)
+            // console.log('styles',styles)
             styles.forEach( item => {
                 // Ignore empty styles (split creates an empty element for last ;)
                 if ( item !== '' ){
@@ -99,7 +79,6 @@ const setState = function(range){
         }
     }
 }
-
 
 options = {setState, style:'color', removeStyle:'color:black;'}
 const FGC = new ToolbarButton( 3, 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, options)

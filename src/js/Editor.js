@@ -35,8 +35,8 @@ class Editor {
         // this.editorNode.dataset.editor = this
         // Add the content
         this.editorNode.innerHTML = content
-        // // Initialise plugins
-        // this.initialisePlugins()
+        // Initialise plugins
+        this.initialisePlugins()
         // Reset global range
         this.range = false
         // Set up event handling
@@ -128,13 +128,13 @@ class Editor {
         return toolbar
     }
 
-    // initialisePlugins(){
-    //     this.options.plugins.forEach( plugin => {
-    //         if ( "init" in plugin ){
-    //             plugin.init( this )
-    //         }
-    //     })
-    // }
+    initialisePlugins(){
+        this.options.plugins.forEach( plugin => {
+            if ( "init" in plugin ){
+                plugin.init( this )
+            }
+        })
+    }
 
     initialiseButtons(){
         // Do any custom setup required
@@ -169,25 +169,20 @@ class Editor {
                     return
                 }
                 Templates.debugRange(this.range)
-                // this.clickToolbarButton(button)
                 if ( button.type == 'buffer' ){
                     this.buffer.click(button)
                 } else {
                     this.range = Helpers.getRange()
                     button.click(this,button)
                 }
-                // if ( "setState" in button ){
-                //     this.range = Helpers.getRange()
-                //     if ( this.range !== false ) { 
-                //         Templates.debugRange( this.range )
-                //         button.setState( this.range )
-                //     }
-                // }
+                if ( "setState" in button ){
+                    this.range = Helpers.getRange()
+                    if ( this.range !== false ) { 
+                        Templates.debugRange( this.range )
+                        button.setState( this.range )
+                    }
+                }
             })
-            // if ( "changed" in button ){
-            //     button.element.addEventListener('input', () => button.changed() )
-            //     button.element.addEventListener('cancel', () => console.log('cancelled') )
-            // }
         })
     }
 
@@ -197,7 +192,7 @@ class Editor {
 
     listenForMouseUpEvents(){
         document.addEventListener('mouseup', event => {
-            console.warn('mouseup on',event.target)
+            // console.warn('mouseup on',event.target)
             if ( this.nodeInEditor( event.target ) ){
                 this.handleMouseUp() 
             } else if ( this.nodeInToolbar( event.target) ) {
@@ -261,7 +256,7 @@ class Editor {
     }
 
     handleMouseUp(){
-        console.log('Handle mouse up')
+        // console.log('Handle mouse up')
         this.range = Helpers.getRange()
         // console.log('handleMouseUp range=',this.range)
         Templates.debugRange(this.range)
