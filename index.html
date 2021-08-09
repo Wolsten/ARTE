@@ -11,11 +11,20 @@
 
     <!-- The inner html will be replaced with the editor instance -->
     <div id="editor">
-        <h1>Welcome to <span style="text-decoration:underline;">AJE</span> AGAIN</h1>
+
+        <h1>Welcome to <span style="text-decoration:underline;">AJE</span></h1>
+
         <p>I am some <span style="color:yellow;background-color:#ff0000;">coloured text</span> for formatting</p>
         <p>I am AJE - <span style="font-style:italic;">Another <span style="font-weight:bold;">Javascript</span> Editor</span>! My name is pronounced <span style="font-weight:bold;">Ajay</span>.</p>
-        <blockquote>I am a block quote and am not yet supported by AJE so you won't see me when the page is saved.</blockquote>
+        <blockquote>I am a block quote. I am a block quote. I am a block quote. I am a block quote. I am a block quote. I am a block quote. </blockquote>
+        
+        <h2>Blocks</h2>
+
+        <p>AJE supports the main block formats, including headings, paragraphs and blockquotes. These can be extended eaily for other block types.</p>
+        
         <h2>Lists</h2>
+
+        <p>AJE supports standard list level formatting indented lists.</p>
         <ul>
             <li>I am an unordered list A</li>
             <li>I am an unordered list B</li>
@@ -23,20 +32,42 @@
         </ul>
         <ol>
             <li>I am an ordered list 1</li>
-            <li>I am an ordered list 2</li>
+            <li>I am an ordered list 2 with an indented unordered list
+                <ul>
+                    <li>Item A</li>
+                    <li>Item B</li>
+                    <li>Item C</li>
+                </ul>
+            </li>
             <li>I am an ordered list 3</li>
         </ol>
+
+        <h2>Inline styling</h2>
+
+        <p>AJE supports a range of inline styling options which can be extended easily.</p>
+
         <h2>Custom elements</h2>
-        <h3>Block level elements</h3>
-        <p>This paragraph contains a custom element
+
+        <h3>Block level custom elements</h3>
+
+        <p>This paragraph contains a block level custom element:
             <custom id="kranj6hr0745u1oxn7du">
                 <span class="property1">a</span>
                 <span class="property2">b</span>
                 <span class="property3">c</span>
             </custom>
         </p>
-        <h3>Inline level elements</h3>
-        <p>This is an inline element with a link to the <a href="https://bbc.co.uk" data-display="2" data-label="BBC"></a> website.</p>
+
+        <h3>Inline custom elements</h3>
+
+        <p>This paragraph contains an inline custom element with a link to the <a href="https://bbc.co.uk" data-display="2" data-label="BBC"></a> website.</p>
+
+        <h2>Miscellanious</h2>
+
+        <h3>Saving editor contents</h3>
+
+        <p>When the editor content is saved the data is cleaned to remove any non-supported elements or styling. Additionally, custom elements can have an optional "clean" method that is invoked automatically on save to handle any custom cleaning required.</p>
+
     </div>
     <button type="button" id="save">Save</button>
     <div id="debug"></div>
@@ -85,7 +116,7 @@
         target.innerHTML = ''
         // Setup toolbar
         const toolbar = [
-            [ Blocks.H1, Blocks.H2, Blocks.H3, Blocks.P],
+            [ Blocks.H1, Blocks.H2, Blocks.H3, Blocks.P, Blocks.BQ],
             [ Blocks.OL, Blocks.UL],
             [ Styles.B, Styles.I, Styles.U, Colours.FOREGROUND, Colours.BACKGROUND, Styles.CLEAR],
             [ Buffer.UNDO, Buffer.REDO ],

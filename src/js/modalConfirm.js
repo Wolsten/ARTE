@@ -10,12 +10,12 @@ function form(title,message,cancel,confirm){
         confirm = 'Yes - lose changes'
     }
     return `
-        <div class="modal-confirm-container">
-            <header class="modal-confirm-header">
-                <h3 class="modal-confirm-title">${title}</h3>
+        <div class="modal-panel-container">
+            <header class="modal-panel-header">
+                <h3 class="modal-panel-title">${title}</h3>
             </header>
-            <div class="modal-confirm-message">${message}</div>
-            <div class="modal-confirm-buttons">
+            <div class="modal-panel-message">${message}</div>
+            <div class="modal-panel-buttons">
                 <button type="button" class="cancel">${cancel}</button>
                 <button type="button" class="confirm">${confirm}</button>
             </div>
@@ -43,7 +43,7 @@ export const show = function( title, message, cancel, confirm){
         confirm = 'Yes - lose changes'
     }
     panel = document.createElement('DIV')
-    panel.classList.add('modal-confirm')
+    panel.classList.add('modal-panel')
     panel.innerHTML = form(title,message, cancel, confirm)
     panel.querySelector('button.cancel').addEventListener('click', event => {
         event.stopPropagation()

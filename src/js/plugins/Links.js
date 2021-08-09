@@ -1,6 +1,8 @@
 "use strict"
 
-/** Create active links, ie. links which can be edited rather than a normal html */
+/** 
+ * Create active links, ie. links which can be edited rather than a normal html 
+ */
 
 import * as Modal from '../modalConfirm.js'
 import ToolbarButton from '../ToolbarButton.js'

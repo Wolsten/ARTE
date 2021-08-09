@@ -364,8 +364,10 @@ export const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click
 export const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click, options )
 export const H3 = new ToolbarButton( 'block', 'H3', 'Heading 3', Icons.h3, click, options )
 export const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click, options )
+export const BQ = new ToolbarButton( 'block', 'BLOCKQUOTE', 'Blockquote', Icons.bq, click, options )
 export const OL = new ToolbarButton( 'list',  'OL', 'Ordered list',   Icons.ol, click, options )
 export const UL = new ToolbarButton( 'list',  'UL', 'Unordered list', Icons.ul, click, options )
+
 
 
 

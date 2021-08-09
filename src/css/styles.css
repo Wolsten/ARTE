@@ -1,15 +1,35 @@
-/* Fonts */
+/* General */
 
 * {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     box-sizing: border-box;
 }
 
+blockquote {
+    background: #f9f9f9;
+    border-left: 10px solid #ccc;
+    margin: 1.5em 10px;
+    padding: 0.5em 10px;
+    font-style: italic;
+}
+
+/* Index.html */
+
+body > button#save {
+    margin-top:1rem;
+}
+
+body > h5 {
+    padding-top:0.5rem;
+    margin-top:1rem;
+    border-top: grey solid 1px;
+}
 
 /* Editor */
 
 .editor-container {
     position: relative;
+    
 }
 
 .editor-toolbar {
@@ -36,8 +56,11 @@
 
 .editor-body {
     padding:1.4rem;
-    border-bottom: 1px solid rgb(200, 200, 200);;
+    border-bottom: 1px solid rgb(200, 200, 200);
+    /* Ideally make these options */
     min-height:200px;
+    max-height:700px;
+    overflow-y: scroll;
 }
 
 .editor-body p {
@@ -156,7 +179,7 @@ label {
 
 /* Modal confirm */
 
-.modal-confirm {
+.modal-panel {
     position:absolute;
     top:0;
     left:0;
@@ -165,7 +188,7 @@ label {
     background:rgba(100,100,100,0.5);
 }
 
-.modal-confirm-container {
+.modal-panel-container {
     width:80%;
     position:absolute;
     top:25%;
@@ -179,11 +202,11 @@ label {
     border-radius: 0.5rem;
 }
 
-.modal-confirm.show .modal-confirm-container {
+.modal-panel.show .modal-panel-container {
     opacity:1;
 }
 
-.modal-confirm-buttons {
+.modal-panel-buttons {
     margin-top:2rem;
 }
 
@@ -285,23 +308,6 @@ custom button.edit {
     right:0.5rem;
 }
 
-/* Example styling for a colour button */
-input[type=color] {
-    height:30px;
-    width:34px;
-
-    background:white;
-    border: 1px solid rgb(200, 200, 200);
-    border-radius: 0.4rem;
-    padding:0.3rem 0.5rem;
-    -webkit-transition: all 0.5s ease;
-    transition:all 0.5s ease;
-}
-
-input[type=color]:not([disabled]):hover {
-    cursor:pointer;
-}
-
 /* debugging */
 
 div#debug h5 {
@@ -328,18 +334,4 @@ div.debug div.col label {
 div.debug div.col span {
     color: green;
     font-size: 1rem;
-}
-
-
-/* index.html */
-
-body > button#save {
-    margin-top:1rem;
-}
-
-
-body > h5 {
-    padding-top:0.5rem;
-    margin-top:1rem;
-    border-top: grey solid 1px;
 }

@@ -131,9 +131,7 @@ class Editor {
                 button.init( this, button )
             }
             // Set initial button state
-            if ( "setState" in button ){
-                button.setState( this, button )
-            }
+            button.setState( this, button )
             // Some button have shortcuts in which case save for use in the keydown
             // event handler
             if ( "shortcut" in button ){

@@ -4,12 +4,12 @@ let panel = null
 
 function template(title, message){
     return `
-        <div class="modal-confirm-container">
-            <header class="modal-confirm-header">
-                <h3 class="modal-confirm-title">${title}</h3>
+        <div class="modal-panel-container">
+            <header class="modal-panel-header">
+                <h3 class="modal-panel-title">${title}</h3>
             </header>
-            <div class="modal-confirm-message">${message}</div>
-            <div class="modal-confirm-buttons">
+            <div class="modal-panel-message">${message}</div>
+            <div class="modal-panel-buttons">
                 <button type="button" class="btn btn-success close">Close</button>
             </div>
         </div>`
@@ -29,7 +29,7 @@ const hide = function(){
 
 export const show = function(title, message){
     panel = document.createElement('DIV')
-    panel.classList.add('modal-confirm')
+    panel.classList.add('modal-panel')
     panel.innerHTML = template(title, message)
     panel.querySelector('button').addEventListener('click', event => {
         event.stopPropagation()
