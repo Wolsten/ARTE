@@ -3,6 +3,7 @@
 import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
 import * as Buffer from './plugins/buffer.js'
+import * as Feedback from './modalFeedback.js'
 
 class Editor {
 
@@ -12,19 +13,18 @@ class Editor {
 
     /**
      * 
-     * @param node target The dom node to populate with the toolbar and editor
-     * @param string content The initial HTML content for the editor
-     * @param array groups 2-d array of buttons
-     * @param false|{*} buffer instance 
-     * @param {*} options Options, such as the buffer size for undo/redo operations
+     * @param {HTMLElement} target The dom node to populate with the toolbar and editor
+     * @param {string} content The initial HTML content for the editor
+     * @param {object[]} toolbar 2-d array of buttons
+     * @param {object} options Options, such as the buffer size for undo/redo operations
      */
-    constructor( target, content, groups, options ){
+    constructor( target, content, toolbar, options ){
         // Initialise options
         this.options = this.initOptions(options)
         // initialise buffering
         this.initBuffering(content)
         // Initialise the toolbar
-        this.toolbar = this.initToolbar(groups)
+        this.toolbar = this.initToolbar(toolbar)
         // Initialise the editor
         target.innerHTML = Templates.editor(this.toolbar, this.options)
         // Grab dom elements
@@ -36,8 +36,8 @@ class Editor {
         this.range = false
         // Set up event handling
         this.listenForMouseUpEvents()
-        this.listenForKeydownEvents()
         this.listenForPasteEvents()
+        this.listenForKeydownEvents()
         this.initialiseButtons()
         // Optional buffering setup
         if ( this.options.bufferSize > 0 ){
@@ -57,7 +57,6 @@ class Editor {
     /**
      * Handle mutations to the editor node as a result of dom insertions or removals
      * Keyboard entry is handled separately
-     * 
      */
     handleMutation() {
         if ( this.bufferIgnoreMutation(this) === false ){
@@ -67,6 +66,9 @@ class Editor {
         }
     }
 
+    /**
+     * Initialise the buffering vars and methods
+     */
     initBuffering(){
         this.bufferIndex = -1
         this.buffer = []
@@ -77,6 +79,11 @@ class Editor {
         // console.log('buffer index', this.bufferIndex)
     }
 
+    /**
+     * Initialise the optional editor parameters
+     * @param {object} options 
+     * @returns 
+     */
     initOptions(options){   
         const headingNumbers = 'off'
         const bufferSize = 10     
@@ -92,9 +99,13 @@ class Editor {
         return options
     }
 
+    /**
+     * Initialiase the toolbar with the grouped buttons
+     * @param {object[][]} groups 
+     * @returns 
+     */
     initToolbar(groups){
         let toolbar = []
-        toolbar = toolbar.sort( (a,b) => a.group - b.group )
         groups.forEach( (group,index) => {
             group.forEach( button => {
                 button.group = index
@@ -105,8 +116,11 @@ class Editor {
         return toolbar
     }
 
-
+    /**
+     * Initialise the toolbar buttons
+     */
     initialiseButtons(){
+        // Empty array of shortcuts
         this.shortcuts = []
         // Do any custom setup required
         this.toolbar.forEach( button => {
@@ -120,7 +134,8 @@ class Editor {
             if ( "setState" in button ){
                 button.setState( this, button )
             }
-            // Some button have shortcuts in which case save
+            // Some button have shortcuts in which case save for use in the keydown
+            // event handler
             if ( "shortcut" in button ){
                 const shortcut = button.shortcut[0]
                 const trigger = button.shortcut[1]
@@ -149,6 +164,10 @@ class Editor {
     // @section Mouse up events
     // -----------------------------------------------------------------------------
 
+    /**
+     * Listen for mouseup events on the whole document and blur
+     * events on the editor
+     */
     listenForMouseUpEvents(){
         document.addEventListener('mouseup', event => {
             // console.warn('mouseup on',event.target)
@@ -162,19 +181,24 @@ class Editor {
         })
     }
 
+    /**
+     * Handle blur event in the editor
+     * @param {Event} event 
+     */
     handleEditorBlur( event ){
         console.log('editor blurred')
         this.toolbar.forEach( button => {
-            // if ( button.type === 'buffer' ){
-            //     this.buffer.disabled(button)
-            // } else {
-                this.range = false
-                button.setState( this, button )
-            // }
+            this.range = false
+            button.setState( this, button )
             button.element.classList.remove('active')
         })
     }
 
+    /**
+     * Check if the node is within the editor section of the dom tree
+     * @param {HTMLElement} node 
+     * @returns {boolean} true if the node is in the editor
+     */
     nodeInEditor(node){
         while ( node.nodeType == 3 || node.tagName != 'HTML' ){
             if ( node == this.editorNode ){
@@ -185,6 +209,11 @@ class Editor {
         return false
     }
 
+    /**
+     * Check if the node is within the toolbar section of the dom tree
+     * @param {HTMLElement} node 
+     * @returns {boolean} true if the node is in the toolbar
+     */
     nodeInToolbar(node){
         while ( node.nodeType == 3 || node.tagName != 'HTML' ){
             if ( node == this.toolbarNode ){
@@ -195,6 +224,9 @@ class Editor {
         return false
     }
 
+    /**
+     * Set the states of all toolbar buttons
+     */
     setToolbarStates(){
         if ( this.range === false ){
             this.toolbar.forEach( button => {
@@ -202,17 +234,20 @@ class Editor {
             })
             return
         }
-        // Get the applied formats for the range selected (all way up to the highest parent 
-        // inside the editor)
-        //const formats = Helpers.appliedFormats(this.range.startContainer, this.editorNode, this.range.rootNode, '')
-        this.toolbar.forEach( button => button.setState( this, button ) )
+        this.toolbar.forEach( button => {
+            if ( "setState" in button ){
+                button.setState( this, button )
+            }
+        })
     }
 
+    /**
+     * Handle the mouse up event in order to potentially insert a paragraph in
+     * an empty editor, highlight a custom node if selected
+     */
     handleMouseUp(){
-        // // console.log('Handle mouse up')
-        // this.range = Helpers.getRange()
-        // // console.log('handleMouseUp range=',this.range)
-        // Templates.debugRange(this.range)
+        // console.log('Handle mouse up')
+        // console.log('handleMouseUp range=',this.range)
         this.updateRange()
         // let formats = []
         if ( this.range !== false ){
@@ -223,15 +258,15 @@ class Editor {
                 this.insertParagraph()
             }
             // Unselect custom blocks and highlight this one if custom 
-            this.highlightCustomNode(false)
             const custom =  Helpers.getCustomParent(this.range)
-            if ( custom ){
-                this.highlightCustomNode(custom)
-            }
+            this.highlightCustomNode(custom)
         }
         this.setToolbarStates()
     }
 
+    /**
+     * Insert empty paragraph
+     */
     insertParagraph(){
         let p = document.createElement('P')
         // Create a placeholder to ensure set cursor works
@@ -245,6 +280,9 @@ class Editor {
     // @section Keydown events
     // -----------------------------------------------------------------------------
     
+    /**
+     * List for keydown events on the editor node
+     */
     listenForKeydownEvents(){
         this.lastKey = ''
         this.editorNode.addEventListener('keydown', event => {
@@ -306,6 +344,9 @@ class Editor {
         })
     }
 
+    /**
+     * Handle enter key pressed in editor node
+     */
     handleEnter(){
         // this.range = Helpers.getRange()
         // Templates.debugRange(this.range)
@@ -329,26 +370,22 @@ class Editor {
         }
         // Get the new range
         this.updateRange()
-        // this.range = Helpers.getRange()
-        // Templates.debugRange(this.range)
         return handled
     }
 
     /**
-     * 
-     * @returns boolean true if need to prevent default action
+     * Handle delete key
+     * @param {string} key
+     * @returns {boolean} true if need to prevent default action
      */
     handleDelete(key){
         if ( key == 'd' ){
             key = 'Delete'
         }
-        // const range = Helpers.getRange()
-        // Templates.debugRange(range)
         this.updateRange()
         if ( this.range ){
-            const example = this.toolbar.find(button => button.type==='custom')
             const title = 'Information'
-            const message = `To delete a custom element (such as an ${example.tag}) you need to edit it by clicking it and choosing Delete.`
+            const message = `To delete a custom element you need to edit it by clicking it and choosing Delete.`
             // Single selection
             if ( this.range.collapsed ){
                 console.log('Single selection')
@@ -393,7 +430,11 @@ class Editor {
     // @section Keyup events
     // -----------------------------------------------------------------------------
     
+    /**
+     * Listen for key up events on the editor node
+     */
     listenForKeyupEvents(){
+        // Set the handleKeyup method to be the debounced method handleKeyupDelayed
         this.handleKeyup = Helpers.debounce(this.handleKeyupDelayed,500)
         this.editorNode.addEventListener( 'keyup', event => {
             const ignore = ['Shift']
@@ -405,16 +446,26 @@ class Editor {
         })
     }
 
+    /**
+     * Handle keyup events (after being debounced)
+     * @param  {...any} args Handle keyup events
+     */
     handleKeyupDelayed(...args){
+        // Nav keys that just need to set new toolbar states
         const navigation = ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','End','Home']
         let key = args[0]
         //console.log('key',key)
         const editor = args[1]
+        // Check if navigating in the editor
         if ( navigation.includes(key) ){
             editor.range = Helpers.getRange()
             editor.setToolbarStates()
+        // Update the buffer?
         } else {
-            editor.bufferUpdate(editor)
+            // Check if a modal dialogue is shown - do not buffer if so
+            if ( document.querySelectorAll('.show').length == 0 ){
+                editor.bufferUpdate(editor)
+            }
         }
     }
 
@@ -423,7 +474,7 @@ class Editor {
     // -----------------------------------------------------------------------------
     
     /**
-     * Active custom elements may require their click event handles to be reset
+     * Active custom elements are likely to require their event handlers to be reset
      * after updates to the dom
      */
     updateEventHandlers(){
@@ -441,24 +492,30 @@ class Editor {
     // @section Cut, Copy and Paste events
     // -----------------------------------------------------------------------------
     
+    /**
+     * List for cut, copy and paste events in the editor node
+     */
     listenForPasteEvents(){
         const events = ['cut', 'copy','paste']
         events.forEach( evt =>
             this.editorNode.addEventListener(evt, event=>{
                 if ( this.handleCutCopyPaste() ){
                     event.preventDefault()
+                // } else {
+                //     // Update buffer
+                //     setTimeout( ()=>this.handleKeyup(this), 1)
                 }
-                // Update buffer
-                setTimeout( ()=>this.handleKeyup(this), 1)
             })
         )
     }
 
+    /**
+     * Handle cut, copy paste events. Prevent any that would involve custom elements
+     * @returns {boolean} true if should be blocked
+     */
     handleCutCopyPaste(){
         console.log('Detected cut-copy-paste event')
         this.updateRange()
-        // const range = Helpers.getRange()
-        // Templates.debugRange(range)
         // Ensure have a range that is not collapsed
         if ( this.range==false || this.range.collapsed ){
             return false
@@ -466,15 +523,18 @@ class Editor {
         // Loop from start container to end container checking for a non-editable block
         let parent = Helpers.getParentBlockNode(this.range.startContainer)
         const endParent = Helpers.getParentBlockNode(this.range.endContainer)
-        while ( parent !== endParent ){
+        let done = false
+        while ( !done ){
             if ( parent.innerHTML.includes('contenteditable="false"') ){
-                const example = this.toolbar.find(button => button.type==='custom')
                 const title = 'Information'
-                const message = `Cut, copy and paste (of/over) selections with custom elements (such as ${example.tag}s) is not supported. Please modify your selection and try again.`
+                const message = `Cut, copy and paste (of/over) selections with custom elements is not supported. Please modify your selection and try again.`
                 Feedback.show(title, message)
                 return true
             }
             parent = parent.nextElementSibling
+            if ( parent === endParent ){
+                done = true
+            }
         }
         return false
     }
@@ -484,29 +544,41 @@ class Editor {
     // @section Other methods
     // -----------------------------------------------------------------------------
     
+    /**
+     * Clean the editor node contents
+     * @returns {string} The cleaned html data
+     */
     getCleanData(){
         let node = this.editorNode.cloneNode(true)
-        const customButtons = this.toolbar.filter( button => button.type==='custom')
+        const customButtons = this.toolbar.filter( button => button.type==='custom' )
         Helpers.cleanForSaving(node, customButtons)
-        node.innerHTML = node.innerHTML.replace(/\n[\n ]*?</gm, '<')
+        // Remove new lines and spaces before opening tags
+        node.innerHTML = node.innerHTML.replace(/[\n ]*?</gm, '<')
         return node.innerHTML
     }
 
+    /**
+     * UPdate the editor node with the supplied content
+     * @param {string} content 
+     */
     updateEditor(content){
         this.editorNode.innerHTML = content
     }
 
+    /**
+     * Get the new range in the editor node and when debugging display this
+     */
     updateRange(){
         this.range = Helpers.getRange()
         Templates.debugRange( this.range )
     }
  
     /**
-     * 
-     * @param node|false node 
+     * Remove "selected" class from all custom elements and then add to node 
+     * (if not false)
+     * @param {HTMLElement|false} node 
      */
     highlightCustomNode(node){
-        // Remove "selected" class from all custom elements and then add back into this one
         const customs = this.editorNode.querySelectorAll('[contenteditable=false]')
         customs.forEach(custom=>custom.classList.remove('selected'))
         if ( node ){

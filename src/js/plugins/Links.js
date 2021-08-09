@@ -369,7 +369,6 @@ const clean = function(node){
     } else {
         button.element.disabled = false
         const link = editor.range.blockParent.querySelector(TAG)
-        console.warn('link',link)
         if ( link != null ){
             button.element.classList.add('active')
         } else {

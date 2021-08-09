@@ -84,31 +84,24 @@
         let content = target.innerHTML
         target.innerHTML = ''
         // Setup toolbar
-        const groups = [
+        const toolbar = [
             [ Blocks.H1, Blocks.H2, Blocks.H3, Blocks.P],
             [ Blocks.OL, Blocks.UL],
             [ Styles.B, Styles.I, Styles.U, Colours.FOREGROUND, Colours.BACKGROUND, Styles.CLEAR],
             [ Buffer.UNDO, Buffer.REDO ],
             [ Mentions.BUTTON, Links.BUTTON, Custom.BUTTON ]
         ]
-
         // Perform optional plugin setup
         Mentions.setup(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
         // Define editor options
         const options = {
-            // Toolbar buttons required
-            // Allowed values 'H1','H2','H3','P','OL','UL','B','U','I','CLEAR','UNDO','REDO']
-            // All other elements are filtered out unless specified below in a plugin
-            // tags: [/* 'H1','H2','H3','P','OL','UL', */'B','I','U','CLEAR'],
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
             headingNumbers: 'on', 
-            // Custom plugs to add to the toolbar to enhance the editor
-            //plugins: [Blocks, Mentions, Links, Custom, Colours],
             // Number of Undo operations supported, max 10       
             bufferSize: 10     
         }
         // Create editor and add to dom in target position
-        const editor = new Editor(target, content, groups, options)
+        const editor = new Editor(target, content, toolbar, options)
         // Look for Save
         const save = document.getElementById('save')
         save.addEventListener('click', ()=>{

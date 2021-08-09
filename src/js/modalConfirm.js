@@ -22,15 +22,6 @@ function form(title,message,cancel,confirm){
         </div>`
 }
 
-function delayedRemove(){
-    panel.remove()
-    panel = null
-}
-
-function delayedShow(){
-    panel.classList.add('show')
-}
-
 
 // -----------------------------------------------------------------------------
 // @section Exports
@@ -38,7 +29,10 @@ function delayedShow(){
 
 export const hide = function(){
     panel.classList.remove('show')
-    setTimeout( ()=>delayedRemove(), 500 )
+    setTimeout( ()=>{
+        panel.remove()
+        panel = null
+    }, 500 )
 }
 
 export const show = function( title, message, cancel, confirm){
@@ -57,6 +51,8 @@ export const show = function( title, message, cancel, confirm){
     })
     document.querySelector('body').appendChild(panel)
     // Invoke with arrow function, otherwise this will be the current window
-    setTimeout( () => delayedShow(), 10 )
+    setTimeout( () => {
+        panel.classList.add('show')
+    }, 10 )
     return panel.querySelector('button.confirm')
 }
