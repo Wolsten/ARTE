@@ -7,15 +7,21 @@ import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 
-// Tag name for this plugin
+/**
+ * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
+ */
 const TAG = 'A'
-
-// Set in init method
+/**
+ * @var {HTMLElement} node The actively edited node
+ */
 let node
-let editorNode
+/**
+ * @var {boolean} dirty Flag whether input data changed
+ */
 let dirty
-let range
-let selectedText = ''
+/**
+ * @var {HTMLElement} panel The container for the edit dialogue
+ */
 let panel = null
 
 
@@ -23,19 +29,36 @@ let panel = null
 // @section Private methods
 // -----------------------------------------------------------------------------
 
-function edit( link ){
+/**
+ * Edit an existing link
+ * 
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ * @param {HTMLElement} element The custom node to be edited
+ */
+ function edit( editor, button, element ){
     // If we already have an active panel - ignore clicks on links
     if ( panel ){
         return
     }
     // Save the clicked link
-    node = link
-    show(true)
+    node = element
+    // Show the dialogue, selected text (3rd param) is ignored
+    show(editor, button, '', true)
 }
 
-function show( edit ){
-    if ( edit == false ){
+/**
+ * Show the link edit dialogue
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ * @param {string} selectedText 
+ * @param {boolean} editFlag flag indicating whether to edit or create new
+ */
+function show( editor, button, selectedText, editFlag ){
+    if ( editFlag == false ){
         node = document.createElement(TAG)
+        node.id = Helpers.generateUid()
+        node.setAttribute('contenteditable','false')
         node.href = ''
         node.dataset.label = selectedText
         node.dataset.display = 0
@@ -43,7 +66,7 @@ function show( edit ){
     panel = document.createElement('DIV')
     panel.id = 'link-edit'
     panel.classList.add('edit-panel')
-    panel.innerHTML = form( edit )
+    panel.innerHTML = form( editFlag )
     // Initialise confirmation module and dirty data detection
     dirty = false
     const inputs = panel.querySelectorAll('form input')
@@ -60,54 +83,62 @@ function show( edit ){
             hide()
         }
     })
-    if ( edit ){
+    if ( editFlag ){
         panel.querySelector('button.delete').addEventListener('click', () => {
             const confirmBtn = Modal.show('Delete link', 'Do you really want to delete this link?')
             confirmBtn.addEventListener( 'click', () => {
                 Modal.hide()
-                deleteItem() 
+                deleteItem(editor, button) 
             })
         })
     }
     panel.querySelector('form').addEventListener('submit', event => {
         event.preventDefault()
-        save( edit )
+        save(editor, button, editFlag )
     })
     // Add to dom, position and focus the input
     document.querySelector('body').appendChild(panel)
     const href = panel.querySelector('form #href')
     href.focus()
     href.setSelectionRange(href.value.length, href.value.length)
-    // Add transition class
+    // Add show class to display with transition
     setTimeout( ()=>panel.classList.add('show'),10 )
 }
 
-function save( edit ){
-    console.log('Save changes')
+/**
+ * Save the changes set in the dialogue
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to clicked
+ * @param {boolean} editFlag Flag whether to insert new or update existing link
+ */
+function save( editor, button, editFlag ){
+    // console.log('Save changes')
     node.href = panel.querySelector('form #href').value.trim()
     node.dataset.label = panel.querySelector('form #label').value.trim()
     node.dataset.display = parseInt(panel.querySelector('form #display').value)
-    if ( edit==false ){
-        insert()
+    if ( editFlag==false ){
+        insert(editor, button)
     }
     // Format link and add event handler
-    format(node)
+    format(editor, button, node)
     hide()
+    // Update state
+    editor.range = Helpers.setCursor( node, 0)
+    setState(editor, button)
 } 
 
-
-
-
 /**
- * Update the selected container with the new link
+ * Insert a new link in the editor at the end of the current 
+ * range's startContainer
+ * @param {object} editor A unique editor instance
  */
-function insert(){
-    const parent = range.startContainer.parentNode
+ function insert(editor){
+    const parent = editor.range.startContainer.parentNode
     // Get any pretext pr post text in the current container that is not selected
-    let preText = range.startContainer.textContent.substring(0,range.startOffset)
+    let preText = editor.range.startContainer.textContent.substring(0,editor.range.startOffset)
     let postText
-    if ( range.collapsed ){
-        postText = range.startContainer.textContent.substring(range.startOffset)
+    if ( editor.range.collapsed ){
+        postText = editor.range.startContainer.textContent.substring(editor.range.startOffset)
         // Insert leading and trailing spaces if needed
         if ( preText.charAt(preText.length+1) != ' ' ){
             preText = preText + ' '
@@ -116,76 +147,108 @@ function insert(){
             postText = ' ' + postText
         }
     } else {
-        postText = range.startContainer.textContent.substring(range.endOffset)
+        postText = editor.range.startContainer.textContent.substring(editor.range.endOffset)
     }
     // Insert pretext before the current container
     if ( preText ) {
-        parent.insertBefore(document.createTextNode(preText), range.startContainer)
+        parent.insertBefore(document.createTextNode(preText), editor.range.startContainer)
     }
     // Insert the node before the current container
-    node = parent.insertBefore(node, range.startContainer)
+    node = parent.insertBefore(node, editor.range.startContainer)
     // Insert post text before the current container
     if ( postText ) {
-        parent.insertBefore(document.createTextNode(postText), range.startContainer)
+        parent.insertBefore(document.createTextNode(postText), editor.range.startContainer)
     }
     // Remove the pre-existing container
-    range.startContainer.remove()
+    editor.range.startContainer.remove()
 }
 
-function deleteItem(){
-    const node = editorNode.querySelector(`${TAG}#${data.id}`)
+/**
+ * Delete the link in the dom
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ */
+ function deleteItem(editor, button){
+    //node = editorNode.querySelector(`${TAG}#${data.id}`)
     node.remove()
     hide()
+    // Update state
+    editor.range = false
+    setState(editor, button)
 }
 
+/**
+ * Hide the dialogue with transition
+ */
 function hide(){
     panel.classList.remove('show')
-    panel.remove()
-    panel = null 
+    setTimeout( ()=>{
+        panel.remove()
+        panel = null
+    }, 500)
 }
 
+/**
+ * Generate the label to be used for the link
+ * @param {HTMLElement} link 
+ * @returns {string} The string to display
+ */
 function label(link){
+    // Test the display option saved with the link
     switch (parseInt(link.dataset.display)){
+        // Display as text label?
         case 0:
             // Label is an optional parameter
             if ( link.dataset.label ){
                 return link.dataset.label
             }
             break
+        // Display as the href
         case 1:
             return link.href
+        // Assuming they are different display as "label (href)""
         case 2:
             if ( link.dataset.label && link.dataset.label != link.href ){
                 return `${link.dataset.label} (${link.href})`
             }
     }
+    // Default to the href
     return link.href
 }
 
 /**
- * The format of a source link xml node is:
- * 
+ * The format of a source link element is:
  * <a href="href" data-label="label" data-display="0|1|2"> </a>
  * 
- * The format of a editor link html node is:
+ * The formatted link looks like this:
+ * <a href="href" id="unique-editor-id" data-label="label" data-display="0|1|2" contenteditable="false">
+ *      [label|link|label (link)]
+ * </a>
  * 
- * <a href="href" id="unique-editor-id" data-label="label" data-display="0|1|2" contenteditable="false">label|link|label (link)</a>
- * 
- * @param {*} The custom source link xml
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to use
+ * @param {HTMLElement} element
  */
-function format( link ){
-    // Click event handling - first time and after reformatting
-    link.id = Helpers.generateUid()
-    link.setAttribute('contenteditable',false)
-    link.title = 'Click to edit'
-    link.innerText = label(link)
-    link.addEventListener('click', event => {
+function format( editor, button, element ){
+    // Generate new id if required
+    if ( element.id == false ){
+        element.id = Helpers.generateUid()
+    }
+    element.setAttribute('contenteditable',false)
+    element.title = 'Click to edit'
+    element.innerText = label(element)
+    element.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(link) 
+        edit(editor, button, element) 
     })
 }
 
+/**
+ * Generate html for a dialogue to create/edit a link
+ * @param {boolean} edit flag
+ * @returns {string} HTML string
+ */
 function form(edit){
     let title = 'Create link'
     let delBtn = ''
@@ -233,42 +296,58 @@ function form(edit){
         </div>`
 }
 
-// -----------------------------------------------------------------------------
-// @section Exports
-// -----------------------------------------------------------------------------
 
-const init = function( editor ){
+/**
+ * Optional method that, on first load of editor, converts the minimal custom 
+ * HTML into the full editable version
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to use
+ */
+const init = function( editor, button ){
     // console.log('Initialising links')
-    editorNode = editor.editorNode
-    let links = editorNode.querySelectorAll( TAG )
-    links.forEach( link => format( link ))
+    const links = editor.editorNode.querySelectorAll( TAG )
+    links.forEach( link => format( editor, button, link ))
 }
 
-const click = function( editor, btn ){
+/**
+ * Mandatory button click function which displays the colour dialogue
+ * for the supplied button
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ */
+const click = function( editor, button ){
     console.log('click link')
     if ( editor.range === false){
         console.log('No range selected')
         return
     }
-    range = editor.range
     // Get default label if range not collapsed
-    selectedText = ''
-    if ( range.collapsed == false && 
-         range.startContainer == range.endContainer ){
-            selectedText = range.endContainer.textContent.substring(range.startOffset, range.endOffset)  
+    let selectedText = ''
+    if ( editor.range.collapsed == false && 
+         editor.range.startContainer == editor.range.endContainer ){
+        selectedText = editor.range.endContainer.textContent.substring(editor.range.startOffset, editor.range.endOffset)  
     }
-    show( false )
+    show( editor, button, selectedText, false )
 }
 
+/**
+ * Optional method to add event handlers to all custom links
+ * @param {object} editor 
+ */
 const addEventHandlers = function(editor){
     const nodes = editor.editorNode.querySelectorAll(TAG)
     nodes.forEach( node => node.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit( node ) 
+        edit(editor, BUTTON, node) 
     }))
 }
 
+/**
+ * Optional method to reformat/clean the custom element as it should be saved in a file or database
+ * @param {HTMLElement} node
+ * @returns HTMLElement as cleaned
+ */
 const clean = function(node){
     console.log('clean link',node)
     node.removeAttribute('id')
@@ -278,6 +357,30 @@ const clean = function(node){
     return node
 }
 
-const options = {init, addEventHandlers, clean}
+/**
+ * Set the disabled and active states of a button
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ */
+ const setState = function( editor, button ){
+    if ( editor.range === false ){
+        button.element.disabled = true
+        button.element.classList.remove('active')
+    } else {
+        button.element.disabled = false
+        const link = editor.range.blockParent.querySelector(TAG)
+        console.warn('link',link)
+        if ( link != null ){
+            button.element.classList.add('active')
+        } else {
+            button.element.classList.remove('active')
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
+
+const options = {init, setState, addEventHandlers, clean}
 export const BUTTON = new ToolbarButton( 'custom', TAG, 'Link', Icons.link, click, options ) 
-// export const buttons = [button]

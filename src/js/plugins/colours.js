@@ -8,6 +8,16 @@ import ToolbarButton from '../ToolbarButton.js'
 let options
 let input
 
+
+/**
+ * Show the colour input for the button supplied, saving in the global input 
+ * variable.
+ * The input is not displayed but triggered programmatically to display
+ * a HTML5 colour input dialogue. 
+ * Clicking on this triggers the input event.
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ */
 function show(editor, btn){
     input = document.createElement('input')
     input.type = 'color'
@@ -17,21 +27,33 @@ function show(editor, btn){
     input.addEventListener('input', event => {
         console.log('colour changed',event.target.value)
         const colour = event.target.value
+        // Synthesise a button using the colour value selected
         const button = {
             setState,
             style:`${btn.style}:${colour}`, 
             removeStyle:btn.removeStyle, 
             element:btn.element
         }
+        // Apply the new style. The Styles module does the heavy lifting 
+        // in terms of parsing the dom tree
         Styles.click( editor, button )
         hide()
     })
 }
 
+/**
+ * Hide the dialogue
+ */
 function hide(){
     input.remove()
 }
 
+/**
+ * Mandatory button click function which displays the colour dialogue
+ * for the supplied button
+ * @param {object} editor A unique editor instance
+ * @param {object} btn The button to act on
+ */
 const click = function( editor, btn ){
     if ( editor.range === false || editor.range.collapsed ){
         console.log('No non-collapsed range selected')
@@ -42,8 +64,8 @@ const click = function( editor, btn ){
 
 /**
  * Set the disabled and active states of a button
- * @param range Standard range object with addition of a rootNode which is always a block
- * and is either the same as the commonAncestor ior the parent node of this when it is a text node
+ * @param {object} editor A unique editor instance
+ * @param {object} btn The button to act on
  */
 const setState = function(editor,btn){
     // console.log('setting colour state')
@@ -89,12 +111,8 @@ const setState = function(editor,btn){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-
 options = {setState, style:'color', removeStyle:'color:black;'}
 export const FOREGROUND = new ToolbarButton( 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, options)
 
 options = {setState, style:'background-color', removeStyle:'background-color:white;'}
 export const BACKGROUND = new ToolbarButton( 'inline', 'BGC', 'Background colour', Icons.colourBackground, click, options)
-
-
-// export const buttons = [ FGC, BGC ]

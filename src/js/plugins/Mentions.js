@@ -9,6 +9,11 @@ let dataListOptions = ''
 let panel = null
 let filterInput = ''
 
+/**
+ * Get the position for the input dialogue base don current range
+ * @param {HTMLElement} dialogue 
+ * @returns {number,number} position as x,y coordinates
+ */
 function getPosition(dialogue){
     let pos
     // If this is not a text node then get the first text node
@@ -35,6 +40,10 @@ function getPosition(dialogue){
 } 
 
 
+/**
+ * Generate the html for the input form
+ * @returns {string} HTML form string
+ */
 function form(){
     return `
         <div class="inplace-content">
@@ -43,10 +52,14 @@ function form(){
         </div>`
 }
 
+/**
+ * Handle keyup events in the input box
+ * @param {Event} e 
+ */
 function handleKeyup(e){
-    console.log('key',e.target)
-    console.log('key',e.key)
-    console.log('shift',e.shiftKey)
+    // console.log('key',e.target)
+    // console.log('key',e.key)
+    // console.log('shift',e.shiftKey)
     e.stopPropagation()
     if ( e.key=='Escape' ){
         hide()
@@ -55,6 +68,11 @@ function handleKeyup(e){
     }
 }
 
+/**
+ * Handle mentions button click
+ * @param {object} edt The editor instance
+ * @param {object} btn The button clicked
+ */
 function click(edt,btn){
     if ( edt.range === false ){
         console.log('No range selected')
@@ -80,11 +98,18 @@ function click(edt,btn){
     filterInput.focus()
 }
 
+/**
+ * Hide the input
+ */
 function hide(){
     panel.remove()
     panel = null
 }
 
+/**
+ * Insert a new person's name in the appropritae position
+ * @param {string} person 
+ */
 function insert(person){
     let contents = editor.range.startContainer.textContent
     let offset   = editor.range.startOffset
@@ -106,8 +131,9 @@ function insert(person){
     offset += person.length
     editor.range = setCursor( editor.range.startContainer, offset )
     hide()
-    // Update the buffer. Ignored if no buffering set
-    editor.buffer.update()
+    // Update the buffer explicity because this operation does not
+    // change the dom tree and hence will be missed by the observer
+    editor.bufferUpdate(editor)
 }
 
 
@@ -115,7 +141,6 @@ function insert(person){
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
-
 
 export const setup = function(people){
     people = people.sort()
@@ -127,4 +152,3 @@ export const setup = function(people){
 
 const options = {shortcut:'@'}
 export const BUTTON = new ToolbarButton( 'custom', 'mention', 'Mention', Icons.person, click, options ) 
-//export const buttons = [button]

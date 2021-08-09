@@ -75,15 +75,11 @@ class Editor {
     initBuffering(){
         this.bufferIndex = -1
         this.buffer = []
-        // if ( this.options.bufferSize > 0 ){
-        //     this.bufferIndex = 0
-        //     this.buffer = [content]
-        // }
         this.bufferIgnore = false
         this.bufferUpdate = Buffer.update
         this.bufferIgnoreMutation = Buffer.ignore
-        console.log('buffer',this.buffer)
-        console.log('buffer index', this.bufferIndex)
+        // console.log('buffer',this.buffer)
+        // console.log('buffer index', this.bufferIndex)
     }
 
     initOptions(options){   

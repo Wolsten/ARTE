@@ -1,6 +1,13 @@
+"use strict"
+
 import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
 
+/**
+ * If available update the editor content with the last but one
+ * entry in the buffer
+ * @param {object} editor The editor instance
+ */
 const undo = function(editor){
     if ( editor.bufferIndex > 0 ){
         editor.bufferIndex --
@@ -14,6 +21,11 @@ const undo = function(editor){
     editor.updateEventHandlers()
 }
 
+/**
+ * If available update the editor content with the next but one
+ * entry in the buffer
+ * @param {object} editor The editor instance
+ */
 const redo = function(editor){
     if ( editor.bufferIndex + 1 < editor.buffer.length ){
         editor.bufferIndex ++
@@ -27,6 +39,11 @@ const redo = function(editor){
     editor.updateEventHandlers()
 }
 
+/**
+ * Set the disabled and active states of a button
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ */
 const setState = function( editor, button ){
     if ( button.tag == 'UNDO' ){
         button.element.disabled = editor.buffer.length<=1 || editor.bufferIndex <= 0
@@ -35,6 +52,11 @@ const setState = function( editor, button ){
     }
 }
 
+/**
+ * Add a new item to the editor buffer and if required remove the first entry
+ * when the maximum buffer size is reached
+ * @param {object} editor The editor instance
+ */
 export const update = function(editor){
     if ( editor.options.bufferSize == 0 ){
         return
@@ -61,6 +83,14 @@ export const update = function(editor){
     console.log('buffer index', editor.bufferIndex)
 }
 
+/**
+ * Return the current value of the buffer ignore flag but at the
+ * same time reset the flag so that buffering until set again
+ * This facility ensures that not all updates to the editor 
+ * content are acted on immediately
+ * @param {object} editor The editor instance
+ * @returns 
+ */
 export const ignore = function(editor){
     let current = editor.bufferIgnore
     editor.bufferIgnore = false

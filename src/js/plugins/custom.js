@@ -5,14 +5,23 @@ import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 
-// A custom tag must be in upper case
+/**
+ * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
+ */
 const TAG = 'CUSTOM'
-
-// Global variables
-let dirty
-let panel = null
-let data
+/**
+ * @var {HTMLElement} node The actively edited node
+ */
 let node
+ /**
+  * @var {boolean} dirty Flag whether input data changed
+  */
+let dirty
+ /**
+  * @var {HTMLElement} panel The container for the edit dialogue
+  */
+let panel = null
+
 
 // -----------------------------------------------------------------------------
 // @section Private methods
@@ -22,8 +31,9 @@ let node
  * Edit an existing custom node by extracting the data from the node and displaying
  * the edit form
  * 
- * @param {node} element The custom node to be edited
- * @returns 
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ * @param {HTMLElement} element The custom node to be edited
  */
 function edit( editor, button, element ){
     // If we already have an active panel - ignore edit clicks
@@ -31,20 +41,31 @@ function edit( editor, button, element ){
         return
     }
     node = element
-    data = {
-        id: node.id,
-        property1: node.querySelector('.property1').innerText.trim(),
-        property2: node.querySelector('.property2').innerText.trim(),
-        property3: node.querySelector('.property3').innerText.trim(),
-    }
     show( editor, button, true)
 }
 
-
+/**
+ * Show the custom dialogue.
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ * @param {boolean} editFlag Whether editing existing custom element or creating new
+ */
 function show( editor, button, editFlag ){
+    if ( editFlag == false ){
+        // Create a empty HTMLElement
+        node = document.createElement(TAG)
+        node.id = Helpers.generateUid()
+        node.setAttribute('contenteditable','false')
+        node.innerHTML = template({property1:' ', property2:' ', property3:' '})
+    }
     panel = document.createElement('DIV')
     panel.id = 'custom-edit'
     panel.classList.add('edit-panel')
+    const data = {
+        property1: node.querySelector('.property1').innerText,
+        property2: node.querySelector('.property2').innerText,
+        property3: node.querySelector('.property3').innerText,
+    }
     panel.innerHTML = form(data, editFlag)
     // Initialise confirmation module and dirty data detection
     dirty = false
@@ -73,33 +94,36 @@ function show( editor, button, editFlag ){
     }
     panel.querySelector('form').addEventListener('submit', event => {
         event.preventDefault()
-        save(editor, button)
+        save(editor, button, editFlag)
     })
     // Add to dom, position and focus the input
     document.querySelector('body').appendChild(panel)
     const prop1 = panel.querySelector('form #property1')
     prop1.focus()
     prop1.setSelectionRange(prop1.value.length, prop1.value.length)
-    // Add transition class
+     // Add show class to display with transition
     setTimeout( ()=>panel.classList.add('show'), 10 )
 }
 
 /**
- * Save the new or edited custom node
+ * Save the new or edited custom element
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button clicked
+ * @param {boolean} editFlag Flag whether to insert new or update existing link
  */
-function save(editor, button){
-    console.log('Save changes')
-    // Create new empty custom element and add to the editor?
-    if ( data.id == '' ){
-        data.id = Helpers.generateUid()
+function save(editor, button, editFlag ){
+    // console.log('Save changes')
+    node.querySelector('.property1').innerText = panel.querySelector('form #property1').value.trim()
+    node.querySelector('.property2').innerText = panel.querySelector('form #property2').value.trim()
+    node.querySelector('.property3').innerText = panel.querySelector('form #property3').value.trim()
+    if ( editFlag==false ){
         insert(editor, button)
     }
-    // Save the (updated) properties 
-    data.property1 = panel.querySelector('form #property1').value.trim()
-    data.property2 = panel.querySelector('form #property2').value.trim()
-    data.property3 = panel.querySelector('form #property3').value.trim()
-    // Update the dom after a delay
-    setTimeout( ()=>updateDom(editor, button), 10)
+    // // Update the dom after a delay
+    // setTimeout( ()=>updateDom(editor, button), 10)
+    // Format node and add event handler
+    format(editor, button, node)
+    hide()
     // Update state
     editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
@@ -108,37 +132,45 @@ function save(editor, button){
 /**
  * Insert a new custom element in the editor at the end of the current 
  * range's startContainer
+ * @param {object} editor A unique editor instance
  */
-function insert(editor, button){
-    // const 
-    node = document.createElement(TAG)
-    node.innerHTML = template(data)
-    node.id = data.id
-    node.setAttribute('contenteditable', 'false')
+function insert(editor){
+    // // const 
+    // node = document.createElement(TAG)
+    // node.innerHTML = template(data)
+    // node.id = data.id
+    // node.setAttribute('contenteditable', 'false')
     node = editor.range.startContainer.parentNode.appendChild(node)
-    // Update state
-    editor.range = Helpers.setCursor( node, 0)
-    setState(editor, button)
+    // // Update state
+    // editor.range = Helpers.setCursor( node, 0)
+    // setState(editor, button)
+    // hide()
 }
+
+// /**
+//  * Update the custom element in the dom
+//  * @param {object} editor A unique editor instance
+//  * @param {object} button The button to act on
+//  */
+// function updateDom(editor, button){
+//     // const form = panel.querySelector('form')
+//     // const node = editorNode.querySelector(`${TAG}#${data.id}`)
+//     node.querySelector('.property1').innerText = data.property1
+//     node.querySelector('.property2').innerText = data.property2
+//     node.querySelector('.property3').innerText = data.property3
+//     // Format node and add event handler
+//     format(editor, button, node)
+//     // Close the edit pane
+//     hide()
+// }
 
 /**
- * Update the custom element in the dom
+ * Delete the custom element in the dom
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
  */
-function updateDom(editor, button){
-    // const form = panel.querySelector('form')
-    // const node = editorNode.querySelector(`${TAG}#${data.id}`)
-    node.querySelector('.property1').innerText = data.property1
-    node.querySelector('.property2').innerText = data.property2
-    node.querySelector('.property3').innerText = data.property3
-    // Format node and add event handler
-    format(editor, button, node)
-    // Close the edit pane
-    hide()
-}
-
 function deleteItem(editor, button){
-    // @todo Remove link from the editor
-    const node = editor.editorNode.querySelector(`${TAG}#${data.id}`)
+    //node = editor.editorNode.querySelector(`${TAG}#${data.id}`)
     node.remove()
     hide()
     // Update state
@@ -146,32 +178,38 @@ function deleteItem(editor, button){
     setState(editor, button)
 }
 
-function hide(){
+/**
+ * Hide the dialogue with transition
+ */
+ function hide(){
     panel.classList.remove('show')
-    panel.remove()
-    panel = null
-
+    setTimeout( ()=>{
+        panel.remove()
+        panel = null
+    }, 500)
 }
 
 /**
  * Optional method to reformat/clean the custom element as it should be saved in a file or database
- * @param {node} n
- * @returns node as cleaned
+ * @param {HTMLElement} node
+ * @returns HTMLElement as cleaned
  */
-function clean(n){
-    console.log('clean custom element',n)
+function clean(node){
+    console.log('clean custom element',node)
     // Remove the content editable flag and the ornamentation
-    n.removeAttribute('contenteditable')
-    n.querySelector('.title').remove()
-    n.querySelector('.advice').remove()
-    n.querySelector('.label').remove()
-    n.querySelector('button').remove()
-    return n
+    node.removeAttribute('contenteditable')
+    node.querySelector('.title').remove()
+    node.querySelector('.advice').remove()
+    node.querySelector('.label').remove()
+    node.querySelector('button').remove()
+    return node
 }
 
 /**
- * Format the given custom node and add click event handler
- * @param node n The custom node
+ * Format the given custom element and add click event handler
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to use
+ * @param {HTMLElement} element
  */
 function format( editor, button, element ){
     const id = element.id
@@ -179,9 +217,8 @@ function format( editor, button, element ){
     if ( element.id == false ){
         element.id = Helpers.generateUid()
     }
-    // Define the custom element
-    data = {
-        id: element.id,
+    // Element data
+    const data = {
         property1: element.querySelector('.property1').innerText,
         property2: element.querySelector('.property2').innerText,
         property3: element.querySelector('.property3').innerText,
@@ -195,6 +232,7 @@ function format( editor, button, element ){
     editButton.innerText = 'Edit'
     editButton.addEventListener('click', event => {
         event.preventDefault()
+        event.stopPropagation()
         edit(editor, button, element) 
     })
     element.appendChild(editButton)
@@ -206,26 +244,28 @@ function format( editor, button, element ){
 
 /**
  * Add event handlers to all custom node edit buttons
+ * @param {object} editor A unique editor instance
  */
 function addEventHandlers(editor){
     const buttons = editor.editorNode.querySelectorAll(TAG + ' button')
     buttons.forEach( button => button.addEventListener('click', event => {
         event.preventDefault()
+        event.stopPropagation()
         const element = button.parentNode
-        edit(editor, BUTTON, element) 
+        edit(editor, BUTTON, element)
     }))
 }
 
 /**
  * Form template
- * @param {property1, property2, property3} props The form properties to be edited
- * @param boolean edit The edit flag used to configure title and add delete button 
- * @returns string Generated html
+ * @param {string, string, string} props The form properties to be edited
+ * @param {boolean} editFlag The edit flag used to configure title and add delete button 
+ * @returns {string} Generated html
  */
-function form(props,edit){
+function form(props,editFlag){
     let title = 'Create custom element'
     let delBtn = ''
-    if ( edit ) {
+    if ( editFlag ) {
         title = 'Edit custom element'
         delBtn = `<button type="button" class="delete">Delete</button>`
     }
@@ -258,6 +298,11 @@ function form(props,edit){
         </div>`
 }
 
+/**
+ * 
+ * @param {string,string,string} props The properties to display
+ * @returns {string} HTML text to display
+ */
 function template(props){
     return `
         <span class="title">I am a custom object with 3 properties:</span>
@@ -268,18 +313,23 @@ function template(props){
     `
 }
 
-
-
-// -----------------------------------------------------------------------------
-// @section Exports
-// -----------------------------------------------------------------------------
-
+/**
+ * On first load of editor, convert the minimal custom HTML into the full
+ * editable version
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to use
+ */
 const init = function( editor, button ){
     //console.log('Initialising custom plugin')
     const customElements = editor.editorNode.querySelectorAll( TAG )
     customElements.forEach( element => format( editor, button, element ) )
 }
 
+/**
+ * Set the disabled and active states of a button
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ */
 const setState = function( editor, button ){
     if ( editor.range === false ){
         button.element.disabled = true
@@ -295,6 +345,11 @@ const setState = function( editor, button ){
     }
 }
 
+/**
+ * Mandatory button click function
+ * @param {object} editor A unique editor instance
+ * @param {object} btn The button to act on
+ */
 const click = function( editor, button ){
     const custom = editor.range.blockParent.querySelector(TAG)
     if ( custom != null ){
@@ -315,6 +370,10 @@ const click = function( editor, button ){
         show(editor, button, false)
     }
 }
+
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
 
 const options = {setState, init, addEventHandlers, clean}
 export const BUTTON = new ToolbarButton( 'custom', TAG, 'Custom', Icons.plugin, click, options ) 

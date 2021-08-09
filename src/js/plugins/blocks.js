@@ -5,7 +5,6 @@ import * as Phase from '../phase.js'
 import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
 
-// Global variables reset on each click
 let editorNode
 let range
 let button
@@ -17,6 +16,13 @@ let previousFormats = []
 let lastNodeAdded = false
 let fragmentNode
 
+
+/**
+ * 
+ * @param {HTMLElement} node 
+ * @param {object} formats object with two arrays of old and new format strings
+ * @returns {object} Two arrays of old and new format strings
+ */
 function getListAndBlockFormats( node, formats ){
     // Always set old formats to the original
     const oldFormats = [...formats.oldFormats, node.tagName]
@@ -24,7 +30,7 @@ function getListAndBlockFormats( node, formats ){
     // Pre and post phases set the new format to be the 
     // same as the old format
     if ( Phase.pre() || Phase.post() ){
-        console.log(`1. Pushing ${node.tagName} to formats`)
+        // console.log(`1. Pushing ${node.tagName} to formats`)
         newFormats = [...formats.newFormats, node.tagName]
         return {newFormats,oldFormats}
     }
@@ -32,22 +38,22 @@ function getListAndBlockFormats( node, formats ){
     //
     // New block formatting (not list) - apply new format
     if ( formatType == 'block' ){
-        console.log(`Format type = ${formatType}`)
-        console.log(`2. new block format ${newFormat}`)
+        // console.log(`Format type = ${formatType}`)
+        // console.log(`2. new block format ${newFormat}`)
         newFormats = [ newFormat ]
         return {newFormats,oldFormats}
     }
     //
     // New list formatting
     if ( Phase.first() ){
-        console.log(`3. First node with new list format ${newFormat}`)
+        // console.log(`3. First node with new list format ${newFormat}`)
         // Reformatting a list item?
         if ( node.tagName == 'LI' ){
             console.log('3.1 Processing LI')
             const parentListContainer = node.parentNode
             // First in list - in which case modify list type
             if ( parentListContainer.firstElementChild == node ){
-                console.log( '3.1.1 First item in a list - replace existing list')
+                // console.log( '3.1.1 First item in a list - replace existing list')
                 // Pop off the old list format and replace with the new one plus the LI
                 newFormats.pop()
                 newFormats.push(newFormat)
@@ -55,34 +61,34 @@ function getListAndBlockFormats( node, formats ){
                 console.log('3.1.2 new list formats', formats.newFormats.join(' '))
             // Else create a new indented list
             } else {
-                console.log( '3.1.3 Subsequent item in a list - indent a new list')
+                // console.log( '3.1.3 Subsequent item in a list - indent a new list')
                 // Start with the old formats
                 newFormats = formats.oldFormats.slice()
                 // Add the new list format and an LI
                 newFormats.push(newFormat)
                 newFormats.push('LI')
-                console.log('3.1.4 new list formats', formats.newFormats.join(' '))
+                // console.log('3.1.4 new list formats', formats.newFormats.join(' '))
             }
         // This is a different block node (e. H1, P) or a list container node - therefore start a new list
         } else {
-            console.log( 'Converting a block node')
+            // console.log( 'Converting a block node')
             newFormats.push(newFormat)
             newFormats.push('LI')
-            console.log('3.2 new list formats', formats.newFormats.join(' '))
+            // console.log('3.2 new list formats', formats.newFormats.join(' '))
         }
         return {newFormats,oldFormats}
     }
     // During but not first node phase - reuse previously defined list formats
     // Slice produces a shallow copy (in this case of all elements)
     newFormats = previousFormats.slice()
-    console.log(`4. Reusing initial list formatting ${formats.newFormats.join(' ')}`)
+    // console.log(`4. Reusing initial list formatting ${formats.newFormats.join(' ')}`)
     return {newFormats,oldFormats}
 }
     
 /**
  * Returns the html content of a node including its child nodes
- * @param node node 
- * @returns string html content
+ * @param {HTMLElement} node 
+ * @returns {string} html content
  */
 function getBlockHTML(node){
     let html = ''
@@ -104,6 +110,11 @@ function getBlockHTML(node){
     return html
 }
     
+/**
+ * 
+ * @param {HTMLElement} node 
+ * @param {object} formats Two arrays of old and new format strings
+ */
 function saveBlockContent( node, formats ){
     let n
     let target = fragmentNode
@@ -118,7 +129,7 @@ function saveBlockContent( node, formats ){
     console.log('html',html)
     // Skip "blocks" where the html returned is empty but the node contains one or more tags
     if ( html == '' && node.innerHTML.includes('<') ){
-        console.log('saveBlockContent: Found a block node - return', node)
+        // console.log('saveBlockContent: Found a block node - return', node)
         return
     }
     // First time - apply all formats
@@ -127,22 +138,22 @@ function saveBlockContent( node, formats ){
         currentFormats.forEach( format => {
             n = document.createElement( format )
             target = target.appendChild( n )
-            console.log('saveBlockContent: 1. First content - moving target to',target.outerHTML)
+            // console.log('saveBlockContent: 1. First content - moving target to',target.outerHTML)
         })
     // New tree larger and the previous formats are a subset?
     // Compare formatting and add to appropriate end of tree
     } else if ( currentFormats.length > previousFormats.length ){
         console.log('saveBlockContent: 2. Current formats longer than previous formats')
         if ( Helpers.arraySubset( previousFormats, currentFormats ) ){
-            console.log('saveBlockContent: 2.1 Current formats are a superset of previous formats')
+            // console.log('saveBlockContent: 2.1 Current formats are a superset of previous formats')
             for( let i=0; i<previousFormats.length; i++){
                 target = target.lastElementChild
-                console.log('saveBlockContent: 2.2 New formats superset - moving target to',target.outerHTML)
+                // console.log('saveBlockContent: 2.2 New formats superset - moving target to',target.outerHTML)
             }
             for( let i=previousFormats.length; i < currentFormats.length; i++ ){
                 n = document.createElement( currentFormats[i] )
                 target = target.appendChild( n )
-                console.log('saveBlockContent: 2.3 New formats superset - moving target to',target.outerHTML)
+                // console.log('saveBlockContent: 2.3 New formats superset - moving target to',target.outerHTML)
             }
         }
     // Formatting is the same as previously
@@ -152,11 +163,11 @@ function saveBlockContent( node, formats ){
         }
         n = document.createElement( lastFormat )
         target = target.appendChild( n )
-        console.log('saveBlockContent: 3. Formats equal - moving target to',target.outerHTML)
+        // console.log('saveBlockContent: 3. Formats equal - moving target to',target.outerHTML)
     }
     // New formatting smaller or different - find where in tree to append
     if ( target == fragmentNode ){
-        console.log('saveBlockContent: 4. New formatting smaller or different')
+        // console.log('saveBlockContent: 4. New formatting smaller or different')
         let startIndex = 0
         currentFormats.forEach( (format,index) => {
             if ( format == previousFormats[index] ){
@@ -172,7 +183,7 @@ function saveBlockContent( node, formats ){
         for( let i=startIndex; i<currentFormats.length; i++ ){
             n = document.createElement( currentFormats[i] )
             target = target.appendChild( n )
-            console.log('saveBlockContent: 4.2 Starting new formats - moving target to',target.outerHTML)
+            // console.log('saveBlockContent: 4.2 Starting new formats - moving target to',target.outerHTML)
         }
     }
     lastNodeAdded = target
@@ -180,15 +191,20 @@ function saveBlockContent( node, formats ){
     // Add the content
     if ( html != '' ){
         target.innerHTML = html
-        console.log('saveBlockContent: target with new content', target.outerHTML)
-        console.log('saveBlockContent: fragmentNode',fragmentNode.innerHTML)
+        // console.log('saveBlockContent: target with new content', target.outerHTML)
+        // console.log('saveBlockContent: fragmentNode',fragmentNode.innerHTML)
     }
 }
     
+/**
+ * 
+ * @param {HTMLElement} node 
+ * @param {object} formats Old and new arrays of format strings
+ */
 function parseListsAndBlocks( node, formats ){
-    console.log( `%cparseListsAndBlocks ${node.tagName}`,'background:green;color:white;padding:0.5rem')
-    console.log( `Inner HTML [${node.innerHTML.trim()}]`)
-    console.log( `node formats on entry`,formats.oldFormats)
+    // console.log( `%cparseListsAndBlocks ${node.tagName}`,'background:green;color:white;padding:0.5rem')
+    // console.log( `Inner HTML [${node.innerHTML.trim()}]`)
+    // console.log( `node formats on entry`,formats.oldFormats)
     // Define the formats for this node only
     let nodeFormats = {
         oldFormats:[],
@@ -198,21 +214,27 @@ function parseListsAndBlocks( node, formats ){
         Phase.set( node )
         // Get the old and new formats
         nodeFormats = getListAndBlockFormats( node, formats )
-        console.log( `old node formats`,nodeFormats.oldFormats)
-        console.log( `new node formats`,nodeFormats.newFormats)
+        // console.log( `old node formats`,nodeFormats.oldFormats)
+        // console.log( `new node formats`,nodeFormats.newFormats)
         // Save content of text nodes and protected nodes
         saveBlockContent( node, nodeFormats )
     }
     // Loop through all child blocks 
     node.childNodes.forEach( child => {
         if ( Helpers.isBlock(child) ){
-            console.log(`Moving to child ${child.tagName}`)
+            // console.log(`Moving to child ${child.tagName}`)
             parseListsAndBlocks( child, nodeFormats  ) 
         }
     })
-    console.log(`Finished this branch - processed children`, node.childNodes)
+    // console.log(`Finished this branch - processed children`, node.childNodes)
 }
 
+
+/**
+ * Mandatory button click function
+ * @param {object} editor A unique editor instance
+ * @param {object} btn The button to act on
+ */
 const click = function( editor, btn ){
     editorNode = editor.editorNode
     range = editor.range
@@ -307,8 +329,8 @@ const click = function( editor, btn ){
 
 /**
  * Set the disabled and active states of a button
- * @param range Standard range object with addition of a rootNode which is always a block
- * and is either the same as the commonAncestor ior the parent node of this when it is a text node
+ * @param {object} editor A unique editor instance
+ * @param {object} btn The button to act on
  */
 const setState = function(editor, btn){
     // console.log('setting block state')

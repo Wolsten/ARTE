@@ -1,7 +1,7 @@
 "use strict"
 
-import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
+import * as Helpers from '../helpers.js'
 import * as Icons from '../icons.js'
 import * as Phase from '../phase.js'
 
@@ -15,7 +15,7 @@ let action
 
 /**
  * Split the style stype property into style:value parts
- * @param string tag in format style or style:value
+ * @param {string} styleProp in format [style|style:value]
  */
 function setStyle(styleProp){
     const styleParts = styleProp.split(':')
@@ -24,9 +24,14 @@ function setStyle(styleProp){
 }
 
 
+/**
+ * 
+ * @param {HTMLElement} node
+ * @param {string[]} styles Array of style:value pairs
+ * @returns {string}
+ */
 function parseTextNode( node, styles ) {
     Phase.set( node )
-    //const computedStyles = window.getComputedStyle(node.parentNode)
     let text = ''
     let preText = ''
     let postText = ''
@@ -100,8 +105,8 @@ function parseTextNode( node, styles ) {
  * Parse a block node, saving inline styles as traverse down the tree
  * Cannot set the styles here as need to get to the text nodes to know when the 
  * start end end containers have been found.
- * @param node node 
- * @param [] styles 
+ * @param {HTMLElement} node 
+ * @param {string[]} styles Array of style:value pairs
  * @returns 
  */
 function parseBlockNode(node, styles){
@@ -131,9 +136,9 @@ function parseBlockNode(node, styles){
 
 /**
  * Parse nodes recursively and generates updated html
- * @param node node 
- * @param array styles 
- * @returns string of the new html generated
+ * @param {HTMLElement} node 
+ * @param {string[]} styles Array of style:value pairs
+ * @returns {string} of the new html generated
  */
 function parseNode(node, styles){
     console.log('Parsing node',node)
@@ -150,38 +155,9 @@ function parseNode(node, styles){
 }
 
 /**
- * Button click function, where "this" = button instance
- * @param {*} editor The editor object
- */
-export const click = function( editor, btn ){
-    range = editor.range
-    button = btn
-    removeStyle = button.removeStyle
-    // Adjust rootNode if required
-    if ( Helpers.isBlock(range.rootNode) == false ){
-        range.rootNode = Helpers.getParentBlockNode( range.rootNode )
-    }
-    setStyle(button.style)
-    // Determine the action
-    action = 'apply'
-    if ( button.element.classList.contains('active') || style == 'CLEAR') {
-        action = 'remove'
-    }
-    // Initialise phase detection and parse the root node
-    Phase.init(range, false)
-    const html = parseNode(range.rootNode, [])
-    console.log('html',html)
-    const node = Helpers.replaceNode( range.rootNode, range.rootNode.tagName, html )
-    // Reset the selection
-    Helpers.resetSelection(editor.editorNode)
-    editor.updateRange()
-    button.setState( editor, button )
-}
-
-/**
  * Set the disabled and active states of a button
- * @param range Standard range object with addition of a rootNode which is always a block
- * and is either the same as the commonAncestor ior the parent node of this when it is a text node
+ * @param {object} editor A unique editor instance
+ * @param {object} btn The button to act on
  */
 const setState = function(editor, btn){
     // console.log('setting style state')
@@ -212,6 +188,37 @@ const setState = function(editor, btn){
 // @section Exports
 // -----------------------------------------------------------------------------
 
+/**
+ * Mandatory button click function. This is exported in its own right so that other
+ * plugins implementing inline styling can re-use
+ * @param {object} editor A unique editor instance
+ * @param {object} btn The button to act on
+ */
+ export const click = function( editor, btn ){
+    range = editor.range
+    button = btn
+    removeStyle = button.removeStyle
+    // Adjust rootNode if required
+    if ( Helpers.isBlock(range.rootNode) == false ){
+        range.rootNode = Helpers.getParentBlockNode( range.rootNode )
+    }
+    setStyle(button.style)
+    // Determine the action
+    action = 'apply'
+    if ( button.element.classList.contains('active') || style == 'CLEAR') {
+        action = 'remove'
+    }
+    // Initialise phase detection and parse the root node
+    Phase.init(range, false)
+    const html = parseNode(range.rootNode, [])
+    console.log('html',html)
+    const node = Helpers.replaceNode( range.rootNode, range.rootNode.tagName, html )
+    // Reset the selection
+    Helpers.resetSelection(editor.editorNode)
+    editor.updateRange()
+    button.setState( editor, button )
+}
+
 options = {setState, style:'font-weight:bold', removeStyle:'font-weight:400'}
 export const B = new ToolbarButton( 'style', 'B', 'Bold', Icons.b, click, options)
 
@@ -223,5 +230,3 @@ export const U = new ToolbarButton( 'style', 'U',  'Underline', Icons.u, click, 
 
 options = {setState, style:'CLEAR'}
 export const CLEAR = new ToolbarButton( 'style', 'CLEAR', 'Clear', Icons.clear, click, options)
-
-// export const buttons = [ B, I, U, CLEAR ]
