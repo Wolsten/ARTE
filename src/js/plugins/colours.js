@@ -17,7 +17,12 @@ function show(editor, btn){
     input.addEventListener('input', event => {
         console.log('colour changed',event.target.value)
         const colour = event.target.value
-        const button = {style:`${btn.style}:${colour}`, removeStyle:btn.removeStyle, element:btn.element}
+        const button = {
+            setState,
+            style:`${btn.style}:${colour}`, 
+            removeStyle:btn.removeStyle, 
+            element:btn.element
+        }
         Styles.click( editor, button )
         hide()
     })
@@ -40,24 +45,24 @@ const click = function( editor, btn ){
  * @param range Standard range object with addition of a rootNode which is always a block
  * and is either the same as the commonAncestor ior the parent node of this when it is a text node
  */
-const setState = function(range){
-    console.log('setting colour state')
-    if ( range === false ){
-        this.element.disabled = true
-        this.element.classList.remove('active')
-    } else if ( this.tag == 'CLEAR' ){
-        this.element.disabled = false
-        this.element.classList.remove('active')
+const setState = function(editor,btn){
+    // console.log('setting colour state')
+    if ( editor.range === false ){
+        btn.element.disabled = true
+        btn.element.classList.remove('active')
+    } else if ( btn.tag == 'CLEAR' ){
+        btn.element.disabled = false
+        btn.element.classList.remove('active')
     } else {
         // The rootNode should not be a DIV (the editor) or list container - (implying 
         // multiple blocks selected) or a custom element
-        this.element.disabled = range.rootNode.tagName === 'DIV' || 
-                                Helpers.isList(range.rootNode) ||
-                                Helpers.isCustom(range.rootNode)
+        btn.element.disabled = editor.range.rootNode.tagName === 'DIV' || 
+                                Helpers.isList(editor.range.rootNode) ||
+                                Helpers.isCustom(editor.range.rootNode)
         // Get the inline styles of the selected range
         let value = ''
         let styles = []
-        const inlineStyles = range.startContainer.parentNode.getAttribute('style')
+        const inlineStyles = editor.range.startContainer.parentNode.getAttribute('style')
         if ( inlineStyles != null ){
             styles = inlineStyles.split(';')
             // console.log('styles',styles)
@@ -67,27 +72,29 @@ const setState = function(range){
                     const parts = item.split(':')
                     // Does the inline style match the button?
                     // If so set the button styling to match
-                    if ( parts[0].trim() === this.style ){
+                    if ( parts[0].trim() === btn.style ){
                         value = parts[1].trim()
-                        this.element.setAttribute('style',`${this.style}:${value};`)
+                        btn.element.setAttribute('style',`background-color:${value};`)
                     }
                 }
             })
         }
         if ( value == '' ){
-            this.element.setAttribute('style', this.removeStyle)
+            btn.element.removeAttribute('style')
         }
     }
 }
-
-options = {setState, style:'color', removeStyle:'color:black;'}
-const FGC = new ToolbarButton( 3, 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, options)
-
-options = {setState, style:'background-color', removeStyle:'background-color:white;'}
-const BGC = new ToolbarButton( 3, 'inline', 'BGC', 'Background colour', Icons.colourBackground, click, options)
 
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
-export const buttons = [ FGC, BGC ]
+
+options = {setState, style:'color', removeStyle:'color:black;'}
+export const FOREGROUND = new ToolbarButton( 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, options)
+
+options = {setState, style:'background-color', removeStyle:'background-color:white;'}
+export const BACKGROUND = new ToolbarButton( 'inline', 'BGC', 'Background colour', Icons.colourBackground, click, options)
+
+
+// export const buttons = [ FGC, BGC ]

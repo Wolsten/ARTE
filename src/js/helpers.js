@@ -37,10 +37,11 @@ export const replaceNode = function(existingNode, tag, html){
 }
 
 
-let tags = { block: ['DIV','P','LI'], list: ['LI'], inline: [], custom:[]}
+// let tags = { block: ['DIV','P','LI'], list: ['LI'], inline: [], custom:[]}
+let tags = { block: ['DIV','P','LI'], list: ['LI'], custom:[]}
 
 export const registerTag = function(type,tag){
-    if ( tags[type].includes(tag) == false && tag!='CLEAR'){
+    if ( tags[type]!=undefined && tags[type].includes(tag) == false && tag!='CLEAR'){
         tags[type].push(tag)
         // console.log('registered tag', tag, 'in type', type)
     }
@@ -53,14 +54,14 @@ export const debugTags = function(){
     console.warn('customs',tags.custom.join(', '))
 }
 
-export const isInline = function( node ){
-    if ( node.tagName == undefined ){
-        return false
-    }
-    return tags.inline.includes(node.tagName)
-}
+// export const isInline = function( node ){
+//     if ( node.tagName == undefined ){
+//         return false
+//     }
+//     return tags.inline.includes(node.tagName)
+// }
 
-const isStyle = function( node ){
+export const isStyle = function( node ){
     if ( node.tagName == undefined ){
         return false
     }
@@ -196,6 +197,19 @@ export const cleanForSaving = function( node, buttons ){
 // @section Selection and keyboard methods
 // -----------------------------------------------------------------------------
 
+
+function augmentRange(range){
+    // First parent node that is a block tag
+    range.blockParent = getParentBlockNode(range.commonAncestorContainer)
+    // First parent node
+    range.rootNode = range.commonAncestorContainer
+    if ( range.commonAncestorContainer.nodeType === 3 ) {
+        range.rootNode = range.commonAncestorContainer.parentNode
+    }
+    return range
+}
+
+
 export const getRange = function(){
     // The selector is looking for a class used with modals so selections
     // are ignored when modals are active
@@ -203,13 +217,7 @@ export const getRange = function(){
         let sel = window.getSelection()
         if ( sel.rangeCount==1 ){
             let range =  sel.getRangeAt(0)
-            // First parent node that is a block tag
-            range.blockParent = getParentBlockNode(range.commonAncestorContainer)
-            // First parent node
-            range.rootNode = range.commonAncestorContainer
-            if ( range.commonAncestorContainer.nodeType === 3 ) {
-                range.rootNode = range.commonAncestorContainer.parentNode
-            } 
+            range = augmentRange(range)
             return range
         }
     }
@@ -238,7 +246,7 @@ export const setCursorToTargetNode = function(editor, target){
 
 
 export const setCursor = function( node, offset ){
-    const range = document.createRange()
+    let range = document.createRange()
     const selection = window.getSelection()
     // Check the offset is in range
     // if ( offset > node.textContent.length - 1 ){
@@ -249,6 +257,7 @@ export const setCursor = function( node, offset ){
     range.collapse(true)
     selection.removeAllRanges()
     selection.addRange(range)
+    range = augmentRange(range)
     return range
 }
 

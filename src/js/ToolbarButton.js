@@ -2,8 +2,7 @@
 
 class ToolbarButton {
 
-    constructor( group, type, tag, label, icon, click, options ){
-        this.group = group
+    constructor( type, tag, label, icon, click, options ){
         this.type = type
         this.tag = tag
         this.label = label

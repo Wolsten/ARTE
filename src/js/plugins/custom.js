@@ -8,10 +8,8 @@ import * as Helpers from '../helpers.js'
 // A custom tag must be in upper case
 const TAG = 'CUSTOM'
 
-// Global variables reset on each click
-let editorNode
+// Global variables
 let dirty
-let range
 let panel = null
 let data
 let node
@@ -24,35 +22,30 @@ let node
  * Edit an existing custom node by extracting the data from the node and displaying
  * the edit form
  * 
- * @param {node} n The custom node to be edited
+ * @param {node} element The custom node to be edited
  * @returns 
  */
-function edit( n ){
+function edit( editor, button, element ){
     // If we already have an active panel - ignore edit clicks
     if ( panel ){
         return
     }
-    node = n
-    editorNode = Helpers.getEditorNode(node)
+    node = element
     data = {
         id: node.id,
         property1: node.querySelector('.property1').innerText.trim(),
         property2: node.querySelector('.property2').innerText.trim(),
         property3: node.querySelector('.property3').innerText.trim(),
     }
-    show(true)
+    show( editor, button, true)
 }
 
-/**
- * Triggered by clicking the button or the element in the editor
- * 
- * @param {boolean} edit True if clicked an existing custom element
- */
-function show( edit ){
+
+function show( editor, button, editFlag ){
     panel = document.createElement('DIV')
     panel.id = 'custom-edit'
     panel.classList.add('edit-panel')
-    panel.innerHTML = form(data, edit)
+    panel.innerHTML = form(data, editFlag)
     // Initialise confirmation module and dirty data detection
     dirty = false
     const inputs = panel.querySelectorAll('form input')
@@ -69,18 +62,18 @@ function show( edit ){
             hide()
         }
     })
-    if ( edit ){
+    if ( editFlag ){
         panel.querySelector('button.delete').addEventListener('click', () => {
             const confirmBtn = Modal.show('Delete custom item', 'Do you really want to delete this custom item?', 'No - keep', 'Yes - delete')
             confirmBtn.addEventListener( 'click', () => {
                 Modal.hide()
-                deleteItem() 
+                deleteItem(editor, button) 
             })
         })
     }
     panel.querySelector('form').addEventListener('submit', event => {
         event.preventDefault()
-        save()
+        save(editor, button)
     })
     // Add to dom, position and focus the input
     document.querySelector('body').appendChild(panel)
@@ -94,63 +87,70 @@ function show( edit ){
 /**
  * Save the new or edited custom node
  */
-function save(){
+function save(editor, button){
     console.log('Save changes')
     // Create new empty custom element and add to the editor?
     if ( data.id == '' ){
         data.id = Helpers.generateUid()
-        insert()
+        insert(editor, button)
     }
     // Save the (updated) properties 
     data.property1 = panel.querySelector('form #property1').value.trim()
     data.property2 = panel.querySelector('form #property2').value.trim()
     data.property3 = panel.querySelector('form #property3').value.trim()
     // Update the dom after a delay
-    setTimeout( ()=>updateDom(), 10)
+    setTimeout( ()=>updateDom(editor, button), 10)
+    // Update state
+    editor.range = Helpers.setCursor( node, 0)
+    setState(editor, button)
 } 
 
 /**
  * Insert a new custom element in the editor at the end of the current 
  * range's startContainer
  */
-function insert(){
-    //const 
+function insert(editor, button){
+    // const 
     node = document.createElement(TAG)
     node.innerHTML = template(data)
     node.id = data.id
     node.setAttribute('contenteditable', 'false')
-    node = range.startContainer.parentNode.appendChild(node)
+    node = editor.range.startContainer.parentNode.appendChild(node)
+    // Update state
+    editor.range = Helpers.setCursor( node, 0)
+    setState(editor, button)
 }
 
 /**
  * Update the custom element in the dom
  */
-function updateDom(){
+function updateDom(editor, button){
     // const form = panel.querySelector('form')
     // const node = editorNode.querySelector(`${TAG}#${data.id}`)
     node.querySelector('.property1').innerText = data.property1
     node.querySelector('.property2').innerText = data.property2
     node.querySelector('.property3').innerText = data.property3
     // Format node and add event handler
-    format(node)
+    format(editor, button, node)
     // Close the edit pane
     hide()
 }
 
-function deleteItem(){
+function deleteItem(editor, button){
     // @todo Remove link from the editor
-    const node = editorNode.querySelector(`${TAG}#${data.id}`)
+    const node = editor.editorNode.querySelector(`${TAG}#${data.id}`)
     node.remove()
     hide()
-    // Flag that the dom has been updated
-    const event = new Event('editor-updated')
-    editorNode.dispatchEvent(event)
+    // Update state
+    editor.range = false
+    setState(editor, button)
 }
 
 function hide(){
     panel.classList.remove('show')
     panel.remove()
     panel = null
+
 }
 
 /**
@@ -173,39 +173,46 @@ function clean(n){
  * Format the given custom node and add click event handler
  * @param node n The custom node
  */
-function format( n ){
-    const id = n.id
-    if ( n.id == false ){
-        n.id = Helpers.generateUid()
+function format( editor, button, element ){
+    const id = element.id
+    // Generate new id if required
+    if ( element.id == false ){
+        element.id = Helpers.generateUid()
     }
+    // Define the custom element
     data = {
-        id: n.id,
-        property1: n.querySelector('.property1').innerText,
-        property2: n.querySelector('.property2').innerText,
-        property3: n.querySelector('.property3').innerText,
+        id: element.id,
+        property1: element.querySelector('.property1').innerText,
+        property2: element.querySelector('.property2').innerText,
+        property3: element.querySelector('.property3').innerText,
     }
-    n.innerHTML = template(data)
-    n.setAttribute('contenteditable',false)
+    element.innerHTML = template(data)
+    element.setAttribute('contenteditable',false)
     // Add edit button and listener
-    const button = document.createElement('button')
-    button.type = 'button'
-    button.classList.add('edit')
-    button.innerText = 'Edit'
-    button.addEventListener('click', event => {
+    const editButton = document.createElement('button')
+    editButton.type = 'button'
+    editButton.classList.add('edit')
+    editButton.innerText = 'Edit'
+    editButton.addEventListener('click', event => {
         event.preventDefault()
-        edit(n) 
+        edit(editor, button, element) 
     })
-    n.appendChild(button)
+    element.appendChild(editButton)
+    // Add set state listener
+    element.addEventListener( 'click', ()=> {
+        setState( editor, button )
+    })
 }
 
 /**
  * Add event handlers to all custom node edit buttons
  */
 function addEventHandlers(editor){
-    const nodes = editor.editorNode.querySelectorAll(TAG + ' button')
-    nodes.forEach( n => n.addEventListener('click', event => {
+    const buttons = editor.editorNode.querySelectorAll(TAG + ' button')
+    buttons.forEach( button => button.addEventListener('click', event => {
         event.preventDefault()
-        edit(n) 
+        const element = button.parentNode
+        edit(editor, BUTTON, element) 
     }))
 }
 
@@ -261,38 +268,53 @@ function template(props){
     `
 }
 
+
+
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
-export const init = function( editor ){
+const init = function( editor, button ){
     //console.log('Initialising custom plugin')
     const customElements = editor.editorNode.querySelectorAll( TAG )
-    customElements.forEach( element => format( element ) )
+    customElements.forEach( element => format( editor, button, element ) )
 }
 
-function click( editor, btn ){
+const setState = function( editor, button ){
     if ( editor.range === false ){
-        console.log('No range selected')
-        return
+        button.element.disabled = true
+        button.element.classList.remove('active')
+    } else {
+        button.element.disabled = false
+        const custom = editor.range.blockParent.querySelector(TAG)
+        if ( custom != null ){
+            button.element.classList.add('active')
+        } else {
+            button.element.classList.remove('active')
+        }
     }
-    range = editor.range
-    editorNode = editor.editorNode
-    // Get default label if range not collapsed
-    let label = ''
-    if ( range.collapsed == false && 
-         range.startContainer == range.endContainer ){
-        label = range.endContainer.textContent.substring(range.startOffset, range.endOffset)  
-    }
-    data = {
-        id:'',
-        property1:'',
-        property2:'',
-        property3:''
-    }
-    show(false)
 }
 
-const options = {addEventHandlers, clean}
-const button = new ToolbarButton( 4, 'custom', TAG, 'Custom', Icons.plugin, click, options ) 
-export const buttons = [button]
+const click = function( editor, button ){
+    const custom = editor.range.blockParent.querySelector(TAG)
+    if ( custom != null ){
+        edit(editor, button, custom)
+    } else {
+        // Get default label if range not collapsed
+        let label = ''
+        if ( editor.range.collapsed == false && 
+            editor.range.startContainer == editor.range.endContainer ){
+            label = editor.range.endContainer.textContent.substring(editor.range.startOffset, editor.range.endOffset)  
+        }
+        data = {
+            id:'',
+            property1:'',
+            property2:'',
+            property3:''
+        }
+        show(editor, button, false)
+    }
+}
+
+const options = {setState, init, addEventHandlers, clean}
+export const BUTTON = new ToolbarButton( 'custom', TAG, 'Custom', Icons.plugin, click, options ) 

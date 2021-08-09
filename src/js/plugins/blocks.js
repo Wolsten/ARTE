@@ -97,7 +97,7 @@ function getBlockHTML(node){
             }
             html += text
         // Inline, custom node or line break
-        } else if ( Helpers.isInline(child) || Helpers.isCustom(child) || child.tagName==='BR'){
+        } else if ( Helpers.isStyle(child) || Helpers.isCustom(child) || child.tagName==='BR'){
             html += child.outerHTML 
         }
     })
@@ -301,8 +301,8 @@ const click = function( editor, btn ){
     // Reset the selection
     Helpers.setCursorToTargetNode(editorNode, endTarget)
     // Reset state
-    range = Helpers.getRange()
-    setState(range)
+    editor.updateRange()
+    setState(editor, btn)
 }
 
 /**
@@ -310,43 +310,43 @@ const click = function( editor, btn ){
  * @param range Standard range object with addition of a rootNode which is always a block
  * and is either the same as the commonAncestor ior the parent node of this when it is a text node
  */
- const setState = function(range){
-    // If have a "this" defined then it is a button click, otherwise invoked from 
-    // the insert method after the text insertion, in which case reuse the button value
-    if ( this !== undefined ){
-        button = this
-    }
-    if ( range === false ){
-        button.element.disabled = true
-        button.element.classList.remove('active')
-    } else if ( button.tag == 'CLEAR' ){
-        button.element.disabled = false
-        button.element.classList.remove('active')
+const setState = function(editor, btn){
+    // console.log('setting block state')
+    if ( editor.range === false ){
+        btn.element.disabled = true
+        btn.element.classList.remove('active')
+    } else if ( btn.tag == 'CLEAR' ){
+        btn.element.disabled = false
+        btn.element.classList.remove('active')
     } else {
         // The rootNode should not be a DIV (the editor) or list container - (implying 
         // multiple blocks selected) or a custom element
-        button.element.disabled = range.rootNode.tagName === 'DIV' || 
-                                Helpers.isList(range.rootNode) ||
-                                Helpers.isCustom(range.rootNode)
-        const block = Helpers.getParentBlockNode(range.rootNode)
-        if ( block.tagName === button.tag ){
-            button.element.classList.add('active')
+        btn.element.disabled = editor.range.rootNode.tagName === 'DIV' || 
+                                Helpers.isList(editor.range.rootNode) ||
+                                Helpers.isCustom(editor.range.rootNode)
+        const block = Helpers.getParentBlockNode(editor.range.rootNode)
+        if ( block.tagName === btn.tag ){
+            btn.element.classList.add('active')
         } else {
-            button.element.classList.remove('active')
+            btn.element.classList.remove('active')
         }
     }
 }
-
-const options = {setState}
-const H1 = new ToolbarButton( 1, 'block', 'H1', 'Heading 1', Icons.h1, click, options )
-const H2 = new ToolbarButton( 1, 'block', 'H2', 'Heading 2', Icons.h2, click, options )
-const H3 = new ToolbarButton( 1, 'block', 'H3', 'Heading 3', Icons.h3, click, options )
-const P  = new ToolbarButton( 1, 'block', 'P',  'Paragraph', Icons.p,  click, options )
-const OL = new ToolbarButton( 2, 'list',  'OL', 'Ordered list',   Icons.ol, click, options )
-const UL = new ToolbarButton( 2, 'list',  'UL', 'Unordered list', Icons.ul, click, options )
 
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
-export const buttons = [ H1, H2, H3, P, OL, UL ]
+const options = {setState}
+export const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click, options )
+export const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click, options )
+export const H3 = new ToolbarButton( 'block', 'H3', 'Heading 3', Icons.h3, click, options )
+export const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click, options )
+export const OL = new ToolbarButton( 'list',  'OL', 'Ordered list',   Icons.ol, click, options )
+export const UL = new ToolbarButton( 'list',  'UL', 'Unordered list', Icons.ul, click, options )
+
+
+
+
+
+

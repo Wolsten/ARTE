@@ -117,7 +117,7 @@ function insert(person){
 // -----------------------------------------------------------------------------
 
 
-export const initPeople = function(people){
+export const setup = function(people){
     people = people.sort()
     dataListOptions = ''
     people.forEach( person => {
@@ -126,5 +126,5 @@ export const initPeople = function(people){
 }
 
 const options = {shortcut:'@'}
-const button = new ToolbarButton( 4, 'custom', 'mention', 'Mention', Icons.person, click, options ) 
-export const buttons = [button]
+export const BUTTON = new ToolbarButton( 'custom', 'mention', 'Mention', Icons.person, click, options ) 
+//export const buttons = [button]

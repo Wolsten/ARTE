@@ -174,6 +174,8 @@ export const click = function( editor, btn ){
     const node = Helpers.replaceNode( range.rootNode, range.rootNode.tagName, html )
     // Reset the selection
     Helpers.resetSelection(editor.editorNode)
+    editor.updateRange()
+    button.setState( editor, button )
 }
 
 /**
@@ -181,46 +183,45 @@ export const click = function( editor, btn ){
  * @param range Standard range object with addition of a rootNode which is always a block
  * and is either the same as the commonAncestor ior the parent node of this when it is a text node
  */
-const setState = function(range){
-    // If have a "this" defined then it is a button click, otherwise invoked from 
-    // the insert method after the text insertion, in which case reuse the button value
-    if ( this !== undefined ){
-        button = this
-    }
-    if ( range === false ){
-        button.element.disabled = true
-        button.element.classList.remove('active')
-    } else if ( button.tag == 'CLEAR' ){
-        button.element.disabled = false
-        button.element.classList.remove('active')
+const setState = function(editor, btn){
+    // console.log('setting style state')
+    if ( editor.range === false ){
+        btn.element.disabled = true
+        btn.element.classList.remove('active')
+    } else if ( btn.tag == 'CLEAR' ){
+        btn.element.disabled = false
+        btn.element.classList.remove('active')
     } else {
         // The rootNode should not be a DIV (the editor) or list container - (implying 
         // multiple blocks selected) or a custom element
-        button.element.disabled = range.rootNode.tagName === 'DIV' || 
-                                Helpers.isList(range.rootNode) ||
-                                Helpers.isCustom(range.rootNode)
-        // Check whether the computed style matches the button
-        setStyle( button.style )
-        const inlineStyles = Helpers.getInlineStyles( range.startContainer )
-        if ( inlineStyles.includes(button.style) ){
-            button.element.classList.add('active')
+        btn.element.disabled = editor.range.rootNode.tagName === 'DIV' || 
+                                Helpers.isList(editor.range.rootNode) ||
+                                Helpers.isCustom(editor.range.rootNode)
+        // Check whether the computed style matches the btn
+        setStyle( btn.style )
+        const inlineStyles = Helpers.getInlineStyles( editor.range.startContainer )
+        if ( inlineStyles.includes(btn.style) ){
+            btn.element.classList.add('active')
         } else {
-            button.element.classList.remove('active')
+            btn.element.classList.remove('active')
         }
     }
 }
 
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
 
 options = {setState, style:'font-weight:bold', removeStyle:'font-weight:400'}
-const B = new ToolbarButton( 3, 'style', 'B', 'Bold', Icons.b, click, options)
+export const B = new ToolbarButton( 'style', 'B', 'Bold', Icons.b, click, options)
 
 options = {setState, style:'font-style:italic', removeStyle:'font-style:normal'}
-const I = new ToolbarButton( 3, 'style', 'I', 'Italic', Icons.i, click, options)
+export const I = new ToolbarButton( 'style', 'I', 'Italic', Icons.i, click, options)
 
 options = {setState, style:'text-decoration:underline', removeStyle:'text-decoration:none'}
-const U = new ToolbarButton( 3, 'style', 'U',  'Underline', Icons.u, click, options)
+export const U = new ToolbarButton( 'style', 'U',  'Underline', Icons.u, click, options)
 
 options = {setState, style:'CLEAR'}
-const CLEAR = new ToolbarButton( 3, 'style', 'CLEAR', 'Clear', Icons.clear, click, options)
+export const CLEAR = new ToolbarButton( 'style', 'CLEAR', 'Clear', Icons.clear, click, options)
 
-export const buttons = [ B, I, U, CLEAR ]
+// export const buttons = [ B, I, U, CLEAR ]

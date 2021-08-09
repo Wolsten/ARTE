@@ -237,13 +237,14 @@ function form(edit){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-export const init = function( editor ){
+const init = function( editor ){
+    // console.log('Initialising links')
     editorNode = editor.editorNode
     let links = editorNode.querySelectorAll( TAG )
     links.forEach( link => format( link ))
 }
 
-function click( editor, btn ){
+const click = function( editor, btn ){
     console.log('click link')
     if ( editor.range === false){
         console.log('No range selected')
@@ -259,7 +260,7 @@ function click( editor, btn ){
     show( false )
 }
 
-function addEventHandlers(editor){
+const addEventHandlers = function(editor){
     const nodes = editor.editorNode.querySelectorAll(TAG)
     nodes.forEach( node => node.addEventListener('click', event => {
         event.preventDefault()
@@ -268,7 +269,7 @@ function addEventHandlers(editor){
     }))
 }
 
-function clean(node){
+const clean = function(node){
     console.log('clean link',node)
     node.removeAttribute('id')
     node.removeAttribute('contenteditable')
@@ -277,6 +278,6 @@ function clean(node){
     return node
 }
 
-const options = {addEventHandlers, clean}
-const button = new ToolbarButton( 4, 'custom', TAG, 'Link', Icons.link, click, options ) 
-export const buttons = [button]
+const options = {init, addEventHandlers, clean}
+export const BUTTON = new ToolbarButton( 'custom', TAG, 'Link', Icons.link, click, options ) 
+// export const buttons = [button]

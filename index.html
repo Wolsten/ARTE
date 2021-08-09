@@ -69,7 +69,12 @@
 
     <!-- None-bundled version -->
     <script type="module" charset="utf-8">
+        // Import the editor class
         import Editor from './src/js/Editor.js'
+        // Import plugins
+        import * as Buffer from './src/js/plugins/buffer.js'
+        import * as Blocks from './src/js/plugins/blocks.js'
+        import * as Styles from './src/js/plugins/styles.js'
         import * as Mentions from './src/js/plugins/mentions.js'
         import * as Links from './src/js/plugins/links.js'
         import * as Colours from './src/js/plugins/colours.js'
@@ -78,23 +83,32 @@
         const target = document.getElementById('editor')
         let content = target.innerHTML
         target.innerHTML = ''
-        // Setup plugins - required mentions.css to be included in head
-        Mentions.initPeople(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
+        // Setup toolbar
+        const groups = [
+            [ Blocks.H1, Blocks.H2, Blocks.H3, Blocks.P],
+            [ Blocks.OL, Blocks.UL],
+            [ Styles.B, Styles.I, Styles.U, Colours.FOREGROUND, Colours.BACKGROUND, Styles.CLEAR],
+            [ Buffer.UNDO, Buffer.REDO ],
+            [ Mentions.BUTTON, Links.BUTTON, Custom.BUTTON ]
+        ]
+
+        // Perform optional plugin setup
+        Mentions.setup(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
         // Define editor options
         const options = {
             // Toolbar buttons required
             // Allowed values 'H1','H2','H3','P','OL','UL','B','U','I','CLEAR','UNDO','REDO']
             // All other elements are filtered out unless specified below in a plugin
-            tags: ['H1','H2','H3','P','OL','UL','B','I','U','CLEAR'],
+            // tags: [/* 'H1','H2','H3','P','OL','UL', */'B','I','U','CLEAR'],
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
             headingNumbers: 'on', 
             // Custom plugs to add to the toolbar to enhance the editor
-            plugins: [Mentions, Links, Custom, Colours],
+            //plugins: [Blocks, Mentions, Links, Custom, Colours],
             // Number of Undo operations supported, max 10       
             bufferSize: 10     
         }
         // Create editor and add to dom in target position
-        const editor = new Editor(target, content, options)
+        const editor = new Editor(target, content, groups, options)
         // Look for Save
         const save = document.getElementById('save')
         save.addEventListener('click', ()=>{
