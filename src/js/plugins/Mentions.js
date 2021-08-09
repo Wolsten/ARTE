@@ -115,14 +115,18 @@ function insert(person){
     let offset   = editor.range.startOffset
     let before   = contents.substring(0,offset)
     let after    = contents.substring(offset)
+    // Remove optional @
+    if ( after.charAt(0) === '@' ){
+        after = after.slice(1, after.length-1)
+    }
     // Add space before?
     if ( contents.charCodeAt(offset-1) !== 32){
         person = ' ' + person
     }
-    // Add space after & optional remove @
+    // Add space after
     if ( offset<contents.length && contents.charCodeAt(offset) !== 32){
-        if ( after != '' && after.charAt(0) === '@'){
-            after = after.slice(1, after.length-1)
+        if ( after != ''){
+            after = after + ' '
         }
         person = person + ' '
     }
@@ -150,5 +154,5 @@ export const setup = function(people){
     })
 }
 
-const options = {shortcut:'@'}
+const options = {shortcut:['@','Tab']}
 export const BUTTON = new ToolbarButton( 'custom', 'mention', 'Mention', Icons.person, click, options ) 

@@ -2,9 +2,6 @@
 
 import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
-// import * as Blocks from './plugins/blocks.js'
-// import * as Inline from './plugins/inline.js'
-// import * as Styles from './plugins/styles.js'
 import * as Buffer from './plugins/buffer.js'
 
 class Editor {
@@ -35,9 +32,7 @@ class Editor {
         this.toolbarNode = target.querySelector('.editor-toolbar')
         // Add the content
         this.editorNode.innerHTML = content
-        // // Initialise plugins
-        // this.initialisePlugins()
-        // Reset global range
+        // Reset range
         this.range = false
         // Set up event handling
         this.listenForMouseUpEvents()
@@ -110,16 +105,9 @@ class Editor {
         return toolbar
     }
 
-    // initialisePlugins(){
-    //     // Initialise any plugins that require this, passing in the editor instance
-    //     this.options.plugins.forEach( plugin => {
-    //         if ( "init" in plugin ){
-    //             plugin.init( this )
-    //         }
-    //     })
-    // }
 
     initialiseButtons(){
+        this.shortcuts = []
         // Do any custom setup required
         this.toolbar.forEach( button => {
             // Add dom element to the button
@@ -132,17 +120,14 @@ class Editor {
             if ( "setState" in button ){
                 button.setState( this, button )
             }
-            // Some button have shortcuts in which case listen for
+            // Some button have shortcuts in which case save
             if ( "shortcut" in button ){
-                this.editorNode.addEventListener('keydown', event =>{
-                    if ( event.key === button.shortcut ){
-                        // Prevent default so key not echo'd to the screen
-                        event.preventDefault()
-                        // Stop propagation to prevent other event handlers responding
-                        event.stopPropagation()
-                        // Trigger the dialogue with the then current range
-                        button.click( this, button )
-                    }
+                const shortcut = button.shortcut[0]
+                const trigger = button.shortcut[1]
+                this.shortcuts.push({
+                    shortcut: button.shortcut[0],
+                    trigger: button.shortcut[1],
+                    button: button
                 })
             }
             // All buttons have a click method (but undefined for buffer buttons)
@@ -261,25 +246,47 @@ class Editor {
     // -----------------------------------------------------------------------------
     
     listenForKeydownEvents(){
+        this.lastKey = ''
         this.editorNode.addEventListener('keydown', event => {
+            let handled = false
             console.log('control key?',event.ctrlKey)
             console.log('key',event.key)
-            // CCheck if a modal dialogue is shown - ignore key entry?
+            // Check if a modal dialogue is shown - ignore key entry?
             if ( document.querySelectorAll('.show').length > 0 ){
                 event.preventDefault()
+                handled = true
+            }
             // Override normal browser enter key action
-            } else if ( event.key == 'Enter' ) {
+            if ( !handled && event.key == 'Enter' ) {
                 if ( this.handleEnter() ){
                     event.preventDefault()
                 }
+                handled = true
+            }
             // Prevent deletion of customised blocks
-            } else if ( event.key == 'Backspace' || event.key == 'Delete' || 
-                        (event.ctrlKey && event.key == 'd') ){
+            if ( !handled && (event.key == 'Backspace' || event.key == 'Delete' || 
+                        (event.ctrlKey && event.key == 'd')) ){
                 if ( this.handleDelete(event.key) ){
                     event.preventDefault()
                 }
+                handled = true
+            } 
+            // Check shortcuts
+            if ( !handled ) { 
+                this.shortcuts.forEach( item => {
+                    if ( this.lastKey === item.shortcut && event.key === item.trigger ){
+                        // Prevent default so key not echo'd to the screen
+                        event.preventDefault()
+                        // Stop propagation to prevent other event handlers responding
+                        event.stopPropagation()
+                        // Trigger the dialogue with the then current range
+                        item.button.click( this, item.button )
+                        handled = true
+                    }
+                })
+            }
             // Undo/redo events
-           } else if (this.bufferSize>0){
+            if ( !handled && this.bufferSize>0){
                 if ( (event.ctrlKey || event.metaKey) && event.key == 'z' ){
                     event.preventDefault()
                     // Redo
@@ -292,8 +299,10 @@ class Editor {
                     }
                     this.buffer.click(button)
                     this.updateEventHandlers()
+                    handled = true
                 }
             }
+            this.lastKey = event.key
         })
     }
 
