@@ -9,11 +9,11 @@
 }
 
 a {
-    color:var(--link-text);
+    color:var(--text-link);
     text-decoration: none;;
 }
 a:visited {
-    color:var(--link-text);
+    color:var(--text-link);
 }
 
 /* Index.html */
@@ -398,6 +398,6 @@ div.debug div.col label {
 }
 
 div.debug div.col span {
-    color: var(--debug-text);
+    color: var(--text-debug);
     font-size: 1rem;
 }

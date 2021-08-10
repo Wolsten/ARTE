@@ -1,8 +1,8 @@
 :root {
     --text: rgb(90,90,90);
     --text-disabled: rgb(160,160,160);
-    --link-text: rgb(102, 102, 235);
-    --debug-text: green;
+    --text-link: rgb(102, 102, 235);
+    --text-debug: green;
     --background: #ffffff;
     --border: rgb(90,90,90);
     --block-quote-border: #ccc;
