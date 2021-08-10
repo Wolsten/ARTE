@@ -36,8 +36,6 @@ export const replaceNode = function(existingNode, tag, html){
     return node
 }
 
-
-// let tags = { block: ['DIV','P','LI'], list: ['LI'], inline: [], custom:[]}
 let tags = { block: ['DIV','P','LI'], list: ['LI'], custom:[]}
 
 export const registerTag = function(type,tag){
@@ -53,13 +51,6 @@ export const debugTags = function(){
     console.warn('inline',tags.inline.join(', '))
     console.warn('customs',tags.custom.join(', '))
 }
-
-// export const isInline = function( node ){
-//     if ( node.tagName == undefined ){
-//         return false
-//     }
-//     return tags.inline.includes(node.tagName)
-// }
 
 export const isStyle = function( node ){
     if ( node.tagName == undefined ){
@@ -100,8 +91,8 @@ export const isCustom = function( node ){
  /**
  * Get the inline styles for all nodes in the tree from the lowest to the highest that
  * isn;t a block node. In practice these are attached only to SPANs
- * @param node node 
- * @returns string of styles separated by semi-colons
+ * @param {HTMLElement} node 
+ * @returns {string} of styles separated by semi-colons
  */
 export const getInlineStyles = function(node){
     let styles = ''
@@ -135,9 +126,9 @@ export const getEditorNode = function( node ){
 
 /**
  * Get the top parent node for a child node 
- * @param node node A child node
- * @param node stopNode A parent node defining when to stop going back up the dom tree
- * @returns node first node below the stop node (if there is one) otherwise the stopNode
+ * @param {HTMLElement} node A child node
+ * @param {HTMLElement} stopNode A parent node defining when to stop going back up the dom tree
+ * @returns {HTMLElement} first node below the stop node (if there is one) otherwise the stopNode
  */
 export const getTopParentNode = function( node, stopNode ){
     let saved = node
@@ -149,9 +140,7 @@ export const getTopParentNode = function( node, stopNode ){
 }
 
 export const cleanForSaving = function( node, buttons ){
-    // if ( node.nodeType === 1 && node.tagName == 'BLOCKQUOTE' ){
-    //     debugger
-    // }
+
     // Trim text nodes with CR's
     if ( node.nodeType === 3 ){
         if ( node.textContent.includes('\n') ){
@@ -196,6 +185,26 @@ export const cleanForSaving = function( node, buttons ){
 // -----------------------------------------------------------------------------
 // @section Selection and keyboard methods
 // -----------------------------------------------------------------------------
+
+export const addMarkers = function( range ){
+    if ( range.startContainer == range.endContainer ){
+        range.startContainer.textContent = 
+            range.startContainer.textContent.substring(0, range.startOffset) +
+            START_MARKER +
+            range.startContainer.textContent.substring(range.startOffset,range.endOffset) +
+            END_MARKER +
+            range.startContainer.textContent.substring(range.endOffset)
+    } else {
+        range.startContainer.textContent = 
+            range.startContainer.textContent.substring(0, range.startOffset) +
+            START_MARKER +
+            range.startContainer.textContent.substring(range.startOffset)
+        range.endContainer.textContent = 
+            range.endContainer.textContent.substring(0, range.endOffset) +
+            END_MARKER +
+            range.endContainer.textContent.substring(range.endOffset)
+    }
+}
 
 
 function augmentRange(range){
@@ -286,17 +295,17 @@ let endOffset = 0
 
 
 
-export const addStartMarker = function( text, offset ){
-    return text.substring(0,offset) + 
-            START_MARKER + 
-            text.substring(offset)
-}
+// export const addStartMarker = function( text, offset ){
+//     return text.substring(0,offset) + 
+//             START_MARKER + 
+//             text.substring(offset)
+// }
 
-export const addEndMarker = function( text, offset ){
-    return text.substring(0,offset-1) + 
-           END_MARKER +
-           text.substring(offset)
-}
+// export const addEndMarker = function( text, offset ){
+//     return text.substring(0,offset-1) + 
+//            END_MARKER +
+//            text.substring(offset)
+// }
 
 export const getStartNode = function(parent){
     return findMarkerNode( parent, START_MARKER)

@@ -16,14 +16,13 @@ let previousFormats = []
 let lastNodeAdded = false
 let fragmentNode
 
-
 /**
- * 
+ * Get the old and new formats for the node, depending on the phase
  * @param {HTMLElement} node 
  * @param {object} formats object with two arrays of old and new format strings
  * @returns {object} Two arrays of old and new format strings
  */
-function getListAndBlockFormats( node, formats ){
+function getFormats( node, formats ){
     // Always set old formats to the original
     const oldFormats = [...formats.oldFormats, node.tagName]
     let newFormats = []
@@ -31,15 +30,15 @@ function getListAndBlockFormats( node, formats ){
     // same as the old format
     if ( Phase.pre() || Phase.post() ){
         // console.log(`1. Pushing ${node.tagName} to formats`)
-        newFormats = [...formats.newFormats, node.tagName]
+        newFormats = [...oldFormats]
         return {newFormats,oldFormats}
     }
     // During phase
     //
     // New block formatting (not list) - apply new format
-    if ( formatType == 'block' ){
-        // console.log(`Format type = ${formatType}`)
-        // console.log(`2. new block format ${newFormat}`)
+    if ( formatType === 'block' ){
+        console.log(`Format type = ${formatType}`)
+        console.log(`2. new block format ${newFormat}`)
         newFormats = [ newFormat ]
         return {newFormats,oldFormats}
     }
@@ -53,7 +52,7 @@ function getListAndBlockFormats( node, formats ){
             const parentListContainer = node.parentNode
             // First in list - in which case modify list type
             if ( parentListContainer.firstElementChild == node ){
-                // console.log( '3.1.1 First item in a list - replace existing list')
+                console.log( '3.1.1 First item in a list - replace existing list')
                 // Pop off the old list format and replace with the new one plus the LI
                 newFormats.pop()
                 newFormats.push(newFormat)
@@ -61,20 +60,20 @@ function getListAndBlockFormats( node, formats ){
                 console.log('3.1.2 new list formats', formats.newFormats.join(' '))
             // Else create a new indented list
             } else {
-                // console.log( '3.1.3 Subsequent item in a list - indent a new list')
+                console.log( '3.1.3 Subsequent item in a list - indent a new list')
                 // Start with the old formats
                 newFormats = formats.oldFormats.slice()
                 // Add the new list format and an LI
                 newFormats.push(newFormat)
                 newFormats.push('LI')
-                // console.log('3.1.4 new list formats', formats.newFormats.join(' '))
+                console.log('3.1.4 new list formats', formats.newFormats.join(' '))
             }
-        // This is a different block node (e. H1, P) or a list container node - therefore start a new list
+        // This is a different block node (e.g. H1, P) or a list container node - therefore start a new list
         } else {
             // console.log( 'Converting a block node')
             newFormats.push(newFormat)
             newFormats.push('LI')
-            // console.log('3.2 new list formats', formats.newFormats.join(' '))
+            console.log('3.2 new list formats', formats.newFormats.join(' '))
         }
         return {newFormats,oldFormats}
     }
@@ -111,11 +110,12 @@ function getBlockHTML(node){
 }
     
 /**
- * 
+ * Save the content of text nodes and protected nodes against the current target node
+ * which defaults to be the fragmentNode
  * @param {HTMLElement} node 
- * @param {object} formats Two arrays of old and new format strings
+ * @param {string[],string[]} formats Two arrays of old and new format strings
  */
-function saveBlockContent( node, formats ){
+function saveContent( node, formats ){
     let n
     let target = fragmentNode
     let html = getBlockHTML(node)
@@ -126,10 +126,12 @@ function saveBlockContent( node, formats ){
         currentFormats = formats.oldFormats
     }
     let lastFormat = currentFormats.slice(-1)[0]
-    console.log('html',html)
-    // Skip "blocks" where the html returned is empty but the node contains one or more tags
-    if ( html == '' && node.innerHTML.includes('<') ){
-        // console.log('saveBlockContent: Found a block node - return', node)
+    // console.log('html',html)
+    // Skip unsupported node types and "blocks" where the html returned is empty but the node 
+    // contains one or more tags
+    const allowed = node.nodeType === 1
+    if ( node.nodeType !== 1 || (html == '' && node.innerHTML.includes('<')) ){
+        // console.log('saveContent: Found a block node - return', node)
         return
     }
     // First time - apply all formats
@@ -138,22 +140,22 @@ function saveBlockContent( node, formats ){
         currentFormats.forEach( format => {
             n = document.createElement( format )
             target = target.appendChild( n )
-            // console.log('saveBlockContent: 1. First content - moving target to',target.outerHTML)
+            // console.log('saveContent: 1. First content - moving target to',target.outerHTML)
         })
     // New tree larger and the previous formats are a subset?
     // Compare formatting and add to appropriate end of tree
     } else if ( currentFormats.length > previousFormats.length ){
-        console.log('saveBlockContent: 2. Current formats longer than previous formats')
+        console.log('saveContent: 2. Current formats longer than previous formats')
         if ( Helpers.arraySubset( previousFormats, currentFormats ) ){
-            // console.log('saveBlockContent: 2.1 Current formats are a superset of previous formats')
+            // console.log('saveContent: 2.1 Current formats are a superset of previous formats')
             for( let i=0; i<previousFormats.length; i++){
                 target = target.lastElementChild
-                // console.log('saveBlockContent: 2.2 New formats superset - moving target to',target.outerHTML)
+                // console.log('saveContent: 2.2 New formats superset - moving target to',target.outerHTML)
             }
             for( let i=previousFormats.length; i < currentFormats.length; i++ ){
                 n = document.createElement( currentFormats[i] )
                 target = target.appendChild( n )
-                // console.log('saveBlockContent: 2.3 New formats superset - moving target to',target.outerHTML)
+                // console.log('saveContent: 2.3 New formats superset - moving target to',target.outerHTML)
             }
         }
     // Formatting is the same as previously
@@ -163,11 +165,11 @@ function saveBlockContent( node, formats ){
         }
         n = document.createElement( lastFormat )
         target = target.appendChild( n )
-        // console.log('saveBlockContent: 3. Formats equal - moving target to',target.outerHTML)
+        // console.log('saveContent: 3. Formats equal - moving target to',target.outerHTML)
     }
     // New formatting smaller or different - find where in tree to append
     if ( target == fragmentNode ){
-        // console.log('saveBlockContent: 4. New formatting smaller or different')
+        // console.log('saveContent: 4. New formatting smaller or different')
         let startIndex = 0
         currentFormats.forEach( (format,index) => {
             if ( format == previousFormats[index] ){
@@ -183,7 +185,7 @@ function saveBlockContent( node, formats ){
         for( let i=startIndex; i<currentFormats.length; i++ ){
             n = document.createElement( currentFormats[i] )
             target = target.appendChild( n )
-            // console.log('saveBlockContent: 4.2 Starting new formats - moving target to',target.outerHTML)
+            // console.log('saveContent: 4.2 Starting new formats - moving target to',target.outerHTML)
         }
     }
     lastNodeAdded = target
@@ -191,8 +193,8 @@ function saveBlockContent( node, formats ){
     // Add the content
     if ( html != '' ){
         target.innerHTML = html
-        // console.log('saveBlockContent: target with new content', target.outerHTML)
-        // console.log('saveBlockContent: fragmentNode',fragmentNode.innerHTML)
+        // console.log('saveContent: target with new content', target.outerHTML)
+        // console.log('saveContent: fragmentNode',fragmentNode.innerHTML)
     }
 }
     
@@ -201,8 +203,8 @@ function saveBlockContent( node, formats ){
  * @param {HTMLElement} node 
  * @param {object} formats Old and new arrays of format strings
  */
-function parseListsAndBlocks( node, formats ){
-    // console.log( `%cparseListsAndBlocks ${node.tagName}`,'background:green;color:white;padding:0.5rem')
+function parseNode( node, formats ){
+    // console.log( `%cparseNode ${node.tagName}`,'background:green;color:white;padding:0.5rem')
     // console.log( `Inner HTML [${node.innerHTML.trim()}]`)
     // console.log( `node formats on entry`,formats.oldFormats)
     // Define the formats for this node only
@@ -213,17 +215,17 @@ function parseListsAndBlocks( node, formats ){
     if ( node != editorNode ){
         Phase.set( node )
         // Get the old and new formats
-        nodeFormats = getListAndBlockFormats( node, formats )
+        nodeFormats = getFormats( node, formats )
         // console.log( `old node formats`,nodeFormats.oldFormats)
         // console.log( `new node formats`,nodeFormats.newFormats)
-        // Save content of text nodes and protected nodes
-        saveBlockContent( node, nodeFormats )
+        // Save content of text nodes and protected nodes against the current targetNode
+        saveContent( node, nodeFormats )
     }
     // Loop through all child blocks 
     node.childNodes.forEach( child => {
-        if ( Helpers.isBlock(child) ){
+        if ( Helpers.isBlock(child) || Helpers.isList(child) ){
             // console.log(`Moving to child ${child.tagName}`)
-            parseListsAndBlocks( child, nodeFormats  ) 
+            parseNode( child, nodeFormats  ) 
         }
     })
     // console.log(`Finished this branch - processed children`, node.childNodes)
@@ -235,13 +237,10 @@ function parseListsAndBlocks( node, formats ){
  * @param {object} editor A unique editor instance
  * @param {object} btn The button to act on
  */
-const click = function( editor, btn ){
+ const click = function( editor, btn ){
     editorNode = editor.editorNode
     range = editor.range
     button = btn
-    console.warn('range',range)
-    // const offset = range.endOffset
-    // Initialisation
     formatType = button.type
     formatAction = 'apply'
     if ( button.tag == 'CLEAR' || button.element.getAttribute('data-active') ){
@@ -258,32 +257,34 @@ const click = function( editor, btn ){
     range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
     const firstParentNode = Helpers.getTopParentNode( range.startContainer, editorNode )
     const endParentNode = Helpers.getTopParentNode( range.endContainer, editorNode )
-    // Set the end target to be the next node following the last in the selection
-    // Use this at the end to reset the selection
-    let endTarget = editorNode
-    if ( endParentNode != editorNode.lastElementChild ){
-        endTarget = endParentNode.nextElementSibling
-    }
-    console.log('End target node =',endTarget)
+    // console.warn('root node', editor.range.rootNode)
+    // console.log('first parent node', firstParentNode)
+    // console.log('end parent node', endParentNode)
+    // Mark the start and end selection points
+    Helpers.addMarkers(editor.range)
     // Init phase for block formatting
     Phase.init(range, true)
-    console.log(`%creFormatBlock with new format ${button.tag}`,'background-color:red;color:white;padding:0.5rem')
-    // Just parse the root node if the start and end belong to the same parent
+    // console.warn(`reFormatBlock with new format ${button.tag}`)
+    // Just parse the parent node if the start and end belong to the same parent
     if ( firstParentNode == endParentNode ){
+        // console.log('Parent nodes match')
         fragmentNode = document.createElement('DIV')
-        parseListsAndBlocks( range.rootNode, {oldFormats:[], newFormats:[]} )
-        console.log( 'fragment', fragmentNode.innerHTML)
-        if ( range.rootNode == editorNode ){
-            range.rootNode.innerHTML = fragmentNode.innerHTML
+        parseNode( firstParentNode, {oldFormats:[], newFormats:[]} )
+        // console.log( 'fragment', fragmentNode.innerHTML)
+        if ( firstParentNode == editorNode ){
+            firstParentNode.innerHTML = fragmentNode.innerHTML
         } else {
-            range.rootNode.outerHTML = fragmentNode.innerHTML
+            firstParentNode.outerHTML = fragmentNode.innerHTML
         }
     } else {
+        // console.log('Parent nodes do NOT match')
         let startNodeFound = false
         let endNodeFound = false
         fragmentNode = document.createElement('DIV')
         range.rootNode.childNodes.forEach( node => {
-            if ( node.nodeType === 3 ){
+            // If find a none-block node then terminate this cycle of the loop
+            // ie. ignore text and comments
+            if ( node.nodeType !== 1){
                 return
             }
             if ( node == firstParentNode ){
@@ -291,21 +292,20 @@ const click = function( editor, btn ){
             } 
             // Start processing once start node found
             if ( startNodeFound && endNodeFound==false ) {
-                console.log( `%cparse top level node ${node.tagName}`,'background:orange;color:white;padding:0.5rem')
+                // console.log( `%cparse top level node ${node.tagName}`,'background:orange;color:white;padding:0.5rem')
                 // Check for block (as opposed to list formatting) and start a new fragment
                 if ( formatType == 'block' ){
                     previousFormats = []
                     lastNodeAdded = false
                     fragmentNode = document.createElement('DIV')
                 }
-                parseListsAndBlocks( node, {oldFormats:[], newFormats:[]} )
-                if ( this.type == 'block' ){
-                    console.log( 'fragment', this.fragmentNode.innerHTML)
+                parseNode( node, {oldFormats:[], newFormats:[]} )
+                if ( formatType == 'block' ){
+                    console.log( 'fragment', fragmentNode.innerHTML)
                     node.outerHTML = fragmentNode.innerHTML
                 } else {
                     node.setAttribute('data-remove',true)
                 }
-
             }
             // Stop processing when end node found. If formatting a list write out the 
             // fragment
@@ -321,10 +321,9 @@ const click = function( editor, btn ){
         })
     }
     // Reset the selection
-    Helpers.setCursorToTargetNode(editorNode, endTarget)
-    // Reset state
+    Helpers.resetSelection(editor.editorNode)
     editor.updateRange()
-    setState(editor, btn)
+    button.setState( editor, button )
 }
 
 /**
@@ -341,13 +340,18 @@ const setState = function(editor, btn){
         btn.element.disabled = false
         btn.element.classList.remove('active')
     } else {
-        // The rootNode should not be a DIV (the editor) or list container - (implying 
-        // multiple blocks selected) or a custom element
-        btn.element.disabled = editor.range.rootNode.tagName === 'DIV' || 
-                                Helpers.isList(editor.range.rootNode) ||
-                                Helpers.isCustom(editor.range.rootNode)
-        const block = Helpers.getParentBlockNode(editor.range.rootNode)
-        if ( block.tagName === btn.tag ){
+        // Use the first parent node to set disabled state
+        let firstParentNode = Helpers.getParentBlockNode( editor.range.startContainer, editor.editorNode )
+        //console.log('firstParentNode',firstParentNode)
+        // The firstParentNode should not be a DIV (the editor) or a custom element
+        btn.element.disabled = firstParentNode.tagName === 'DIV' || Helpers.isCustom(firstParentNode)
+        //console.log('disabled',btn.element.disabled)
+        // If this is a list type get the list parent
+        if ( btn.type === 'list' && firstParentNode.tagName === 'LI'){
+            firstParentNode = firstParentNode.parentNode
+        }
+        // Do the tag names match?
+        if ( firstParentNode.tagName === btn.tag ){
             btn.element.classList.add('active')
         } else {
             btn.element.classList.remove('active')

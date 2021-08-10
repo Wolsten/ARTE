@@ -1,22 +1,25 @@
 "use strict"
 
 import * as Modal from '../modalConfirm.js'
-import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
+import ToolbarButton from '../ToolbarButton.js'
 
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
  */
 const TAG = 'CUSTOM'
+
 /**
  * @var {HTMLElement} node The actively edited node
  */
 let node
+
  /**
   * @var {boolean} dirty Flag whether input data changed
   */
 let dirty
+
  /**
   * @var {HTMLElement} panel The container for the edit dialogue
   */
@@ -135,34 +138,8 @@ function save(editor, button, editFlag ){
  * @param {object} editor A unique editor instance
  */
 function insert(editor){
-    // // const 
-    // node = document.createElement(TAG)
-    // node.innerHTML = template(data)
-    // node.id = data.id
-    // node.setAttribute('contenteditable', 'false')
     node = editor.range.startContainer.parentNode.appendChild(node)
-    // // Update state
-    // editor.range = Helpers.setCursor( node, 0)
-    // setState(editor, button)
-    // hide()
 }
-
-// /**
-//  * Update the custom element in the dom
-//  * @param {object} editor A unique editor instance
-//  * @param {object} button The button to act on
-//  */
-// function updateDom(editor, button){
-//     // const form = panel.querySelector('form')
-//     // const node = editorNode.querySelector(`${TAG}#${data.id}`)
-//     node.querySelector('.property1').innerText = data.property1
-//     node.querySelector('.property2').innerText = data.property2
-//     node.querySelector('.property3').innerText = data.property3
-//     // Format node and add event handler
-//     format(editor, button, node)
-//     // Close the edit pane
-//     hide()
-// }
 
 /**
  * Delete the custom element in the dom
@@ -355,18 +332,6 @@ const click = function( editor, button ){
     if ( custom != null ){
         edit(editor, button, custom)
     } else {
-        // Get default label if range not collapsed
-        let label = ''
-        if ( editor.range.collapsed == false && 
-            editor.range.startContainer == editor.range.endContainer ){
-            label = editor.range.endContainer.textContent.substring(editor.range.startOffset, editor.range.endOffset)  
-        }
-        data = {
-            id:'',
-            property1:'',
-            property2:'',
-            property3:''
-        }
         show(editor, button, false)
     }
 }

@@ -3,15 +3,9 @@
 * {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     box-sizing: border-box;
+    font-size: 16px;
 }
 
-blockquote {
-    background: #f9f9f9;
-    border-left: 10px solid #ccc;
-    margin: 1.5em 10px;
-    padding: 0.5em 10px;
-    font-style: italic;
-}
 
 /* Index.html */
 
@@ -64,7 +58,17 @@ body > h5 {
 }
 
 .editor-body p {
-    margin:0.5rem 0
+    line-height: 1.4rem;
+    margin:0.4rem 0;
+    padding:0;
+}
+
+.editor-body blockquote {
+    background: #f9f9f9;
+    border-left: 10px solid #ccc;
+    margin: 1.5em 10px;
+    padding: 0.5em 10px;
+    font-style: italic;
 }
 
 .editor-body.heading-numbers { counter-reset: h1}
@@ -80,18 +84,12 @@ body > h5 {
 .editor-body.heading-numbers h5:before {counter-increment: h5; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " "}
 .editor-body.heading-numbers h5:before {counter-increment: h6; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". " counter(h6)}
 
-/* Rotate redo icon */
-button#REDO {
-    -webkit-transform: scale(-1, 1);
-            transform: scale(-1, 1);
-}
-
 /* Buttons */
 
 button {
     background:white;
     border: 1px solid rgb(200, 200, 200);
-    border-radius: 0.4rem;
+    border-radius: 0.3rem;
     padding:0.3rem 0.5rem;
     -webkit-transition: all 0.5s ease;
     transition:all 0.5s ease;

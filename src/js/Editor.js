@@ -117,6 +117,24 @@ class Editor {
     }
 
     /**
+     * Set the disabled and active states for a button. If not provided
+     * just check if we have a range
+     * @param {object} button 
+     */
+    setState( button ){
+        if ( "setState" in button ){
+            button.setState( this, button )
+        } else {
+            if ( this.range === false ){
+                button.element.disabled = true
+            } else {
+                button.element.disabled = false
+            }
+            button.element.classList.remove('active')
+        }
+    }
+
+    /**
      * Initialise the toolbar buttons
      */
     initialiseButtons(){
@@ -131,7 +149,7 @@ class Editor {
                 button.init( this, button )
             }
             // Set initial button state
-            button.setState( this, button )
+            this.setState( button )
             // Some button have shortcuts in which case save for use in the keydown
             // event handler
             if ( "shortcut" in button ){
@@ -143,7 +161,7 @@ class Editor {
                     button: button
                 })
             }
-            // All buttons have a click method (but undefined for buffer buttons)
+            // All buttons have a click method
             button.element.addEventListener('click', event => {
                 // Prevent default action for all buttons when have no range 
                 // and not the undo-redo buffer buttons
@@ -184,12 +202,14 @@ class Editor {
      * @param {Event} event 
      */
     handleEditorBlur( event ){
-        console.log('editor blurred')
-        this.toolbar.forEach( button => {
-            this.range = false
-            button.setState( this, button )
-            button.element.classList.remove('active')
-        })
+        // Ignore blur if a modal dialogue is shown
+        if ( document.querySelectorAll('.show').length == 0 ){
+            console.log('editor blurred')
+            this.toolbar.forEach( button => {
+                this.range = false
+                this.setState( button )
+            })
+        }
     }
 
     /**
@@ -233,9 +253,7 @@ class Editor {
             return
         }
         this.toolbar.forEach( button => {
-            if ( "setState" in button ){
-                button.setState( this, button )
-            }
+            this.setState( button )
         })
     }
 

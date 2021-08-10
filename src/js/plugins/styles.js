@@ -23,7 +23,6 @@ function setStyle(styleProp){
     value = styleParts[1] !== undefined ? styleParts[1] : ''
 }
 
-
 /**
  * 
  * @param {HTMLElement} node

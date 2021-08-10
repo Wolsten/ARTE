@@ -4,32 +4,48 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./src/css/styles.css">
     <title>Another Javascript Editor</title>
 </head>
 <body>
+
+    <div>
+
+        <!-- <p>Thirdly, and where I struggled most, it should be easy to extend, including the ability to embed "active" content that can be edited using its own dialogue.</p>
+
+        <p>Forthly, the whole editor needs to be modular, written using plugins so that there is a single implementation model. For example, all the standard toolbar buttons are written as block, list, and inline styling plugins.</p>
+
+        <p>Fifthly, it cannot use the builtin browser support for contenteditable, since this throws up too many gotchas between browsers. Therefore, all dom operations are implmented at a low level, such that where possible, behaviour is consistent across modern browsers. However, there has been no attempt to abstract away specific input types and therefore, the look and feel of some interactions will be specific to a browser technology, such as when choosing colours with the colours plugin.</p>
+
+        <p>Lastly, it needs to be open source and free so that there are no commercial drawbacks or lockins to proprietary code that could be difficult to fix.</p> -->
+    </div>
 
     <!-- The inner html will be replaced with the editor instance -->
     <div id="editor">
 
         <h1>Welcome to <span style="text-decoration:underline;">AJE</span></h1>
 
-        <p>I am some <span style="color:yellow;background-color:#ff0000;">coloured text</span> for formatting</p>
-        <p>I am AJE - <span style="font-style:italic;">Another <span style="font-weight:bold;">Javascript</span> Editor</span>! My name is pronounced <span style="font-weight:bold;">Ajay</span>.</p>
-        <blockquote>I am a block quote. I am a block quote. I am a block quote. I am a block quote. I am a block quote. I am a block quote. </blockquote>
-        
+        <p>AJE is Another Javascript Editor, where the name is pronounced <span style="font-style:italic;">Ajay</span>.</p>
+
+        <p>Does the world need another Rich Text Editor? Possibily not, but when developing my own applications I became frustrated with those I could find online. First of all I wanted something written in vanilla Javascript that could be embedded easily in any website irrespective of framework.</p>
+
         <h2>Blocks</h2>
 
-        <p>AJE supports the main block formats, including headings, paragraphs and blockquotes. These can be extended eaily for other block types.</p>
+        <p>AJE supports the main block formats, including headings and paragraphs. These can be extended easily for other block types.</p>
+
+        <blockquote>For example, I am a block quote.</blockquote>
         
         <h2>Lists</h2>
 
-        <p>AJE supports standard list level formatting indented lists.</p>
+        <h3>Ordered lists</h3>
         <ul>
             <li>I am an unordered list A</li>
             <li>I am an unordered list B</li>
             <li>I am an unordered list C</li>
         </ul>
+
+        <h3>Ordered and indented lists</h3>
         <ol>
             <li>I am an ordered list 1</li>
             <li>I am an ordered list 2 with an indented unordered list
@@ -45,6 +61,8 @@
         <h2>Inline styling</h2>
 
         <p>AJE supports a range of inline styling options which can be extended easily.</p>
+
+        <p>For example, I am some <span style="color:yellow;background-color:#ff0000;">coloured text</span> which was added using a plugin called colours.js.</p>
 
         <h2>Custom elements</h2>
 
