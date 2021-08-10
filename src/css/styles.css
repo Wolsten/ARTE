@@ -1,17 +1,4 @@
-/* Variables */
-
-:root {
-    --text: gray;
-    --link-text: rgb(102, 102, 235);
-    --background: #ffffff;
-    --border: gray;
-    --block-quote-border: #ccc;
-    --block-quote-background: #f9f9f9;
-    --toolbar-button-border: white;
-    --modal-background: rgba(100,100,100,0.5);
-    --selected-object-border: rgb(150, 150, 200);
-  }
-
+@import "dark-theme.css";
 
 /* General */
 
@@ -29,8 +16,11 @@ a:visited {
     color:var(--link-text);
 }
 
-
 /* Index.html */
+
+body {
+    background-color: var(--background);
+}
 
 body > button#save {
     margin-top:1rem;
@@ -52,7 +42,7 @@ body > h5 {
     padding:0.5rem;
     position:sticky;
     top:0rem;
-    background:white;
+    background:var(--background);
     border:1px solid var(--border);
 }
 
@@ -61,18 +51,20 @@ body > h5 {
 }
 
 .editor-toolbar-group button.active {
-    background:rgb(230, 230, 230);
+    background:var(--toolbar-button-background-active);
 }
 
 .editor-toolbar-group-separator {
     margin:0 0.3rem;
-    color:rgb(200, 200, 200);
+    color:var(--border);
     font-size: 1.4em;
 }
 
 .editor-body {
     padding:1.4rem;
     border-bottom: 1px solid var(--border);
+    background-color: var(--background);
+    color:var(--text);
     /* Ideally make these options */
     min-height:200px;
     max-height:700px;
@@ -88,6 +80,7 @@ body > h5 {
 .editor-body blockquote {
     background: var(--block-quote-background);
     border-left: 10px solid var(--block-quote-border);
+    color:var(--text);
     margin: 1.5em 10px;
     padding: 0.5em 10px;
     font-style: italic;
@@ -113,8 +106,9 @@ body > h5 {
 /* buttons */
 
 button {
-    background:white;
+    background:var(--background);
     border: 1px solid var(--border);
+    color:var(--text);
     border-radius: 0.3rem;
     padding:0.3rem 0.5rem;
     -webkit-transition: all 0.5s ease;
@@ -291,10 +285,10 @@ label {
   
 .inplace-panel .inplace-content {
     position: absolute;
-    background-color: #fefefe;
+    background-color: var(--background);
     margin: 0;
     padding: 0;
-    border: 1px solid #888;
+    border: 1px solid var(--border);
     max-height: 200px;
     width: 200px;
     -webkit-box-shadow: 5px 5px 10px var(--border);
@@ -321,7 +315,7 @@ custom {
     border-radius:0.3rem;
     font-size: 1rem;
     font-weight:normal;
-    border:3px solid var(--border);
+    border:1px solid var(--border);
     transition: border 500ms ease-in-out;
 }
 custom, custom > * {
@@ -329,12 +323,11 @@ custom, custom > * {
 }
 
 custom.selected {
-    border:3px solid var(--selected-object-border);
+    border-color:var(--selected-object-border);
 }
 
 custom .title {
     display:block;
-    color: rgb(67, 66, 66);
     margin-bottom:0.3rem;
 }
 
@@ -351,13 +344,12 @@ custom .property2 {
     color:green;
 }
 custom .property3 {
-    color:blue;
+    color:rgb(99, 99, 236);
 }
 
 custom .advice {
     display:block;
     margin-top:0.5rem;
-    color: rgb(67, 66, 66);
 }
 
 custom button.edit {
@@ -372,6 +364,7 @@ div#debug h5 {
     font-size:1.2rem;
     padding:0.4rem 0;
     margin:0;
+    color: var(--text);
 }
 
 div.debug {
@@ -387,9 +380,10 @@ div.debug div.col {
 div.debug div.col label {
     display:block;
     font-weight: bold;
+    color: var(--text);
 }
 
 div.debug div.col span {
-    color: green;
+    color: var(--debug-text);
     font-size: 1rem;
 }
