@@ -79,8 +79,8 @@ export const update = function(editor){
     // Update buttons
     setState( editor, UNDO )
     setState( editor, REDO )
-    console.log('buffer',editor.buffer)
-    console.log('buffer index', editor.bufferIndex)
+    // console.log('buffer',editor.buffer)
+    // console.log('buffer index', editor.bufferIndex)
 }
 
 /**

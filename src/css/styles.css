@@ -1,9 +1,32 @@
+/* Variables */
+
+:root {
+    --text: gray;
+    --link-text: rgb(102, 102, 235);
+    --background: #ffffff;
+    --border: gray;
+    --block-quote-border: #ccc;
+    --block-quote-background: #f9f9f9;
+    --toolbar-button-border: white;
+    --modal-background: rgba(100,100,100,0.5);
+    --selected-object-border: rgb(150, 150, 200);
+  }
+
+
 /* General */
 
 * {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     box-sizing: border-box;
     font-size: 16px;
+}
+
+a {
+    color:var(--link-text);
+    text-decoration: none;;
+}
+a:visited {
+    color:var(--link-text);
 }
 
 
@@ -16,14 +39,13 @@ body > button#save {
 body > h5 {
     padding-top:0.5rem;
     margin-top:1rem;
-    border-top: grey solid 1px;
+    border-top: var(--border) solid 1px;
 }
 
 /* Editor */
 
 .editor-container {
     position: relative;
-    
 }
 
 .editor-toolbar {
@@ -31,7 +53,7 @@ body > h5 {
     position:sticky;
     top:0rem;
     background:white;
-    border:1px solid gray;
+    border:1px solid var(--border);
 }
 
 .editor-toolbar-group {
@@ -50,7 +72,7 @@ body > h5 {
 
 .editor-body {
     padding:1.4rem;
-    border-bottom: 1px solid rgb(200, 200, 200);
+    border-bottom: 1px solid var(--border);
     /* Ideally make these options */
     min-height:200px;
     max-height:700px;
@@ -64,11 +86,15 @@ body > h5 {
 }
 
 .editor-body blockquote {
-    background: #f9f9f9;
-    border-left: 10px solid #ccc;
+    background: var(--block-quote-background);
+    border-left: 10px solid var(--block-quote-border);
     margin: 1.5em 10px;
     padding: 0.5em 10px;
     font-style: italic;
+}
+
+.editor-body li {
+    margin: 0.4rem 0;
 }
 
 .editor-body.heading-numbers { counter-reset: h1}
@@ -84,11 +110,11 @@ body > h5 {
 .editor-body.heading-numbers h5:before {counter-increment: h5; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " "}
 .editor-body.heading-numbers h5:before {counter-increment: h6; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". " counter(h6)}
 
-/* Buttons */
+/* buttons */
 
 button {
     background:white;
-    border: 1px solid rgb(200, 200, 200);
+    border: 1px solid var(--border);
     border-radius: 0.3rem;
     padding:0.3rem 0.5rem;
     -webkit-transition: all 0.5s ease;
@@ -97,8 +123,38 @@ button {
 
 button:not([disabled]):hover {
     cursor:pointer;
-    background:rgb(100, 100, 100);
-    color:white;
+    background:var(--text);
+    color:var(--background);
+} 
+
+/* Toolbar buttons */
+
+.editor-toolbar button {
+    border: 1px solid var(--toolbar-button-border);
+}
+
+.editor-toolbar button.barred {
+    position:relative;
+}
+
+.editor-toolbar button.barred i {
+    position:relative;
+    top:-4px;
+}
+
+.editor-toolbar button span.bar {
+    position:absolute;
+    display:inline-block;
+    width:60%;
+    height:6px;
+    left:20%;
+    bottom:2px;
+    border:1px var(--border) solid;
+    background-color: var(--background);
+}
+
+.editor-toolbar button span.bar.FGC {
+    background-color: var(--text);
 }
 
 
@@ -120,8 +176,8 @@ label {
 
 .form-control {
     flex-basis:75%;
-    background:white;
-    border: 1px solid rgb(200, 200, 200);
+    background:var(--background);
+    border: 1px solid var(--border);
     border-radius: 0.4rem;
     padding:0.3rem;
 }
@@ -150,7 +206,7 @@ label {
     left:0;
     width:100vw;
     height:100vh;
-    background:rgba(100,100,100,0.5);
+    background:var(--edit-panel-backgorund);
 }
 
 .edit-panel-container {
@@ -159,9 +215,9 @@ label {
     top:0;
     left:0;
     padding:1rem;
-    background:white;
-    border-bottom:1px gray solid;
-    box-shadow: 2px 2px 2px gray;
+    background:var(--background);
+    border-bottom:1px var(--border) solid;
+    box-shadow: 2px 2px 2px var(--border);
     transform: translateY(-100%);
     transition: all 0.3s ease-in-out 0s;
 }
@@ -174,6 +230,10 @@ label {
     width:100%;
 }
 
+.edit-panel .panel-link i {
+    font-size: 1.4rem;
+}
+
 
 /* Modal confirm */
 
@@ -183,7 +243,7 @@ label {
     left:0;
     width:100vw;
     height:100vh;
-    background:rgba(100,100,100,0.5);
+    background:var(--modal-background);
 }
 
 .modal-panel-container {
@@ -192,9 +252,9 @@ label {
     top:25%;
     left:10%;
     padding:1rem;
-    background:white;
-    border-bottom:1px gray solid;
-    box-shadow: 2px 2px 2px gray;
+    background:var(--background);
+    border-bottom:1px var(--border) solid;
+    box-shadow: 2px 2px 2px var(--border);
     opacity:0;
     transition: all 0.4s ease-in-out 0s;
     border-radius: 0.5rem;
@@ -225,7 +285,7 @@ label {
     /* Full height */
     overflow: auto;
     /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: var(--modal-background);
     /* Black w/ opacity */
 }
   
@@ -237,8 +297,8 @@ label {
     border: 1px solid #888;
     max-height: 200px;
     width: 200px;
-    -webkit-box-shadow: 5px 5px 10px #5e5c5c;
-            box-shadow: 5px 5px 10px #5e5c5c;
+    -webkit-box-shadow: 5px 5px 10px var(--border);
+            box-shadow: 5px 5px 10px var(--border);
 }
   
 .inplace-panel input {
@@ -261,15 +321,15 @@ custom {
     border-radius:0.3rem;
     font-size: 1rem;
     font-weight:normal;
-    border:3px solid rgb(240, 245, 240);
+    border:3px solid var(--border);
     transition: border 500ms ease-in-out;
 }
 custom, custom > * {
-    background-color: rgb(240, 245, 240);
+    background-color: var(--block-quote-background);
 }
 
 custom.selected {
-    border:3px solid blue;
+    border:3px solid var(--selected-object-border);
 }
 
 custom .title {
@@ -288,10 +348,10 @@ custom .property1 {
     color:red;
 }
 custom .property2 {
-    color:rgb(88, 49, 226);
+    color:green;
 }
 custom .property3 {
-    color:rgb(106, 190, 98);
+    color:blue;
 }
 
 custom .advice {

@@ -60,7 +60,7 @@ class Editor {
      */
     handleMutation() {
         if ( this.bufferIgnoreMutation(this) === false ){
-            console.log('MUTATED')
+            // console.log('MUTATED')
             this.bufferUpdate(this)
             this.updateEventHandlers()
         }
@@ -497,7 +497,7 @@ class Editor {
         //console.log('Updating event handlers')
         this.toolbar.forEach( button => {
             if ( 'addEventHandlers' in button ){
-                console.log('Updating event handlers for button',button.tag)
+                // console.log('Updating event handlers for button',button.tag)
                 button.addEventHandlers(this)
             }
 

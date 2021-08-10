@@ -331,7 +331,7 @@ function findMarkerNode( parent, marker ){
         } else if ( child.nodeType === 3 ){
             const index = child.textContent.indexOf(marker)
             if ( index != -1 ){
-                console.log('Found node with marker', marker)
+                // console.log('Found node with marker', marker)
                 child.textContent = child.textContent.replace(marker,'')
                 if ( marker == START_MARKER ){
                     startNode = child
@@ -349,8 +349,8 @@ function findMarkerNode( parent, marker ){
 
 export const resetSelection = function( editorNode ){
     if ( getStartNode( editorNode ) && getEndNode( editorNode ) ){
-        console.log('startNode',startNode)
-        console.log('endNode',endNode)
+        // console.log('startNode',startNode)
+        // console.log('endNode',endNode)
         const range = document.createRange()
         const selection = window.getSelection()
         range.setStart(startNode, startOffset)

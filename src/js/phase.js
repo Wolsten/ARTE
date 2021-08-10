@@ -39,7 +39,7 @@ export const set = function( node ){
     } else if ( phase == 'post-first' ){
         phase = 'post'
     }
-    console.log('Node',node, 'New phase =',phase)
+    // console.log('Node',node, 'New phase =',phase)
 }
 
 export const pre = function(){

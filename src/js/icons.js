@@ -64,6 +64,7 @@ export const link = '<i class="bi bi-link"></i>'
 export const colourForeground = '<i class="bi bi-type"></i>'
 export const colourBackground = '<i class="bi bi-paint-bucket"></i>'
 export const plugin = '<i class="bi bi-plug"></i>'
+export const openLink = '<i class="bi bi-link-45deg"></i>'
 
 
 // export const action = icon( `

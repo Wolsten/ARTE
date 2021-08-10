@@ -38,6 +38,7 @@ function show(editor, btn){
         // in terms of parsing the dom tree
         Styles.click( editor, button )
         hide()
+        setState(editor,btn)
     })
 }
 
@@ -96,23 +97,31 @@ const setState = function(editor,btn){
                     // If so set the button styling to match
                     if ( parts[0].trim() === btn.style ){
                         value = parts[1].trim()
-                        btn.element.setAttribute('style',`background-color:${value};`)
+                        btn.element.querySelector('span.bar').setAttribute('style',`background-color:${value};`)
                     }
                 }
             })
         }
         if ( value == '' ){
-            btn.element.removeAttribute('style')
+            btn.element.querySelector('span.bar').removeAttribute('style')
         }
     }
+}
+
+const init = function(editor, button){
+    const bar = document.createElement('span')
+    bar.classList.add('bar')
+    bar.classList.add(button.tag)
+    button.element.appendChild(bar)
+    button.element.classList.add('barred')
 }
 
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
-options = {setState, style:'color', removeStyle:'color:black;'}
+options = {init, setState, style:'color', removeStyle:'color:black;'}
 export const FOREGROUND = new ToolbarButton( 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, options)
 
-options = {setState, style:'background-color', removeStyle:'background-color:white;'}
+options = {init, setState, style:'background-color', removeStyle:'background-color:white;'}
 export const BACKGROUND = new ToolbarButton( 'inline', 'BGC', 'Background colour', Icons.colourBackground, click, options)

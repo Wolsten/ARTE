@@ -37,8 +37,8 @@ function getFormats( node, formats ){
     //
     // New block formatting (not list) - apply new format
     if ( formatType === 'block' ){
-        console.log(`Format type = ${formatType}`)
-        console.log(`2. new block format ${newFormat}`)
+        // console.log(`Format type = ${formatType}`)
+        // console.log(`2. new block format ${newFormat}`)
         newFormats = [ newFormat ]
         return {newFormats,oldFormats}
     }
@@ -48,11 +48,11 @@ function getFormats( node, formats ){
         // console.log(`3. First node with new list format ${newFormat}`)
         // Reformatting a list item?
         if ( node.tagName == 'LI' ){
-            console.log('3.1 Processing LI')
+            // console.log('3.1 Processing LI')
             const parentListContainer = node.parentNode
             // First in list - in which case modify list type
             if ( parentListContainer.firstElementChild == node ){
-                console.log( '3.1.1 First item in a list - replace existing list')
+                // console.log( '3.1.1 First item in a list - replace existing list')
                 // Pop off the old list format and replace with the new one plus the LI
                 newFormats.pop()
                 newFormats.push(newFormat)
@@ -60,7 +60,7 @@ function getFormats( node, formats ){
                 console.log('3.1.2 new list formats', formats.newFormats.join(' '))
             // Else create a new indented list
             } else {
-                console.log( '3.1.3 Subsequent item in a list - indent a new list')
+                // console.log( '3.1.3 Subsequent item in a list - indent a new list')
                 // Start with the old formats
                 newFormats = formats.oldFormats.slice()
                 // Add the new list format and an LI
@@ -73,7 +73,7 @@ function getFormats( node, formats ){
             // console.log( 'Converting a block node')
             newFormats.push(newFormat)
             newFormats.push('LI')
-            console.log('3.2 new list formats', formats.newFormats.join(' '))
+            // console.log('3.2 new list formats', formats.newFormats.join(' '))
         }
         return {newFormats,oldFormats}
     }
@@ -301,7 +301,7 @@ function parseNode( node, formats ){
                 }
                 parseNode( node, {oldFormats:[], newFormats:[]} )
                 if ( formatType == 'block' ){
-                    console.log( 'fragment', fragmentNode.innerHTML)
+                    // console.log( 'fragment', fragmentNode.innerHTML)
                     node.outerHTML = fragmentNode.innerHTML
                 } else {
                     node.setAttribute('data-remove',true)

@@ -262,7 +262,7 @@ function form(edit){
         title = 'Edit link'
         href = node.href
         delBtn = `<button type="button" class="delete">Delete</button>`
-        openBtn = `<a href="${href}" target="_blank" title="Open link in new tab or window">${Icons.openLink}</a>`
+        openBtn = `<a href="${href}" class="panel-link" target="_blank" title="Open link in new tab or window">${Icons.openLink}</a>`
     }
     return `
         <div class="edit-panel-container">

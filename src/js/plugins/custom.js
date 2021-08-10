@@ -286,7 +286,7 @@ function template(props){
         <span class="label">Property 1:</span><span class="prop property1">${props.property1}</span>
         <span class="label">Property 2:</span><span class="prop property2">${props.property2}</span>
         <span class="label">Property 3:</span><span class="prop property3">${props.property3}</span>
-        <span class="advice">Click the top right-hand button to edit. Select anywherw in the element and then the Enter key to add a new line after this custom element.</span>
+        <span class="advice">Click the top right-hand button to edit. Select anywhere in the element and then the Enter key to add a new line after this custom element.</span>
     `
 }
 
