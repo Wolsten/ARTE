@@ -2,7 +2,7 @@
 
 ## Introduction
 
-AJE stands for "Another Javascript Editor" and is pronounced "Ajay".
+ARTE stands for *Active Rich Text Editor* and is pronounced *Arty*.
 
 It provides a limited set of WYSYWIG controls for formatting text like normal word processors.
 
@@ -10,11 +10,11 @@ It uses a contenteditable approach but none of the standard functions for format
 
 Importantly, AJE supports custom plugins, which allows you to add just about any functionality you like.
 
-AJE is written in ES6 but the build process using Babel and Webpack potentially opens up usage on a wide range of browsers.
+AJE is written in ES6 but can be built using Babel and Webpack potentially opening up usage on a wide range of browsers.
 
 *Disclaimer*
 
-AJE is not a production ready app and has not been tested extensively across a range of browsers. It is licenced under MIT and therefore normal caveats apply.
+ARTE is not a production ready app and has not been tested extensively across a range of browsers. It is licenced under MIT and therefore normal caveats apply.
 
 ## Usage
 
@@ -26,15 +26,7 @@ To use as is just download the following source file:
 
 To build your own version of AJE you can use Babel and Webpack as configured in the source here. Alternatively, feel free to use your own build tools based on the source files provided.
 
-## Todos
-* Confirm the Helpers.isCustom methiod is correctly defined
-* Can make inline work across blocks - should be limited to single blocks
-* Do same reselection/reactivating for inline formatting as for blocks
 
-### Done
-* Filter keys triggering buffering - 13/7/21
-* Make reselection work after block formatting - requires extension to set cursor to pass in two blocks - 14/7/21
-* Reinstate active buttons when formatted - 14/7/21
 
 ## Acknowledgements
 

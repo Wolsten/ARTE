@@ -2,6 +2,14 @@
 
 let panel = null
 
+/**
+ * Create modal panel
+ * @param {string} title 
+ * @param {string} message 
+ * @param {string} cancel 
+ * @param {string} confirm 
+ * @returns {string}
+ */
 function form(title,message,cancel,confirm){
     if ( cancel == undefined ){
         cancel = 'No - stay here'
@@ -27,6 +35,10 @@ function form(title,message,cancel,confirm){
 // @section Exports
 // -----------------------------------------------------------------------------
 
+/**
+ * Hide current panel by removing transition class "show" and then removing from
+ * the dom.
+ */
 export const hide = function(){
     panel.classList.remove('show')
     setTimeout( ()=>{
@@ -35,6 +47,14 @@ export const hide = function(){
     }, 500 )
 }
 
+/**
+ * Show the modal panel using transition class "show"
+ * @param {string} title 
+ * @param {string} message 
+ * @param {string} cancel 
+ * @param {string} confirm 
+ * @returns {HTMLElement} the confirmation button
+ */
 export const show = function( title, message, cancel, confirm){
     if ( cancel == undefined ){
         cancel = 'No - stay here'

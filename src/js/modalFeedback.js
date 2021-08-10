@@ -2,6 +2,12 @@
 
 let panel = null
 
+/**
+ * Generate feedback panel
+ * @param {string} title 
+ * @param {string} message 
+ * @returns {string}
+ */
 function template(title, message){
     return `
         <div class="modal-panel-container">
@@ -15,6 +21,10 @@ function template(title, message){
         </div>`
 }
 
+/**
+ * Hide current panel by removing transition class "show" and then removing from
+ * the dom.
+ */
 const hide = function(){
     panel.classList.remove('show')
     setTimeout( ()=>{
@@ -27,6 +37,11 @@ const hide = function(){
 // @section Exports
 // -----------------------------------------------------------------------------
 
+/**
+ * Show the modal panel using transition class "show"
+ * @param {string} title 
+ * @param {string} message
+ */
 export const show = function(title, message){
     panel = document.createElement('DIV')
     panel.classList.add('modal-panel')

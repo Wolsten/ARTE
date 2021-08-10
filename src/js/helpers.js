@@ -4,6 +4,12 @@
 // @section Arrays
 // -----------------------------------------------------------------------------
 
+/**
+ * Tests whether two arrays are equal - neither can be empty
+ * @param {*[]} a 
+ * @param {*[]} b 
+ * @returns {boolean} true if niether mepty and all values equal
+ */
 export const arraysEqual = function( a, b ){
     if ( a.length != 0 && b.length!= 0 && a.length != b.length ){
         return false
@@ -11,6 +17,12 @@ export const arraysEqual = function( a, b ){
     return a.every( (item, index) => b[index] == item )
 }
 
+/**
+ * Check whether array item in a is also a member of b
+ * @param {*[]} a 
+ * @param {*[]} b 
+ * @returns 
+ */
 export const arraySubset = function( a, b ){
     return a.every( (item, index) => b[index] == item )
 }
@@ -20,14 +32,57 @@ export const arraySubset = function( a, b ){
 // @section Dom manipulation
 // -----------------------------------------------------------------------------
 
+let tags = { block: ['DIV','P','LI'], list: ['LI'], custom:[]}
+
+/**
+ * Register a new button type with tag to allow future checking/cleaning
+ * @param {string} type 
+ * @param {string} tag 
+ */
+export const registerTag = function(type,tag){
+    if ( tags[type]!=undefined && tags[type].includes(tag) == false && tag!='CLEAR'){
+        tags[type].push(tag)
+        // console.log('registered tag', tag, 'in type', type)
+    }
+}
+
+/**
+ * Debug function to print out the tags array
+ */
+ export const debugTags = function(){
+    console.warn('blocks',tags.block.join(', '))
+    console.warn('lists',tags.list.join(', '))
+    console.warn('inline',tags.inline.join(', '))
+    console.warn('customs',tags.custom.join(', '))
+}
+
+/**
+ * Insert newNode after existingNode
+ * @param {HTMLElement} newNode 
+ * @param {HTMLElement} existingNode 
+ * @returns {HTMLElement} the new node inserted
+ */
 export const insertAfter = function(newNode, existingNode) {
     return existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
 
+/**
+ * Insert newNode before existingNode
+ * @param {HTMLElement} newNode 
+ * @param {HTMLElement} existingNode 
+ * @returns {HTMLElement} the new node inserted
+ */
 export const insertBefore = function(newNode, existingNode) {
     return existingNode.parentNode.insertBefore(newNode, existingNode);
 }
 
+/**
+ * 
+ * @param {HTMLElement} existingNode 
+ * @param {string} tag The html tag of the new node
+ * @param {string} html The new innerHTML string to use for the replacement node
+ * @returns 
+ */
 export const replaceNode = function(existingNode, tag, html){
     const replacementNode = document.createElement(tag)
     replacementNode.innerHTML = html
@@ -36,22 +91,11 @@ export const replaceNode = function(existingNode, tag, html){
     return node
 }
 
-let tags = { block: ['DIV','P','LI'], list: ['LI'], custom:[]}
-
-export const registerTag = function(type,tag){
-    if ( tags[type]!=undefined && tags[type].includes(tag) == false && tag!='CLEAR'){
-        tags[type].push(tag)
-        // console.log('registered tag', tag, 'in type', type)
-    }
-}
-
-export const debugTags = function(){
-    console.warn('blocks',tags.block.join(', '))
-    console.warn('lists',tags.list.join(', '))
-    console.warn('inline',tags.inline.join(', '))
-    console.warn('customs',tags.custom.join(', '))
-}
-
+/**
+ * Check whether the node is an inline style span
+ * @param {HTMLElement} node 
+ * @returns {boolean}
+ */
 export const isStyle = function( node ){
     if ( node.tagName == undefined ){
         return false
@@ -59,6 +103,11 @@ export const isStyle = function( node ){
     return node.tagName === 'SPAN'
 }
 
+/**
+ * Check whether the node is a list container
+ * @param {HTMLElement} node 
+ * @returns {boolean}
+ */
 export const isList = function( node ){
     if ( node.tagName === undefined ){
         return false
@@ -66,6 +115,11 @@ export const isList = function( node ){
     return node.tagName === 'OL' || node.tagName === 'UL' 
 }
 
+/**
+ * Check whether the node is a block container
+ * @param {HTMLElement} node 
+ * @returns {boolean}
+ */
 export const isBlock = function( node ){
     if ( node.tagName == undefined ){
         return false
@@ -73,6 +127,11 @@ export const isBlock = function( node ){
     return tags.block.includes(node.tagName)
 }
 
+/**
+ * Returns the parent container of a custom element or false if not found
+ * @param {Range} range 
+ * @returns {HTMLElement|false}
+ */
 export const getCustomParent = function( range ){
     const firstElementChild = range.blockParent.firstElementChild
     if ( firstElementChild != null && isCustom(firstElementChild) ){
@@ -81,6 +140,11 @@ export const getCustomParent = function( range ){
     return false
 }
 
+/**
+ * Checks whether teh element is a custom element
+ * @param {HTMLElement} node 
+ * @returns {boolean}
+ */
 export const isCustom = function( node ){
     if ( node.tagName == undefined ){
         return false
@@ -108,7 +172,12 @@ export const getInlineStyles = function(node){
     return styles
 }
 
- export const getParentBlockNode = function(node){
+/**
+ * Get the parent block node or return the block if the node itself is a block
+ * @param {HTMLElement} node 
+ * @returns {HTMLElement} 
+ */
+export const getParentBlockNode = function(node){
     // Keep going up the tree while the node is not a block node
     // (the editor is a block node - a DIV)
     while ( isBlock(node)==false ){
@@ -117,6 +186,11 @@ export const getInlineStyles = function(node){
     return node
 }
 
+/**
+ * Get the parent editor node of a node
+ * @param {HTMLElement} node 
+ * @returns {HTMLElement} 
+ */
 export const getEditorNode = function( node ){
     while ( node.getAttribute('contenteditable') !== "true" ) {
         node = node.parentNode
@@ -139,8 +213,13 @@ export const getTopParentNode = function( node, stopNode ){
     return saved
 }
 
+/**
+ * Cleans the node, removing any non-supported tags/styles
+ * Invokes custom plugin cleaning if defined
+ * @param {HTMLElement} node 
+ * @param {object[]} buttons array of button objects
+ */
 export const cleanForSaving = function( node, buttons ){
-
     // Trim text nodes with CR's
     if ( node.nodeType === 3 ){
         if ( node.textContent.includes('\n') ){
@@ -178,7 +257,6 @@ export const cleanForSaving = function( node, buttons ){
     node.childNodes.forEach( child => {
         cleanForSaving( child, buttons )
     })
-    return 
 }
 
 
@@ -186,6 +264,22 @@ export const cleanForSaving = function( node, buttons ){
 // @section Selection and keyboard methods
 // -----------------------------------------------------------------------------
 
+// Mark text with "unusual" none-keyboard characters
+export const START_MARKER = '§§'
+export const END_MARKER = '±±'
+
+// Global variables in conjuction with finding marker nodes and resetting 
+// selections
+let startNode = null
+let startOffset = 0
+let endNode = null
+let endOffset = 0
+
+/**
+ * Add start and end marks to the selected text in order to allow reselection at
+ * the end of the editing operation
+ * @param {Range} range 
+ */
 export const addMarkers = function( range ){
     if ( range.startContainer == range.endContainer ){
         range.startContainer.textContent = 
@@ -206,7 +300,11 @@ export const addMarkers = function( range ){
     }
 }
 
-
+/**
+ * Add additional properties to the range
+ * @param {Range} range 
+ * @returns 
+ */
 function augmentRange(range){
     // First parent node that is a block tag
     range.blockParent = getParentBlockNode(range.commonAncestorContainer)
@@ -219,10 +317,14 @@ function augmentRange(range){
 }
 
 
+/**
+ * Get the document range or return false if not set
+ * @returns {Range|false}
+ */
 export const getRange = function(){
     // The selector is looking for a class used with modals so selections
     // are ignored when modals are active
-    if ( document.querySelector('.no-range-if-shown.show') === null ){
+    if ( document.querySelector('.show') === null ){
         let sel = window.getSelection()
         if ( sel.rangeCount==1 ){
             let range =  sel.getRangeAt(0)
@@ -233,6 +335,11 @@ export const getRange = function(){
     return false
 }
 
+/**
+ * Set the cursor in the target node
+ * @param {HTMLElement} editor The editor node
+ * @param {HTMLElement} target The target node for the cursor
+ */
 export const setCursorToTargetNode = function(editor, target){
     // If the target node isn't the editor make it the one before
     if ( target != editor ){
@@ -253,12 +360,17 @@ export const setCursorToTargetNode = function(editor, target){
     }
 }
 
-
+/**
+ * Set the cursor in a text node at the specified offset and
+ * return the new range
+ * @param {HTMLElement} node 
+ * @param {number} offset 
+ * @returns {Range}
+ */
 export const setCursor = function( node, offset ){
     let range = document.createRange()
     const selection = window.getSelection()
     // Check the offset is in range
-    // if ( offset > node.textContent.length - 1 ){
     if ( offset > node.textContent.length ){
         offset = 0
     }
@@ -270,56 +382,30 @@ export const setCursor = function( node, offset ){
     return range
 }
 
-// Mark text with "unusual" none-keyboard characters
-// https://www.w3schools.com/charsets/ref_utf_math.asp
-// const START_MARKER = '&isin;' // Is in (i.e. from here)
-// const END_MARKER = '&ni;'     // Not in (i.e. from here)
-
-export const START_MARKER = '§'
-export const END_MARKER = '±'
-const END_MARKER_CLASS = 'end-marker'
-
-
-export const blockEndMarker = function(){
-    const span = document.createElement('span')
-    span.classList.add(END_MARKER_CLASS)
-    span.contentEditable = 'false'
-    span.innerHTML = END_MARKER
-    return span
-}
-
-let startNode = null
-let startOffset = 0
-let endNode = null
-let endOffset = 0
-
-
-
-// export const addStartMarker = function( text, offset ){
-//     return text.substring(0,offset) + 
-//             START_MARKER + 
-//             text.substring(offset)
-// }
-
-// export const addEndMarker = function( text, offset ){
-//     return text.substring(0,offset-1) + 
-//            END_MARKER +
-//            text.substring(offset)
-// }
-
-export const getStartNode = function(parent){
+/**
+ * Find the node containing the start marker
+ * @param {HTMLElement} parent 
+ * @returns {HTMLElement}
+ */
+const getStartNode = function(parent){
     return findMarkerNode( parent, START_MARKER)
 }
 
-export const getEndNode = function(parent){
+/**
+ * Find the node containing the end marker
+ * @param {HTMLElement} parent 
+ * @returns {HTMLElement}
+ */
+const getEndNode = function(parent){
     return findMarkerNode( parent, END_MARKER)
 }
 
 /**
- * Find a text node containing the given marker text
- * @param node parent The node to end searching from
- * @param node marker The marker text to locate
- * @returns {node,offset}|false 
+ * Find a text node containing the given marker text. As a side effect, sets 
+ * the value of startNode, endNode, startOffset and endOffset
+ * @param {HTMLElement} parent The node to end searching from
+ * @param {HTMLElement} marker The marker text to locate
+ * @returns {boolean} true if finds marker node, false otherwise
  */
 function findMarkerNode( parent, marker ){
     for( let i=0; i<parent.childNodes.length; i++ ){
@@ -347,6 +433,11 @@ function findMarkerNode( parent, marker ){
     return false
 }
 
+/**
+ * Reset the selection using the start and end markers
+ * @param {HTMLElement} editorNode 
+ * @returns {Range|false}
+ */
 export const resetSelection = function( editorNode ){
     if ( getStartNode( editorNode ) && getEndNode( editorNode ) ){
         // console.log('startNode',startNode)
@@ -366,7 +457,25 @@ export const resetSelection = function( editorNode ){
     return false
 }
 
-export const debounce = function(fn, delay) {
+// -----------------------------------------------------------------------------
+// @section Miscellaneous
+// -----------------------------------------------------------------------------
+
+/**
+ * Generate a randon uid based on the current time
+ * @returns {string}
+ */
+export const generateUid = function(){
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+/**
+ * Smooth out key entry
+ * @param {function} fn a callback function
+ * @param {number} delay delay in ms before callback triggered
+ * @returns 
+ */
+ export const debounce = function(fn, delay) {
     let timeOutId
     return function(...args) {
         // Clear previous timeout if not expired
@@ -378,45 +487,6 @@ export const debounce = function(fn, delay) {
             fn(...args)
         }, delay)
     }
-}
-
-// export const appliedFormats = function( node, editorNode, rootNode , formatType){
-//     let formats = []
-
-//     // Collect tags of appropriate type
-//     while ( node != editorNode && node != null ){
-//         if ( node.nodeType === 1 ){   
-//             if ( formatType == '' ){
-//                 formats.unshift( node.tagName )
-//             } else if ( formatType == 'inline' ){
-//                 if ( isInline(node) ){
-
-//                     formats.unshift( node.tagName )
-//                 }
-//             } else if ( formatType == 'block' ){
-//                 if ( isBlock(node)){
-//                     formats.unshift( node.tagName )
-//                 }
-//             } else if ( formatType == 'enter' ){
-//                 formats.unshift( node )
-//                 if ( node == rootNode ){
-//                     break
-//                 }
-//             }
-//         }
-//         node = node.parentNode
-//     }
-//     //console.log(`Applied formats = [${formats.join(' => ')}]`)
-//     return formats
-// }
-
-
-// -----------------------------------------------------------------------------
-// @section Miscellaneous
-// -----------------------------------------------------------------------------
-
-export const generateUid = function(){
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 

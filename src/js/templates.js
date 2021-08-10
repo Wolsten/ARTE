@@ -1,3 +1,11 @@
+"use strict"
+
+
+/**
+ * Return HTML for a toolbar button
+ * @param {object} button 
+ * @returns {string}
+ */
 function editorToolbarButton(button){
     const {type, tag, label, icon} = button
     return `
@@ -6,10 +14,21 @@ function editorToolbarButton(button){
         </button>`
 }
 
+/**
+ * Return HTML for a toolbar group of buttons
+ * @param {string} title 
+ * @param {string} html 
+ * @returns {string}
+ */
 function editorToolBarGroup(title,html){
     return `<div class="editor-toolbar-group block" role="group" title="${title}">${html}</div>`
 }
 
+/**
+ * Return HTML for the toolbar
+ * @param {object[]} buttons 
+ * @returns {string}
+ */
 function editorToolbar(buttons){
     let buttonsHtml = ''
     let groups = []
@@ -29,6 +48,12 @@ function editorToolbar(buttons){
     return groups.join('<span class="editor-toolbar-group-separator">|</span>')
 }
 
+/**
+ * Return the HTML for the editor container including toolbar and editor body
+ * @param {object[]} buttons 
+ * @param {object} options 
+ * @returns {string}
+ */
 export const editor = function(buttons,options){
     const toolbar = editorToolbar(buttons)
     let classes = ''
@@ -46,10 +71,15 @@ export const editor = function(buttons,options){
         </div>`
 }
 
+/**
+ * Debugging function to display the current selected range
+ * @param {Range} range 
+ * @returns {string} empty if no container found for the output
+ */
 export const debugRange = function(range){
     const debug = document.getElementById('debug')
     if ( debug == null ){
-        return
+        return ''
     }
     // console.warn('debugRange',range)
     if ( range === false ){

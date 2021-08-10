@@ -1,10 +1,11 @@
 const path = require("path");
-const libraryName = 'AJE';
+const libraryName = 'ARTE';
 
-// Modify mode to 'production' to create a compressed version
+// Modify mode 'development' to 'production' to create a compressed version
 module.exports = {
-  mode: 'development',
-  entry: "./src/js/index.js",
+  // mode: 'development',
+  mode: 'production',
+  entry: "./src/js/ARTE-BUILD.js",
   output: {
     path: path.resolve(__dirname, "public/js"),
     filename: `${libraryName}.js`,
@@ -17,12 +18,13 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /(node_modules)/,
-        // use: {
-        //   loader: "babel-loader",
-        //   options: {
-        //     presets: ['@babel/preset-env']
-        //   }
-        // }
+        // Uncomment to transpile using Babel
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
       }
     ]
   }
