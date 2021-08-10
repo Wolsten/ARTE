@@ -308,7 +308,8 @@ const init = function( editor, button ){
  * @param {object} button The button to act on
  */
 const setState = function( editor, button ){
-    if ( editor.range === false ){
+    if ( editor.range === false  || 
+        (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
         button.element.disabled = true
         button.element.classList.remove('active')
     } else {

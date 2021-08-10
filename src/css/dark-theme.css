@@ -1,5 +1,6 @@
 :root {
     --text: #ffffff;
+    --text-disabled: rgb(120,120,120);
     --link-text: rgb(102, 102, 235);
     --debug-text: rgb(104, 207, 104);
     --background: rgb(40, 40, 40);

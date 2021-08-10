@@ -8,6 +8,7 @@ let editor
 let dataListOptions = ''
 let panel = null
 let filterInput = ''
+let lastInput = ''
 
 /**
  * Get the position for the input dialogue base don current range
@@ -68,6 +69,8 @@ function handleKeyup(e){
     }
 }
 
+
+
 /**
  * Handle mentions button click
  * @param {object} edt The editor instance
@@ -83,10 +86,21 @@ function click(edt,btn){
     panel.id = 'mentions'
     panel.classList.add('inplace-panel')
     panel.innerHTML = form()
-    panel.addEventListener('click',()=>hide())
-    panel.addEventListener('keyup', e=>handleKeyup(e))
     // Filtering using native html approach
     filterInput = panel.querySelector('input')
+    filterInput.addEventListener('keyup', e=>handleKeyup(e))
+    // Initialise last input so can detect changes greater
+    // than single keys being entered and then look for changes in the input
+    lastInput = ''
+    filterInput.addEventListener('input', e=>{
+        const value = filterInput.value.trim()
+        // Look for longer text changes than single keys entered manually
+        if ( (value.length - lastInput.length) > 1 ){
+            // console.log('auto input detected', value)
+            insert(value)
+        }
+        lastInput = value
+    })
     // Add to dom
     document.querySelector('body').appendChild(panel)
     // Position
@@ -141,6 +155,21 @@ function insert(person){
 }
 
 
+/**
+ * Set the disabled and active states of a button
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ */
+ const setState = function( editor, button ){
+    if ( editor.range === false  || 
+        (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
+        button.element.disabled = true
+        button.element.classList.remove('active')
+    } else {
+        button.element.disabled = false
+        button.element.classList.add('active')
+    }
+}
 
 // -----------------------------------------------------------------------------
 // @section Exports
@@ -154,5 +183,5 @@ export const setup = function(people){
     })
 }
 
-const options = {shortcut:['@','Tab']}
+const options = {setState, shortcut:['@','Tab']}
 export const BUTTON = new ToolbarButton( 'custom', 'mention', 'Mention', Icons.person, click, options ) 

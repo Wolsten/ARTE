@@ -56,8 +56,8 @@ body > h5 {
 
 .editor-toolbar-group-separator {
     margin:0 0.3rem;
-    color:var(--border);
-    font-size: 1.4em;
+    color:var(--text);
+    font-size: 1.2em;
 }
 
 .editor-body {
@@ -115,6 +115,10 @@ button {
     transition:all 0.5s ease;
 }
 
+button[disabled]{
+    color:var(--text-disabled);
+}
+
 button:not([disabled]):hover {
     cursor:pointer;
     background:var(--text);
@@ -147,8 +151,18 @@ button:not([disabled]):hover {
     background-color: var(--background);
 }
 
+.editor-toolbar button[disabled] span.bar {
+    border-color:var(--text-disabled);
+    background-color: var(--text-disabled);
+}
+
 .editor-toolbar button span.bar.FGC {
     background-color: var(--text);
+}
+
+.editor-toolbar button[disabled] span.bar.BGC {
+    background-color: var(--background);
+    border-color: var(--text-disabled);
 }
 
 

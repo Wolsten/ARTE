@@ -160,7 +160,8 @@ function parseNode(node, styles){
  */
 const setState = function(editor, btn){
     // console.log('setting style state')
-    if ( editor.range === false ){
+    if ( editor.range === false  || 
+        (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else if ( btn.tag == 'CLEAR' ){
