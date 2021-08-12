@@ -106,7 +106,9 @@
     <script type="module" charset="utf-8">
         import ARTE from './src/js/ARTE.JS' 
         const target = document.getElementById('editor')
+        // Set the initial content to the current content of the editor div
         let content = target.innerHTML
+        // Clear any existing content
         target.innerHTML = ''
         // Setup toolbar
         const toolbar = [
@@ -116,7 +118,7 @@
             [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
             [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON ]
         ]
-        // Setup plugins - required mentions.css to be included in head
+        // Setup plugins
         ARTE.Mentions.setup(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
         // Define editor options
         const options = {
@@ -127,7 +129,7 @@
         }
         // Create editor and add to dom in target position
         const editor = new ARTE.Editor(target, content, toolbar, options)
-        // Look for Save
+        // Configure save button
         const save = document.getElementById('save')
         save.addEventListener('click', ()=>{
             const xml = editor.save()
