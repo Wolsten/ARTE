@@ -1,11 +1,11 @@
 {
-  "name": "jaje",
+  "name": "ARTE",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Active Rich Text Editor",
   "scripts": {
-    "watch": "webpack --watch",
-    "build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack-ES6-development.config.js",
+    "build-es5": "webpack --config webpack-ES5-production.config.js",
+    "build-es6": "webpack --config webpack-ES6-production.config.js"
   },
   "keywords": [],
   "author": "",

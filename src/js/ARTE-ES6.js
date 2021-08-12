@@ -1,5 +1,3 @@
-"use strict"
-
 // Imports
 import Editor from './Editor.js'
 import * as Buffer from './plugins/buffer.js'

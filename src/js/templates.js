@@ -1,6 +1,3 @@
-"use strict"
-
-
 /**
  * Return HTML for a toolbar button
  * @param {object} button 

@@ -1,5 +1,3 @@
-"use strict"
-
 /** 
  * Create active links, ie. links which can be edited rather than a normal html 
  */

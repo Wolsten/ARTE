@@ -23,16 +23,6 @@
 
         <p>ARTE stands for "Active Rich Text Editor" and is pronounced "Arty".</p>
 
-        <p>Does the world need another Rich Text Editor? Possibily not, but in the course of developing my own applications I became frustrated with those I could find online. First of all I wanted something written in vanilla Javascript that could be embedded easily in any website independent of framework.</p>
-
-        <p>Secondly, and where I struggled most, it should be easy to extend - including the ability to embed "active" content that can be edited using its own dialogue.</p>
-
-        <p>Thirdly, the whole editor needs to be modular, written using plugins so that there is a single implementation model. For example, all the standard toolbar buttons are written as block, list, and inline styling plugins.</p>
-
-        <p>Forthly, it cannot use the builtin browser support for contenteditable, since this throws up too many gotchas between browsers. Therefore, all dom operations are implemented at a low level, such that where possible, behaviour is consistent across modern browsers. However, there has been no attempt to abstract away specific input types and therefore, the look and feel of some interactions will be specific to a browser technology, such as when choosing colours with the colours plugin.</p>
-
-        <p>Lastly, it needs to be open source and free so that there are no commercial drawbacks or lockins to proprietary code that could be difficult to fix. ARTE is written in ES6 but can be built using Babel and Webpack potentially opening up usage on a wide range of browsers</p>
-
         <h2>Blocks</h2>
 
         <p>AJE supports the main block formats, including headings and paragraphs. These can be extended easily for other block types.</p>
@@ -90,26 +80,25 @@
         <p>When the editor content is saved the data is cleaned to remove any non-supported elements or styling. Additionally, custom elements can have an optional "clean" method that is invoked automatically on save to handle any custom cleaning required.</p>
 
     </div>
+
     <button type="button" id="save">Save</button>
+    
     <div id="debug"></div>
 
-    <!-- To change between versions - swap the code blocks below -->
-
-    
-    <!-- Bundled version - generated using webpack build script "npm run build" -->
-    <!-- 
-    <script src='./public/js/ARTE.js' charset="utf-8"></script>  
-    <script type="text/javascript"> 
-    -->
-
-    <!-- Development/test version -->
+    <!-- Refer to readme.md for how to generate and use ES5 -->
     <script type="module" charset="utf-8">
-        import ARTE from './src/js/ARTE.JS' 
+
+        import ARTE from './src/js/ARTE-ES6.JS' 
+
+        // Define where the editor will appear
         const target = document.getElementById('editor')
+
         // Set the initial content to the current content of the editor div
         let content = target.innerHTML
+
         // Clear any existing content
         target.innerHTML = ''
+
         // Setup toolbar
         const toolbar = [
             [ ARTE.Blocks.H1, ARTE.Blocks.H2, ARTE.Blocks.H3, ARTE.Blocks.P, ARTE.Blocks.BQ],
@@ -118,8 +107,10 @@
             [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
             [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON ]
         ]
-        // Setup plugins
+
+        // Setup Mentions plugin with list of people
         ARTE.Mentions.setup(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
+
         // Define editor options
         const options = {
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
@@ -127,8 +118,10 @@
             // Number of Undo operations supported, max 10       
             bufferSize: 10     
         }
+
         // Create editor and add to dom in target position
         const editor = new ARTE.Editor(target, content, toolbar, options)
+
         // Configure save button
         const save = document.getElementById('save')
         save.addEventListener('click', ()=>{

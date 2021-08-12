@@ -1,5 +1,3 @@
-"use strict"
-
 import * as Helpers from '../helpers.js'
 import * as Phase from '../phase.js'
 import * as Icons from '../icons.js'

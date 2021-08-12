@@ -2,7 +2,6 @@
 
 ![ARTE Rich Text Editor](src/img/logo-medium.png "ARTE logo")
 
-
 ## Introduction
 
 ARTE (pronounced *Arty*) stands for *Active Rich Text Editor*. Does the world need another WYSIWYG Rich Text Editor? Possibily not, but in the course of developing my own applications I became frustrated with those I could find online. First of all I wanted something written in vanilla Javascript that could be embedded easily in any website independent of framework.
@@ -42,11 +41,11 @@ You can also add a button to save the content of the editor:
 <button type="button" id="save">Save</button>
 ```
 
-You need a javascript block that looks something like this:
+Create a javascript block like this:
 
 ```
 <script type="module" charset="utf-8">
-    import ARTE from './src/js/ARTE.JS' 
+    import ARTE from './src/js/ARTE-ES6.JS'
     const target = document.getElementById('editor')
     // Set the initial content to the current content of the editor div
     let content = target.innerHTML
@@ -81,26 +80,129 @@ You need a javascript block that looks something like this:
 </script>
 ```
 
+## Building a production and development versions
 
+### Prequisites
 
-Followin
-`
-/public/js/AJE.js
-`
+You'll need the latest versions of node and npm installed, as well as webpack and Babel.
 
-To build your own version of ARTE you can use Babel and Webpack as configured in the source here. Alternatively, feel free to use your own build tools based on the source files provided.
+### Run a build script
 
+Referring to `package.json` one of the NPM scripts to create your target version:
+
+```
+  "scripts": {
+    "build": "webpack --config webpack-ES6-development.config.js",
+    "build-es5": "webpack --config webpack-ES5-production.config.js",
+    "build-es6": "webpack --config webpack-ES6-production.config.js"
+  },
+```
+
+e.g. with the command:
+
+```
+$ npm run build-es5
+```
+
+which will create a minimised single ES5 compatible file `ARTE-ES5.js` in the `public` folder. Then update your html page to replace these lines:
+
+```
+<script type="module" charset="utf-8">
+    import ARTE from './src/js/ARTE-ES6.JS'
+```
+with these lines:
+
+```
+<script src='./public/js/ARTE-ES5.js' charset="utf-8"></script>  
+<script type="text/javascript"> 
+```
+
+## Customising the appearance
+
+ARTE provides three style sheets in `src/css`:
+
+```
+stlyes.css
+dark-theme.css
+light-theme.css
+``` 
+
+To switch between light and dark themes simply swap the import statement at the top of `styles.css`.
+
+Additional themes can be added easily by adding further theme files with their own varaible settings.
+
+The icons used in our example code come from Bootstrap but these may be replaced with a different set by updating the file:
+
+```
+src/js/icons.js
+```
+
+## Writing your own plugins
+
+Plugins reside in the directory `src/plugins/` and are written as ES6 modules. Each plugin is expose as a button object with a set of mandaotry and optional properties. Additionally, a plugin may have additional module wide methods that require custom implementation. For example, referring to the html example earlier you will see a line:
+
+```
+ARTE.Mentions.setup(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
+```
+
+and this demonstrate specific setup which cannot be abstracted with a common interface. In theory a plugin could have as many of these custom methods as you like but in prctice it would be better to minimise the number and ideally follow the pattern here with a single setup function, which can of course take any required parameters specific to the plugin.
+
+Each plugin must export at least one button instance. For example, referring to `src/plugins/blocks.js` we see a number of buttons decalred, including the following:
+
+```
+const options = {setState}
+export const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click, options )
+```
+
+Here the button `H1` is created as an instance of ther ToolbarButton class and takes the following parameters (refer to the `src/ToolbarButton.js` source file):
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `type` | string | Allowed values: 'block','style','buffer','custom' |
+| `tag` | string | The tag as inserted in the dom. e.g. H1, P, CUSTOM |
+| `label` | string | Generally used as the title of the button but could also be displayed |
+| `icon` | string | The icon to use for the button |
+| `click` | function | The callback invoked when the button is clicked |
+| `options` | object | Optional methods and data. |
+
+Plugins come in two flavours:
+
+1. Passive plugins
+2. Active (hence the name ARTE) plugins
+
+and may be of one of four types:
+
+1. block
+2. style
+3. buffer
+4. customPassive plugins perform some operation on the editor, updating the content and then exit. Active plugins perform the same actions but expose the ability to directly edit the inserted content, such as with a visible `edit` button or simply by supporting a `click` or `double-click` interaction, the choice being yours.
+
+`Block` elements relate to normal HTML block tags, such as headings and paragraphs, whereas inline `style` elements are implemented (for consistency) with styled `span` elements that may contain one or more `style:value` pairs.
+
+The `buffer` type can be ignored as this is a special type reserved for handling undo/redo operations.
+
+The `custom` type of plugin is used to insert and manage your own content. For examples of these with different edit interactions refer to:
+
+```
+src/plugins/links.js
+src/plugins/custom.js
+```
+
+The former inserts links which can then be clicked to edit, delete or navigate to the link in a new tab. The latter inserts a custom set of properties with an associated edit button whihc can be clicked to edit or delete.
+
+The full set of optional button methods is as follows:
+
+| Method | Action |
+|--------|--------|
+| init   | `method`. Perform initial format of custom components in the editor, such as converting a compact data representation to a human readable format, and also to add event handlers for active plugins. |
+| setState | `method`. Set the disabled and active states of a button. All buttons should be disabled if no range is selected in the editor, apart from the two buffer buttons, which depend on the state of the editor buffer. The active state is implemented by adding the `active` class to a button element in the toolbar, in order to match the current selection. So for example, selecting `bold` text should make the `bold` button active.
+| style | `string`. For inline styles only, the style is represented as a string in one of two formats: such as `style:value` pairs in the `src/plugins/styles.js` plugin or style only, such as `color` in the `src/plugins/colours.js` plugin. Note that the `styles.js` plugin also exports its `click` method so that other plugins can take advantage of its styling capabaility. `colours.js` is a good example of the way this works, since the style value is not known until run time when it is chosen by the user via a dialogue. |
+| removeStyle | `string`. For inline styles only, complements the `style` attribute and provide the definition for the styling to remove the applied styling already set. So for example in the `colours` plugin the remove style would apply the default font colour. |
+| addEventHandlers | `method`. This method should reapply any required events handlers after any operations updating the editor dom tree. |
+| clean | `method`. This method will be invoked when the editor `save` method is invoked in order to clean any custom plugin content. For example, a `clean` method could minimise a custom component by removing any decorations applied in the `init` method. |
 
 
 ## Acknowledgements
-
-I set up my initial build environment setup using these instructions:
-
-https://www.sitepoint.com/es6-babel-webpack/
-
-I ran into issues with use of an older Babel version so updated to latest for webpack from here:
-
-https://babeljs.io/setup#installation
 
 AJE uses a small number of SVG icons sourced from the Bootstrap Icon library here:
 

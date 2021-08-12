@@ -1,16 +1,13 @@
-"user strict"
-
-
 class ToolbarButton {
 
     /**
      * Constructor for a toolbar button
      * @param {string} type block|style|buffer|custom
-     * @param {string} tag e.g. H1, CUSTOM
+     * @param {string} tag As inserted in the dom. e.g. H1, CUSTOM
      * @param {string} label Generally used as the title of the button but could also be displayed
      * @param {string} icon The icon to use
-     * @param {function} click The callback whent he button is clicked
-     * @param {*} options Optional methods and properties. May include some or all of:
+     * @param {function} click The callback invoked when the button is clicked
+     * @param {object} options Optional methods. May include some or all of:
      *  init                - Initial format of custom component, adding event handlers
      *  setState            - set disabled and active states of the button
      *  style               - For inline styles, see plugins styles.js and colours.js

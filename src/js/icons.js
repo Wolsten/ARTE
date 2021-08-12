@@ -28,8 +28,6 @@
  * 
  */
 
-"use strict"
-
 export const h1 = '<i class="bi bi-type-h1"></i>'
 export const h2 = '<i class="bi bi-type-h2"></i>'
 export const h3 = '<i class="bi bi-type-h3"></i>'

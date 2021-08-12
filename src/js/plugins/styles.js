@@ -1,5 +1,3 @@
-"use strict"
-
 import ToolbarButton from '../ToolbarButton.js'
 import * as Helpers from '../helpers.js'
 import * as Icons from '../icons.js'

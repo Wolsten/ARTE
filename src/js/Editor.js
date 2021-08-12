@@ -1,5 +1,3 @@
-"use strict"
-
 import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
 import * as Buffer from './plugins/buffer.js'
