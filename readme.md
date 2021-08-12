@@ -80,7 +80,7 @@ Create a javascript block like this:
 </script>
 ```
 
-## Building a production and development versions
+## Building production and development versions
 
 ### Prequisites
 
@@ -88,7 +88,7 @@ You'll need the latest versions of node and npm installed, as well as webpack an
 
 ### Run a build script
 
-Referring to `package.json` one of the NPM scripts to create your target version:
+Referring to `package.json`, run one of the NPM scripts to create your target version:
 
 ```
   "scripts": {
@@ -122,16 +122,16 @@ with these lines:
 ARTE provides three style sheets in `src/css`:
 
 ```
-stlyes.css
+styles.css
 dark-theme.css
 light-theme.css
 ``` 
 
 To switch between light and dark themes simply swap the import statement at the top of `styles.css`.
 
-Additional themes can be added easily by adding further theme files with their own varaible settings.
+Additional themes can be added easily by adding further theme files with their own variable settings.
 
-The icons used in our example code come from Bootstrap but these may be replaced with a different set by updating the file:
+The icons used in our example code come from Bootstrap but these may be replaced with a different set by importing a different set and updating the file:
 
 ```
 src/js/icons.js
@@ -139,22 +139,22 @@ src/js/icons.js
 
 ## Writing your own plugins
 
-Plugins reside in the directory `src/plugins/` and are written as ES6 modules. Each plugin is expose as a button object with a set of mandaotry and optional properties. Additionally, a plugin may have additional module wide methods that require custom implementation. For example, referring to the html example earlier you will see a line:
+Plugins reside in the `src/plugins/` folder and are written as ES6 modules. Each plugin exports one or more button objects, each with a set of mandatory and optional attributes. Additionally, a plugin may have additional module wide methods that require custom implementation. For example, referring to the html example earlier you will see a line:
 
 ```
 ARTE.Mentions.setup(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
 ```
 
-and this demonstrate specific setup which cannot be abstracted with a common interface. In theory a plugin could have as many of these custom methods as you like but in prctice it would be better to minimise the number and ideally follow the pattern here with a single setup function, which can of course take any required parameters specific to the plugin.
+which demonstrate specific setup that cannot be abstracted with a common interface. In theory a plugin could have as many of these custom methods as you like but in practice it would be better to minimise the number and ideally follow the pattern here with a single setup function, which can of course take any required parameters specific to the plugin.
 
-Each plugin must export at least one button instance. For example, referring to `src/plugins/blocks.js` we see a number of buttons decalred, including the following:
+For example, referring to `src/plugins/blocks.js` we see a number of buttons declared, including the following:
 
 ```
 const options = {setState}
 export const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click, options )
 ```
 
-Here the button `H1` is created as an instance of ther ToolbarButton class and takes the following parameters (refer to the `src/ToolbarButton.js` source file):
+Here the button `H1` is created as an instance of the `ToolbarButton` class and takes the following parameters (refer to `src/ToolbarButton.js`):
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
@@ -167,10 +167,10 @@ Here the button `H1` is created as an instance of ther ToolbarButton class and t
 
 Plugins come in two flavours:
 
-1. Passive plugins
-2. Active (hence the name ARTE) plugins
+1. Passive 
+2. Active (hence the name ARTE)
 
-Passive plugins perform some operation on the editor, updating the content and then exit. Active plugins perform the same actions but expose the ability to directly edit the inserted content, such as with a visible `edit` button or simply by supporting a _click_, _double-click_ or _right-click_ interaction, the choice being yours.
+Passive plugins perform some operation on the editor, updating the content and then exit. Active plugins perform the same actions but expose the ability to edit the inserted content, such as with a visible `edit` button or simply by supporting a _click_, _double-click_ or _right-click_ interaction, the choice being yours.
 
 `Block` and `list` elements relate to normal HTML block tags, such as headings, paragraphs and ordered lists. Inline `style` elements are implemented (for consistency) with styled `span` elements that may contain one or more `style:value` pairs in their `style` attribute.
 
