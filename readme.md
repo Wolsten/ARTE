@@ -1,6 +1,6 @@
 # README.md
 
-![ARTE Rich Text Editor](https://github.com/Wolsten/ARTE/src/img "ARTE logo")
+![ARTE Rich Text Editor](src/img/logo-large.png "ARTE logo")
 
 
 ## Introduction
