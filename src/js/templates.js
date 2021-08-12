@@ -70,19 +70,18 @@ export const editor = function(buttons,options){
 
 /**
  * Debugging function to display the current selected range
+ * @param {HTMLElement|false} target where to display debug info
  * @param {Range} range 
- * @returns {string} empty if no container found for the output
  */
-export const debugRange = function(range){
-    const debug = document.getElementById('debug')
-    if ( debug == null ){
-        return ''
+export const debugRange = function(target, range){
+    if ( target == false ){
+        return
     }
     // console.warn('debugRange',range)
     if ( range === false ){
-        debug.innerHTML = 'No range selected'
+        target.innerHTML = 'No range selected'
     } else {
-        debug.innerHTML = `
+        target.innerHTML = `
             <h5>Selection info:</h5>
             <div class="debug">
                 <div class="col">

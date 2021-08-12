@@ -82,7 +82,7 @@
     </div>
 
     <button type="button" id="save">Save</button>
-    
+
     <div id="debug"></div>
 
     <!-- Refer to readme.md for how to generate and use ES5 -->
@@ -116,7 +116,10 @@
             // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
             headingNumbers: 'on', 
             // Number of Undo operations supported, max 10       
-            bufferSize: 10     
+            bufferSize: 10,
+            // Define where to display debug output, currently information about the active selection
+            // Comment out to turn off
+            debugTarget: document.getElementById('debug')
         }
 
         // Create editor and add to dom in target position

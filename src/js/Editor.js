@@ -85,13 +85,16 @@ class Editor {
     initOptions(options){   
         const headingNumbers = 'off'
         const bufferSize = 10     
+        const debugTarget = false
         if ( options ){
             options.headingNumbers = options.headingNumbers !== undefined ? options.headingNumbers : headingNumbers
             options.bufferSize = options.bufferSize !== undefined ? Math.max(parseInt(options.bufferSize),bufferSize) : bufferSize
+            options.debugTarget = options.debugTarget !== undefined ? options.debugTarget : false
         } else {
             options = {
                 headingNumbers,
-                bufferSize
+                bufferSize,
+                debugTarget
             }
         }
         return options
@@ -362,8 +365,6 @@ class Editor {
      * Handle enter key pressed in editor node
      */
     handleEnter(){
-        // this.range = Helpers.getRange()
-        // Templates.debugRange(this.range)
         this.updateRange()
         if ( this.range === false ){
             return
@@ -584,7 +585,7 @@ class Editor {
      */
     updateRange(){
         this.range = Helpers.getRange()
-        Templates.debugRange( this.range )
+        Templates.debugRange( this.options.debugTarget, this.range )
     }
  
     /**

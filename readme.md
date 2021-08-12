@@ -10,9 +10,9 @@ Secondly, and where I struggled most, it should be easy to extend - including th
 
 Thirdly, the whole editor needs to be modular, written using plugins so that there is a single implementation pattern. For example, all the standard toolbar buttons are written as block, list, and inline styling plugins.
 
-Fourthly, it cannot use the builtin browser support for contenteditable (execCommand), since I found this throws up too many gotchas between browsers. Therefore, all dom operations are implemented at a low level, such that where possible, behaviour is consistent across modern browsers. However, there has been no attempt to abstract away specific input types and therefore, the look and feel of some interactions will be specific to a browser technology, such as when choosing colours with the colours plugin.
+Fourthly, it cannot use the builtin browser support for contenteditable `execCommand`, since this throws up too many inconsistencies between browsers. Therefore, all dom operations are implemented at a low level, such that where possible, behaviour is consistent across modern browsers. However, there has been no attempt to abstract away specific input types and therefore, the look and feel of some interactions will be specific to a browser technology, such as when choosing colours with the `colours` plugin.
 
-Lastly, it needs to be open source and free so that there are no commercial drawbacks or lockins to proprietary code that could be difficult to fix. ARTE is written in ES6 but can be built using Babel and Webpack (or your favourite build tool) potentially opening up usage on a wide range of browsers. For my purposes I have initially targetted Chrome and other modern webkit based browsers.
+Lastly, it needs to be open source and free so that there are no commercial drawbacks or lockins to proprietary code that could be difficult to fix. ARTE is written in ES6 but can be built using Webpack and Babel (or your favourite build tool) potentially opening up usage on a wide range of browsers. For my purposes I have initially targetted Chrome and other modern webkit based browsers.
 
 *Disclaimer*
 
