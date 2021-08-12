@@ -1,11 +1,9 @@
 # README.md
 
-![alt text](https://github.com/n48.png "Logo Title")
+![ARTE Rich Text Editor](https://github.com/Wolsten/ARTE/src/img "ARTE logo")
 
 
 ## Introduction
-
-
 
 ARTE stands for *Active Rich Text Editor* and is pronounced *Arty*.
 
