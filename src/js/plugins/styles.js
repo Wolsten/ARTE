@@ -5,31 +5,15 @@ import * as Helpers from '../helpers.js'
 import * as Icons from '../icons.js'
 import * as Phase from '../phase.js'
 
-let range
-let style
-let button
-let value
-let removeStyle
-let options
-let action
-
-/**
- * Split the style stype property into style:value parts
- * @param {string} styleProp in format [style|style:value]
- */
-function setStyle(styleProp){
-    const styleParts = styleProp.split(':')
-    style = styleParts[0]
-    value = styleParts[1] !== undefined ? styleParts[1] : ''
-}
-
 /**
  * 
  * @param {HTMLElement} node
  * @param {string[]} styles Array of style:value pairs
+ * @param {object} button The button to act on
+ * @param {Range} range apply or remove
  * @returns {string}
  */
-function parseTextNode( node, styles ) {
+function parseTextNode( node, styles, button, range ) {
     Phase.set( node )
     let text = ''
     let preText = ''
@@ -37,22 +21,22 @@ function parseTextNode( node, styles ) {
     let openSpan = ''
     let closeSpan = ''
     if ( Phase.during() ){
-        if ( action == 'apply' ){
+        if ( button.action == 'apply' ){
             // If not already present - add the new style
             let found = ''
             let idx = -1
             styles.forEach( (item,index) => {
                 const parts = item.split(':')
-                if ( parts[0].trim() == style ){
+                if ( parts[0].trim() == button.newStyle ){
                     idx = index
                 }
             })
             // Remove style with old value
             if ( idx != -1 ){
-                styles = styles.filter( (item,index) => index != idx )
+                styles = styles.filter( index => index != idx )
             }
             // Add style with new value
-            const newStyle = `${style}:${value}`
+            const newStyle = `${button.newStyle}:${button.newValue}`
             styles = [...styles, newStyle]
             openSpan = `<span style="${styles.join(';')}">`
             closeSpan = '</span>'
@@ -63,7 +47,7 @@ function parseTextNode( node, styles ) {
                 return parts[0].trim() != style
             })
             if ( styles.length > 0 ){
-                openSpan = `<span style="${styles.join(';')};${removeStyle}">`
+                openSpan = `<span style="${styles.join(';')};${button.removeStyle}">`
                 closeSpan = '</span>'
             }
         }
@@ -106,9 +90,11 @@ function parseTextNode( node, styles ) {
  * start end end containers have been found.
  * @param {HTMLElement} node 
  * @param {string[]} styles Array of style:value pairs
+ * @param {object} button The button to act on
+ * @param {Range} range apply or remove
  * @returns 
  */
-function parseBlockNode(node, styles){
+function parseBlockNode(node, styles, button, range){
     // Add inline style from a span?
     if ( node.tagName === 'SPAN' ){
         const inlineStyles = node.getAttribute('style')
@@ -127,90 +113,104 @@ function parseBlockNode(node, styles){
     // Parse child nodes
     let html = ''
     node.childNodes.forEach( child => {
-        html += parseNode( child, styles )
+        html += parseNode( child, styles, button, range )
     })
     console.log('Returning block html', html)
     return html
+}
+
+
+
+/**
+ * Set the disabled and active states of a button
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
+ */
+const setState = function(editor, button){
+    // console.log('setting style state')
+    if ( editor.range === false  || 
+        (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
+        button.element.disabled = true
+        button.element.classList.remove('active')
+    } else if ( button.tag == 'CLEAR' ){
+        button.element.disabled = false
+        button.element.classList.remove('active')
+    } else {
+        // The rootNode should not be a DIV (the editor) or list container - (implying 
+        // multiple blocks selected) or a custom element
+        button.element.disabled = editor.range.rootNode.tagName === 'DIV' || 
+                                Helpers.isList(editor.range.rootNode) ||
+                                Helpers.isCustom(editor.range.rootNode)
+        // Check whether the computed style matches the btn
+        setStyleProps( button )
+        const inlineStyles = Helpers.getInlineStyles( editor.range.startContainer )
+        if ( inlineStyles.includes(button.style) ){
+            button.element.classList.add('active')
+        } else {
+            button.element.classList.remove('active')
+        }
+    }
 }
 
 /**
  * Parse nodes recursively and generates updated html
  * @param {HTMLElement} node 
  * @param {string[]} styles Array of style:value pairs
+ * @param {object} button The button to act on
+ * @param {Range} range apply or remove
  * @returns {string} of the new html generated
  */
-function parseNode(node, styles){
+ const parseNode = function(node, styles, button, range){
     console.log('Parsing node',node)
     // Text node
     if ( node.nodeType === 3 ){
-        return parseTextNode( node, styles )
+        return parseTextNode( node, styles, button, range )
     }
     // Custom node
     if ( Helpers.isCustom(node) ){
         return node.outerHTML
     }
     // Blocks and spans
-    return parseBlockNode(node, styles)
+    return parseBlockNode(node, styles, button, range)
 }
 
 /**
- * Set the disabled and active states of a button
- * @param {object} editor A unique editor instance
- * @param {object} btn The button to act on
+ * Split the style stype property into newStyle:newValue parts and set the action
+ * @param {object} button
  */
-const setState = function(editor, btn){
-    // console.log('setting style state')
-    if ( editor.range === false  || 
-        (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
-        btn.element.disabled = true
-        btn.element.classList.remove('active')
-    } else if ( btn.tag == 'CLEAR' ){
-        btn.element.disabled = false
-        btn.element.classList.remove('active')
-    } else {
-        // The rootNode should not be a DIV (the editor) or list container - (implying 
-        // multiple blocks selected) or a custom element
-        btn.element.disabled = editor.range.rootNode.tagName === 'DIV' || 
-                                Helpers.isList(editor.range.rootNode) ||
-                                Helpers.isCustom(editor.range.rootNode)
-        // Check whether the computed style matches the btn
-        setStyle( btn.style )
-        const inlineStyles = Helpers.getInlineStyles( editor.range.startContainer )
-        if ( inlineStyles.includes(btn.style) ){
-            btn.element.classList.add('active')
-        } else {
-            btn.element.classList.remove('active')
-        }
+const setStyleProps = function(button){
+    const styleParts = button.style.split(':')
+    button.newStyle = styleParts[0]
+    button.newValue = styleParts[1] !== undefined ? styleParts[1] : ''
+    // Determine the action
+    button.action = 'apply'
+    if ( button.element.classList.contains('active') || button.style == 'CLEAR') {
+        button.action = 'remove'
     }
 }
+
 
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
+
 /**
- * Mandatory button click function. This is exported in its own right so that other
- * plugins implementing inline styling can re-use
+ * Mandatory button click function.
  * @param {object} editor A unique editor instance
- * @param {object} btn The button to act on
+ * @param {object} button The button to act on
  */
- export const click = function( editor, btn ){
-    range = editor.range
-    button = btn
-    removeStyle = button.removeStyle
+ export const click = function( editor, button ){
+    const range = editor.range
     // Adjust rootNode if required
     if ( Helpers.isBlock(range.rootNode) == false ){
         range.rootNode = Helpers.getParentBlockNode( range.rootNode )
     }
-    setStyle(button.style)
-    // Determine the action
-    action = 'apply'
-    if ( button.element.classList.contains('active') || style == 'CLEAR') {
-        action = 'remove'
-    }
+    // Set newStyle, newValue and action
+    setStyleProps(button)
     // Initialise phase detection and parse the root node
     Phase.init(range, false)
-    const html = parseNode(range.rootNode, [])
+    const html = parseNode(range.rootNode, [], button, range)
     console.log('html',html)
     const node = Helpers.replaceNode( range.rootNode, range.rootNode.tagName, html )
     // Reset the selection
@@ -219,7 +219,7 @@ const setState = function(editor, btn){
     button.setState( editor, button )
 }
 
-options = {setState, style:'font-weight:bold', removeStyle:'font-weight:400'}
+let options = {setState, style:'font-weight:bold', removeStyle:'font-weight:400'}
 export const B = new ToolbarButton( 'style', 'B', 'Bold', Icons.b, click, options)
 
 options = {setState, style:'font-style:italic', removeStyle:'font-style:normal'}

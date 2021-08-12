@@ -6,12 +6,6 @@ import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
 
 let editorNode
-let range
-let button
-
-let formatType = ''
-let formatAction = ''
-let newFormat = ''
 let previousFormats = []
 let lastNodeAdded = false
 let fragmentNode
@@ -20,9 +14,10 @@ let fragmentNode
  * Get the old and new formats for the node, depending on the phase
  * @param {HTMLElement} node 
  * @param {object} formats object with two arrays of old and new format strings
+ * @param {object} button
  * @returns {object} Two arrays of old and new format strings
  */
-function getFormats( node, formats ){
+function getFormats( node, formats, button ){
     // Always set old formats to the original
     const oldFormats = [...formats.oldFormats, node.tagName]
     let newFormats = []
@@ -36,16 +31,16 @@ function getFormats( node, formats ){
     // During phase
     //
     // New block formatting (not list) - apply new format
-    if ( formatType === 'block' ){
+    if ( button.type === 'block' ){
         // console.log(`Format type = ${formatType}`)
-        // console.log(`2. new block format ${newFormat}`)
-        newFormats = [ newFormat ]
+        // console.log(`2. new block format ${button.newFormat}`)
+        newFormats = [ button.newFormat ]
         return {newFormats,oldFormats}
     }
     //
     // New list formatting
     if ( Phase.first() ){
-        // console.log(`3. First node with new list format ${newFormat}`)
+        // console.log(`3. First node with new list format ${button.newFormat}`)
         // Reformatting a list item?
         if ( node.tagName == 'LI' ){
             // console.log('3.1 Processing LI')
@@ -55,7 +50,7 @@ function getFormats( node, formats ){
                 // console.log( '3.1.1 First item in a list - replace existing list')
                 // Pop off the old list format and replace with the new one plus the LI
                 newFormats.pop()
-                newFormats.push(newFormat)
+                newFormats.push(button.newFormat)
                 newFormats.push('LI')
                 console.log('3.1.2 new list formats', formats.newFormats.join(' '))
             // Else create a new indented list
@@ -64,14 +59,14 @@ function getFormats( node, formats ){
                 // Start with the old formats
                 newFormats = formats.oldFormats.slice()
                 // Add the new list format and an LI
-                newFormats.push(newFormat)
+                newFormats.push(button.newFormat)
                 newFormats.push('LI')
                 console.log('3.1.4 new list formats', formats.newFormats.join(' '))
             }
         // This is a different block node (e.g. H1, P) or a list container node - therefore start a new list
         } else {
             // console.log( 'Converting a block node')
-            newFormats.push(newFormat)
+            newFormats.push(button.newFormat)
             newFormats.push('LI')
             // console.log('3.2 new list formats', formats.newFormats.join(' '))
         }
@@ -202,8 +197,9 @@ function saveContent( node, formats ){
  * 
  * @param {HTMLElement} node 
  * @param {object} formats Old and new arrays of format strings
+ * @param {object} button
  */
-function parseNode( node, formats ){
+function parseNode( node, formats, button ){
     // console.log( `%cparseNode ${node.tagName}`,'background:green;color:white;padding:0.5rem')
     // console.log( `Inner HTML [${node.innerHTML.trim()}]`)
     // console.log( `node formats on entry`,formats.oldFormats)
@@ -215,7 +211,7 @@ function parseNode( node, formats ){
     if ( node != editorNode ){
         Phase.set( node )
         // Get the old and new formats
-        nodeFormats = getFormats( node, formats )
+        nodeFormats = getFormats( node, formats, button )
         // console.log( `old node formats`,nodeFormats.oldFormats)
         // console.log( `new node formats`,nodeFormats.newFormats)
         // Save content of text nodes and protected nodes against the current targetNode
@@ -225,7 +221,7 @@ function parseNode( node, formats ){
     node.childNodes.forEach( child => {
         if ( Helpers.isBlock(child) || Helpers.isList(child) ){
             // console.log(`Moving to child ${child.tagName}`)
-            parseNode( child, nodeFormats  ) 
+            parseNode( child, nodeFormats, button  ) 
         }
     })
     // console.log(`Finished this branch - processed children`, node.childNodes)
@@ -233,26 +229,33 @@ function parseNode( node, formats ){
 
 
 /**
+ * Split the style stype property into newStyle:newValue parts and set the action
+ * @param {object} button
+ */
+ const setStyleProps = function(button){
+    button.action = 'apply'
+    if ( button.tag == 'CLEAR' || button.element.getAttribute('data-active') ){
+        button.action = 'remove'
+    }
+    button.newFormat = button.tag
+    if ( button.type == 'block' && button.action == 'remove' ){
+        button.newFormat = 'P'
+    }
+}
+
+
+
+/**
  * Mandatory button click function
  * @param {object} editor A unique editor instance
- * @param {object} btn The button to act on
+ * @param {object} button The button to act on
  */
- const click = function( editor, btn ){
+ const click = function( editor, button ){
+    const range = editor.range
     editorNode = editor.editorNode
-    range = editor.range
-    button = btn
-    formatType = button.type
-    formatAction = 'apply'
-    if ( button.tag == 'CLEAR' || button.element.getAttribute('data-active') ){
-        formatAction = 'remove'
-    }
-    // console.log('Format action', formatAction)
-    newFormat = button.tag
-    if ( button.type == 'block' && formatAction == 'remove' ){
-        newFormat = 'P'
-    }
     previousFormats = []
     lastNodeAdded = false
+    setStyleProps(button)
     // Ensure start from a block node
     range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
     const firstParentNode = Helpers.getTopParentNode( range.startContainer, editorNode )
@@ -261,15 +264,14 @@ function parseNode( node, formats ){
     // console.log('first parent node', firstParentNode)
     // console.log('end parent node', endParentNode)
     // Mark the start and end selection points
-    Helpers.addMarkers(editor.range)
+    Helpers.addMarkers(range)
     // Init phase for block formatting
     Phase.init(range, true)
     // console.warn(`reFormatBlock with new format ${button.tag}`)
     // Just parse the parent node if the start and end belong to the same parent
     if ( firstParentNode == endParentNode ){
-        // console.log('Parent nodes match')
         fragmentNode = document.createElement('DIV')
-        parseNode( firstParentNode, {oldFormats:[], newFormats:[]} )
+        parseNode( firstParentNode, {oldFormats:[], newFormats:[]}, button )
         // console.log( 'fragment', fragmentNode.innerHTML)
         if ( firstParentNode == editorNode ){
             firstParentNode.innerHTML = fragmentNode.innerHTML
@@ -277,7 +279,6 @@ function parseNode( node, formats ){
             firstParentNode.outerHTML = fragmentNode.innerHTML
         }
     } else {
-        // console.log('Parent nodes do NOT match')
         let startNodeFound = false
         let endNodeFound = false
         fragmentNode = document.createElement('DIV')
@@ -294,13 +295,13 @@ function parseNode( node, formats ){
             if ( startNodeFound && endNodeFound==false ) {
                 // console.log( `%cparse top level node ${node.tagName}`,'background:orange;color:white;padding:0.5rem')
                 // Check for block (as opposed to list formatting) and start a new fragment
-                if ( formatType == 'block' ){
+                if ( button.type === 'block' ){
                     previousFormats = []
                     lastNodeAdded = false
                     fragmentNode = document.createElement('DIV')
                 }
-                parseNode( node, {oldFormats:[], newFormats:[]} )
-                if ( formatType == 'block' ){
+                parseNode( node, {oldFormats:[], newFormats:[]}, button )
+                if ( button.type === 'block' ){
                     // console.log( 'fragment', fragmentNode.innerHTML)
                     node.outerHTML = fragmentNode.innerHTML
                 } else {
@@ -311,7 +312,7 @@ function parseNode( node, formats ){
             // fragment
             if ( node == endParentNode ){
                 endNodeFound = true 
-                if ( formatType == 'list' ){
+                if ( button.type === 'list' ){
                     console.log( 'fragment', fragmentNode.innerHTML)
                     node.outerHTML = fragmentNode.innerHTML 
                 }
@@ -329,32 +330,32 @@ function parseNode( node, formats ){
 /**
  * Set the disabled and active states of a button
  * @param {object} editor A unique editor instance
- * @param {object} btn The button to act on
+ * @param {object} button The button to act on
  */
-const setState = function(editor, btn){
+const setState = function(editor, button){
     // console.log('setting block state')
     if ( editor.range === false ){
-        btn.element.disabled = true
-        btn.element.classList.remove('active')
-    } else if ( btn.tag == 'CLEAR' ){
-        btn.element.disabled = false
-        btn.element.classList.remove('active')
+        button.element.disabled = true
+        button.element.classList.remove('active')
+    } else if ( button.tag == 'CLEAR' ){
+        button.element.disabled = false
+        button.element.classList.remove('active')
     } else {
         // Use the first parent node to set disabled state
         let firstParentNode = Helpers.getParentBlockNode( editor.range.startContainer, editor.editorNode )
         //console.log('firstParentNode',firstParentNode)
         // The firstParentNode should not be a DIV (the editor) or a custom element
-        btn.element.disabled = firstParentNode.tagName === 'DIV' || Helpers.isCustom(firstParentNode)
+        button.element.disabled = firstParentNode.tagName === 'DIV' || Helpers.isCustom(firstParentNode)
         //console.log('disabled',btn.element.disabled)
         // If this is a list type get the list parent
-        if ( btn.type === 'list' && firstParentNode.tagName === 'LI'){
+        if ( button.type === 'list' && firstParentNode.tagName === 'LI'){
             firstParentNode = firstParentNode.parentNode
         }
         // Do the tag names match?
-        if ( firstParentNode.tagName === btn.tag ){
-            btn.element.classList.add('active')
+        if ( firstParentNode.tagName === button.tag ){
+            button.element.classList.add('active')
         } else {
-            btn.element.classList.remove('active')
+            button.element.classList.remove('active')
         }
     }
 }
@@ -371,10 +372,3 @@ export const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click
 export const BQ = new ToolbarButton( 'block', 'BLOCKQUOTE', 'Blockquote', Icons.bq, click, options )
 export const OL = new ToolbarButton( 'list',  'OL', 'Ordered list',   Icons.ol, click, options )
 export const UL = new ToolbarButton( 'list',  'UL', 'Unordered list', Icons.ul, click, options )
-
-
-
-
-
-
-

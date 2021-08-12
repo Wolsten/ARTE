@@ -5,10 +5,6 @@ import * as Styles from './styles.js'
 import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
 
-let options
-let input
-
-
 /**
  * Show the colour input for the button supplied, saving in the global input 
  * variable.
@@ -18,8 +14,8 @@ let input
  * @param {object} editor A unique editor instance
  * @param {object} button The button to act on
  */
-function show(editor, btn){
-    input = document.createElement('input')
+function show(editor, button){
+    const input = document.createElement('input')
     input.type = 'color'
     input.style = "display:none;"
     document.body.appendChild(input)
@@ -28,24 +24,23 @@ function show(editor, btn){
         console.log('colour changed',event.target.value)
         const colour = event.target.value
         // Synthesise a button using the colour value selected
-        const button = {
+        const synthButton = {
             setState,
-            style:`${btn.style}:${colour}`, 
-            removeStyle:btn.removeStyle, 
-            element:btn.element
+            style:`${button.style}:${colour}`, 
+            removeStyle:button.removeStyle, 
+            element:button.element
         }
-        // Apply the new style. The Styles module does the heavy lifting 
-        // in terms of parsing the dom tree
-        Styles.click( editor, button )
-        hide()
-        setState(editor,btn)
+        // Apply the new style
+        Styles.click( editor, synthButton )
+        hide(input)
     })
 }
 
 /**
  * Hide the dialogue
+ * @param {HTMLInputElement} input The hidden colour input element
  */
-function hide(){
+function hide(input){
     input.remove()
 }
 
@@ -120,7 +115,7 @@ const init = function(editor, button){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-options = {init, setState, style:'color', removeStyle:'color:black;'}
+let options = {init, setState, style:'color', removeStyle:'color:black;'}
 export const FOREGROUND = new ToolbarButton( 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, options)
 
 options = {init, setState, style:'background-color', removeStyle:'background-color:white;'}
