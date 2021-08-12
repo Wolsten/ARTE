@@ -2,7 +2,7 @@ class ToolbarButton {
 
     /**
      * Constructor for a toolbar button
-     * @param {string} type block|style|buffer|custom
+     * @param {string} type block|list|style|buffer|custom
      * @param {string} tag As inserted in the dom. e.g. H1, CUSTOM
      * @param {string} label Generally used as the title of the button but could also be displayed
      * @param {string} icon The icon to use

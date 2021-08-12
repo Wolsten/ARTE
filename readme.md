@@ -8,7 +8,7 @@ ARTE (pronounced *Arty*) stands for *Active Rich Text Editor*. Does the world ne
 
 Secondly, and where I struggled most, it should be easy to extend - including the ability to embed "active" content that can be edited using its own dialogue.
 
-Thirdly, the whole editor needs to be modular, written using plugins so that there is a single implementation model. For example, all the standard toolbar buttons are written as block, list, and inline styling plugins.
+Thirdly, the whole editor needs to be modular, written using plugins so that there is a single implementation pattern. For example, all the standard toolbar buttons are written as block, list, and inline styling plugins.
 
 Fourthly, it cannot use the builtin browser support for contenteditable (execCommand), since I found this throws up too many gotchas between browsers. Therefore, all dom operations are implemented at a low level, such that where possible, behaviour is consistent across modern browsers. However, there has been no attempt to abstract away specific input types and therefore, the look and feel of some interactions will be specific to a browser technology, such as when choosing colours with the colours plugin.
 
@@ -158,7 +158,7 @@ Here the button `H1` is created as an instance of ther ToolbarButton class and t
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `type` | string | Allowed values: 'block','style','buffer','custom' |
+| `type` | string | Allowed values: 'block','list','style','buffer','custom' |
 | `tag` | string | The tag as inserted in the dom. e.g. H1, P, CUSTOM |
 | `label` | string | Generally used as the title of the button but could also be displayed |
 | `icon` | string | The icon to use for the button |
@@ -170,14 +170,9 @@ Plugins come in two flavours:
 1. Passive plugins
 2. Active (hence the name ARTE) plugins
 
-and may be of one of four types:
+Passive plugins perform some operation on the editor, updating the content and then exit. Active plugins perform the same actions but expose the ability to directly edit the inserted content, such as with a visible `edit` button or simply by supporting a _click_, _double-click_ or _right-click_ interaction, the choice being yours.
 
-1. block
-2. style
-3. buffer
-4. customPassive plugins perform some operation on the editor, updating the content and then exit. Active plugins perform the same actions but expose the ability to directly edit the inserted content, such as with a visible `edit` button or simply by supporting a `click` or `double-click` interaction, the choice being yours.
-
-`Block` elements relate to normal HTML block tags, such as headings and paragraphs, whereas inline `style` elements are implemented (for consistency) with styled `span` elements that may contain one or more `style:value` pairs.
+`Block` and `list` elements relate to normal HTML block tags, such as headings, paragraphs and ordered lists. Inline `style` elements are implemented (for consistency) with styled `span` elements that may contain one or more `style:value` pairs in their `style` attribute.
 
 The `buffer` type can be ignored as this is a special type reserved for handling undo/redo operations.
 
@@ -188,12 +183,12 @@ src/plugins/links.js
 src/plugins/custom.js
 ```
 
-The former inserts links which can then be clicked to edit, delete or navigate to the link in a new tab. The latter inserts a custom set of properties with an associated edit button whihc can be clicked to edit or delete.
+The former inserts links which can then be clicked to edit, delete or navigate to the link in a new tab. The latter inserts a custom set of properties with an associated edit button which can be clicked to edit or delete.
 
 The full set of optional button methods is as follows:
 
-| Method | Action |
-|--------|--------|
+| Attribute | Usage |
+|-----------|-------|
 | init   | `method`. Perform initial format of custom components in the editor, such as converting a compact data representation to a human readable format, and also to add event handlers for active plugins. |
 | setState | `method`. Set the disabled and active states of a button. All buttons should be disabled if no range is selected in the editor, apart from the two buffer buttons, which depend on the state of the editor buffer. The active state is implemented by adding the `active` class to a button element in the toolbar, in order to match the current selection. So for example, selecting `bold` text should make the `bold` button active.
 | style | `string`. For inline styles only, the style is represented as a string in one of two formats: such as `style:value` pairs in the `src/plugins/styles.js` plugin or style only, such as `color` in the `src/plugins/colours.js` plugin. Note that the `styles.js` plugin also exports its `click` method so that other plugins can take advantage of its styling capabaility. `colours.js` is a good example of the way this works, since the style value is not known until run time when it is chosen by the user via a dialogue. |
@@ -204,7 +199,7 @@ The full set of optional button methods is as follows:
 
 ## Acknowledgements
 
-AJE uses a small number of SVG icons sourced from the Bootstrap Icon library here:
+ARTE uses a small number of SVG icons sourced from the Bootstrap Icon library here:
 
 https://icons.getbootstrap.com
 
