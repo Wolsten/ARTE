@@ -1,6 +1,6 @@
 # README.md
 
-![ARTE Rich Text Editor](src/img/logo-large.png "ARTE logo")
+![ARTE Rich Text Editor](src/img/logo-medium.png "ARTE logo")
 
 
 ## Introduction
