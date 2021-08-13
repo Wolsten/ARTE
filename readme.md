@@ -12,7 +12,9 @@ Thirdly, the whole editor needs to be modular, written using plugins so that the
 
 Fourthly, it cannot use the builtin browser support for contenteditable `execCommand`, since this throws up too many inconsistencies between browsers. Therefore, all dom operations are implemented at a low level, such that where possible, behaviour is consistent across modern browsers. However, there has been no attempt to abstract away specific input types and therefore, the look and feel of some interactions will be specific to a browser technology, such as when choosing colours with the `colours` plugin.
 
-Lastly, it needs to be open source and free so that there are no commercial drawbacks or lockins to proprietary code that could be difficult to fix. ARTE is written in ES6 but can be built using Webpack and Babel (or your favourite build tool) potentially opening up usage on a wide range of browsers. For my purposes I have initially targetted Chrome and other modern webkit based browsers.
+Lastly, it needs to be open source and free so that there are no commercial drawbacks or lockins to proprietary code that could be difficult to fix. ARTE is written in ES6 but can be built using Webpack and Babel (or your favourite build tool) potentially opening up usage on a wide range of browsers. For my purposes I have initially targetted Chrome and other modern webkit based browsers. The following screenshot shows what the editor looks like using its light theme.
+
+![ARTE Rich Text Editor](assets/ARTE-light-theme.png "ARTE Screen shot - light theme")
 
 *Disclaimer*
 
@@ -92,9 +94,9 @@ Referring to `package.json`, run one of the NPM scripts to create your target ve
 
 ```
   "scripts": {
-    "build": "webpack --config webpack-ES6-development.config.js",
-    "build-es5": "webpack --config webpack-ES5-production.config.js",
-    "build-es6": "webpack --config webpack-ES6-production.config.js"
+    "dev": "webpack --env=mode=development --config webpack.config.js",
+    "build-es6": "webpack --env=mode=production --env=target=ES6 --config webpack.config.js",
+    "build-es5": "webpack --env=mode=production --env=target=ES5 --config webpack.config.js"
   },
 ```
 
@@ -104,11 +106,11 @@ e.g. with the command:
 $ npm run build-es5
 ```
 
-which will create a minimised single ES5 compatible file `ARTE-ES5.js` in the `public` folder. Then update your html page to replace these lines:
+which will create a minimised single ES5 compatible file `ARTE.js` in the `public` folder. Then update your html page to replace these lines:
 
 ```
 <script type="module" charset="utf-8">
-    import ARTE from './src/js/ARTE-ES6.JS'
+    import ARTE from './src/js/ARTE.JS'
 ```
 with these lines:
 
@@ -127,7 +129,9 @@ dark-theme.css
 light-theme.css
 ``` 
 
-To switch between light and dark themes simply swap the import statement at the top of `styles.css`.
+To switch between light and dark themes simply swap the import statement at the top of `styles.css` in order to change the appearance to the following:
+
+![ARTE Rich Text Editor](assets/ARTE-dark-theme.png "ARTE Screen shot - dark theme")
 
 Additional themes can be added easily by adding further theme files with their own variable settings.
 

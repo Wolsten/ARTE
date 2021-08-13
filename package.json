@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Active Rich Text Editor",
   "scripts": {
-    "build": "webpack --config webpack-ES6-development.config.js",
-    "build-es5": "webpack --config webpack-ES5-production.config.js",
-    "build-es6": "webpack --config webpack-ES6-production.config.js"
+    "dev": "webpack --env=mode=development --config webpack.config.js",
+    "build-es6": "webpack --env=mode=production --env=target=ES6 --config webpack.config.js",
+    "build-es5": "webpack --env=mode=production --env=target=ES5 --config webpack.config.js"
   },
   "keywords": [],
   "author": "",
