@@ -229,7 +229,7 @@ label {
     padding:1rem;
     background:var(--background);
     border-bottom:1px var(--border) solid;
-    box-shadow: 2px 2px 2px var(--border);
+    /* box-shadow: 2px 2px 2px var(--border); */
     transform: translateY(-100%);
     transition: all 0.3s ease-in-out 0s;
 }
@@ -266,7 +266,7 @@ label {
     padding:1rem;
     background:var(--background);
     border-bottom:1px var(--border) solid;
-    box-shadow: 2px 2px 2px var(--border);
+    /* box-shadow: 2px 2px 2px var(--border); */
     opacity:0;
     transition: all 0.4s ease-in-out 0s;
     border-radius: 0.5rem;
@@ -309,8 +309,8 @@ label {
     border: 1px solid var(--border);
     max-height: 200px;
     width: 200px;
-    -webkit-box-shadow: 5px 5px 10px var(--border);
-            box-shadow: 5px 5px 10px var(--border);
+    /* -webkit-box-shadow: 5px 5px 10px var(--border);
+            box-shadow: 5px 5px 10px var(--border); */
 }
   
 .inplace-panel input {
@@ -374,6 +374,58 @@ custom button.edit {
     position: absolute;
     top:0.5rem;
     right:0.5rem;
+}
+
+/* `src\plugins\colours.js */
+
+#colour-menu form {
+    display:flex;
+    flex-wrap: wrap;
+}
+
+#colour-menu form .colours {
+    flex-basis:80%;
+}
+
+#colour-menu label {
+    display:block;
+    padding: 1rem 0;
+}
+
+#colour-menu form .result {
+    flex-basis:20%;
+    text-align: center;
+}
+#colour-menu form .result span {
+    display:block;
+    max-width:80px;
+    height:80px;
+    margin:0 auto;
+}
+
+#colour-menu form .buttons {
+    flex-basis:100%;
+    padding-top:1rem;
+}
+
+#colour-menu .colours span {
+    display:inline-block;
+    width:5%;
+    height:32px;
+    padding:0;
+    margin:0;
+    border:var(--border);
+    z-index: 1;
+}
+
+#colour-menu .colours div{
+    position:relative;
+}
+
+#colour-menu .colours span.active {
+    position:relative;
+    outline: 3px solid var(--text);
+    z-index: 100;
 }
 
 /* debugging */

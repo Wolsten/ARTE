@@ -113,7 +113,7 @@ function parseBlockNode(node, styles, button, range){
     node.childNodes.forEach( child => {
         html += parseNode( child, styles, button, range )
     })
-    console.log('Returning block html', html)
+    // console.log('Returning block html', html)
     return html
 }
 
@@ -159,7 +159,7 @@ const setState = function(editor, button){
  * @returns {string} of the new html generated
  */
  const parseNode = function(node, styles, button, range){
-    console.log('Parsing node',node)
+    // console.log('Parsing node',node)
     // Text node
     if ( node.nodeType === 3 ){
         return parseTextNode( node, styles, button, range )
@@ -209,7 +209,7 @@ const setStyleProps = function(button){
     // Initialise phase detection and parse the root node
     Phase.init(range, false)
     const html = parseNode(range.rootNode, [], button, range)
-    console.log('html',html)
+    // console.log('html',html)
     const node = Helpers.replaceNode( range.rootNode, range.rootNode.tagName, html )
     // Reset the selection
     Helpers.resetSelection(editor.editorNode)
