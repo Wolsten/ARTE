@@ -263,7 +263,7 @@ function form(edit){
         openBtn = `<a href="${href}" class="panel-link" target="_blank" title="Open link in new tab or window">${Icons.openLink}</a>`
     }
     return `
-        <div class="edit-panel-container">
+        <div class="edit-panel-container modal">
             <div class="edit-panel-header">
                 <h3 class="edit-panel-title">${title}</h3>
             </div>

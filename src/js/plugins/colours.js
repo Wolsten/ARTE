@@ -70,38 +70,38 @@ function form(button){
         lightnesses += `<span class="colour" data-colour="lightness" data-index="${i}">&nbsp;</span>`
     }
     return `
-        <div class="edit-panel-container">
-        <div class="edit-panel-header">
-            <h3 class="edit-panel-title">${title}</h3>
-        </div>
-        <div class="edit-panel-body" id="colour-menu">
-            <form>
-                <div class="colours">
-                    <div class="hues">
-                        <label>Hue</label>
-                        <div>${hues}</div>
+        <div class="edit-panel-container modal">
+            <div class="edit-panel-header">
+                <h3 class="edit-panel-title">${title}</h3>
+            </div>
+            <div class="edit-panel-body" id="colour-menu">
+                <form>
+                    <div class="colours">
+                        <div class="hues">
+                            <label>Hue</label>
+                            <div>${hues}</div>
+                        </div>
+                        <div class="saturations">
+                            <label>Saturation</label>
+                            <div>${saturations}</div>
+                        </div>
+                        <div class="lightnesses">
+                            <label>Lightness</label>
+                            <div>${lightnesses}</div>
+                        </div>
                     </div>
-                    <div class="saturations">
-                        <label>Saturation</label>
-                        <div>${saturations}</div>
-                    </div>
-                    <div class="lightnesses">
-                        <label>Lightness</label>
-                        <div>${lightnesses}</div>
-                    </div>
-                </div>
 
-                <div class="result">
-                    <label>Result</label>
-                    <span>&nbsp;</span>
+                    <div class="result">
+                        <label>Result</label>
+                        <span>&nbsp;</span>
 
-                    <div class="buttons">
-                        <button type="button" class="cancel">Cancel</button>
-                        <button type="submit" class="save">Set</button>
+                        <div class="buttons">
+                            <button type="button" class="cancel">Cancel</button>
+                            <button type="submit" class="save">Set</button>
+                        </div>
                     </div>
-                </div>
-            </form>
-
+                </form>
+            </div>
         </div>`
 }
 

@@ -204,7 +204,7 @@ class Editor {
      */
     handleEditorBlur( event ){
         // Ignore blur if a modal dialogue is shown
-        if ( document.querySelectorAll('.show').length == 0 ){
+        if ( document.querySelectorAll('.modal').length == 0 ){
             console.log('editor blurred')
             this.toolbar.forEach( button => {
                 this.range = false

@@ -83,6 +83,7 @@ function click(edt,btn){
     panel = document.createElement('DIV')
     panel.id = 'mentions'
     panel.classList.add('inplace-panel')
+    panel.classList.add('modal')
     panel.innerHTML = form()
     // Filtering using native html approach
     filterInput = panel.querySelector('input')
@@ -92,9 +93,10 @@ function click(edt,btn){
     lastInput = ''
     filterInput.addEventListener('input', e=>{
         const value = filterInput.value.trim()
+        console.log('input changed from',lastInput, 'to',value)
         // Look for longer text changes than single keys entered manually
         if ( (value.length - lastInput.length) > 1 ){
-            // console.log('auto input detected', value)
+            console.log('auto input detected', value)
             insert(value)
         }
         lastInput = value

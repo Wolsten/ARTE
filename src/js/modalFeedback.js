@@ -43,6 +43,7 @@ const hide = function(){
 export const show = function(title, message){
     panel = document.createElement('DIV')
     panel.classList.add('modal-panel')
+    panel.classList.add('modal')
     panel.innerHTML = template(title, message)
     panel.querySelector('button').addEventListener('click', event => {
         event.stopPropagation()

@@ -245,7 +245,7 @@ function form(props,editFlag){
         delBtn = `<button type="button" class="delete">Delete</button>`
     }
     return `
-        <div class="edit-panel-container">
+        <div class="edit-panel-container modal">
             <div class="edit-panel-header">
                 <h3 class="edit-panel-title">${title}</h3>
             </div>

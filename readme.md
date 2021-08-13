@@ -199,6 +199,7 @@ The full set of optional button methods is as follows:
 | removeStyle | `string`. For inline styles only, complements the `style` attribute and provide the definition for the styling to remove the applied styling already set. So for example in the `colours` plugin the remove style would apply the default font colour. |
 | addEventHandlers | `method`. This method should reapply any required events handlers after any operations updating the editor dom tree. |
 | clean | `method`. This method will be invoked when the editor `save` method is invoked in order to clean any custom plugin content. For example, a `clean` method could minimise a custom component by removing any decorations applied in the `init` method. |
+| shortcut | `array`. A two-key sequence to trigger the button click event, such as [`@`,`Tab`] where `@` is the shortcut key and `Tab` is the trigger key. |
 
 
 ## Acknowledgements

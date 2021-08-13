@@ -229,7 +229,6 @@ label {
     padding:1rem;
     background:var(--background);
     border-bottom:1px var(--border) solid;
-    /* box-shadow: 2px 2px 2px var(--border); */
     transform: translateY(-100%);
     transition: all 0.3s ease-in-out 0s;
 }
@@ -266,7 +265,6 @@ label {
     padding:1rem;
     background:var(--background);
     border-bottom:1px var(--border) solid;
-    /* box-shadow: 2px 2px 2px var(--border); */
     opacity:0;
     transition: all 0.4s ease-in-out 0s;
     border-radius: 0.5rem;
@@ -285,20 +283,19 @@ label {
 .inplace-panel {
     box-sizing: border-box;
     display: block;
-    position: fixed;
     /* Stay in place */
-    z-index: 9999;
-    /* Sit on top */
+    position: fixed;
     left: 0;
     top: 0;
-    width: 100%;
+    /* Sit on top */
+    z-index: 9999;
     /* Full width */
-    height: 100%;
+    width: 100%;
     /* Full height */
-    overflow: auto;
+    height: 100%;
     /* Enable scroll if needed */
+    overflow: auto;
     background-color: var(--modal-background);
-    /* Black w/ opacity */
 }
   
 .inplace-panel .inplace-content {
@@ -309,13 +306,16 @@ label {
     border: 1px solid var(--border);
     max-height: 200px;
     width: 200px;
-    /* -webkit-box-shadow: 5px 5px 10px var(--border);
-            box-shadow: 5px 5px 10px var(--border); */
 }
   
 .inplace-panel input {
+    background-color:var(--background);
+    color:var(--text);
     width: 100%;
     padding:0.3rem;
+    border:1px solid var(--border);
+    outline:none;
+    -webkit-appearance: none;
 }
 
 .inplace-panel option {
@@ -376,7 +376,7 @@ custom button.edit {
     right:0.5rem;
 }
 
-/* `src\plugins\colours.js */
+/* colours.js plugin */
 
 #colour-menu form {
     display:flex;
