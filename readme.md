@@ -115,7 +115,7 @@ which will create a minimised single ES5 compatible file `ARTE.js` in the `publi
 with these lines:
 
 ```
-<script src='./public/js/ARTE-ES5.js' charset="utf-8"></script>  
+<script src='./public/js/ARTE.js' charset="utf-8"></script>  
 <script type="text/javascript"> 
 ```
 
@@ -151,7 +151,7 @@ ARTE.Mentions.setup(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian
 
 which demonstrate specific setup that cannot be abstracted with a common interface. In theory a plugin could have as many of these custom methods as you like but in practice it would be better to minimise the number and ideally follow the pattern here with a single setup function, which can of course take any required parameters specific to the plugin.
 
-For example, referring to `src/plugins/blocks.js` we see a number of buttons declared, including the following:
+Referring to `src/plugins/blocks.js` we see a number of buttons declared, including the following:
 
 ```
 const options = {setState}

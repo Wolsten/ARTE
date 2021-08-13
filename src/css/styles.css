@@ -8,9 +8,13 @@
     font-size: 16px;
 }
 
+div, h1, h2, h3, h4, h5, p, label, input, select, button {
+    color:var(--text)
+}
+
 a {
     color:var(--text-link);
-    text-decoration: none;;
+    text-decoration: none;
 }
 a:visited {
     color:var(--text-link);
@@ -115,7 +119,7 @@ button {
     transition:all 0.5s ease;
 }
 
-button[disabled]{
+button[disabled] {
     color:var(--text-disabled);
 }
 
