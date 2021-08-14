@@ -1,4 +1,4 @@
-import * as Modal from '../modalConfirm.js'
+// import * as Modal from '../modalConfirm.js'
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
@@ -75,9 +75,9 @@ function show( editor, button, editFlag ){
     // Handle button events
     panel.querySelector('button.cancel').addEventListener('click', () => {
         if ( dirty ){
-            const confirmBtn = Modal.show('Cancel changes', 'Do you really want to lose these changes?')
+            const confirmBtn = editor.modalConfirmShow('Cancel changes', 'Do you really want to lose these changes?')
             confirmBtn.addEventListener( 'click', () => {
-                Modal.hide()
+                editor.modalConfirmHide()
                 hide()
             })
         } else {
@@ -86,9 +86,9 @@ function show( editor, button, editFlag ){
     })
     if ( editFlag ){
         panel.querySelector('button.delete').addEventListener('click', () => {
-            const confirmBtn = Modal.show('Delete custom item', 'Do you really want to delete this custom item?', 'No - keep', 'Yes - delete')
+            const confirmBtn = editor.modalConfirmShow('Delete custom item', 'Do you really want to delete this custom item?', 'No - keep', 'Yes - delete')
             confirmBtn.addEventListener( 'click', () => {
-                Modal.hide()
+                editor.modalConfirmHide()
                 deleteItem(editor, button) 
             })
         })

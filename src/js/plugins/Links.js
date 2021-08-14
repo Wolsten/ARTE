@@ -2,7 +2,6 @@
  * Create active links, ie. links which can be edited rather than a normal html 
  */
 
-import * as Modal from '../modalConfirm.js'
 import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
@@ -74,9 +73,9 @@ function show( editor, button, selectedText, editFlag ){
     // Handle button events
     panel.querySelector('button.cancel').addEventListener('click', () => {
         if ( dirty ){
-            const confirmBtn = Modal.show('Cancel changes', 'Do you really want to lose these changes?')
+            const confirmBtn = editor.modalConfirmShow('Cancel changes', 'Do you really want to lose these changes?')
             confirmBtn.addEventListener( 'click', () => {
-                Modal.hide()
+                editor.modalConfirmHide()
                 hide()
             })
         } else {
@@ -85,9 +84,9 @@ function show( editor, button, selectedText, editFlag ){
     })
     if ( editFlag ){
         panel.querySelector('button.delete').addEventListener('click', () => {
-            const confirmBtn = Modal.show('Delete link', 'Do you really want to delete this link?')
+            const confirmBtn = editor.modalConfirmShow('Delete link', 'Do you really want to delete this link?')
             confirmBtn.addEventListener( 'click', () => {
-                Modal.hide()
+                editor.modalConfirmHide()
                 deleteItem(editor, button) 
             })
         })
@@ -263,7 +262,7 @@ function form(edit){
         openBtn = `<a href="${href}" class="panel-link" target="_blank" title="Open link in new tab or window">${Icons.openLink}</a>`
     }
     return `
-        <div class="edit-panel-container modal">
+        <div class="edit-panel-container">
             <div class="edit-panel-header">
                 <h3 class="edit-panel-title">${title}</h3>
             </div>

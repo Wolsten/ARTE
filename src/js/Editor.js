@@ -1,7 +1,8 @@
 import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
 import * as Buffer from './plugins/buffer.js'
-import * as Feedback from './modalFeedback.js'
+import * as ModalFeedback from './modalFeedback.js'
+import * as ModalConfirm from './modalConfirm.js'
 
 class Editor {
 
@@ -50,6 +51,26 @@ class Editor {
         const config = { attributes: false, childList: true, subtree: true }
         const observer = new MutationObserver(()=>this.handleMutation())
         observer.observe(this.editorNode,config)
+        // Set up public methods to handle modal dialogues
+        this.handleModals()
+    }
+
+    handleModals(){
+        // Set the modal flag to false, when set to true ignore events on
+        // the editor
+        this.modal = false
+        this.modalConfirmShow = (title, message, cancel, confirm) => {
+            this.modal = true
+            return ModalConfirm.show(title, message, cancel, confirm)
+        }
+        this.modalConfirmHide = () => {
+            this.modal = false
+            ModalConfirm.hide()
+        }
+        this.modalFeedbackShow = (title, message) => {
+            this.modal = true
+            ModalFeedback.show( title, message )    
+        }
     }
 
     /**
@@ -164,6 +185,10 @@ class Editor {
             }
             // All buttons have a click method
             button.element.addEventListener('click', event => {
+                // Ignore if a modal is active
+                if ( this.modal ){
+                    return
+                }
                 // Prevent default action for all buttons when have no range 
                 // and not the undo-redo buffer buttons
                 if ( this.range === false && button.type !== 'buffer' ){
@@ -187,6 +212,10 @@ class Editor {
      */
     listenForMouseUpEvents(){
         document.addEventListener('mouseup', event => {
+            // Ignore if a modal is active
+            if ( this.modal ){
+                return
+            }
             // console.warn('mouseup on',event.target)
             if ( this.nodeInEditor( event.target ) ){
                 this.handleMouseUp() 
@@ -203,14 +232,15 @@ class Editor {
      * @param {Event} event 
      */
     handleEditorBlur( event ){
-        // Ignore blur if a modal dialogue is shown
-        if ( document.querySelectorAll('.modal').length == 0 ){
-            console.log('editor blurred')
-            this.toolbar.forEach( button => {
-                this.range = false
-                this.setState( button )
-            })
+        // Ignore if a modal is active
+        if ( this.modal ){
+            return
         }
+        console.log('editor blurred')
+        this.toolbar.forEach( button => {
+            this.range = false
+            this.setState( button )
+        })
     }
 
     /**
@@ -263,6 +293,10 @@ class Editor {
      * an empty editor, highlight a custom node if selected
      */
     handleMouseUp(){
+        // Ignore if a modal is active
+        if ( this.modal ){
+            return
+        }
         // console.log('Handle mouse up')
         // console.log('handleMouseUp range=',this.range)
         this.updateRange()
@@ -303,6 +337,10 @@ class Editor {
     listenForKeydownEvents(){
         this.lastKey = ''
         this.editorNode.addEventListener('keydown', event => {
+            // Ignore if a modal is active
+            if ( this.modal ){
+                return
+            }
             let handled = false
             console.log('control key?',event.ctrlKey)
             console.log('key',event.key)
@@ -411,7 +449,7 @@ class Editor {
                     // Back spacing into a non-editable block?
                     const previous = this.range.blockParent.previousElementSibling
                     if ( previous && previous.innerHTML.includes('contenteditable="false"') ){
-                        Feedback.show(title, message)
+                        this.ModalFeedback.show(title, message)
                         return true
                     }
                 // Forward delete in a none-editable block?
@@ -420,7 +458,7 @@ class Editor {
                     const next = this.range.endContainer.nextElementSibling
                     console.log('next',next)
                     if ( next && next.getAttribute("contenteditable") == 'false' ){
-                        Feedback.show(title, message)
+                        this.ModalFeedback.show(title, message)
                         return true
                     }
                 }
@@ -431,7 +469,7 @@ class Editor {
                 const endParent = Helpers.getParentBlockNode(this.range.endContainer)
                 while ( parent !== endParent ){
                     if ( parent.innerHTML.includes('contenteditable="false"') ){
-                        Feedback.show(title, message)
+                        this.ModalFeedback.show(title, message)
                         return true
                     }
                     parent = parent.nextElementSibling
@@ -452,6 +490,10 @@ class Editor {
         // Set the handleKeyup method to be the debounced method handleKeyupDelayed
         this.handleKeyup = Helpers.debounce(this.handleKeyupDelayed,500)
         this.editorNode.addEventListener( 'keyup', event => {
+            // Ignore if a modal is active
+            if ( this.modal ){
+                return
+            }
             const ignore = ['Shift']
             console.log('handle key up event',event)
             if ( ignore.includes(event.key) == false ){
@@ -514,11 +556,12 @@ class Editor {
         const events = ['cut', 'copy','paste']
         events.forEach( evt =>
             this.editorNode.addEventListener(evt, event=>{
+                // Ignore if a modal is active
+                if ( this.modal ){
+                    return
+                }
                 if ( this.handleCutCopyPaste() ){
                     event.preventDefault()
-                // } else {
-                //     // Update buffer
-                //     setTimeout( ()=>this.handleKeyup(this), 1)
                 }
             })
         )
@@ -543,7 +586,7 @@ class Editor {
             if ( parent.innerHTML.includes('contenteditable="false"') ){
                 const title = 'Information'
                 const message = `Cut, copy and paste (of/over) selections with custom elements is not supported. Please modify your selection and try again.`
-                Feedback.show(title, message)
+                this.ModalFeedback.show(title, message)
                 return true
             }
             parent = parent.nextElementSibling

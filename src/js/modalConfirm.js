@@ -16,7 +16,7 @@ function form(title,message,cancel,confirm){
         confirm = 'Yes - lose changes'
     }
     return `
-        <div class="modal-panel-container modal">
+        <div class="modal-panel-container">
             <header class="modal-panel-header">
                 <h3 class="modal-panel-title">${title}</h3>
             </header>
@@ -53,7 +53,7 @@ export const hide = function(){
  * @param {string} confirm 
  * @returns {HTMLElement} the confirmation button
  */
-export const show = function( title, message, cancel, confirm){
+export const show = function( title, message, cancel, confirm ){
     if ( cancel == undefined ){
         cancel = 'No - stay here'
     }
