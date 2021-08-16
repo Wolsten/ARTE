@@ -12,7 +12,12 @@ let inputElement
 let selectedIndex = 0
 let panel = null
 
-
+/**
+ * Generate the list elements for the full list of people
+ * setting the initial ones to be visible (with the "show" class) and the first
+ * one to be selected (using the "selected" class)
+ * @returns {string} list of li's 
+ */
 function filterList(){
     let html = ''
     let n = 0
@@ -31,7 +36,6 @@ function filterList(){
     })
     return html
 }
-
 
 
 /**
@@ -82,7 +86,8 @@ function handleKeyUp( event ){
     }
     // Enter pressed?
     if ( key == 'Enter' ){
-        event.preventDefault()
+        // If have any visible list items then chose the one selected, otherwise
+        // just enter the current input value
         const chosen = selectedIndex!= -1 ? visible[selectedIndex].textContent : inputElement.value
         insert(chosen)
     } else if ( selectedIndex != -1 ){
@@ -96,6 +101,10 @@ function handleKeyUp( event ){
     }
 }
 
+function handleListClick(event){
+    const chosen = event.target.textContent
+    insert(chosen)
+}
 
 /**
  * Handle mentions button click
@@ -116,6 +125,7 @@ function click(edt,btn){
     filterText = ''
     listElement = panel.querySelector('ul')
     panel.addEventListener('keyup', handleKeyUp)
+    listElement.addEventListener('click', handleListClick)
     inputElement.focus()
 }
 

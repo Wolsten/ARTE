@@ -210,7 +210,7 @@ label {
 }
 
 
-/* Slide down edit panel */
+/* Slide down modal panel for editing custom content */
 
 .edit-panel {
     position:absolute;
@@ -312,7 +312,7 @@ label {
     color:var(--text)
 }
 
-/* mentions.js */
+/* mentions.js plugin */
 
 .mentions ul {
     padding:0;
@@ -325,14 +325,15 @@ label {
 }
 .mentions li.show {
     display:block;
+    cursor: pointer;
 }
+.mentions li:hover,
 .mentions li.selected {
     background-color:var(--text);
     color:var(--background);
 }
 
-
-/* Example styling for a custom plugin */
+/* custom.js plugin */
 
 custom {
     position:relative;
