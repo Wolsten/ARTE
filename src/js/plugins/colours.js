@@ -3,6 +3,7 @@ import * as Styles from './styles.js'
 import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
 import * as ModalEdit from '../modalEdit.js'
+import * as ModalFeedback from '../modalFeedback.js'
 
 const DIVISIONS = 20
 const H_INC = 360 / DIVISIONS
@@ -125,10 +126,6 @@ function save(editor,button){
  * @param {object} button The button to act on
  */
 function show(editor, button){
-    // Only allow one at a time
-    if ( panel != null ){
-        return
-    }
     // Set initial colours
     hue = 0
     saturation = (DIVISIONS-1) * S_INC
@@ -178,8 +175,12 @@ function show(editor, button){
  * @param {object} btn The button to act on
  */
 const click = function( editor, btn ){
+    // Ignore if a modal is active
+    if ( editor.modalActive() ){
+        return
+    }
     if ( editor.range === false || editor.range.collapsed ){
-        console.log('No non-collapsed range selected')
+        ModalFeedback.show('Info','The colour selection buttons require at least one character to be selected')
         return
     }
     show(editor, btn)

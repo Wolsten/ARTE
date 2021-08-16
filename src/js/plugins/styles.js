@@ -4,6 +4,66 @@ import * as Icons from '../icons.js'
 import * as Phase from '../phase.js'
 
 /**
+ * Split the node into component parts based on the current selection
+ * @param {HTMLElement} node The current text node 
+ * @param {Range} range 
+ * @returns 
+ */
+function getTextParts(node,range){
+    let text = ''
+    let preText = ''
+    let postText = ''
+    if ( Phase.both() ){
+        preText = node.textContent.substring(0,range.startOffset)
+        text = Helpers.START_MARKER + node.textContent.substring(range.startOffset,range.endOffset) + Helpers.END_MARKER
+        postText = node.textContent.substring( range.endOffset )
+    } else if ( Phase.first() ){
+        preText = node.textContent.substring(0,range.startOffset)
+        text = Helpers.START_MARKER + node.textContent.substring(range.startOffset)
+    } else if ( Phase.last() ){
+        text = node.textContent.substring(0,range.endOffset) + Helpers.END_MARKER
+        postText = node.textContent.substring(range.endOffset)
+    } else {
+        text = node.textContent
+    }
+    return {preText, text, postText}
+}
+
+/**
+ * Check whether the newStyle appears in the styles array
+ * @param {string[]} styles 
+ * @param {string} newStyle 
+ * @returns 
+ */
+function styleApplied(styles,newStyle){
+    let result = -1
+    styles.forEach( (item,index) => {
+        if ( item == newStyle ){
+            result = index
+        }
+    })
+    return result
+}
+
+/**
+ * 
+ * @param {string[]} styles 
+ * @param {string} txt 
+ * @param {boolean} closeFlag true = close
+ * @returns 
+ */
+function generateText(styles, txt, closeFlag){
+    if ( styles.length == 0 ){
+        return txt
+    }
+    let html = `<span style="${styles.join(';')}">${txt}`
+    if ( closeFlag ){
+        html += '</span>'
+    }
+    return html
+}
+
+/**
  * 
  * @param {HTMLElement} node
  * @param {string[]} styles Array of style:value pairs
@@ -11,76 +71,80 @@ import * as Phase from '../phase.js'
  * @param {Range} range apply or remove
  * @returns {string}
  */
-function parseTextNode( node, styles, button, range ) {
+ function parseTextNode( node, styles, button, range ) {
     Phase.set( node )
-    let text = ''
-    let preText = ''
-    let postText = ''
-    let openSpan = ''
-    let closeSpan = ''
-    if ( Phase.during() ){
-        if ( button.action == 'apply' ){
-            // If not already present - add the new style
-            let found = ''
-            let idx = -1
-            styles.forEach( (item,index) => {
-                const parts = item.split(':')
-                if ( parts[0].trim() == button.newStyle ){
-                    idx = index
-                }
-            })
-            // Remove style with old value
-            if ( idx != -1 ){
-                styles = styles.filter( index => index != idx )
-            }
-            // Add style with new value
-            const newStyle = `${button.newStyle}:${button.newValue}`
-            styles = [...styles, newStyle]
-            openSpan = `<span style="${styles.join(';')}">`
-            closeSpan = '</span>'
-        } else if ( style != 'CLEAR' ) {
-            // Remove the style
-            styles = styles.filter( item => {
-                const parts = item.split(':')
-                return parts[0].trim() != style
-            })
-            if ( styles.length > 0 ){
-                openSpan = `<span style="${styles.join(';')};${button.removeStyle}">`
-                closeSpan = '</span>'
-            }
-        }
-        // Don't need to handle clear explicitly as this is the default
-    } else {
-        if ( styles.length > 0 ){
-            openSpan = `<span style="${styles.join(';')}">`
-            closeSpan = '</span>'
-        }
-    }
+    const {preText, text, postText} = getTextParts(node,range)
+    let newStyle = button.newStyle
+    let html = ''
+    // In pre and post phases return text with current styling
     if ( Phase.pre() || Phase.post() ){
-        return openSpan + node.textContent + closeSpan
+        html += generateText(styles, text, true)
+    // During phase 
+    } else {
+        // Has the style been applied already?
+        const fullStyle = `${button.newStyle}:${button.newValue}`
+        const idx = styleApplied(styles, fullStyle)
+        // If have pretext or post text then apply current styles
+        if ( preText || postText ) {
+            html += generateText(styles, preText, 0)
+        }
+        // Check text
+        if ( text ){
+            // Apply new style?
+            if ( button.action == 'apply' ){
+                // If already applied then ignore
+                if ( idx > -1 ){
+                    newStyle = ''
+                // Otherwise apply
+                } else {
+                    newStyle = fullStyle
+                }
+                // if no preText apply all styles to the selected text
+                let newStyles = []
+                if ( preText == '' && newStyle ){
+                    newStyles = [...styles, newStyle]
+                // Otherwise just apply the new style
+                } else {
+                    newStyles = [newStyle]
+                }
+                html += generateText(newStyles, text, 1)
+            // Remove existing style?
+            } else if ( button.action == 'remove' ) {
+
+                // If already applied then apply remove style
+                if ( idx > -1 ){
+                    const removeStyles = [button.removeStyle]
+                    html += generateText(removeStyles, text, 1)
+                // Else just save text
+                } else {
+                    html += text
+                }
+            
+            } else if ( button.action == 'clear' ) {
+                console.log('adding clear text')
+                html += text
+            }
+
+        }
+
+        if ( postText ){
+            html += postText 
+        }
+
+        // Close an opening span?
+        const openSpans = html.split('<span ').length - 1
+        const closeSpans = html.split('</span>').length - 1
+        if ( openSpans > closeSpans ){
+            html += '</span>'
+        }
+
     }
-    if ( Phase.both() ){
-        preText = node.textContent.substring(0,range.startOffset)
-        text = Helpers.START_MARKER + node.textContent.substring(range.startOffset, range.endOffset) + Helpers.END_MARKER
-        postText = node.textContent.substring( range.endOffset )
-        return preText + openSpan + text + closeSpan + postText
-    }
-    if ( Phase.first() ){
-        preText = node.textContent.substring(0,range.startOffset)
-        text = Helpers.START_MARKER + node.textContent.substring(range.startOffset)
-        return preText + openSpan + text + closeSpan
-    }
-    if ( Phase.last() ){
-        text = node.textContent.substring(0,range.endOffset) + Helpers.END_MARKER
-        postText = node.textContent.substring(range.endOffset)
-        return openSpan + text + closeSpan + postText
-    }
-    if ( Phase.during() ){
-        return openSpan + node.textContent + closeSpan
-    }
-    console.warn('Error: Found a missing state with node',node)
-    return ''
+    console.log('html', html)
+    return html
 }
+
+
+
 
 /**
  * Parse a block node, saving inline styles as traverse down the tree
@@ -126,8 +190,17 @@ function parseBlockNode(node, styles, button, range){
  */
 const setState = function(editor, button){
     // console.log('setting style state')
-    if ( editor.range === false  || 
-        (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
+    if ( editor.range === false ) {
+
+
+    // }  || 
+    //     editor.range.collapsed==true ) {
+
+        // } || 
+        // //  editor.range.startContainer != editor.range.endContainer) ){
+        // editor.range.rootNode == editor.editorNode ||
+        // Helpers.isList(editor.range.rootNode) ){
+
         button.element.disabled = true
         button.element.classList.remove('active')
     } else if ( button.tag == 'CLEAR' ){
@@ -182,8 +255,10 @@ const setStyleProps = function(button){
     button.newValue = styleParts[1] !== undefined ? styleParts[1] : ''
     // Determine the action
     button.action = 'apply'
-    if ( button.element.classList.contains('active') || button.style == 'CLEAR') {
+    if ( button.element.classList.contains('active') && button.style != 'CLEAR') {
         button.action = 'remove'
+    } else if ( button.style == 'CLEAR' ){
+        button.action = 'clear'
     }
 }
 
@@ -191,7 +266,6 @@ const setStyleProps = function(button){
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
-
 
 /**
  * Mandatory button click function.
@@ -217,7 +291,7 @@ const setStyleProps = function(button){
     button.setState( editor, button )
 }
 
-let options = {setState, style:'font-weight:bold', removeStyle:'font-weight:400'}
+let options = {setState, style:'font-weight:bold', removeStyle:'font-weight:normal'}
 export const B = new ToolbarButton( 'style', 'B', 'Bold', Icons.b, click, options)
 
 options = {setState, style:'font-style:italic', removeStyle:'font-style:normal'}

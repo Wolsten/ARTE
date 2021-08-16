@@ -53,49 +53,18 @@ class Editor {
         const config = { attributes: false, childList: true, subtree: true }
         const observer = new MutationObserver(()=>this.handleMutation())
         observer.observe(this.editorNode,config)
-        // // Set up public methods to handle modal dialogues
-        // this.handleModals()
     }
 
-    // handleModals(){
-    //     // Set the modal flag to false, when set to true ignore events on
-    //     // the editor
-    //     this.modal = false
-    //     this.modalConfirmShow = (title, message, cancel, confirm) => {
-    //         this.modal = true
-    //         return ModalConfirm.show(title, message, cancel, confirm)
-    //     }
-    //     this.modalConfirmHide = () => {
-    //         if ( this.modal ){
-    //             this.modal = false
-    //             ModalConfirm.hide()
-    //         }
-    //     }
-    //     this.modalFeedbackShow = (title, message) => {
-    //         this.modal = true
-    //         ModalFeedback.show( title, message )
-    //     }
-    //     this.modalPopupShow = (html) => {
-    //         this.modal = true
-    //         return ModalPopup.show(this, html)    
-    //     }
-    //     this.modalPopupHide = () => {
-    //         if ( this.modal ){
-    //             this.modal = false
-    //             ModalPopup.hide()
-    //         } 
-    //     }
-    //     this.modalEditShow = (title,html) => {
-    //         this.modal = true
-    //         return ModalEdit.show(title,html)    
-    //     }
-    //     this.modalEditHide = () => {
-    //         if ( this.modal ){
-    //             this.modal = false
-    //             ModalEdit.hide()
-    //         } 
-    //     }
-    // }
+    /**
+     * Return true if a modal is already visible, otherwise false
+     * @returns {boolean}
+     */
+    modalActive(){
+        if (  document.querySelectorAll('[data-modal-active]').length > 0 ){
+            return true
+        }
+        return false
+    }
 
     /**
      * Handle mutations to the editor node as a result of dom insertions or removals
@@ -210,7 +179,7 @@ class Editor {
             // All buttons have a click method
             button.element.addEventListener('click', event => {
                 // Ignore if a modal is active
-                if ( document.querySelectorAll('[data-modal-active]').length > 0 ){
+                if ( this.modalActive() ){
                     return
                 }
                 // Prevent default action for all buttons when have no range 
@@ -236,7 +205,7 @@ class Editor {
     listenForMouseUpEvents(){
         document.addEventListener('mouseup', event => {
             // Ignore if a modal is active
-            if ( document.querySelectorAll('[data-modal-active]').length > 0 ){
+            if ( this.modalActive() ){
                 return
             }
             // console.warn('mouseup on',event.target)

@@ -306,6 +306,10 @@ const setState = function( editor, button ){
  * @param {object} btn The button to act on
  */
 const click = function( editor, button ){
+    // Ignore if a modal is active
+    if ( editor.modalActive() ){
+        return
+    }
     const custom = editor.range.blockParent.querySelector(TAG)
     if ( custom != null ){
         edit(editor, button, custom)

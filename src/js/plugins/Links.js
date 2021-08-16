@@ -305,7 +305,11 @@ const init = function( editor, button ){
  * @param {object} button The button to act on
  */
 const click = function( editor, button ){
-    console.log('click link')
+    // console.log('click link')
+    // Ignore if a modal is active
+    if ( editor.modalActive() ){
+        return
+    }
     if ( editor.range === false){
         console.log('No range selected')
         return
