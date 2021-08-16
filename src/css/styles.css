@@ -312,41 +312,25 @@ label {
     color:var(--text)
 }
 
-/* Popup inplace panel */
-/* .inplace-panel {
-    box-sizing: border-box;
-    display: block;
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 9999;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: var(--modal-background);
+/* mentions.js */
+
+.mentions ul {
+    padding:0;
+    margin:0;
 }
-.inplace-panel .inplace-content {
-    position: absolute;
-    background-color: var(--background);
-    margin: 0;
-    padding: 0;
-    border: 1px solid var(--border);
-    max-height: 200px;
-    width: 200px;
+.mentions li {
+    list-style: none;
+    padding:0.2rem 0 0.2rem 0.3rem;
+    display:none;
 }
-.inplace-panel input {
-    background-color:var(--background);
-    color:var(--text);
-    width: 100%;
-    padding:0.3rem;
-    border:1px solid var(--border);
-    outline:none;
-    -webkit-appearance: none;
+.mentions li.show {
+    display:block;
 }
-.inplace-panel option {
-    min-height:0;
-    height:1.2rem;
-} */
+.mentions li.selected {
+    background-color:var(--text);
+    color:var(--background);
+}
+
 
 /* Example styling for a custom plugin */
 

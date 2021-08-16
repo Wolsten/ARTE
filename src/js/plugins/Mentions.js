@@ -3,41 +3,35 @@ import * as Icons from '../icons.js'
 import {setCursor} from '../helpers.js'
 import * as ModalPopup from '../modalPopup.js'
 
+const VISIBLE_ITEMS = 5
 let editor
-let dataListOptions = ''
+let people = []
+let listElement
+let filterText = ''
+let inputElement
+let selectedIndex = 0
 let panel = null
-let filterInput = ''
-let lastInput = ''
 
-/**
- * Get the position for the input dialogue base don current range
- * @param {HTMLElement} dialogue 
- * @returns {number,number} position as x,y coordinates
- */
-// function getPosition(dialogue){
-//     let pos
-//     // If this is not a text node then get the first text node
-//     // Can happen at the start of a line when backspace to the start
-//     if ( editor.range.startContainer.nodeType !== 3 ){
-//         if ( editor.range.startContainer.childNodes.length>0 ){
-//             let node = editor.range.startContainer.childNodes[0]
-//             pos = node.getBoundingClientRect()
-//         } else {
-//             pos = {x:editor.editorNode.offsetLeft, y:editor.editorNode.offsetTop}
-//         }
-//     // Text node
-//     } else {
-//         pos = editor.range.getBoundingClientRect()
-//         //console.log('text node const ',pos)
-//     }
-//     if ( (pos.x + dialogue.outerWidth) > window.innerWidth ){
-//         pos.x = window.innerWidth - dialogue.outerWidth - 20;
-//     }
-//     if ( (pos.y + dialogue.outerHeight) > window.innerHeight ){
-//         pos.y = window.innerHeight - dialogue.outerHeight - 40;
-//     }
-//     return pos
-// } 
+
+function filterList(){
+    let html = ''
+    let n = 0
+    people.forEach( (person, index) => {
+        const p = person.toLowerCase()
+        let classes = ''
+        if ( n == selectedIndex ){
+            classes += ' selected'
+        }
+        const filtered = filterText != '' ? p.includes(filterText) : true
+        if ( n < VISIBLE_ITEMS && filtered ){
+            n ++
+            classes += ' show'
+        }
+        html += `<li class="${classes}">${person}</li>`
+    })
+    return html
+}
+
 
 
 /**
@@ -45,26 +39,60 @@ let lastInput = ''
  * @returns {string} HTML form string
  */
 function form(){
-    return `
-        <div class="inplace-content">
-            <input list="people-list" type="text"/>
-            <datalist id="people-list">${dataListOptions}</datalist>
-        </div>`
+    const html = filterList()
+    return `<div class="mentions">
+                <input type="text"/>
+                <ul>${html}</ul>
+            </div>`
 }
 
+
 /**
- * Handle keyup events in the input box
- * @param {Event} e 
+ * Handle key down events anywhere in the panel
+ * @param {Event} event The keydown event
  */
-function handleKeyup(e){
-    // console.log('key',e.target)
-    // console.log('key',e.key)
-    // console.log('shift',e.shiftKey)
-    e.stopPropagation()
-    if ( e.key=='Escape' ){
-        ModalPopup.hide()
-    } else if ( e.key=='Enter' ){
-        insert(filterInput.value.trim())
+function handleKeyUp( event ){
+    const key = event.key
+    const shiftKey = event.shiftKey
+    const visible = listElement.querySelectorAll('li.show')
+    if ( visible.length == 0 ){
+        selectedIndex = -1
+    // Move down list
+    } else if ( key=='ArrowDown' || key=='ArrowRight' || (key=='Tab' && shiftKey==false)){
+        event.preventDefault()
+        if ( selectedIndex < visible.length - 1  ){
+            selectedIndex ++
+        } else {
+            selectedIndex = 0
+        }
+    // Move up list
+    } else if ( key=='ArrowUp' || key=='ArrowLeft' || (key=='Tab' && shiftKey) ){
+        event.preventDefault()
+        if ( selectedIndex == 0 ){
+            selectedIndex = visible.length - 1
+        } else {
+            selectedIndex --
+        }
+    // Filter list if not pressed enter
+    } else if ( key!='Enter' ){
+        filterText = inputElement.value.toLowerCase()
+        const html = filterList()
+        listElement.innerHTML = html
+        selectedIndex = html == '' ? -1 : 0
+    }
+    // Enter pressed?
+    if ( key == 'Enter' ){
+        event.preventDefault()
+        const chosen = selectedIndex!= -1 ? visible[selectedIndex].textContent : inputElement.value
+        insert(chosen)
+    } else if ( selectedIndex != -1 ){
+        visible.forEach( (item,index) => {
+            if ( item.classList.contains('selected') ){
+                item.classList.remove('selected')
+            } else if ( index == selectedIndex ){
+                item.classList.add('selected')
+            }
+        })
     }
 }
 
@@ -80,63 +108,16 @@ function click(edt,btn){
         return
     }
     editor = edt
-    const html = `
-        <input list="people-list" type="text"/>
-        <datalist id="people-list">${dataListOptions}</datalist>`
+    selectedIndex = 0
+    const html = form()
     panel = ModalPopup.show(editor,html)
+    inputElement = panel.querySelector('input')
+    inputElement.value = ''
+    filterText = ''
+    listElement = panel.querySelector('ul')
+    panel.addEventListener('keyup', handleKeyUp)
+    inputElement.focus()
 }
-
-/**
- * Hide the input
- */
-//  function hide(){
-//     editor.modalPopupHide()
-// }
-
-
-/**
- * Handle mentions button click
- * @param {object} edt The editor instance
- * @param {object} btn The button clicked
- */
-// function XXXclick(edt,btn){
-//     if ( edt.range === false ){
-//         console.log('No range selected')
-//         return
-//     }
-//     editor = edt
-//     panel = document.createElement('DIV')
-//     panel.id = 'mentions'
-//     panel.classList.add('inplace-panel')
-//     panel.classList.add('modal')
-//     panel.innerHTML = form()
-//     // Filtering using native html approach
-//     filterInput = panel.querySelector('input')
-//     filterInput.addEventListener('keyup', e=>handleKeyup(e))
-//     // Initialise last input so can detect changes greater
-//     // than single keys being entered and then look for changes in the input
-//     lastInput = ''
-//     filterInput.addEventListener('input', e=>{
-//         const value = filterInput.value.trim()
-//         console.log('input changed from',lastInput, 'to',value)
-//         // Look for longer text changes than single keys entered manually
-//         if ( (value.length - lastInput.length) > 1 ){
-//             console.log('auto input detected', value)
-//             insert(value)
-//         }
-//         lastInput = value
-//     })
-//     // Add to dom
-//     document.querySelector('body').appendChild(panel)
-//     // Position
-//     let dialogue = document.querySelector('.inplace-content')
-//     const position = getPosition(dialogue)
-//     dialogue.style.top = `${position.y}px`
-//     dialogue.style.left = `${position.x}px`
-//     // Focus the input
-//     filterInput.focus()
-// }
-
 
 
 /**
@@ -194,12 +175,8 @@ function insert(person){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-export const setup = function(people){
-    people = people.sort()
-    dataListOptions = ''
-    people.forEach( person => {
-        dataListOptions += `<option>${person}</option>`
-    })
+export const setup = function(peeps){
+    people = peeps.sort()
 }
 
 const options = {setState, shortcut:['@','Tab']}
