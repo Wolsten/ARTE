@@ -5,6 +5,8 @@
 import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
+import * as ModalConfirm from '../modalConfirm.js'
+import * as ModalEdit from '../modalEdit.js'
 
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
@@ -54,7 +56,9 @@ let panel = null
  * @param {boolean} editFlag flag indicating whether to edit or create new
  */
 function show( editor, button, selectedText, editFlag ){
+    let title = 'Edit link'
     if ( editFlag == false ){
+        title = 'Create link'
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
         node.setAttribute('contenteditable','false')
@@ -62,10 +66,8 @@ function show( editor, button, selectedText, editFlag ){
         node.dataset.label = selectedText
         node.dataset.display = 0
     }
-    panel = document.createElement('DIV')
-    panel.id = 'link-edit'
-    panel.classList.add('edit-panel')
-    panel.innerHTML = form( editFlag )
+    const html = form(editFlag)
+    panel = ModalEdit.show(title, html)
     // Initialise confirmation module and dirty data detection
     dirty = false
     const inputs = panel.querySelectorAll('form input')
@@ -73,20 +75,20 @@ function show( editor, button, selectedText, editFlag ){
     // Handle button events
     panel.querySelector('button.cancel').addEventListener('click', () => {
         if ( dirty ){
-            const confirmBtn = editor.modalConfirmShow('Cancel changes', 'Do you really want to lose these changes?')
+            const confirmBtn = ModalConfirm.show('Cancel changes', 'Do you really want to lose these changes?')
             confirmBtn.addEventListener( 'click', () => {
-                editor.modalConfirmHide()
-                hide()
+                ModalConfirm.hide()
+                ModalEdit.hide()
             })
         } else {
-            hide()
+            ModalEdit.hide()
         }
     })
     if ( editFlag ){
         panel.querySelector('button.delete').addEventListener('click', () => {
-            const confirmBtn = editor.modalConfirmShow('Delete link', 'Do you really want to delete this link?')
+            const confirmBtn = ModalConfirm.show('Delete link', 'Do you really want to delete this link?')
             confirmBtn.addEventListener( 'click', () => {
-                editor.modalConfirmHide()
+                ModalConfirm.hide()
                 deleteItem(editor, button) 
             })
         })
@@ -95,13 +97,10 @@ function show( editor, button, selectedText, editFlag ){
         event.preventDefault()
         save(editor, button, editFlag )
     })
-    // Add to dom, position and focus the input
-    document.querySelector('body').appendChild(panel)
+    // Focus the href
     const href = panel.querySelector('form #href')
     href.focus()
     href.setSelectionRange(href.value.length, href.value.length)
-    // Add show class to display with transition
-    setTimeout( ()=>panel.classList.add('show'),10 )
 }
 
 /**
@@ -120,7 +119,7 @@ function save( editor, button, editFlag ){
     }
     // Format link and add event handler
     format(editor, button, node)
-    hide()
+    ModalEdit.hide()
     // Update state
     editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
@@ -170,7 +169,7 @@ function save( editor, button, editFlag ){
  function deleteItem(editor, button){
     //node = editorNode.querySelector(`${TAG}#${data.id}`)
     node.remove()
-    hide()
+    ModalEdit.hide()
     // Update state
     editor.range = false
     setState(editor, button)
@@ -179,13 +178,13 @@ function save( editor, button, editFlag ){
 /**
  * Hide the dialogue with transition
  */
-function hide(){
-    panel.classList.remove('show')
-    setTimeout( ()=>{
-        panel.remove()
-        panel = null
-    }, 500)
-}
+// function hide(){
+//     panel.classList.remove('show')
+//     setTimeout( ()=>{
+//         panel.remove()
+//         panel = null
+//     }, 500)
+// }
 
 /**
  * Generate the label to be used for the link
@@ -249,50 +248,41 @@ function format( editor, button, element ){
  * @returns {string} HTML string
  */
 function form(edit){
-    let title = 'Create link'
     let delBtn = ''
     let openBtn = ''
     let href = 'http://'
     let label = node.dataset.label
     let display = node.dataset.display ? node.dataset.display : 0
     if ( edit) {
-        title = 'Edit link'
         href = node.href
         delBtn = `<button type="button" class="delete">Delete</button>`
         openBtn = `<a href="${href}" class="panel-link" target="_blank" title="Open link in new tab or window">${Icons.openLink}</a>`
     }
     return `
-        <div class="edit-panel-container">
-            <div class="edit-panel-header">
-                <h3 class="edit-panel-title">${title}</h3>
+        <form>
+            <div class="form-input">
+                <label for="href">URL</label>
+                <input id="href" type="url" class="form-control ${openBtn ? 'with-button' : ''}" placeholder="URL" required value="${href}">
+                ${openBtn}
             </div>
-            <div class="edit-panel-body">
-                <form>
-                    <div class="form-input">
-                        <label for="href">URL</label>
-                        <input id="href" type="url" class="form-control ${openBtn ? 'with-button' : ''}" placeholder="URL" required value="${href}">
-                        ${openBtn}
-                    </div>
-                    <div class="form-input">
-                        <label for="label">Label (optional)</label>
-                        <input id="label" type="text" class="form-control" placeholder="Label" value="${label}">
-                    </div>
-                    <div class="form-input">
-                        <label for="label">Display option</label>
-                        <select class="form-control" id="display">
-                            <option value="0" ${display==0 ? 'selected' : ''}>Label only</option>
-                            <option value="1" ${display==1 ? 'selected' : ''}>Link only</option>
-                            <option value="2" ${display==2 ? 'selected' : ''}>Label and link</option>
-                        </select>
-                    </div>
-                    <div class="buttons">
-                        <button type="button" class="cancel">Cancel</button>
-                        ${delBtn}
-                        <button type="submit" class="save">Save</button>
-                    </div>
-                </form>
+            <div class="form-input">
+                <label for="label">Label (optional)</label>
+                <input id="label" type="text" class="form-control" placeholder="Label" value="${label}">
             </div>
-        </div>`
+            <div class="form-input">
+                <label for="label">Display option</label>
+                <select class="form-control" id="display">
+                    <option value="0" ${display==0 ? 'selected' : ''}>Label only</option>
+                    <option value="1" ${display==1 ? 'selected' : ''}>Link only</option>
+                    <option value="2" ${display==2 ? 'selected' : ''}>Label and link</option>
+                </select>
+            </div>
+            <div class="buttons">
+                <button type="button" class="cancel">Cancel</button>
+                ${delBtn}
+                <button type="submit" class="save">Save</button>
+            </div>
+        </form>`
 }
 
 

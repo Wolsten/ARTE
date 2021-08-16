@@ -8,7 +8,7 @@ let panel = null
  * @param {string} confirm 
  * @returns {string}
  */
-function form(title,message,cancel,confirm){
+function template(title,message,cancel,confirm){
     if ( cancel == undefined ){
         cancel = 'No - stay here'
     }
@@ -62,7 +62,8 @@ export const show = function( title, message, cancel, confirm ){
     }
     panel = document.createElement('DIV')
     panel.classList.add('modal-panel')
-    panel.innerHTML = form(title,message, cancel, confirm)
+    panel.setAttribute('data-modal-active',true)
+    panel.innerHTML = template(title, message, cancel, confirm)
     panel.querySelector('button.cancel').addEventListener('click', event => {
         event.stopPropagation()
         hide()

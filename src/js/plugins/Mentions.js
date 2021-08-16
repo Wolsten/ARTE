@@ -1,6 +1,7 @@
 import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import {setCursor} from '../helpers.js'
+import * as ModalPopup from '../modalPopup.js'
 
 let editor
 let dataListOptions = ''
@@ -13,30 +14,30 @@ let lastInput = ''
  * @param {HTMLElement} dialogue 
  * @returns {number,number} position as x,y coordinates
  */
-function getPosition(dialogue){
-    let pos
-    // If this is not a text node then get the first text node
-    // Can happen at the start of a line when backspace to the start
-    if ( editor.range.startContainer.nodeType !== 3 ){
-        if ( editor.range.startContainer.childNodes.length>0 ){
-            let node = editor.range.startContainer.childNodes[0]
-            pos = node.getBoundingClientRect()
-        } else {
-            pos = {x:editor.editorNode.offsetLeft, y:editor.editorNode.offsetTop}
-        }
-    // Text node
-    } else {
-        pos = editor.range.getBoundingClientRect()
-        //console.log('text node const ',pos)
-    }
-    if ( (pos.x + dialogue.outerWidth) > window.innerWidth ){
-        pos.x = window.innerWidth - dialogue.outerWidth - 20;
-    }
-    if ( (pos.y + dialogue.outerHeight) > window.innerHeight ){
-        pos.y = window.innerHeight - dialogue.outerHeight - 40;
-    }
-    return pos
-} 
+// function getPosition(dialogue){
+//     let pos
+//     // If this is not a text node then get the first text node
+//     // Can happen at the start of a line when backspace to the start
+//     if ( editor.range.startContainer.nodeType !== 3 ){
+//         if ( editor.range.startContainer.childNodes.length>0 ){
+//             let node = editor.range.startContainer.childNodes[0]
+//             pos = node.getBoundingClientRect()
+//         } else {
+//             pos = {x:editor.editorNode.offsetLeft, y:editor.editorNode.offsetTop}
+//         }
+//     // Text node
+//     } else {
+//         pos = editor.range.getBoundingClientRect()
+//         //console.log('text node const ',pos)
+//     }
+//     if ( (pos.x + dialogue.outerWidth) > window.innerWidth ){
+//         pos.x = window.innerWidth - dialogue.outerWidth - 20;
+//     }
+//     if ( (pos.y + dialogue.outerHeight) > window.innerHeight ){
+//         pos.y = window.innerHeight - dialogue.outerHeight - 40;
+//     }
+//     return pos
+// } 
 
 
 /**
@@ -61,12 +62,11 @@ function handleKeyup(e){
     // console.log('shift',e.shiftKey)
     e.stopPropagation()
     if ( e.key=='Escape' ){
-        hide()
+        ModalPopup.hide()
     } else if ( e.key=='Enter' ){
         insert(filterInput.value.trim())
     }
 }
-
 
 
 /**
@@ -80,45 +80,64 @@ function click(edt,btn){
         return
     }
     editor = edt
-    panel = document.createElement('DIV')
-    panel.id = 'mentions'
-    panel.classList.add('inplace-panel')
-    panel.classList.add('modal')
-    panel.innerHTML = form()
-    // Filtering using native html approach
-    filterInput = panel.querySelector('input')
-    filterInput.addEventListener('keyup', e=>handleKeyup(e))
-    // Initialise last input so can detect changes greater
-    // than single keys being entered and then look for changes in the input
-    lastInput = ''
-    filterInput.addEventListener('input', e=>{
-        const value = filterInput.value.trim()
-        console.log('input changed from',lastInput, 'to',value)
-        // Look for longer text changes than single keys entered manually
-        if ( (value.length - lastInput.length) > 1 ){
-            console.log('auto input detected', value)
-            insert(value)
-        }
-        lastInput = value
-    })
-    // Add to dom
-    document.querySelector('body').appendChild(panel)
-    // Position
-    let dialogue = document.querySelector('.inplace-content')
-    const position = getPosition(dialogue)
-    dialogue.style.top = `${position.y}px`
-    dialogue.style.left = `${position.x}px`
-    // Focus the input
-    filterInput.focus()
+    const html = `
+        <input list="people-list" type="text"/>
+        <datalist id="people-list">${dataListOptions}</datalist>`
+    panel = ModalPopup.show(editor,html)
 }
 
 /**
  * Hide the input
  */
-function hide(){
-    panel.remove()
-    panel = null
-}
+//  function hide(){
+//     editor.modalPopupHide()
+// }
+
+
+/**
+ * Handle mentions button click
+ * @param {object} edt The editor instance
+ * @param {object} btn The button clicked
+ */
+// function XXXclick(edt,btn){
+//     if ( edt.range === false ){
+//         console.log('No range selected')
+//         return
+//     }
+//     editor = edt
+//     panel = document.createElement('DIV')
+//     panel.id = 'mentions'
+//     panel.classList.add('inplace-panel')
+//     panel.classList.add('modal')
+//     panel.innerHTML = form()
+//     // Filtering using native html approach
+//     filterInput = panel.querySelector('input')
+//     filterInput.addEventListener('keyup', e=>handleKeyup(e))
+//     // Initialise last input so can detect changes greater
+//     // than single keys being entered and then look for changes in the input
+//     lastInput = ''
+//     filterInput.addEventListener('input', e=>{
+//         const value = filterInput.value.trim()
+//         console.log('input changed from',lastInput, 'to',value)
+//         // Look for longer text changes than single keys entered manually
+//         if ( (value.length - lastInput.length) > 1 ){
+//             console.log('auto input detected', value)
+//             insert(value)
+//         }
+//         lastInput = value
+//     })
+//     // Add to dom
+//     document.querySelector('body').appendChild(panel)
+//     // Position
+//     let dialogue = document.querySelector('.inplace-content')
+//     const position = getPosition(dialogue)
+//     dialogue.style.top = `${position.y}px`
+//     dialogue.style.left = `${position.x}px`
+//     // Focus the input
+//     filterInput.focus()
+// }
+
+
 
 /**
  * Insert a new person's name in the appropritae position
@@ -148,7 +167,7 @@ function insert(person){
     // Move offset to the end of the newly inserted person
     offset += person.length
     editor.range = setCursor( editor.range.startContainer, offset )
-    hide()
+    ModalPopup.hide()
     // Update the buffer explicity because this operation does not
     // change the dom tree and hence will be missed by the observer
     editor.bufferUpdate(editor)

@@ -2,6 +2,8 @@
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
+import * as ModalConfirm from '../modalConfirm.js'
+import * as ModalEdit from '../modalEdit.js'
 
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
@@ -52,22 +54,22 @@ function edit( editor, button, element ){
  * @param {boolean} editFlag Whether editing existing custom element or creating new
  */
 function show( editor, button, editFlag ){
+    let title = 'Edit custom element'
     if ( editFlag == false ){
         // Create a empty HTMLElement
+        title = 'Create custom element'
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
         node.setAttribute('contenteditable','false')
         node.innerHTML = template({property1:' ', property2:' ', property3:' '})
     }
-    panel = document.createElement('DIV')
-    panel.id = 'custom-edit'
-    panel.classList.add('edit-panel')
     const data = {
         property1: node.querySelector('.property1').innerText,
         property2: node.querySelector('.property2').innerText,
         property3: node.querySelector('.property3').innerText,
     }
-    panel.innerHTML = form(data, editFlag)
+    const html = form(data, editFlag)
+    panel = ModalEdit.show( title, html )
     // Initialise confirmation module and dirty data detection
     dirty = false
     const inputs = panel.querySelectorAll('form input')
@@ -75,20 +77,20 @@ function show( editor, button, editFlag ){
     // Handle button events
     panel.querySelector('button.cancel').addEventListener('click', () => {
         if ( dirty ){
-            const confirmBtn = editor.modalConfirmShow('Cancel changes', 'Do you really want to lose these changes?')
+            const confirmBtn = ModalConfirm.show('Cancel changes', 'Do you really want to lose these changes?')
             confirmBtn.addEventListener( 'click', () => {
-                editor.modalConfirmHide()
-                hide()
+                ModalConfirm.hide()
+                ModalEdit.hide()
             })
         } else {
-            hide()
+            ModalEdit.hide()
         }
     })
     if ( editFlag ){
         panel.querySelector('button.delete').addEventListener('click', () => {
-            const confirmBtn = editor.modalConfirmShow('Delete custom item', 'Do you really want to delete this custom item?', 'No - keep', 'Yes - delete')
+            const confirmBtn = ModalConfirm.show('Delete custom item', 'Do you really want to delete this custom item?', 'No - keep', 'Yes - delete')
             confirmBtn.addEventListener( 'click', () => {
-                editor.modalConfirmHide()
+                ModalConfirm.hide()
                 deleteItem(editor, button) 
             })
         })
@@ -97,13 +99,10 @@ function show( editor, button, editFlag ){
         event.preventDefault()
         save(editor, button, editFlag)
     })
-    // Add to dom, position and focus the input
-    document.querySelector('body').appendChild(panel)
+    // Focus the first property
     const prop1 = panel.querySelector('form #property1')
     prop1.focus()
     prop1.setSelectionRange(prop1.value.length, prop1.value.length)
-     // Add show class to display with transition
-    setTimeout( ()=>panel.classList.add('show'), 10 )
 }
 
 /**
@@ -124,7 +123,7 @@ function save(editor, button, editFlag ){
     // setTimeout( ()=>updateDom(editor, button), 10)
     // Format node and add event handler
     format(editor, button, node)
-    hide()
+    ModalEdit.hide()
     // Update state
     editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
@@ -147,21 +146,10 @@ function insert(editor){
 function deleteItem(editor, button){
     //node = editor.editorNode.querySelector(`${TAG}#${data.id}`)
     node.remove()
-    hide()
+    ModalEdit.hide()
     // Update state
     editor.range = false
     setState(editor, button)
-}
-
-/**
- * Hide the dialogue with transition
- */
- function hide(){
-    panel.classList.remove('show')
-    setTimeout( ()=>{
-        panel.remove()
-        panel = null
-    }, 500)
 }
 
 /**
@@ -238,39 +226,30 @@ function addEventHandlers(editor){
  * @returns {string} Generated html
  */
 function form(props,editFlag){
-    let title = 'Create custom element'
     let delBtn = ''
     if ( editFlag ) {
-        title = 'Edit custom element'
         delBtn = `<button type="button" class="delete">Delete</button>`
     }
     return `
-        <div class="edit-panel-container modal">
-            <div class="edit-panel-header">
-                <h3 class="edit-panel-title">${title}</h3>
+        <form>
+            <div class="form-input">
+                <label for="property1">Property 1</label>
+                <input id="property1" type="text" class="form-control" placeholder="Property 1" required value="${props.property1}">
             </div>
-            <div class="edit-panel-body">
-                <form>
-                    <div class="form-input">
-                        <label for="property1">Property 1</label>
-                        <input id="property1" type="text" class="form-control" placeholder="Property 1" required value="${props.property1}">
-                    </div>
-                    <div class="form-input">
-                        <label for="property2">Property 2</label>
-                        <input id="property2" type="text" class="form-control" placeholder="Property 2" required value="${props.property2}">
-                    </div>
-                    <div class="form-input">
-                        <label for="property3">Property 3</label>
-                        <input id="property3" type="text" class="form-control" placeholder="Property 3" required value="${props.property3}">
-                    </div>
-                    <div class="buttons">
-                        <button type="button" class="cancel">Cancel</button>
-                        ${delBtn}
-                        <button type="submit" class="save">Save</button>
-                    </div>
-                </form>
+            <div class="form-input">
+                <label for="property2">Property 2</label>
+                <input id="property2" type="text" class="form-control" placeholder="Property 2" required value="${props.property2}">
             </div>
-        </div>`
+            <div class="form-input">
+                <label for="property3">Property 3</label>
+                <input id="property3" type="text" class="form-control" placeholder="Property 3" required value="${props.property3}">
+            </div>
+            <div class="buttons">
+                <button type="button" class="cancel">Cancel</button>
+                ${delBtn}
+                <button type="submit" class="save">Save</button>
+            </div>
+        </form>`
 }
 
 /**

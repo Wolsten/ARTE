@@ -2,6 +2,7 @@ import * as Helpers from '../helpers.js'
 import * as Styles from './styles.js'
 import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
+import * as ModalEdit from '../modalEdit.js'
 
 const DIVISIONS = 20
 const H_INC = 360 / DIVISIONS
@@ -56,65 +57,44 @@ function colourise(){
  * @param {object} button 
  * @returns 
  */
-function form(button){
+function form(){
     let hues = ''
     let saturations = ''
     let lightnesses = ''
-    let title = "Choose a background colour"
-    if ( button.tag == 'FGC'){
-        title = "Choose a foreground colour"
-    }
     for( let i=0; i<DIVISIONS; i++ ){
         hues += `<span class="colour" data-colour="hue" data-index="${i}">&nbsp;</span>`
         saturations += `<span class="colour" data-colour="saturation" data-index="${i}">&nbsp;</span>`
         lightnesses += `<span class="colour" data-colour="lightness" data-index="${i}">&nbsp;</span>`
     }
     return `
-        <div class="edit-panel-container modal">
-            <div class="edit-panel-header">
-                <h3 class="edit-panel-title">${title}</h3>
+        <form id="colour-menu">
+            <div class="colours">
+                <div class="hues">
+                    <label>Hue</label>
+                    <div>${hues}</div>
+                </div>
+                <div class="saturations">
+                    <label>Saturation</label>
+                    <div>${saturations}</div>
+                </div>
+                <div class="lightnesses">
+                    <label>Lightness</label>
+                    <div>${lightnesses}</div>
+                </div>
             </div>
-            <div class="edit-panel-body" id="colour-menu">
-                <form>
-                    <div class="colours">
-                        <div class="hues">
-                            <label>Hue</label>
-                            <div>${hues}</div>
-                        </div>
-                        <div class="saturations">
-                            <label>Saturation</label>
-                            <div>${saturations}</div>
-                        </div>
-                        <div class="lightnesses">
-                            <label>Lightness</label>
-                            <div>${lightnesses}</div>
-                        </div>
-                    </div>
 
-                    <div class="result">
-                        <label>Result</label>
-                        <span>&nbsp;</span>
+            <div class="result">
+                <label>Result</label>
+                <span>&nbsp;</span>
 
-                        <div class="buttons">
-                            <button type="button" class="cancel">Cancel</button>
-                            <button type="submit" class="save">Set</button>
-                        </div>
-                    </div>
-                </form>
+                <div class="buttons">
+                    <button type="button" class="cancel">Cancel</button>
+                    <button type="submit" class="save">Set</button>
+                </div>
             </div>
-        </div>`
+        </form>`
 }
 
-/**
- * Hide the dialogue with transition
- */
- function hide(){
-    panel.classList.remove('show')
-    setTimeout( ()=>{
-        panel.remove()
-        panel = null
-    }, 500)
-}
 
 /**
  * Save the currently selected colour values
@@ -132,7 +112,7 @@ function save(editor,button){
     }
     // Apply the new style
     Styles.click( editor, synthButton )
-    hide()
+    ModalEdit.hide()
 }
 
 /**
@@ -146,26 +126,26 @@ function save(editor,button){
  */
 function show(editor, button){
     // Only allow one at a time
-    if ( document.getElementById('colour-menu') != null ){
+    if ( panel != null ){
         return
     }
     // Set initial colours
     hue = 0
     saturation = (DIVISIONS-1) * S_INC
     lightness = 50
-    // Create the panel
-    panel = document.createElement('DIV')
-    panel.id = 'custom-edit'
-    panel.classList.add('edit-panel')
-    panel.innerHTML = form( button )
+    let title = "Choose a background colour"
+    if ( button.tag == 'FGC'){
+        title = "Choose a foreground colour"
+    }
+    // Display the panel
+    const html = form()
+    panel = ModalEdit.show( title, html )
     // Handle button events
-    panel.querySelector('button.cancel').addEventListener('click', hide )
+    panel.querySelector('button.cancel').addEventListener('click', ModalEdit.hide )
     panel.querySelector('form').addEventListener('submit', event => {
         event.preventDefault()
         save(editor, button)
     })
-    // Add to dom
-    document.querySelector('body').appendChild(panel)
     // Apply colours
     colourise()
     // Add click handlers
@@ -188,8 +168,6 @@ function show(editor, button){
         }
         colourise()
     }))
-    // Add show class to display with transition
-    setTimeout( ()=>panel.classList.add('show'), 10 )
 }
 
 

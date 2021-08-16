@@ -2,7 +2,9 @@ import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
 import * as Buffer from './plugins/buffer.js'
 import * as ModalFeedback from './modalFeedback.js'
-import * as ModalConfirm from './modalConfirm.js'
+// import * as ModalConfirm from './modalConfirm.js'
+// import * as ModalPopup from './modalPopup.js'
+// import * as ModalEdit from './modalEdit.js'
 
 class Editor {
 
@@ -51,27 +53,49 @@ class Editor {
         const config = { attributes: false, childList: true, subtree: true }
         const observer = new MutationObserver(()=>this.handleMutation())
         observer.observe(this.editorNode,config)
-        // Set up public methods to handle modal dialogues
-        this.handleModals()
+        // // Set up public methods to handle modal dialogues
+        // this.handleModals()
     }
 
-    handleModals(){
-        // Set the modal flag to false, when set to true ignore events on
-        // the editor
-        this.modal = false
-        this.modalConfirmShow = (title, message, cancel, confirm) => {
-            this.modal = true
-            return ModalConfirm.show(title, message, cancel, confirm)
-        }
-        this.modalConfirmHide = () => {
-            this.modal = false
-            ModalConfirm.hide()
-        }
-        this.modalFeedbackShow = (title, message) => {
-            this.modal = true
-            ModalFeedback.show( title, message )    
-        }
-    }
+    // handleModals(){
+    //     // Set the modal flag to false, when set to true ignore events on
+    //     // the editor
+    //     this.modal = false
+    //     this.modalConfirmShow = (title, message, cancel, confirm) => {
+    //         this.modal = true
+    //         return ModalConfirm.show(title, message, cancel, confirm)
+    //     }
+    //     this.modalConfirmHide = () => {
+    //         if ( this.modal ){
+    //             this.modal = false
+    //             ModalConfirm.hide()
+    //         }
+    //     }
+    //     this.modalFeedbackShow = (title, message) => {
+    //         this.modal = true
+    //         ModalFeedback.show( title, message )
+    //     }
+    //     this.modalPopupShow = (html) => {
+    //         this.modal = true
+    //         return ModalPopup.show(this, html)    
+    //     }
+    //     this.modalPopupHide = () => {
+    //         if ( this.modal ){
+    //             this.modal = false
+    //             ModalPopup.hide()
+    //         } 
+    //     }
+    //     this.modalEditShow = (title,html) => {
+    //         this.modal = true
+    //         return ModalEdit.show(title,html)    
+    //     }
+    //     this.modalEditHide = () => {
+    //         if ( this.modal ){
+    //             this.modal = false
+    //             ModalEdit.hide()
+    //         } 
+    //     }
+    // }
 
     /**
      * Handle mutations to the editor node as a result of dom insertions or removals
@@ -186,7 +210,7 @@ class Editor {
             // All buttons have a click method
             button.element.addEventListener('click', event => {
                 // Ignore if a modal is active
-                if ( this.modal ){
+                if ( document.querySelectorAll('[data-modal-active]').length > 0 ){
                     return
                 }
                 // Prevent default action for all buttons when have no range 
@@ -207,13 +231,12 @@ class Editor {
     // -----------------------------------------------------------------------------
 
     /**
-     * Listen for mouseup events on the whole document and blur
-     * events on the editor
+     * Listen for mouseup events on the document 
      */
     listenForMouseUpEvents(){
         document.addEventListener('mouseup', event => {
             // Ignore if a modal is active
-            if ( this.modal ){
+            if ( document.querySelectorAll('[data-modal-active]').length > 0 ){
                 return
             }
             // console.warn('mouseup on',event.target)
@@ -232,10 +255,6 @@ class Editor {
      * @param {Event} event 
      */
     handleEditorBlur( event ){
-        // Ignore if a modal is active
-        if ( this.modal ){
-            return
-        }
         console.log('editor blurred')
         this.toolbar.forEach( button => {
             this.range = false
@@ -293,10 +312,6 @@ class Editor {
      * an empty editor, highlight a custom node if selected
      */
     handleMouseUp(){
-        // Ignore if a modal is active
-        if ( this.modal ){
-            return
-        }
         // console.log('Handle mouse up')
         // console.log('handleMouseUp range=',this.range)
         this.updateRange()
@@ -337,10 +352,6 @@ class Editor {
     listenForKeydownEvents(){
         this.lastKey = ''
         this.editorNode.addEventListener('keydown', event => {
-            // Ignore if a modal is active
-            if ( this.modal ){
-                return
-            }
             let handled = false
             console.log('control key?',event.ctrlKey)
             console.log('key',event.key)
@@ -449,7 +460,7 @@ class Editor {
                     // Back spacing into a non-editable block?
                     const previous = this.range.blockParent.previousElementSibling
                     if ( previous && previous.innerHTML.includes('contenteditable="false"') ){
-                        this.ModalFeedback.show(title, message)
+                        ModalFeedback.show(title, message)
                         return true
                     }
                 // Forward delete in a none-editable block?
@@ -458,7 +469,7 @@ class Editor {
                     const next = this.range.endContainer.nextElementSibling
                     console.log('next',next)
                     if ( next && next.getAttribute("contenteditable") == 'false' ){
-                        this.ModalFeedback.show(title, message)
+                        ModalFeedback.show(title, message)
                         return true
                     }
                 }
@@ -469,7 +480,7 @@ class Editor {
                 const endParent = Helpers.getParentBlockNode(this.range.endContainer)
                 while ( parent !== endParent ){
                     if ( parent.innerHTML.includes('contenteditable="false"') ){
-                        this.ModalFeedback.show(title, message)
+                        ModalFeedback.show(title, message)
                         return true
                     }
                     parent = parent.nextElementSibling
@@ -490,10 +501,6 @@ class Editor {
         // Set the handleKeyup method to be the debounced method handleKeyupDelayed
         this.handleKeyup = Helpers.debounce(this.handleKeyupDelayed,500)
         this.editorNode.addEventListener( 'keyup', event => {
-            // Ignore if a modal is active
-            if ( this.modal ){
-                return
-            }
             const ignore = ['Shift']
             console.log('handle key up event',event)
             if ( ignore.includes(event.key) == false ){
@@ -535,7 +542,7 @@ class Editor {
      * after updates to the dom
      */
     updateEventHandlers(){
-        //console.log('Updating event handlers')
+        console.log('Updating event handlers')
         this.toolbar.forEach( button => {
             if ( 'addEventHandlers' in button ){
                 // console.log('Updating event handlers for button',button.tag)
@@ -556,10 +563,6 @@ class Editor {
         const events = ['cut', 'copy','paste']
         events.forEach( evt =>
             this.editorNode.addEventListener(evt, event=>{
-                // Ignore if a modal is active
-                if ( this.modal ){
-                    return
-                }
                 if ( this.handleCutCopyPaste() ){
                     event.preventDefault()
                 }
@@ -586,7 +589,7 @@ class Editor {
             if ( parent.innerHTML.includes('contenteditable="false"') ){
                 const title = 'Information'
                 const message = `Cut, copy and paste (of/over) selections with custom elements is not supported. Please modify your selection and try again.`
-                this.ModalFeedback.show(title, message)
+                ModalFeedback.show(title, message)
                 return true
             }
             parent = parent.nextElementSibling

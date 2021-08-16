@@ -246,7 +246,7 @@ label {
 }
 
 
-/* Modal confirm */
+/* Modal confirm and feedback panels */
 
 .modal-panel {
     position:absolute;
@@ -278,9 +278,9 @@ label {
     margin-top:2rem;
 }
 
-/* Popup inplace panel */
+/* Modal popup (an inplace panel that appears near the selection point )*/
 
-.inplace-panel {
+.modal-popup {
     box-sizing: border-box;
     display: block;
     /* Stay in place */
@@ -295,9 +295,36 @@ label {
     height: 100%;
     /* Enable scroll if needed */
     overflow: auto;
+    background-color: var(--modal-background); 
+}
+
+.modal-popup-content {
+    position: absolute;
+    background-color: var(--background);
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+}
+
+.modal-popup-content li,
+.modal-popup-content input {
+    background-color: var(--background);
+    color:var(--text)
+}
+
+/* Popup inplace panel */
+/* .inplace-panel {
+    box-sizing: border-box;
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 9999;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
     background-color: var(--modal-background);
 }
-  
 .inplace-panel .inplace-content {
     position: absolute;
     background-color: var(--background);
@@ -307,7 +334,6 @@ label {
     max-height: 200px;
     width: 200px;
 }
-  
 .inplace-panel input {
     background-color:var(--background);
     color:var(--text);
@@ -317,11 +343,10 @@ label {
     outline:none;
     -webkit-appearance: none;
 }
-
 .inplace-panel option {
     min-height:0;
     height:1.2rem;
-}
+} */
 
 /* Example styling for a custom plugin */
 
@@ -378,12 +403,12 @@ custom button.edit {
 
 /* colours.js plugin */
 
-#colour-menu form {
+#colour-menu {
     display:flex;
     flex-wrap: wrap;
 }
 
-#colour-menu form .colours {
+#colour-menu .colours {
     flex-basis:80%;
 }
 
@@ -392,18 +417,18 @@ custom button.edit {
     padding: 1rem 0;
 }
 
-#colour-menu form .result {
+#colour-menu .result {
     flex-basis:20%;
     text-align: center;
 }
-#colour-menu form .result span {
+#colour-menu .result span {
     display:block;
     max-width:80px;
     height:80px;
     margin:0 auto;
 }
 
-#colour-menu form .buttons {
+#colour-menu .buttons {
     flex-basis:100%;
     padding-top:1rem;
 }
