@@ -1,16 +1,16 @@
 import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import {setCursor} from '../helpers.js'
-import * as ModalPopup from '../modalPopup.js'
+// import * as ModalPopup from '../modalPopup.js'
+import * as Modal from '../modal.js'
 
-const VISIBLE_ITEMS = 5
 let editor
 let people = []
-let listElement
+let listContainerElement
 let filterText = ''
 let inputElement
 let selectedIndex = 0
-let panel = null
+let modal = null
 
 /**
  * Generate the list elements for the full list of people
@@ -23,15 +23,16 @@ function filterList(){
     let n = 0
     people.forEach( (person, index) => {
         const p = person.toLowerCase()
-        let classes = ''
+        let selected = ''
         if ( n == selectedIndex ){
-            classes += ' selected'
+            selected += 'class="selected"'
         }
         const filtered = filterText != '' ? p.includes(filterText) : true
         if ( filtered ){
             n ++
+            html += `<li ${selected}>${person}</li>`
         }
-        html += `<li class="${classes}">${person}</li>`
+        
     })
     return html
 }
@@ -64,7 +65,7 @@ function form(){
 function handleKeyUp( event ){
     const key = event.key
     const shiftKey = event.shiftKey
-    const items = listElement.querySelectorAll('li')
+    const items = listContainerElement.querySelectorAll('li')
     if ( items.length == 0 ){
         selectedIndex = -1
     // Move down list
@@ -89,7 +90,7 @@ function handleKeyUp( event ){
     } else if ( key!='Enter' ){
         filterText = inputElement.value.toLowerCase()
         const html = filterList()
-        listElement.innerHTML = html
+        listContainerElement.innerHTML = html
         selectedIndex = html == '' ? -1 : 0
     }
     // Enter pressed?
@@ -119,13 +120,19 @@ function click(edt,btn){
     editor = edt
     selectedIndex = 0
     const html = form()
-    panel = ModalPopup.show(editor,html)
-    inputElement = panel.querySelector('input')
+    modal = Modal.show({
+        editor,
+        type:'positioned',
+        escape:true,
+        html
+    })
+    // modal = Modal.show(editor,html)
+    inputElement = modal.querySelector('input')
     inputElement.value = ''
     filterText = ''
-    listElement = panel.querySelector('ul')
-    panel.addEventListener('keyup', handleKeyUp)
-    listElement.addEventListener('click', handleListClick)
+    listContainerElement = modal.querySelector('ul')
+    modal.addEventListener('keyup', handleKeyUp)
+    listContainerElement.addEventListener('click', handleListClick)
     inputElement.focus()
 }
 
@@ -158,7 +165,7 @@ function insert(person){
     // Move offset to the end of the newly inserted person
     offset += person.length
     editor.range = setCursor( editor.range.startContainer, offset )
-    ModalPopup.hide()
+    Modal.hide()
     // Update the buffer explicity because this operation does not
     // change the dom tree and hence will be missed by the observer
     editor.bufferUpdate(editor)

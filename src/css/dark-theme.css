@@ -1,5 +1,7 @@
 :root {
     --text: #ffffff;
+    --text-warning: rgb(250, 120, 30);
+    --text-danger: rgb(250, 30, 30);
     --text-disabled: rgb(120,120,120);
     --text-link: rgb(102, 102, 235);
     --text-debug: rgb(104, 207, 104);

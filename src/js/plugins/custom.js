@@ -1,4 +1,3 @@
-// import * as Modal from '../modalConfirm.js'
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'

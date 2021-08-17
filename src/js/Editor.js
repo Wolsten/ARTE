@@ -2,6 +2,7 @@ import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
 import * as Buffer from './plugins/buffer.js'
 import * as ModalFeedback from './modalFeedback.js'
+import * as Modal from './modal.js'
 // import * as ModalConfirm from './modalConfirm.js'
 // import * as ModalPopup from './modalPopup.js'
 // import * as ModalEdit from './modalEdit.js'
@@ -12,6 +13,7 @@ class Editor {
     // @section Initialisation
     // -----------------------------------------------------------------------------
 
+
     /**
      * 
      * @param {HTMLElement} target The dom node to populate with the toolbar and editor
@@ -20,6 +22,60 @@ class Editor {
      * @param {object} options Options, such as the buffer size for undo/redo operations
      */
     constructor( target, content, toolbar, options ){
+
+        // Test modals
+        // const mod = Modal.show({
+        //     title:'test title', 
+        //     html:'<p>Test body</p>', 
+        //     severity:'warning',
+        //     buttons:[{class:'hide', label:'cancel'}]
+        // })
+        // const mod = Modal.show({
+        //     title:'test title', 
+        //     html:'<p>Test body</p>', 
+        //     severity:'warning',
+        //     buttons:[
+        //         {
+        //             class:'hide', 
+        //             label:'cancel'
+        //         }, 
+        //         {
+        //             class:"delete", 
+        //             label:'Delete', 
+        //             callback:()=>alert('delete')
+        //         },
+        //         {
+        //             class:"confirm", 
+        //             label:'Confirm', 
+        //             callback:()=>alert('confirme')
+        //         }
+        //     ]
+        // })
+        // target.addEventListener( 'click', ()=> {
+        //     this.updateRange()
+        //     const mod = Modal.show({
+        //         editor:this,
+        //         type:'positioned',
+        //         escape:true,
+        //         html:`<div class="mentions">
+        //             <input type="text"/>
+        //             <ul>
+        //             <li>David</li>
+        //             <li>David</li>
+        //             <li>David</li>
+        //             <li>David</li>
+        //             <li>David</li>
+        //             <li>David</li>
+        //             <li>David</li>
+        //             <li>David</li>
+        //             </ul>
+        //             </div>`
+        //     })
+            
+        // })
+
+
+
         // Initialise options
         this.options = this.initOptions(options)
         // initialise buffering
@@ -53,6 +109,7 @@ class Editor {
         const config = { attributes: false, childList: true, subtree: true }
         const observer = new MutationObserver(()=>this.handleMutation())
         observer.observe(this.editorNode,config)
+        
     }
 
     /**

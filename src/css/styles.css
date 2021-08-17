@@ -20,6 +20,16 @@ a:visited {
     color:var(--text-link);
 }
 
+i.info {
+    color:var(--text)
+}
+i.warning {
+    color:var(--text-warning)
+}
+i.danger {
+    color:var(--text-danger)
+}
+
 /* Index.html */
 
 body {
@@ -212,7 +222,7 @@ label {
 
 /* Slide down modal panel for editing custom content */
 
-.edit-panel {
+/* .edit-panel {
     position:absolute;
     top:0;
     left:0;
@@ -243,12 +253,12 @@ label {
 
 .edit-panel .panel-link i {
     font-size: 1.4rem;
-}
+} */
 
 
 /* Modal confirm and feedback panels */
 
-.modal-panel {
+/* .modal-panel {
     position:absolute;
     top:0;
     left:0;
@@ -276,24 +286,24 @@ label {
 
 .modal-panel-buttons {
     margin-top:2rem;
-}
+} */
 
 /* Modal popup (an inplace panel that appears near the selection point )*/
 
-.modal-popup {
+/* .modal-popup {
     box-sizing: border-box;
     display: block;
-    /* Stay in place */
+
     position: fixed;
     left: 0;
     top: 0;
-    /* Sit on top */
+
     z-index: 9999;
-    /* Full width */
+
     width: 100%;
-    /* Full height */
+
     height: 100%;
-    /* Enable scroll if needed */
+
     overflow: auto;
     background-color: var(--modal-background); 
 }
@@ -310,6 +320,82 @@ label {
 .modal-popup-content input {
     background-color: var(--background);
     color:var(--text)
+} */
+
+/* Generic modal styles */
+
+.modal-panel {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    background:var(--modal-background);
+}
+
+.modal-panel-container {
+    position:absolute;
+    background:var(--background);
+    opacity:0;
+    transition: all 0.4s ease-in-out 0s;
+}
+
+.modal-panel-confirm .modal-panel-container,
+.modal-panel-feedback .modal-panel-container {
+    width:80%;
+    top:25%;
+    left:10%;
+    padding:2rem 2rem 1rem 2rem;
+    border:1px var(--border) solid;
+    border-radius: 0.5rem;
+}
+
+.modal-panel-popup .modal-panel-container {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+}
+
+.modal-panel-edit .modal-panel-container {
+    width:100%;
+    top:0;
+    left:0;
+    padding:2rem;
+    background:var(--background);
+    border-bottom:1px var(--border) solid;
+    transform: translateY(-100%);
+    transition: all 0.3s ease-in-out 0s;
+}
+
+.modal-panel.show .modal-panel-container {
+    opacity:1;
+}
+
+.modal-panel-title {
+    text-align: center;
+    font-size: 2rem;
+    position:relative;
+    margin:0 0 1.5rem 0;
+}
+
+.modal-panel-title i {
+    font-size: 3rem;
+    padding-right:2rem;
+    position: relative;
+    top:0.4rem;
+}
+
+.modal-panel-body {
+    margin: 2rem 0;
+}
+.modal-panel-positioned .modal-panel-body {
+    margin:0;
+}
+
+.modal-panel-buttons {
+    display:flex;
+    justify-content: space-around;
 }
 
 /* mentions.js plugin */
@@ -317,7 +403,7 @@ label {
 .mentions ul {
     padding:0;
     margin:0;
-    max-height: 7rem;
+    max-height: 7.2rem;
     overflow-y: scroll;
 }
 .mentions li {
