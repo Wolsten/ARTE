@@ -1,4 +1,4 @@
-@import "dark-theme.css";
+@import "light-theme.css";
 
 /* General */
 
@@ -317,20 +317,22 @@ label {
 .mentions ul {
     padding:0;
     margin:0;
+    max-height: 7rem;
+    overflow-y: scroll;
 }
 .mentions li {
     list-style: none;
+    line-height: 1rem;
     padding:0.2rem 0 0.2rem 0.3rem;
-    display:none;
-}
-.mentions li.show {
     display:block;
     cursor: pointer;
 }
-.mentions li:hover,
 .mentions li.selected {
     background-color:var(--text);
     color:var(--background);
+}
+.mentions li:hover{
+    background-color:var(--background-hover);
 }
 
 /* custom.js plugin */

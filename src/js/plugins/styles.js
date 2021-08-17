@@ -74,7 +74,6 @@ function generateText(styles, txt, closeFlag){
  function parseTextNode( node, styles, button, range ) {
     Phase.set( node )
     const {preText, text, postText} = getTextParts(node,range)
-    let newStyle = button.newStyle
     let html = ''
     // In pre and post phases return text with current styling
     if ( Phase.pre() || Phase.post() ){
@@ -164,7 +163,7 @@ function generateText(styles, txt, closeFlag){
             }
         }
     }
-    console.log('html', html)
+    // console.log('html', html)
     return html
 }
 

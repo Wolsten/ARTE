@@ -28,13 +28,19 @@ function filterList(){
             classes += ' selected'
         }
         const filtered = filterText != '' ? p.includes(filterText) : true
-        if ( n < VISIBLE_ITEMS && filtered ){
+        if ( filtered ){
             n ++
-            classes += ' show'
         }
         html += `<li class="${classes}">${person}</li>`
     })
     return html
+}
+
+
+function highlightItem(items, index){
+    items.forEach( item => item.classList.remove('selected') )
+    items[index].classList.add('selected')
+    items[index].scrollIntoView()
 }
 
 
@@ -58,25 +64,27 @@ function form(){
 function handleKeyUp( event ){
     const key = event.key
     const shiftKey = event.shiftKey
-    const visible = listElement.querySelectorAll('li.show')
-    if ( visible.length == 0 ){
+    const items = listElement.querySelectorAll('li')
+    if ( items.length == 0 ){
         selectedIndex = -1
     // Move down list
     } else if ( key=='ArrowDown' || key=='ArrowRight' || (key=='Tab' && shiftKey==false)){
         event.preventDefault()
-        if ( selectedIndex < visible.length - 1  ){
+        if ( selectedIndex < items.length - 1  ){
             selectedIndex ++
         } else {
             selectedIndex = 0
         }
+        highlightItem(items,selectedIndex)
     // Move up list
     } else if ( key=='ArrowUp' || key=='ArrowLeft' || (key=='Tab' && shiftKey) ){
         event.preventDefault()
         if ( selectedIndex == 0 ){
-            selectedIndex = visible.length - 1
+            selectedIndex = items.length - 1
         } else {
             selectedIndex --
         }
+        highlightItem(items,selectedIndex)
     // Filter list if not pressed enter
     } else if ( key!='Enter' ){
         filterText = inputElement.value.toLowerCase()
@@ -88,16 +96,8 @@ function handleKeyUp( event ){
     if ( key == 'Enter' ){
         // If have any visible list items then chose the one selected, otherwise
         // just enter the current input value
-        const chosen = selectedIndex!= -1 ? visible[selectedIndex].textContent : inputElement.value
+        const chosen = selectedIndex!= -1 ? items[selectedIndex].textContent : inputElement.value
         insert(chosen)
-    } else if ( selectedIndex != -1 ){
-        visible.forEach( (item,index) => {
-            if ( item.classList.contains('selected') ){
-                item.classList.remove('selected')
-            } else if ( index == selectedIndex ){
-                item.classList.add('selected')
-            }
-        })
     }
 }
 
