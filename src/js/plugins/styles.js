@@ -84,60 +84,85 @@ function generateText(styles, txt, closeFlag){
         // Has the style been applied already?
         const fullStyle = `${button.newStyle}:${button.newValue}`
         const idx = styleApplied(styles, fullStyle)
-        // If have pretext or post text then apply current styles
-        if ( preText || postText ) {
-            html += generateText(styles, preText, 0)
+        let closedSpans = true
+
+        // PRE TEXT
+        if ( preText ) {
+
+            if ( styles.length == 0 ){
+
+                html += preText
+
+            // Got at least one style to apply
+            } else {
+
+                // Defaults to true for cases of 'remove' and 'clear'
+                closedSpans = true
+
+                if ( button.action == 'apply' ){
+                    
+                    // Don't close if new style is in styles list or if there is post text 
+                    // which needs the same styling as the pre text
+                    if ( idx > -1 || postText != '' ){
+                        closedSpans = false
+                    }
+                }
+
+                html += generateText(styles, preText, closedSpans)
+            }
         }
-        // Check text
+
+        // SELECTED TEXT
         if ( text ){
+
             // Apply new style?
             if ( button.action == 'apply' ){
-                // If already applied then ignore
-                if ( idx > -1 ){
-                    newStyle = ''
-                // Otherwise apply
-                } else {
-                    newStyle = fullStyle
-                }
-                // if no preText apply all styles to the selected text
-                let newStyles = []
-                if ( preText == '' && newStyle ){
-                    newStyles = [...styles, newStyle]
-                // Otherwise just apply the new style
-                } else {
-                    newStyles = [newStyle]
-                }
-                html += generateText(newStyles, text, 1)
-            // Remove existing style?
-            } else if ( button.action == 'remove' ) {
 
-                // If already applied then apply remove style
-                if ( idx > -1 ){
-                    const removeStyles = [button.removeStyle]
-                    html += generateText(removeStyles, text, 1)
-                // Else just save text
-                } else {
+                // If style already applied and the pretext spans are open 
+                // just add the text
+                if ( idx > -1 && closedSpans==false ){
                     html += text
+                } else {
+                    let newStyles = []
+                    // Otherwise if the pre text spans are closed add the old and new styles
+                    if ( closedSpans ){
+                        newStyles = [...styles, fullStyle]
+                    // If pre text spans open then just add the new style
+                    } else {
+                        newStyles = [fullStyle]
+                    }
+                    
+                    html += generateText(newStyles, text, true)
                 }
-            
-            } else if ( button.action == 'clear' ) {
-                console.log('adding clear text')
+
+            // Remove existing style?
+            } else if ( button.action == 'remove' || button.action == 'clear' ) {
+
                 html += text
             }
-
         }
 
-        if ( postText ){
-            html += postText 
-        }
+        // POST TEXT
+        if ( postText ) {
 
-        // Close an opening span?
-        const openSpans = html.split('<span ').length - 1
-        const closeSpans = html.split('</span>').length - 1
-        if ( openSpans > closeSpans ){
-            html += '</span>'
-        }
+            // No styles
+            if ( styles.length == 0 ){
+                
+                html += postText
+                
+            // Got at least one style to apply/remove
+            } else {
 
+                // Apply styles to the post text if the spans were closed for the pre text
+                if ( closedSpans ){
+                    html += generateText(styles, postText, true)
+                // Else close the spans from the pretext
+                } else {
+                    html += postText
+                    styles.forEach( () => html+='</span>' )
+                }
+            }
+        }
     }
     console.log('html', html)
     return html
