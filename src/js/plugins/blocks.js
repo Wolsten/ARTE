@@ -50,7 +50,7 @@ function getFormats( node, formats, button ){
                 newFormats.pop()
                 newFormats.push(button.newFormat)
                 newFormats.push('LI')
-                console.log('3.1.2 new list formats', formats.newFormats.join(' '))
+                // console.log('3.1.2 new list formats', formats.newFormats.join(' '))
             // Else create a new indented list
             } else {
                 // console.log( '3.1.3 Subsequent item in a list - indent a new list')
@@ -59,7 +59,7 @@ function getFormats( node, formats, button ){
                 // Add the new list format and an LI
                 newFormats.push(button.newFormat)
                 newFormats.push('LI')
-                console.log('3.1.4 new list formats', formats.newFormats.join(' '))
+                // console.log('3.1.4 new list formats', formats.newFormats.join(' '))
             }
         // This is a different block node (e.g. H1, P) or a list container node - therefore start a new list
         } else {
@@ -138,7 +138,7 @@ function saveContent( node, formats ){
     // New tree larger and the previous formats are a subset?
     // Compare formatting and add to appropriate end of tree
     } else if ( currentFormats.length > previousFormats.length ){
-        console.log('saveContent: 2. Current formats longer than previous formats')
+        // console.log('saveContent: 2. Current formats longer than previous formats')
         if ( Helpers.arraySubset( previousFormats, currentFormats ) ){
             // console.log('saveContent: 2.1 Current formats are a superset of previous formats')
             for( let i=0; i<previousFormats.length; i++){

@@ -14,8 +14,10 @@ const undo = function(editor){
     }
     setState( editor, UNDO )
     setState( editor, REDO )
-    console.log('buffer',editor.buffer)
-    console.log('buffer index', editor.bufferIndex)
+    if ( editor.options.debug ){
+        console.log('buffer',editor.buffer)
+        console.log('buffer index', editor.bufferIndex)
+    }
     editor.updateEventHandlers()
 }
 
@@ -32,8 +34,10 @@ const redo = function(editor){
     }
     setState( editor, UNDO )
     setState( editor, REDO )
-    console.log('buffer',editor.buffer)
-    console.log('buffer index', editor.bufferIndex)
+    if ( editor.options.debug ){
+        console.log('buffer',editor.buffer)
+        console.log('buffer index', editor.bufferIndex)
+    }
     editor.updateEventHandlers()
 }
 

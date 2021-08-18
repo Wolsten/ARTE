@@ -319,7 +319,7 @@ const click = function( edt, btn ){
     editor = edt
     button = btn
     if ( editor.range === false){
-        console.log('No range selected')
+        // console.log('No range selected')
         return
     }
     // Get default label if range not collapsed

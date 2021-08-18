@@ -70,7 +70,9 @@ class Editor {
      */
     handleMutation() {
         if ( this.bufferIgnoreMutation(this) === false ){
-            // console.log('MUTATED')
+            if ( this.options.debug ){
+                console.log('MUTATED')
+            }
             this.bufferUpdate(this)
             this.updateEventHandlers()
         }
@@ -322,8 +324,10 @@ class Editor {
         this.lastKey = ''
         this.editorNode.addEventListener('keydown', event => {
             let handled = false
-            console.log('control key?',event.ctrlKey)
-            console.log('key',event.key)
+            if ( this.options.debug ){
+                console.log('control key?',event.ctrlKey)
+                console.log('key',event.key)
+            }
             // Check if a modal dialogue is shown - ignore key entry?
             if ( document.querySelectorAll('.show').length > 0 ){
                 event.preventDefault()
@@ -391,7 +395,7 @@ class Editor {
         const endNormal = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
         if ( custom || endNormal ) {
-            console.log(`Creating a ${this.range.blockParent.tagName} node`)
+            // console.log(`Creating a ${this.range.blockParent.tagName} node`)
             let n = document.createElement(this.range.blockParent.tagName)
             n.innerText = '\n'
             n = Helpers.insertAfter( n, this.range.blockParent )
@@ -476,7 +480,7 @@ class Editor {
         this.handleKeyup = Helpers.debounce(this.handleKeyupDelayed,500)
         this.editorNode.addEventListener( 'keyup', event => {
             const ignore = ['Shift']
-            console.log('handle key up event',event)
+            // console.log('handle key up event',event)
             if ( ignore.includes(event.key) == false ){
                 this.bufferIgnore = true
                 this.handleKeyup(event.key,this)
@@ -549,7 +553,7 @@ class Editor {
      * @returns {boolean} true if should be blocked
      */
     handleCutCopyPaste(){
-        console.log('Detected cut-copy-paste event')
+        // console.log('Detected cut-copy-paste event')
         this.updateRange()
         // Ensure have a range that is not collapsed
         if ( this.range==false || this.range.collapsed ){
