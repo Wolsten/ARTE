@@ -5,7 +5,7 @@
 import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
-import Modal from '../modal.js'
+import Modal from '../Modal.js'
 
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node

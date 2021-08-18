@@ -1,7 +1,6 @@
 import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
 import * as Buffer from './plugins/buffer.js'
-import * as ModalFeedback from './modalFeedback.js'
 import Modal from './Modal.js'
 
 class Editor {
@@ -402,8 +401,9 @@ class Editor {
         if ( custom ){
             this.highlightCustomNode(false)
         }
-        // Get the new range
-        this.updateRange()
+        // Reset the range which must be done after a delay since this
+        // method was triggered on keydown before added to dom
+        setTimeout( () => this.updateRange(), 10 )
         return handled
     }
 
@@ -418,28 +418,29 @@ class Editor {
         }
         this.updateRange()
         if ( this.range ){
-            const title = 'Information'
-            const message = `To delete a custom element you need to edit it by clicking it and choosing Delete.`
+            const feedback = new Modal({
+                type:'overlay', 
+                severity:'info',
+                title: 'Information',
+                html: `<p>To delete a custom element you need to edit it by clicking it and choosing Delete.</p>`,
+                escape:true,
+                buttons: {cancel:{label:'Close'}}
+            })
             // Single selection
             if ( this.range.collapsed ){
-                console.log('Single selection')
-                console.log('range length', this.range.endContainer.textContent.trim().length)
-                console.log('range endOffset', this.range.endOffset)
                 // Check for back spacing from a single selection point
                 if ( key == 'Backspace' && this.range.startOffset == 0 ){
-                    // Back spacing into a non-editable block?
+                    // Back spacing into a block containing a non-editable block?
                     const previous = this.range.blockParent.previousElementSibling
-                    if ( previous && previous.innerHTML.includes('contenteditable="false"') ){
-                        ModalFeedback.show(title, message)
+                    if ( previous && previous.querySelector( '[contenteditable="false"]') ){
+                        feedback.show()
                         return true
                     }
                 // Forward delete in a none-editable block?
                 } else if ( key == 'Delete' && this.range.endContainer.textContent.trim().length == this.range.endOffset ){
-                    console.log('Deleting from end container')
                     const next = this.range.endContainer.nextElementSibling
-                    console.log('next',next)
                     if ( next && next.getAttribute("contenteditable") == 'false' ){
-                        ModalFeedback.show(title, message)
+                        feedback.show()
                         return true
                     }
                 }
@@ -450,13 +451,16 @@ class Editor {
                 const endParent = Helpers.getParentBlockNode(this.range.endContainer)
                 while ( parent !== endParent ){
                     if ( parent.innerHTML.includes('contenteditable="false"') ){
-                        ModalFeedback.show(title, message)
+                        feedback.show()
                         return true
                     }
                     parent = parent.nextElementSibling
                 }
             }
         }
+        // Reset the range which must be done after a delay since this
+        // method was triggered on keydown before added to dom
+        setTimeout( () => this.updateRange(), 10 )
         return false
     }
 
@@ -557,9 +561,16 @@ class Editor {
         let done = false
         while ( !done ){
             if ( parent.innerHTML.includes('contenteditable="false"') ){
-                const title = 'Information'
-                const message = `Cut, copy and paste (of/over) selections with custom elements is not supported. Please modify your selection and try again.`
-                ModalFeedback.show(title, message)
+                const feedback = new Modal({
+                    type:'overlay', 
+                    severity:'info',
+                    title: 'Information',
+                    html: `<p>Cut, copy and paste (of or over) selections with custom block elements is not supported.</p>
+                           <p>Please modify your selection and try again.</p>`,
+                    escape:true,
+                    buttons: {cancel:{label:'Close'}}
+                })
+                feedback.show()
                 return true
             }
             parent = parent.nextElementSibling
@@ -663,7 +674,9 @@ class Editor {
      */
     updateRange(){
         this.range = Helpers.getRange()
-        Templates.debugRange( this.debugTarget, this.range )
+        if ( this.options.debug ){
+            Templates.debugRange( this.debugTarget, this.range )
+        }
     }
  
     /**

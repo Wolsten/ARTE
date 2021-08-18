@@ -19,7 +19,6 @@ class Modal {
         for( let option in options ){
             this[option] = options[option]
         }
-        console.log('this',this)
     }
 
     /**
