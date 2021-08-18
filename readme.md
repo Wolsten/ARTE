@@ -47,7 +47,7 @@ Create a javascript block like this:
 
 ```
 <script type="module" charset="utf-8">
-    import ARTE from './src/js/ARTE-ES6.JS'
+    import * as ARTE from './src/js/ARTE-ES6.JS'
     const target = document.getElementById('editor')
     // Set the initial content to the current content of the editor div
     let content = target.innerHTML
@@ -95,6 +95,7 @@ Referring to `package.json`, run one of the NPM scripts to create your target ve
 ```
   "scripts": {
     "dev": "webpack --env=mode=development --config webpack.config.js",
+    "test": "webpack --env=mode=development --env=target=ES6 --config webpack.config.js",
     "build-es6": "webpack --env=mode=production --env=target=ES6 --config webpack.config.js",
     "build-es5": "webpack --env=mode=production --env=target=ES5 --config webpack.config.js"
   },
