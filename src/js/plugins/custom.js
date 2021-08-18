@@ -1,7 +1,7 @@
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
-import * as Modal from '../modal.js'
+import * as Modal from '../Modal.js'
 
 // -----------------------------------------------------------------------------
 // @section Variables

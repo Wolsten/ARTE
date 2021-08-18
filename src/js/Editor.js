@@ -2,10 +2,7 @@ import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
 import * as Buffer from './plugins/buffer.js'
 import * as ModalFeedback from './modalFeedback.js'
-import * as Modal from './modal.js'
-// import * as ModalConfirm from './modalConfirm.js'
-// import * as ModalPopup from './modalPopup.js'
-// import * as ModalEdit from './modalEdit.js'
+import Modal from './Modal.js'
 
 class Editor {
 
@@ -13,30 +10,26 @@ class Editor {
     // @section Initialisation
     // -----------------------------------------------------------------------------
 
+    testModals(){
 
-    /**
-     * 
-     * @param {HTMLElement} target The dom node to populate with the toolbar and editor
-     * @param {string} content The initial HTML content for the editor
-     * @param {object[]} toolbar 2-d array of buttons
-     * @param {object} options Options, such as the buffer size for undo/redo operations
-     */
-    constructor( target, content, toolbar, options ){
-
-        // Test modals
-        // const mod = Modal.show({
+        // Warning modal
+        // const modal = new Modal({
+        //     type: 'feedback',
         //     title:'test title', 
-        //     html:'<p>Test body</p>', 
+        //     html:'<p>A warning message</p>', 
         //     severity:'warning',
-        //     buttons:[{class:'hide', label:'cancel'}]
+        //     buttons:[{class:'hide', label:'OK'}]
         // })
-        // const mod = Modal.show({
-        //     title:'test title', 
-        //     html:'<p>Test body</p>', 
-        //     severity:'warning',
+        // modal.show()
+
+        // Edit modal with buttons and callbacks
+        // const modal = new Modal({
+        //     type:'edit',
+        //     title:'Edit something', 
+        //     html:'<p>Placeholder for a form with values that can be changed</p>', 
         //     buttons:[
         //         {
-        //             class:'hide', 
+        //             class:'cancel', 
         //             label:'cancel'
         //         }, 
         //         {
@@ -47,14 +40,16 @@ class Editor {
         //         {
         //             class:"confirm", 
         //             label:'Confirm', 
-        //             callback:()=>alert('confirme')
+        //             callback:()=>alert('confirm')
         //         }
         //     ]
         // })
-        // target.addEventListener( 'click', ()=> {
+        // modal.show()
+
+        // Positioned modal
+        // this.editorNode.addEventListener( 'click', ()=> {
         //     this.updateRange()
-        //     const mod = Modal.show({
-        //         editor:this,
+        //     const modal = new Modal({
         //         type:'positioned',
         //         escape:true,
         //         html:`<div class="mentions">
@@ -71,11 +66,19 @@ class Editor {
         //             </ul>
         //             </div>`
         //     })
-            
+        //     modal.show()
+        //     modal.setPosition(this.range, this.editorNode)
         // })
+    }
 
-
-
+    /**
+     * 
+     * @param {HTMLElement} target The dom node to populate with the toolbar and editor
+     * @param {string} content The initial HTML content for the editor
+     * @param {object[]} toolbar 2-d array of buttons
+     * @param {object} options Options, such as the buffer size for undo/redo operations
+     */
+    constructor( target, content, toolbar, options ){
         // Initialise options
         this.options = this.initOptions(options)
         // initialise buffering
@@ -91,6 +94,9 @@ class Editor {
         this.editorNode.innerHTML = content
         // Reset range
         this.range = false
+        // *** TEST THE MODALS ***
+        // this.testModals()
+        // return
         // Set up event handling
         this.listenForMouseUpEvents()
         this.listenForPasteEvents()
@@ -109,18 +115,8 @@ class Editor {
         const config = { attributes: false, childList: true, subtree: true }
         const observer = new MutationObserver(()=>this.handleMutation())
         observer.observe(this.editorNode,config)
-        
-    }
-
-    /**
-     * Return true if a modal is already visible, otherwise false
-     * @returns {boolean}
-     */
-    modalActive(){
-        if (  document.querySelectorAll('[data-modal-active]').length > 0 ){
-            return true
-        }
-        return false
+        // Define an empty modal so can check if any active
+        this.modal = new Modal()
     }
 
     /**
@@ -236,7 +232,7 @@ class Editor {
             // All buttons have a click method
             button.element.addEventListener('click', event => {
                 // Ignore if a modal is active
-                if ( this.modalActive() ){
+                if ( this.modal.active() ){
                     return
                 }
                 // Prevent default action for all buttons when have no range 
@@ -262,7 +258,7 @@ class Editor {
     listenForMouseUpEvents(){
         document.addEventListener('mouseup', event => {
             // Ignore if a modal is active
-            if ( this.modalActive() ){
+            if ( this.modal.active() ){
                 return
             }
             // console.warn('mouseup on',event.target)

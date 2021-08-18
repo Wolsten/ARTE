@@ -1,36 +1,30 @@
 import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import {setCursor} from '../helpers.js'
-// import * as ModalPopup from '../modalPopup.js'
-import * as Modal from '../modal.js'
+import Modal from '../Modal.js'
 
 let editor
 let people = []
+let listItemElements
 let listContainerElement
-let filterText = ''
 let inputElement
 let selectedIndex = 0
-let modal = null
+let modal = null // This will be an instance of the Modal class
 
 /**
  * Generate the list elements for the full list of people
  * setting the initial ones to be visible (with the "show" class) and the first
  * one to be selected (using the "selected" class)
+ * @param {string} filterText The text input string
  * @returns {string} list of li's 
  */
-function filterList(){
+function filterList(filterText){
     let html = ''
-    let n = 0
-    people.forEach( (person, index) => {
+    people.forEach( person => {
         const p = person.toLowerCase()
-        let selected = ''
-        if ( n == selectedIndex ){
-            selected += 'class="selected"'
-        }
         const filtered = filterText != '' ? p.includes(filterText) : true
         if ( filtered ){
-            n ++
-            html += `<li ${selected}>${person}</li>`
+            html += `<li>${person}</li>`
         }
         
     })
@@ -38,25 +32,28 @@ function filterList(){
 }
 
 
-function highlightItem(items, index){
-    items.forEach( item => item.classList.remove('selected') )
-    items[index].classList.add('selected')
-    items[index].scrollIntoView()
+/**
+ * Highlight the selected item as a result of navigating through the list
+ */
+function highlightItem(){
+    if ( selectedIndex >= 0 && listItemElements.length > 0 ){
+        listItemElements.forEach( item => item.classList.remove('selected') )
+        listItemElements[selectedIndex].classList.add('selected')
+        listItemElements[selectedIndex].scrollIntoView()
+    }
 }
-
 
 /**
  * Generate the html for the input form
  * @returns {string} HTML form string
  */
 function form(){
-    const html = filterList()
+    const html = filterList('')
     return `<div class="mentions">
                 <input type="text"/>
                 <ul>${html}</ul>
             </div>`
 }
-
 
 /**
  * Handle key down events anywhere in the panel
@@ -65,77 +62,50 @@ function form(){
 function handleKeyUp( event ){
     const key = event.key
     const shiftKey = event.shiftKey
-    const items = listContainerElement.querySelectorAll('li')
-    if ( items.length == 0 ){
+    
+    if ( listItemElements.length == 0 ){
         selectedIndex = -1
     // Move down list
     } else if ( key=='ArrowDown' || key=='ArrowRight' || (key=='Tab' && shiftKey==false)){
         event.preventDefault()
-        if ( selectedIndex < items.length - 1  ){
+        if ( selectedIndex < listItemElements.length - 1  ){
             selectedIndex ++
         } else {
             selectedIndex = 0
         }
-        highlightItem(items,selectedIndex)
+        highlightItem()
     // Move up list
     } else if ( key=='ArrowUp' || key=='ArrowLeft' || (key=='Tab' && shiftKey) ){
         event.preventDefault()
         if ( selectedIndex == 0 ){
-            selectedIndex = items.length - 1
+            selectedIndex = listItemElements.length - 1
         } else {
             selectedIndex --
         }
-        highlightItem(items,selectedIndex)
+        highlightItem()
     // Filter list if not pressed enter
     } else if ( key!='Enter' ){
-        filterText = inputElement.value.toLowerCase()
-        const html = filterList()
-        listContainerElement.innerHTML = html
-        selectedIndex = html == '' ? -1 : 0
+        listContainerElement.innerHTML = filterList( inputElement.value.toLowerCase() )
+        listItemElements = listContainerElement.querySelectorAll('li')
+        selectedIndex = 0
+        highlightItem()
     }
     // Enter pressed?
     if ( key == 'Enter' ){
         // If have any visible list items then chose the one selected, otherwise
         // just enter the current input value
-        const chosen = selectedIndex!= -1 ? items[selectedIndex].textContent : inputElement.value
+        const chosen = selectedIndex!= -1 ? listItemElements[selectedIndex].textContent : inputElement.value
         insert(chosen)
     }
 }
 
-function handleListClick(event){
-    const chosen = event.target.textContent
-    insert(chosen)
-}
-
 /**
- * Handle mentions button click
- * @param {object} edt The editor instance
- * @param {object} btn The button clicked
+ * Handle clicking on a list item and insert the clicked value
+ * @param {Event} event 
  */
-function click(edt,btn){
-    if ( edt.range === false ){
-        console.log('No range selected')
-        return
-    }
-    editor = edt
-    selectedIndex = 0
-    const html = form()
-    modal = Modal.show({
-        editor,
-        type:'positioned',
-        escape:true,
-        html
-    })
-    // modal = Modal.show(editor,html)
-    inputElement = modal.querySelector('input')
-    inputElement.value = ''
-    filterText = ''
-    listContainerElement = modal.querySelector('ul')
-    modal.addEventListener('keyup', handleKeyUp)
-    listContainerElement.addEventListener('click', handleListClick)
-    inputElement.focus()
+function handleListClick(event){
+    insert(event.target.textContent)
 }
-
 
 /**
  * Insert a new person's name in the appropritae position
@@ -165,12 +135,46 @@ function insert(person){
     // Move offset to the end of the newly inserted person
     offset += person.length
     editor.range = setCursor( editor.range.startContainer, offset )
-    Modal.hide()
+    modal.hide()
     // Update the buffer explicity because this operation does not
     // change the dom tree and hence will be missed by the observer
     editor.bufferUpdate(editor)
 }
 
+/**
+ * Handle mentions button click
+ * @param {object} edt The editor instance
+ * @param {object} btn The button clicked
+ */
+ function click(edt,btn){
+    if ( edt.range === false ){
+        console.log('No range selected')
+        return
+    }
+    editor = edt
+    // Create the modal, show and position
+    modal = new Modal({
+        type:'positioned',
+        escape:true,
+        html:form()
+    })
+    modal.show()
+    modal.setPosition(editor.range, editor.editorNode)
+    // Add custom event handling - add keyup to main container
+    // so can detect/filter keystrokes and handle navigation in the
+    // list using arrow keys and tabs
+    modal.container.addEventListener('keyup', handleKeyUp)
+    listContainerElement = modal.container.querySelector('ul')
+    listContainerElement.addEventListener('click', handleListClick)
+    // Init list items and selection
+    listItemElements = listContainerElement.querySelectorAll('li')
+    selectedIndex = 0
+    highlightItem()
+    // Initialise the text input
+    inputElement = modal.container.querySelector('input')
+    inputElement.value = ''
+    inputElement.focus()
+}
 
 /**
  * Set the disabled and active states of a button
