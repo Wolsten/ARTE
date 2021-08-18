@@ -1,4 +1,5 @@
-// Imports
+// https://www.loginradius.com/blog/async/write-a-javascript-library-using-webpack-and-babel/// 
+
 import Editor from './Editor.js'
 import * as Buffer from './plugins/buffer.js'
 import * as Blocks from './plugins/blocks.js'
@@ -8,7 +9,7 @@ import * as Links from './plugins/links.js'
 import * as Colours from './plugins/colours.js'
 import * as Custom from './plugins/custom.js'
 
-export default {
+export {
     Editor,
     Buffer,
     Blocks,

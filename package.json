@@ -1,9 +1,11 @@
 {
   "name": "ARTE",
-  "version": "0.1-alpha",
+  "version": "0.2",
   "description": "Active Rich Text Editor",
+  "main": "public/ARTE.js",
   "scripts": {
     "dev": "webpack --env=mode=development --config webpack.config.js",
+    "test": "webpack --env=mode=development --env=target=ES6 --config webpack.config.js",
     "build-es6": "webpack --env=mode=production --env=target=ES6 --config webpack.config.js",
     "build-es5": "webpack --env=mode=production --env=target=ES5 --config webpack.config.js"
   },
@@ -15,9 +17,9 @@
     "@babel/preset-env": "^7.14.7",
     "babel-cli": "^6.26.0",
     "babel-loader": "^8.2.2",
-    "webpack": "^5.43.0",
-    "webpack-cli": "^4.7.2",
+    "braces": ">=2.3.1",
     "glob-parent": ">=5.1.2",
-    "braces": ">=2.3.1"
+    "webpack": "^5.43.0",
+    "webpack-cli": "^4.7.2"
   }
 }

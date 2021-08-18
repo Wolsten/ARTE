@@ -185,7 +185,7 @@ function deleteItem(){
  * @returns HTMLElement as cleaned
  */
 function clean(node){
-    console.log('clean custom element',node)
+    // console.log('clean custom element',node)
     // Remove the content editable flag and the ornamentation
     node.removeAttribute('contenteditable')
     node.querySelector('.title').remove()

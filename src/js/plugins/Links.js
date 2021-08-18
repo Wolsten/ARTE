@@ -352,7 +352,7 @@ const addEventHandlers = function(edt){
  * @returns HTMLElement as cleaned
  */
 const clean = function(node){
-    console.log('clean link',node)
+    // console.log('clean link',node)
     node.removeAttribute('id')
     node.removeAttribute('contenteditable')
     // Clear inner text because label saved in dataset

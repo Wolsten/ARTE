@@ -224,7 +224,7 @@ class Editor {
      * @param {Event} event 
      */
     handleEditorBlur( event ){
-        console.log('editor blurred')
+        // console.log('editor blurred')
         this.toolbar.forEach( button => {
             this.range = false
             this.setState( button )
@@ -516,7 +516,7 @@ class Editor {
      * after updates to the dom
      */
     updateEventHandlers(){
-        console.log('Updating event handlers')
+        // console.log('Updating event handlers')
         this.toolbar.forEach( button => {
             if ( 'addEventHandlers' in button ){
                 // console.log('Updating event handlers for button',button.tag)
