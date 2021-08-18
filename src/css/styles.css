@@ -350,6 +350,17 @@ label {
     border-radius: 0.5rem;
 }
 
+.modal-panel-edit .modal-panel-container {
+    width:100%;
+    position:absolute;
+    top:0;
+    left:0;
+    padding:1rem;
+    border-bottom:1px var(--border) solid;
+    transform: translateY(-100%);
+    transition: all 0.3s ease-in-out 0s;
+}
+
 .modal-panel-popup .modal-panel-container {
     position: absolute;
     margin: 0;
@@ -370,6 +381,10 @@ label {
 
 .modal-panel.show .modal-panel-container {
     opacity:1;
+}
+
+.modal-panel-edit.show .modal-panel-container {
+    transform: translateX(0);
 }
 
 .modal-panel-title {

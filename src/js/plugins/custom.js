@@ -1,8 +1,11 @@
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
-import * as ModalConfirm from '../modalConfirm.js'
-import * as ModalEdit from '../modalEdit.js'
+import * as Modal from '../modal.js'
+
+// -----------------------------------------------------------------------------
+// @section Variables
+// -----------------------------------------------------------------------------
 
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
@@ -10,20 +13,34 @@ import * as ModalEdit from '../modalEdit.js'
 const TAG = 'CUSTOM'
 
 /**
+ * @var {object} editor The current editor instance
+ */
+let editor
+
+/**
+ * @var {object} button The current button
+ */
+ let button
+
+/**
  * @var {HTMLElement} node The actively edited node
  */
 let node
 
- /**
+/**
   * @var {boolean} dirty Flag whether input data changed
   */
 let dirty
 
- /**
+/**
   * @var {HTMLElement} panel The container for the edit dialogue
   */
 let panel = null
 
+ /**
+  * @var {HTMLElement} confirm The container for the modal confirm dialogue
+  */
+let confirm = null
 
 // -----------------------------------------------------------------------------
 // @section Private methods
@@ -33,26 +50,63 @@ let panel = null
  * Edit an existing custom node by extracting the data from the node and displaying
  * the edit form
  * 
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
  * @param {HTMLElement} element The custom node to be edited
  */
-function edit( editor, button, element ){
-    // If we already have an active panel - ignore edit clicks
-    if ( panel ){
+function edit( element ){
+    // If we already have an active edit panel - ignore edit clicks
+    if ( Modal.active() ){
         return
     }
     node = element
-    show( editor, button, true)
+    show(true)
+}
+
+function handleConfirmCancel(){
+    Modal.hide(confirm)
+    Modal.hide(panel)
+}
+
+function handleConfirmDelete(){
+    Modal.hide(confirm)
+    Modal.hide(panel)
+    deleteItem() 
+}
+
+function handleCancel(){
+    if ( dirty ){
+        confirm = Modal.show({ 
+            type:'confirm',
+            severity:'warning',
+            title:'Cancel changes', 
+            html:'Do you really want to lose these changes?',
+            buttons: [
+                {class:'cancel', label:'No - keep editing'},
+                {class:'confirm', label:'Yes - lose changes', callback:handleConfirmCancel}
+            ]
+        })
+    } else {
+        Modal.hide(panel)
+    }
+}
+
+function handleDelete(){
+    confirm = Modal.show({ 
+        type:'confirm',
+        severity:'danger',
+        title:'Delete changes', 
+        html:'Do you really want to delete this item?',
+        buttons: [
+            {class:'cancel', label:'No - keep editing'},
+            {class:'confirm', label:'Yes - delete item', callback:handleConfirmDelete}
+        ]
+    })
 }
 
 /**
  * Show the custom dialogue.
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
  * @param {boolean} editFlag Whether editing existing custom element or creating new
  */
-function show( editor, button, editFlag ){
+function show( editFlag ){
     let title = 'Edit custom element'
     if ( editFlag == false ){
         // Create a empty HTMLElement
@@ -67,37 +121,34 @@ function show( editor, button, editFlag ){
         property2: node.querySelector('.property2').innerText,
         property3: node.querySelector('.property3').innerText,
     }
-    const html = form(data, editFlag)
-    panel = ModalEdit.show( title, html )
+    const html = form(data)
+    let buttons = [{
+        class:'hide',
+        label:'Cancel',
+        callback:handleCancel
+    }]
+    if ( editFlag ){
+        buttons.push({
+            class:"delete", 
+            label:'Delete', 
+            callback:handleDelete
+        })
+    }
+    buttons.push({
+        class:"confirm", 
+        label:'Save', 
+        callback:save
+    })
+    panel = Modal.show({
+        type:'edit',
+        title,
+        html,
+        buttons
+    })
     // Initialise confirmation module and dirty data detection
     dirty = false
     const inputs = panel.querySelectorAll('form input')
     inputs.forEach(input => input.addEventListener('change', () => dirty=true))
-    // Handle button events
-    panel.querySelector('button.cancel').addEventListener('click', () => {
-        if ( dirty ){
-            const confirmBtn = ModalConfirm.show('Cancel changes', 'Do you really want to lose these changes?')
-            confirmBtn.addEventListener( 'click', () => {
-                ModalConfirm.hide()
-                ModalEdit.hide()
-            })
-        } else {
-            ModalEdit.hide()
-        }
-    })
-    if ( editFlag ){
-        panel.querySelector('button.delete').addEventListener('click', () => {
-            const confirmBtn = ModalConfirm.show('Delete custom item', 'Do you really want to delete this custom item?', 'No - keep', 'Yes - delete')
-            confirmBtn.addEventListener( 'click', () => {
-                ModalConfirm.hide()
-                deleteItem(editor, button) 
-            })
-        })
-    }
-    panel.querySelector('form').addEventListener('submit', event => {
-        event.preventDefault()
-        save(editor, button, editFlag)
-    })
     // Focus the first property
     const prop1 = panel.querySelector('form #property1')
     prop1.focus()
@@ -106,23 +157,18 @@ function show( editor, button, editFlag ){
 
 /**
  * Save the new or edited custom element
- * @param {object} editor A unique editor instance
- * @param {object} button The button clicked
- * @param {boolean} editFlag Flag whether to insert new or update existing link
  */
-function save(editor, button, editFlag ){
+function save(){
     // console.log('Save changes')
     node.querySelector('.property1').innerText = panel.querySelector('form #property1').value.trim()
     node.querySelector('.property2').innerText = panel.querySelector('form #property2').value.trim()
     node.querySelector('.property3').innerText = panel.querySelector('form #property3').value.trim()
-    if ( editFlag==false ){
-        insert(editor, button)
+    if ( node.parentNode == null ){
+        insert()
     }
-    // // Update the dom after a delay
-    // setTimeout( ()=>updateDom(editor, button), 10)
+    Modal.hide(panel)
     // Format node and add event handler
-    format(editor, button, node)
-    ModalEdit.hide()
+    format(node)
     // Update state
     editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
@@ -131,21 +177,17 @@ function save(editor, button, editFlag ){
 /**
  * Insert a new custom element in the editor at the end of the current 
  * range's startContainer
- * @param {object} editor A unique editor instance
  */
-function insert(editor){
+function insert(){
     node = editor.range.startContainer.parentNode.appendChild(node)
 }
 
 /**
  * Delete the custom element in the dom
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
  */
-function deleteItem(editor, button){
+function deleteItem(){
     //node = editor.editorNode.querySelector(`${TAG}#${data.id}`)
     node.remove()
-    ModalEdit.hide()
     // Update state
     editor.range = false
     setState(editor, button)
@@ -169,11 +211,9 @@ function clean(node){
 
 /**
  * Format the given custom element and add click event handler
- * @param {object} editor A unique editor instance
- * @param {object} button The button to use
  * @param {HTMLElement} element
  */
-function format( editor, button, element ){
+function format( element ){
     const id = element.id
     // Generate new id if required
     if ( element.id == false ){
@@ -195,7 +235,7 @@ function format( editor, button, element ){
     editButton.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(editor, button, element) 
+        edit(element) 
     })
     element.appendChild(editButton)
     // Add set state listener
@@ -206,29 +246,26 @@ function format( editor, button, element ){
 
 /**
  * Add event handlers to all custom node edit buttons
- * @param {object} editor A unique editor instance
+ * @param {object} edt A unique editor instance
  */
-function addEventHandlers(editor){
+function addEventHandlers(edt){
+    editor = edt
+    button = BUTTON
     const buttons = editor.editorNode.querySelectorAll(TAG + ' button')
     buttons.forEach( button => button.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
         const element = button.parentNode
-        edit(editor, BUTTON, element)
+        edit(element)
     }))
 }
 
 /**
  * Form template
  * @param {string, string, string} props The form properties to be edited
- * @param {boolean} editFlag The edit flag used to configure title and add delete button 
  * @returns {string} Generated html
  */
-function form(props,editFlag){
-    let delBtn = ''
-    if ( editFlag ) {
-        delBtn = `<button type="button" class="delete">Delete</button>`
-    }
+function form(props){
     return `
         <form>
             <div class="form-input">
@@ -242,11 +279,6 @@ function form(props,editFlag){
             <div class="form-input">
                 <label for="property3">Property 3</label>
                 <input id="property3" type="text" class="form-control" placeholder="Property 3" required value="${props.property3}">
-            </div>
-            <div class="buttons">
-                <button type="button" class="cancel">Cancel</button>
-                ${delBtn}
-                <button type="submit" class="save">Save</button>
             </div>
         </form>`
 }
@@ -272,48 +304,52 @@ function template(props){
  * @param {object} editor A unique editor instance
  * @param {object} button The button to use
  */
-const init = function( editor, button ){
+const init = function( edt, btn ){
     //console.log('Initialising custom plugin')
-    const customElements = editor.editorNode.querySelectorAll( TAG )
-    customElements.forEach( element => format( editor, button, element ) )
+    editor = edt
+    button = btn
+    const customElements = edt.editorNode.querySelectorAll( TAG )
+    customElements.forEach( element => format( element ) )
 }
 
 /**
  * Set the disabled and active states of a button
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
+ * @param {object} edt A unique editor instance
+ * @param {object} btn The button to act on
  */
-const setState = function( editor, button ){
-    if ( editor.range === false  || 
-        (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
-        button.element.disabled = true
-        button.element.classList.remove('active')
+const setState = function( edt, btn ){
+    if ( edt.range === false  || 
+        (edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer) ){
+        btn.element.disabled = true
+        btn.element.classList.remove('active')
     } else {
-        button.element.disabled = false
-        const custom = editor.range.blockParent.querySelector(TAG)
+        btn.element.disabled = false
+        const custom = edt.range.blockParent.querySelector(TAG)
         if ( custom != null ){
-            button.element.classList.add('active')
+            btn.element.classList.add('active')
         } else {
-            button.element.classList.remove('active')
+            btn.element.classList.remove('active')
         }
     }
 }
 
 /**
  * Mandatory button click function
- * @param {object} editor A unique editor instance
+ * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const click = function( editor, button ){
+const click = function( edt, btn ){
     // Ignore if a modal is active
-    if ( editor.modalActive() ){
+    if ( edt.modalActive() ){
         return
     }
+    editor = edt
+    button = btn
     const custom = editor.range.blockParent.querySelector(TAG)
     if ( custom != null ){
-        edit(editor, button, custom)
+        edit(custom)
     } else {
-        show(editor, button, false)
+        show(false)
     }
 }
 

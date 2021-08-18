@@ -4,7 +4,6 @@ import * as Helpers from './helpers.js'
 
 let modal = null
 let container = null
-
 let options = {
     editor:null,
     title: '',
@@ -80,20 +79,32 @@ function template(){
     return html
 }
 
-// -----------------------------------------------------------------------------
-// @section Exports
-// -----------------------------------------------------------------------------
-
 /**
  * Hide current panel by removing transition class "show" and then removing from
  * the dom.
  */
- export const hide = function(){
+ const hideModal = function(){
     modal.classList.remove('show')
     setTimeout( ()=>{
         modal.remove()
         modal = null
     }, options.delay ? options.delay : 10 )
+}
+
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
+
+export const hide = function(mod){
+    modal = document.getElementById(mod.id)
+    hideModal()
+}
+
+export const active = function(type){
+    if ( document.querySelector(`.modal-panel`) ){
+        return true
+    }
+    return false
 }
 
 /**
@@ -107,27 +118,27 @@ function template(){
             options[option] = opts[option]
         }
     }
+    // Create the modal
     modal = document.createElement('DIV')
+    modal.id = Helpers.generateUid()
     modal.classList.add( 'modal-panel' )
     modal.classList.add( `modal-panel-${options.type}`)
+    // Set attribute to identify that a modal is active
+    // see Editor.js method 'modalActive'
     modal.setAttribute('data-modal-active',true)
     modal.innerHTML = template()
-    
+    // Add modal to the document
     document.querySelector('body').appendChild(modal)
     // Add event listeners
     options.buttons.forEach( button => {
-        if ( button.class=='hide' ){
-            const btn = modal.querySelector('button.hide')
-            if ( btn ){
-                btn.addEventListener('click', hide)
-            }
-        } else if ( button.class=='confirm' ){
-            const btn = modal.querySelector('button.confirm')
+        if ( button.class=='cancel' ){
+            const btn = modal.querySelector('button.cancel')
             if ( btn ){
                 btn.addEventListener('click', ()=> {
-                    hide()
                     if ( button.callback ){
                         button.callback()
+                    } else {
+                        hideModal()
                     }
                 })
             }
@@ -135,26 +146,36 @@ function template(){
             const btn = modal.querySelector('button.delete')
             if ( btn ){
                 btn.addEventListener('click', ()=> {
-                    hide()
                     if ( button.callback ){
                         button.callback()
+                    } else {
+                        hideModal()
                     }
                 })
             }
-        }
+        } else if ( button.class=='confirm' ){
+            const btn = modal.querySelector('button.confirm')
+            if ( btn ){
+                btn.addEventListener('click', ()=> {
+                    if ( button.callback ){
+                        button.callback()
+                    } else {
+                        hideModal()
+                    }
+                })
+            }
+        } 
     })
     // Position the container
-    
     if ( options.type == 'positioned' && options.editor ){
         positionContainer()
-
     }
     // Support escape key?
     if ( options.escape ){
         document.addEventListener('keydown', event => {
             if ( event.key == 'Escape' ){
                 event.stopPropagation()
-                hide()
+                hideModal()
             }
         })
     }
@@ -165,6 +186,3 @@ function template(){
     return modal
 }
 
-export const getConfirmButton = function(){
-    return modal.querySelector('button.confirm')
-}
