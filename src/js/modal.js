@@ -1,7 +1,7 @@
 import * as Icons from './icons.js'
 import * as Helpers from './helpers.js'
 
-
+const BUTTON_ORDER = ['cancel','delete','confirm']
 
 class Modal {
 
@@ -12,7 +12,7 @@ class Modal {
         this.title  = ''
         this.html = ''
         this.severity = ''
-        this.buttons = []
+        this.buttons = false
         this.type = 'feedback'
         this.escape = false
         // Override defaults with any options supplied
@@ -81,10 +81,12 @@ class Modal {
         if ( this.html ){
             html += `<div class="modal-panel-body">${this.html}</div>`
         }
-        if ( this.buttons.length > 0 ){
+        if ( this.buttons ){
             html += `<div class="modal-panel-buttons">`
-            this.buttons.forEach( button => {
-                html += `<button type="button" class="${button.class}">${button.label}</button>`
+            BUTTON_ORDER.forEach( type => {
+                if ( this.buttons[type] ){
+                    html += `<button type="button" class="${type}">${this.buttons[type].label}</button>`
+                }
             })
             html += `</div>`
         }
@@ -121,18 +123,23 @@ class Modal {
      */
     addEventListeners(){
         // Button callbacks
-        this.buttons.forEach( button => {
-            const btn = this.panel.querySelector(`button.${button.class}`)
-            if ( btn ){
-                btn.addEventListener('click', ()=> {
-                    if ( button.callback ){
-                        button.callback()
-                    } else {
-                        this.hide()
+        if ( this.buttons ){
+            BUTTON_ORDER.forEach( type => {
+                if ( this.buttons[type] ){
+                    const button = this.buttons[type]
+                    const element = this.panel.querySelector(`button.${type}`)
+                    if ( element ){
+                        element.addEventListener('click', ()=> {
+                            if ( button.callback ){
+                                button.callback()
+                            } else {
+                                this.hide()
+                            }
+                        })
                     }
-                })
-            }
-        })
+                }
+            })
+        }
         // Support escape key?
         if ( this.escape ){
             document.addEventListener('keydown', event => {

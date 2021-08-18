@@ -1,5 +1,6 @@
 :root {
     --text: #ffffff;
+    --text-success: rgb(30, 250, 60);
     --text-warning: rgb(250, 120, 30);
     --text-danger: rgb(250, 30, 30);
     --text-disabled: rgb(120,120,120);

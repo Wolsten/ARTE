@@ -20,7 +20,7 @@ let editor
 /**
  * @var {object} button The current button
  */
- let button
+let button
 
 /**
  * @var {HTMLElement} node The actively edited node
@@ -79,10 +79,10 @@ function handleCancel(){
             severity:'warning',
             title:'Cancel changes', 
             html:'Do you really want to lose these changes?',
-            buttons: [
-                {class:'cancel', label:'No - keep editing'},
-                {class:'confirm', label:'Yes - lose changes', callback:handleConfirmCancel}
-            ]
+            buttons: {
+                cancel: { label:'No - keep editing'},
+                confirm: { label:'Yes - delete link', callback:handleConfirmCancel}
+            }
         })
         confirm.show()
     } else {
@@ -96,10 +96,10 @@ function handleDelete(){
         severity:'danger',
         title:'Delete changes', 
         html:'Do you really want to delete this item?',
-        buttons: [
-            {class:'cancel', label:'No - keep editing'},
-            {class:'confirm', label:'Yes - delete item', callback:handleConfirmDelete}
-        ]
+        buttons: {
+            cancel: { label:'No - keep editing'},
+            confirm: { label:'Yes - delete link', callback:handleConfirmDelete }
+        }
     })
     confirm.show()
 }
@@ -109,10 +109,15 @@ function handleDelete(){
  * @param {boolean} editFlag Whether editing existing custom element or creating new
  */
 function show( editFlag ){
-    let title = 'Edit custom element'
-    if ( editFlag == false ){
-        // Create a empty HTMLElement
-        title = 'Create custom element'
+    let title = 'Create custom element'
+    let buttons = {
+        cancel:  { label:'Cancel', callback:handleCancel },
+        confirm: { label:'Save', callback:save }
+    }
+    if ( editFlag ){
+        title = 'Edit custom element'
+        buttons.delete = { label:'Delete', callback:handleDelete }
+    } else {
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
         node.setAttribute('contenteditable','false')
@@ -123,29 +128,8 @@ function show( editFlag ){
         property2: node.querySelector('.property2').innerText,
         property3: node.querySelector('.property3').innerText,
     }
-    let buttons = [{
-        class:'hide',
-        label:'Cancel',
-        callback:handleCancel
-    }]
-    if ( editFlag ){
-        buttons.push({
-            class:"delete", 
-            label:'Delete', 
-            callback:handleDelete
-        })
-    }
-    buttons.push({
-        class:"confirm", 
-        label:'Save', 
-        callback:save
-    })
-    panel = new Modal({
-        type:'edit',
-        title,
-        html: form(data),
-        buttons
-    })
+    // Create and display the modal panel
+    panel = new Modal({type:'edit',title,html: form(data), buttons})
     panel.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
@@ -248,7 +232,7 @@ function format( element ){
 
 /**
  * Add event handlers to all custom node edit buttons
- * @param {object} edt A unique editor instance
+ * @param {object} edt An editor instance
  */
 function addEventHandlers(edt){
     editor = edt
@@ -341,7 +325,7 @@ const setState = function( edt, btn ){
  */
 const click = function( edt, btn ){
     // Ignore if a modal is active
-    if ( edt.modalActive() ){
+    if ( panel && panel.active() ){
         return
     }
     editor = edt

@@ -400,8 +400,13 @@ label {
 
 .modal-panel-buttons {
     display:flex;
-    justify-content: space-around;
+    justify-content: space-between;
 }
+
+.modal-panel-buttons button {
+    padding: 0.5rem 0.7rem;
+}
+
 
 /* mentions.js plugin */
 

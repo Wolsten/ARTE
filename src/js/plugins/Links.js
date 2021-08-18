@@ -5,13 +5,20 @@
 import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
-import * as ModalConfirm from '../modalConfirm.js'
-import * as ModalEdit from '../modalEdit.js'
+import Modal from '../modal.js'
 
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
  */
 const TAG = 'A'
+/**
+ * @var {object} editor The current editor instance
+ */
+let editor
+ /**
+  * @var {object} button The current button
+  */
+let button
 /**
  * @var {HTMLElement} node The actively edited node
  */
@@ -21,44 +28,104 @@ let node
  */
 let dirty
 /**
- * @var {HTMLElement} panel The container for the edit dialogue
+ * @var {Modal} panel The container for the modal edit dialogue
  */
 let panel = null
+/**
+ * @var {Modal} confirm The container for the modal confirm dialogue
+ */
+ let confirm = null
 
 
 // -----------------------------------------------------------------------------
 // @section Private methods
 // -----------------------------------------------------------------------------
 
+function handleConfirmCancel(){
+    confirm.hide()
+    panel.hide()
+}
+
+function handleCancel(){
+    if ( dirty ){
+        confirm = new Modal({ 
+            type:'confirm',
+            severity:'warning',
+            title:'Cancel changes', 
+            html:'Do you really want to lose these changes?',
+            buttons: {
+                cancel: { label:'No - keep editing'},
+                confirm: { label:'Yes - delete link', callback:handleConfirmCancel}
+            }
+        })
+        confirm.show()
+    } else {
+        panel.hide()
+    }
+}
+
+/**
+ * Delete the link in the dom
+ */
+ function deleteItem(){
+    node.remove()
+    // Update state
+    editor.range = false
+    setState(editor, button)
+}
+
+function handleConfirmDelete(){
+    confirm.hide()
+    panel.hide()
+    deleteItem() 
+}
+
+function handleDelete(){
+    confirm = new Modal({ 
+        type:'confirm',
+        severity:'danger',
+        title:'Delete changes', 
+        html:'Do you really want to delete this link?',
+        buttons: {
+            cancel: { label:'No - keep editing'},
+            confirm: { label:'Yes - delete link', callback:handleConfirmDelete }
+        }
+    })
+    confirm.show()
+}
+
+
 /**
  * Edit an existing link
- * 
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
+ *
  * @param {HTMLElement} element The custom node to be edited
  */
- function edit( editor, button, element ){
-    // If we already have an active panel - ignore clicks on links
-    if ( panel ){
+ function edit( element ){
+    // If we already have an active panel - ignore edit clicks
+    if ( panel && panel.active() ){
         return
     }
     // Save the clicked link
     node = element
-    // Show the dialogue, selected text (3rd param) is ignored
-    show(editor, button, '', true)
+    // Show the dialogue
+    show('', true)
 }
 
 /**
  * Show the link edit dialogue
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
  * @param {string} selectedText 
  * @param {boolean} editFlag flag indicating whether to edit or create new
  */
-function show( editor, button, selectedText, editFlag ){
-    let title = 'Edit link'
-    if ( editFlag == false ){
-        title = 'Create link'
+function show( selectedText, editFlag ){
+    let title = 'Create link'
+    let buttons = {
+        cancel: { label:'Cancel', callback:handleCancel },
+        confirm: { label:'Save', callback:save }
+    }
+    if ( editFlag ){
+        title = 'Edit link'
+        buttons.delete = { label:'Delete', callback:handleDelete }
+    } else {
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
         node.setAttribute('contenteditable','false')
@@ -66,60 +133,33 @@ function show( editor, button, selectedText, editFlag ){
         node.dataset.label = selectedText
         node.dataset.display = 0
     }
-    const html = form(editFlag)
-    panel = ModalEdit.show(title, html)
+    // Create and display the modal panel
+    panel = new Modal({type:'edit',title,html: form(editFlag), buttons})
+    panel.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
-    const inputs = panel.querySelectorAll('form input')
+    const inputs = panel.panel.querySelectorAll('form input')
     inputs.forEach(input => input.addEventListener('change', () => dirty=true))
-    // Handle button events
-    panel.querySelector('button.cancel').addEventListener('click', () => {
-        if ( dirty ){
-            const confirmBtn = ModalConfirm.show('Cancel changes', 'Do you really want to lose these changes?')
-            confirmBtn.addEventListener( 'click', () => {
-                ModalConfirm.hide()
-                ModalEdit.hide()
-            })
-        } else {
-            ModalEdit.hide()
-        }
-    })
-    if ( editFlag ){
-        panel.querySelector('button.delete').addEventListener('click', () => {
-            const confirmBtn = ModalConfirm.show('Delete link', 'Do you really want to delete this link?')
-            confirmBtn.addEventListener( 'click', () => {
-                ModalConfirm.hide()
-                deleteItem(editor, button) 
-            })
-        })
-    }
-    panel.querySelector('form').addEventListener('submit', event => {
-        event.preventDefault()
-        save(editor, button, editFlag )
-    })
     // Focus the href
-    const href = panel.querySelector('form #href')
+    const href = panel.panel.querySelector('form #href')
     href.focus()
     href.setSelectionRange(href.value.length, href.value.length)
 }
 
 /**
  * Save the changes set in the dialogue
- * @param {object} editor A unique editor instance
- * @param {object} button The button to clicked
- * @param {boolean} editFlag Flag whether to insert new or update existing link
  */
-function save( editor, button, editFlag ){
+function save(){
     // console.log('Save changes')
-    node.href = panel.querySelector('form #href').value.trim()
-    node.dataset.label = panel.querySelector('form #label').value.trim()
-    node.dataset.display = parseInt(panel.querySelector('form #display').value)
-    if ( editFlag==false ){
+    node.href = panel.panel.querySelector('form #href').value.trim()
+    node.dataset.label = panel.panel.querySelector('form #label').value.trim()
+    node.dataset.display = parseInt(panel.panel.querySelector('form #display').value)
+    if ( node.parentNode == null ){
         insert(editor, button)
     }
+    panel.hide()
     // Format link and add event handler
-    format(editor, button, node)
-    ModalEdit.hide()
+    format(node)
     // Update state
     editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
@@ -162,31 +202,6 @@ function save( editor, button, editFlag ){
 }
 
 /**
- * Delete the link in the dom
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
- */
- function deleteItem(editor, button){
-    //node = editorNode.querySelector(`${TAG}#${data.id}`)
-    node.remove()
-    ModalEdit.hide()
-    // Update state
-    editor.range = false
-    setState(editor, button)
-}
-
-/**
- * Hide the dialogue with transition
- */
-// function hide(){
-//     panel.classList.remove('show')
-//     setTimeout( ()=>{
-//         panel.remove()
-//         panel = null
-//     }, 500)
-// }
-
-/**
  * Generate the label to be used for the link
  * @param {HTMLElement} link 
  * @returns {string} The string to display
@@ -223,11 +238,9 @@ function label(link){
  *      [label|link|label (link)]
  * </a>
  * 
- * @param {object} editor A unique editor instance
- * @param {object} button The button to use
  * @param {HTMLElement} element
  */
-function format( editor, button, element ){
+function format( element ){
     // Generate new id if required
     if ( element.id == false ){
         element.id = Helpers.generateUid()
@@ -238,7 +251,7 @@ function format( editor, button, element ){
     element.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(editor, button, element) 
+        edit(element) 
     })
 }
 
@@ -248,14 +261,12 @@ function format( editor, button, element ){
  * @returns {string} HTML string
  */
 function form(edit){
-    let delBtn = ''
     let openBtn = ''
     let href = 'http://'
     let label = node.dataset.label
     let display = node.dataset.display ? node.dataset.display : 0
-    if ( edit) {
+    if ( edit ) {
         href = node.href
-        delBtn = `<button type="button" class="delete">Delete</button>`
         openBtn = `<a href="${href}" class="panel-link" target="_blank" title="Open link in new tab or window">${Icons.openLink}</a>`
     }
     return `
@@ -277,11 +288,6 @@ function form(edit){
                     <option value="2" ${display==2 ? 'selected' : ''}>Label and link</option>
                 </select>
             </div>
-            <div class="buttons">
-                <button type="button" class="cancel">Cancel</button>
-                ${delBtn}
-                <button type="submit" class="save">Save</button>
-            </div>
         </form>`
 }
 
@@ -289,27 +295,29 @@ function form(edit){
 /**
  * Optional method that, on first load of editor, converts the minimal custom 
  * HTML into the full editable version
- * @param {object} editor A unique editor instance
- * @param {object} button The button to use
+ * @param {object} edt A unique editor instance
+ * @param {object} btn The button to use
  */
-const init = function( editor, button ){
-    // console.log('Initialising links')
+ const init = function( edt, btn ){
+    editor = edt
+    button = btn
     const links = editor.editorNode.querySelectorAll( TAG )
-    links.forEach( link => format( editor, button, link ))
+    links.forEach( link => format( link ))
 }
 
 /**
  * Mandatory button click function which displays the colour dialogue
  * for the supplied button
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
+ * @param {object} edt A unique editor instance
+ * @param {object} btn The button to act on
  */
-const click = function( editor, button ){
-    // console.log('click link')
+const click = function( edt, btn ){
     // Ignore if a modal is active
-    if ( editor.modalActive() ){
+    if ( panel && panel.active() ){
         return
     }
+    editor = edt
+    button = btn
     if ( editor.range === false){
         console.log('No range selected')
         return
@@ -320,19 +328,21 @@ const click = function( editor, button ){
          editor.range.startContainer == editor.range.endContainer ){
         selectedText = editor.range.endContainer.textContent.substring(editor.range.startOffset, editor.range.endOffset)  
     }
-    show( editor, button, selectedText, false )
+    show( selectedText, false )
 }
 
 /**
  * Optional method to add event handlers to all custom links
- * @param {object} editor 
+ * @param {object} edt 
  */
-const addEventHandlers = function(editor){
+const addEventHandlers = function(edt){
+    editor = edt
+    button = BUTTON
     const nodes = editor.editorNode.querySelectorAll(TAG)
     nodes.forEach( node => node.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(editor, BUTTON, node) 
+        edit(node) 
     }))
 }
 
@@ -352,21 +362,21 @@ const clean = function(node){
 
 /**
  * Set the disabled and active states of a button
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
+ * @param {object} edt A unique editor instance
+ * @param {object} btn The button to act on
  */
- const setState = function( editor, button ){
-    if ( editor.range === false  || 
-        (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
-        button.element.disabled = true
-        button.element.classList.remove('active')
+ const setState = function( edt, btn ){
+    if ( edt.range === false  || 
+        (edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer) ){
+        btn.element.disabled = true
+        btn.element.classList.remove('active')
     } else {
-        button.element.disabled = false
-        const link = editor.range.blockParent.querySelector(TAG)
+        btn.element.disabled = false
+        const link = edt.range.blockParent.querySelector(TAG)
         if ( link != null ){
-            button.element.classList.add('active')
+            btn.element.classList.add('active')
         } else {
-            button.element.classList.remove('active')
+            btn.element.classList.remove('active')
         }
     }
 }
