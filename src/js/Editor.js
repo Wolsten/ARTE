@@ -10,67 +10,6 @@ class Editor {
     // @section Initialisation
     // -----------------------------------------------------------------------------
 
-    testModals(){
-
-        // Warning modal
-        // const modal = new Modal({
-        //     type: 'feedback',
-        //     title:'test title', 
-        //     html:'<p>A warning message</p>', 
-        //     severity:'warning',
-        //     buttons:[{class:'hide', label:'OK'}]
-        // })
-        // modal.show()
-
-        // Edit modal with buttons and callbacks
-        // const modal = new Modal({
-        //     type:'edit',
-        //     title:'Edit something', 
-        //     html:'<p>Placeholder for a form with values that can be changed</p>', 
-        //     buttons:[
-        //         {
-        //             class:'cancel', 
-        //             label:'cancel'
-        //         }, 
-        //         {
-        //             class:"delete", 
-        //             label:'Delete', 
-        //             callback:()=>alert('delete')
-        //         },
-        //         {
-        //             class:"confirm", 
-        //             label:'Confirm', 
-        //             callback:()=>alert('confirm')
-        //         }
-        //     ]
-        // })
-        // modal.show()
-
-        // Positioned modal
-        // this.editorNode.addEventListener( 'click', ()=> {
-        //     this.updateRange()
-        //     const modal = new Modal({
-        //         type:'positioned',
-        //         escape:true,
-        //         html:`<div class="mentions">
-        //             <input type="text"/>
-        //             <ul>
-        //             <li>David</li>
-        //             <li>David</li>
-        //             <li>David</li>
-        //             <li>David</li>
-        //             <li>David</li>
-        //             <li>David</li>
-        //             <li>David</li>
-        //             <li>David</li>
-        //             </ul>
-        //             </div>`
-        //     })
-        //     modal.show()
-        //     modal.setPosition(this.range, this.editorNode)
-        // })
-    }
-
     /**
      * 
      * @param {HTMLElement} target The dom node to populate with the toolbar and editor
@@ -94,8 +33,15 @@ class Editor {
         this.editorNode.innerHTML = content
         // Reset range
         this.range = false
+        // Check for debugging
+        this.debugTarget = false
+        if ( this.options.debug ){
+            const div = document.createElement('div')
+            this.debugTarget = Helpers.insertAfter( div, this.editorNode )
+        }
         // *** TEST THE MODALS ***
-        // this.testModals()
+        // Uncomment the next two lines for development testing
+        // this.testModals('positioned')  // options are 'overlay', 'positioned' and 'edit'
         // return
         // Set up event handling
         this.listenForMouseUpEvents()
@@ -140,8 +86,10 @@ class Editor {
         this.bufferIgnore = false
         this.bufferUpdate = Buffer.update
         this.bufferIgnoreMutation = Buffer.ignore
-        // console.log('buffer',this.buffer)
-        // console.log('buffer index', this.bufferIndex)
+        if ( this.options.debug ){
+            console.log('buffer',this.buffer)
+            console.log('buffer index', this.bufferIndex)
+        }
     }
 
     /**
@@ -150,18 +98,18 @@ class Editor {
      * @returns 
      */
     initOptions(options){   
-        const headingNumbers = 'off'
+        const headingNumbers = true
         const bufferSize = 10     
-        const debugTarget = false
+        const debug = false
         if ( options ){
-            options.headingNumbers = options.headingNumbers !== undefined ? options.headingNumbers : headingNumbers
-            options.bufferSize = options.bufferSize !== undefined ? Math.max(parseInt(options.bufferSize),bufferSize) : bufferSize
-            options.debugTarget = options.debugTarget !== undefined ? options.debugTarget : false
+            options.headingNumbers = options.headingNumbers == undefined ? headingNumbers : options.headingNumbers
+            options.bufferSize = options.bufferSize == undefined ? bufferSize : Math.max(parseInt(options.bufferSize),bufferSize)
+            options.debug = options.debug == undefined ? debug : options.debug
         } else {
             options = {
                 headingNumbers,
                 bufferSize,
-                debugTarget
+                debug
             }
         }
         return options
@@ -622,6 +570,68 @@ class Editor {
         return false
     }
 
+    // -----------------------------------------------------------------------------
+    // @section Testing
+    // -----------------------------------------------------------------------------
+    
+    testModals( type ){
+
+        // Warning modal
+        if ( type == 'overlay' ){
+            const modal = new Modal({
+                type: 'overlay',
+                title:'Example feedback modal', 
+                html:`
+                    <p>This is an example of an overlay modal.</p>
+                    <p>It can be dismissed by selecting the "escape" option and/or by adding a "cancel" button.</p>
+                    <p>It also demonstrates the display of a graphic icon which is configured by setting the severity option.</p>`, 
+                severity:'warning',
+                escape:true,
+                buttons:{ cancel: {label:'OK'} }
+            })
+            modal.show()
+
+        // Edit modal with buttons and callbacks
+        } else if ( type == 'edit' ){
+            const modal = new Modal({
+                type:'edit',
+                title:'Example of an edit modal', 
+                html:`
+                    <p>This modal type provides a placeholder for custom content, such as a form with values that can be edited.</p>
+                    <p>It is typically used by specifying a number of standard buttons, such as "cancel", "delete" or "confirm".</p>
+                    <p>Each button may have an associated callback function assigned. If none is assigned the default action is to close the modal.</p>`,
+                buttons: {
+                    cancel : { label:'Cancel' }, 
+                    delete : { label:'Delete', callback:()=>alert('delete')},
+                    confirm : {label:'Confirm', callback:()=>alert('confirm')}
+                }
+            })
+            modal.show()
+
+        // Positioned modal
+        } else if ( type == 'positioned' ){
+            this.editorNode.addEventListener( 'click', ()=> {
+                this.updateRange()
+                const modal = new Modal({
+                    type:'positioned',
+                    escape:true,
+                    backgroundColour:'palegreen',
+                    borderRadius:'10px',
+                    html:`
+                        <div style="width:400px;padding:1rem;">
+                            <p>This is an example of a positional modal which is positioned with its top-left-hand corner adjacent to the mouse selection point.</p>
+                            <p>The contents can be added as required.</p>
+                            <p>Like all other modals it could be defined with standard buttons but typically would be used for in-place popups like "@mentions".</p>
+                            <p>Optionally you can specify whether it can be dismissed with the Escape key as is required here since no "cancel" button is provided.</p>
+                            <p>You can also set a background colour and border radius to override the defaults as done here.</p>
+                        </div>`
+                })
+                modal.show()
+                modal.setPosition(this.range, this.editorNode)
+            })
+        }
+    }
+
 
     // -----------------------------------------------------------------------------
     // @section Other methods
@@ -653,7 +663,7 @@ class Editor {
      */
     updateRange(){
         this.range = Helpers.getRange()
-        Templates.debugRange( this.options.debugTarget, this.range )
+        Templates.debugRange( this.debugTarget, this.range )
     }
  
     /**
@@ -669,7 +679,7 @@ class Editor {
         }
     }
 
-}
+} // End of class definition
 
 // -----------------------------------------------------------------------------
 // @section Exports

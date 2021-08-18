@@ -201,6 +201,29 @@ The full set of optional button methods is as follows:
 | clean | `method`. This method will be invoked when the editor `save` method is invoked in order to clean any custom plugin content. For example, a `clean` method could minimise a custom component by removing any decorations applied in the `init` method. |
 | shortcut | `array`. A two-key sequence to trigger the button click event, such as [`@`,`Tab`] where `@` is the shortcut key and `Tab` is the trigger key. |
 
+## Built-in modal support
+
+ARTE comes with a Modals.js class module which supports three types of modal as well as several other configuration options which can be used when developing your own plugins:
+
+| Option | Descrption and usage |
+|--------|----------------------|
+| type | `string`. One of `overlay`, `positioned` or `edit`. `overlay` modals are displayed in the centre of the page. `positioned` modals are displayed with their top-left corner near where you clicked your mouse and is used for our `mentions` plugin. `edit` modals are slide-down drawers, typically used for creating and editing your own content. The default if not specified is `overlay`.|
+| title | `string`. The text to appear in the header of the modal. If blank or not specified no title is displayed. |
+| html | `string`. The html to display in the body of the modal. It would be unusual for this to be empty but it would be possible to display without. |
+| severity | `string`. One of `info`, `warning` or `danger`. Setting this controls whether an icon is displayed (in an appropriate colour) in the modal header. If not set no icon is displayed. |
+| escape | `boolean`. If true the modal can be dismissed by hitting the `Escape` key. The default is false if not specified. |
+| buttons | `object`. A set of upto three buttons with optional callbacks. See example below. |
+| borderRadius | `string`, e.g. `10px`. The default is none. |
+| backgroundColour | `string`. Any allowed css colour specification. The default depends on which theme you selected |
+
+### Example button specification
+```
+buttons: {
+    cancel : { label:'Cancel' }, 
+    delete : { label:'Delete', callback:()=>alert('delete')},
+    confirm : {label:'Confirm', callback:()=>alert('confirm')}
+}
+```
 
 ## Acknowledgements
 

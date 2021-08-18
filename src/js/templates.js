@@ -54,7 +54,7 @@ function editorToolbar(buttons){
 export const editor = function(buttons,options){
     const toolbar = editorToolbar(buttons)
     let classes = ''
-    if ( options.headingNumbers == 'on' ){
+    if ( options.headingNumbers ){
         classes += 'heading-numbers'
     }
     return `

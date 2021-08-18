@@ -7,13 +7,13 @@ class Modal {
 
     constructor( options ){
         // Defaults
+        this.type = 'overlay'
         this.panel = null       // The HTMLElement representing the modal panel
         this.container = null   // The HTMLElement representing the innerHTML of the modal
         this.title  = ''
         this.html = ''
         this.severity = ''
         this.buttons = false
-        this.type = 'feedback'
         this.escape = false
         // Override defaults with any options supplied
         for( let option in options ){
@@ -59,7 +59,15 @@ class Modal {
      * @returns {string}
      */
     template(){
-        let html = `<div class="modal-panel-container">`
+        let styles = []
+        if ( this.backgroundColour != undefined ){
+            styles.push( `background-color:${this.backgroundColour}`)
+        }
+        if ( this.borderRadius != undefined ){
+            styles.push( `border-radius:${this.borderRadius}`)
+        }
+        const style = styles.length == 0 ? '' : `style="${styles.join(';')}"`
+        let html = `<div class="modal-panel-container" ${style}>`
         let icon = ''
         switch(this.severity){
             case 'info':

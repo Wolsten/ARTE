@@ -237,8 +237,7 @@ label {
     transition: all 0.4s ease-in-out 0s;
 }
 
-.modal-panel-confirm .modal-panel-container,
-.modal-panel-feedback .modal-panel-container {
+.modal-panel-overlay .modal-panel-container {
     width:50%;
     top:25%;
     left:25%;
@@ -264,7 +263,7 @@ label {
     margin-right: auto;
 }
 
-.modal-panel-popup .modal-panel-container {
+.modal-panel-positioned .modal-panel-container {
     position: absolute;
     margin: 0;
     padding: 0;

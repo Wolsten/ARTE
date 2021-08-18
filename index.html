@@ -83,8 +83,6 @@
 
     <button type="button" id="save">Save</button>
 
-    <div id="debug"></div>
-
     <!-- Refer to readme.md for how to build and use an ES5 compatible version -->
     <script type="module" charset="utf-8">
 
@@ -113,13 +111,12 @@
 
         // Define editor options
         const options = {
-            // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
-            headingNumbers: 'on', 
+            // Automatically number headings using outline numbering. Allowed values true or false     
+            headingNumbers: true, 
             // Number of Undo operations supported, max 10       
             bufferSize: 10,
-            // Define where to display debug output, currently information about the active selection
-            // Comment out to turn off
-            debugTarget: document.getElementById('debug')
+            // debugging flag, e.g. to output selection ranges
+            debug: false
         }
 
         // Create editor and add to dom in target position
