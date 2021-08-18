@@ -72,7 +72,7 @@ class Modal {
                 icon = Icons.danger
                 break
         }
-        if ( this.title ){
+        if ( this.title || icon ){
             html += `
                 <header class="modal-panel-header">
                     <h3 class="modal-panel-title">${icon}${this.title}</h3>
@@ -82,13 +82,16 @@ class Modal {
             html += `<div class="modal-panel-body">${this.html}</div>`
         }
         if ( this.buttons ){
-            html += `<div class="modal-panel-buttons">`
+            let buttonHTML = ''
+            let buttonCount = 0
             BUTTON_ORDER.forEach( type => {
                 if ( this.buttons[type] ){
-                    html += `<button type="button" class="${type}">${this.buttons[type].label}</button>`
+                    buttonCount ++
+                    buttonHTML += `<button type="button" class="${type}">${this.buttons[type].label}</button>`
                 }
             })
-            html += `</div>`
+            const centred = buttonCount == 1 ? 'centred' : ''
+            html += `<div class="modal-panel-buttons ${centred}">${buttonHTML}</div>`
         }
         html += `</div>`
         return html

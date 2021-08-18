@@ -2,8 +2,7 @@ import * as Helpers from '../helpers.js'
 import * as Styles from './styles.js'
 import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
-import * as ModalEdit from '../modalEdit.js'
-import * as ModalFeedback from '../modalFeedback.js'
+import Modal from '../Modal.js'
 
 const DIVISIONS = 20
 const H_INC = 360 / DIVISIONS
@@ -12,14 +11,21 @@ const L_INC = 100 / DIVISIONS
 let hue
 let saturation
 let lightness
+let editor
+let button
 let panel = null
+
+
+
+
+
 
 /**
  * Set the colours in the colours dialogue according to the curerntly selected
  * hue, saturation and lightness values
  */
 function colourise(){
-    const hues = panel.querySelectorAll('.colours .hues span')
+    const hues = panel.panel.querySelectorAll('.colours .hues span')
     hues.forEach( (item,i) => {
         const h = i * H_INC
         item.style.backgroundColor = `hsl(${h},100%,50%)`
@@ -29,7 +35,7 @@ function colourise(){
             item.classList.remove('active')
         }
     })
-    const saturations = panel.querySelectorAll('.colours .saturations span')
+    const saturations = panel.panel.querySelectorAll('.colours .saturations span')
     saturations.forEach( (item,i) => {
         const s = i * S_INC
         item.style.backgroundColor = `hsl(${hue},${s}%,50%)`
@@ -39,7 +45,7 @@ function colourise(){
             item.classList.remove('active')
         }
     })
-    const lightnesses = panel.querySelectorAll('.colours .lightnesses span')
+    const lightnesses = panel.panel.querySelectorAll('.colours .lightnesses span')
     lightnesses.forEach( (item,i) => {
         const l = i * L_INC
         item.style.backgroundColor = `hsl(${hue},50%,${l}%)`
@@ -49,7 +55,7 @@ function colourise(){
             item.classList.remove('active')
         }
     })
-    panel.querySelector('form .result span').style.backgroundColor = `hsl(${hue},${saturation}%,${lightness}%)`
+    panel.panel.querySelector('form .result span').style.backgroundColor = `hsl(${hue},${saturation}%,${lightness}%)`
 }
 
 
@@ -87,11 +93,6 @@ function form(){
             <div class="result">
                 <label>Result</label>
                 <span>&nbsp;</span>
-
-                <div class="buttons">
-                    <button type="button" class="cancel">Cancel</button>
-                    <button type="submit" class="save">Set</button>
-                </div>
             </div>
         </form>`
 }
@@ -99,10 +100,8 @@ function form(){
 
 /**
  * Save the currently selected colour values
- * @param {object} editor 
- * @param {object} button 
  */
-function save(editor,button){
+function save(){
     const colour = `hsl(${hue}, ${saturation}%, ${lightness}%)`
     // Synthesise a button using the colour value selected
     const synthButton = {
@@ -111,9 +110,9 @@ function save(editor,button){
         removeStyle:button.removeStyle, 
         element:button.element
     }
+    panel.hide()
     // Apply the new style
     Styles.click( editor, synthButton )
-    ModalEdit.hide()
 }
 
 /**
@@ -122,10 +121,8 @@ function save(editor,button){
  * The input is not displayed but triggered programmatically to display
  * a HTML5 colour input dialogue. 
  * Clicking on this triggers the input event.
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
  */
-function show(editor, button){
+function show(){
     // Set initial colours
     hue = 0
     saturation = (DIVISIONS-1) * S_INC
@@ -135,18 +132,20 @@ function show(editor, button){
         title = "Choose a foreground colour"
     }
     // Display the panel
-    const html = form()
-    panel = ModalEdit.show( title, html )
-    // Handle button events
-    panel.querySelector('button.cancel').addEventListener('click', ModalEdit.hide )
-    panel.querySelector('form').addEventListener('submit', event => {
-        event.preventDefault()
-        save(editor, button)
+    panel = new Modal({
+        type:'edit',
+        title,
+        html:form(),
+        buttons: {
+            cancel: {label:'Cancel'},
+            confirm: {label:'Set', callback:save}
+        }
     })
+    panel.show()
     // Apply colours
     colourise()
-    // Add click handlers
-    const colours = panel.querySelectorAll('span.colour')
+    // Add custom click handlers
+    const colours = panel.panel.querySelectorAll('span.colour')
     colours.forEach(c => c.addEventListener('click', event => {
         // Find out which colour span was clicked and set the appropriate colour value
         const item = event.target
@@ -171,29 +170,37 @@ function show(editor, button){
 /**
  * Mandatory button click function which displays the colour dialogue
  * for the supplied button
- * @param {object} editor A unique editor instance
+ * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const click = function( editor, btn ){
+const click = function( edt, btn ){
     // Ignore if a modal is active
-    if ( editor.modalActive() ){
+    if ( panel && panel.active() ){
         return
     }
+    editor = edt
+    button = btn
     if ( editor.range === false || editor.range.collapsed ){
-        ModalFeedback.show('Info','The colour selection buttons require at least one character to be selected')
+        const feedback = new Modal({
+            type:'feedback',
+            severity:'info',
+            html:'The colour selection buttons require at least one character to be selected.',
+            buttons: { cancel: {label:'Close'} }
+        })
+        feedback.show()
         return
     }
     show(editor, btn)
 }
 
 /**
- * Set the disabled and active states of a button
- * @param {object} editor A unique editor instance
+ * Set the disabled 
+ * @param {object} edt An editor instance
  * @param {object} btn The button to act on
  */
-const setState = function(editor,btn){
+const setState = function(edt,btn){
     // console.log('setting colour state')
-    if ( editor.range === false ){
+    if ( edt.range === false ){
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else if ( btn.tag == 'CLEAR' ){
@@ -202,13 +209,13 @@ const setState = function(editor,btn){
     } else {
         // The rootNode should not be a DIV (the editor) or list container - (implying 
         // multiple blocks selected) or a custom element
-        btn.element.disabled = editor.range.rootNode.tagName === 'DIV' || 
-                                Helpers.isList(editor.range.rootNode) ||
-                                Helpers.isCustom(editor.range.rootNode)
+        btn.element.disabled = edt.range.rootNode.tagName === 'DIV' || 
+                                Helpers.isList(edt.range.rootNode) ||
+                                Helpers.isCustom(edt.range.rootNode)
         // Get the inline styles of the selected range
         let value = ''
         let styles = []
-        const inlineStyles = editor.range.startContainer.parentNode.getAttribute('style')
+        const inlineStyles = edt.range.startContainer.parentNode.getAttribute('style')
         if ( inlineStyles != null ){
             styles = inlineStyles.split(';')
             // console.log('styles',styles)

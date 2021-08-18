@@ -219,110 +219,7 @@ label {
     color:inherit;
 }
 
-
-/* Slide down modal panel for editing custom content */
-
-/* .edit-panel {
-    position:absolute;
-    top:0;
-    left:0;
-    width:100vw;
-    height:100vh;
-    background:var(--edit-panel-backgorund);
-}
-
-.edit-panel-container {
-    width:100%;
-    position:absolute;
-    top:0;
-    left:0;
-    padding:1rem;
-    background:var(--background);
-    border-bottom:1px var(--border) solid;
-    transform: translateY(-100%);
-    transition: all 0.3s ease-in-out 0s;
-}
-
-.edit-panel.show .edit-panel-container{
-    transform: translateX(0);
-}
-
-.edit-panel-header {
-    width:100%;
-}
-
-.edit-panel .panel-link i {
-    font-size: 1.4rem;
-} */
-
-
-/* Modal confirm and feedback panels */
-
-/* .modal-panel {
-    position:absolute;
-    top:0;
-    left:0;
-    width:100vw;
-    height:100vh;
-    background:var(--modal-background);
-}
-
-.modal-panel-container {
-    width:80%;
-    position:absolute;
-    top:25%;
-    left:10%;
-    padding:1rem;
-    background:var(--background);
-    border-bottom:1px var(--border) solid;
-    opacity:0;
-    transition: all 0.4s ease-in-out 0s;
-    border-radius: 0.5rem;
-}
-
-.modal-panel.show .modal-panel-container {
-    opacity:1;
-}
-
-.modal-panel-buttons {
-    margin-top:2rem;
-} */
-
-/* Modal popup (an inplace panel that appears near the selection point )*/
-
-/* .modal-popup {
-    box-sizing: border-box;
-    display: block;
-
-    position: fixed;
-    left: 0;
-    top: 0;
-
-    z-index: 9999;
-
-    width: 100%;
-
-    height: 100%;
-
-    overflow: auto;
-    background-color: var(--modal-background); 
-}
-
-.modal-popup-content {
-    position: absolute;
-    background-color: var(--background);
-    margin: 0;
-    padding: 0;
-    border: 1px solid var(--border);
-}
-
-.modal-popup-content li,
-.modal-popup-content input {
-    background-color: var(--background);
-    color:var(--text)
-} */
-
-/* Generic modal styles */
+/* Modal styles */
 
 .modal-panel {
     position:absolute;
@@ -401,6 +298,11 @@ label {
 .modal-panel-buttons {
     display:flex;
     justify-content: space-between;
+}
+
+.modal-panel-buttons.centred {
+    display:block;
+    text-align: right;
 }
 
 .modal-panel-buttons button {
