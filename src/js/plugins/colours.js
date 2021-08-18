@@ -4,7 +4,7 @@ import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
 import Modal from '../Modal.js'
 
-const DIVISIONS = 20
+const DIVISIONS = 30
 const H_INC = 360 / DIVISIONS
 const S_INC = 100 / DIVISIONS
 const L_INC = 100 / DIVISIONS
@@ -16,45 +16,53 @@ let button
 let panel = null
 
 
-
-
-
-
 /**
  * Set the colours in the colours dialogue according to the curerntly selected
  * hue, saturation and lightness values
+ * @param {HTMLElement} target black and white button
+ * @param {string} colour 'black' or 'white'
  */
-function colourise(){
-    const hues = panel.panel.querySelectorAll('.colours .hues span')
-    hues.forEach( (item,i) => {
-        const h = i * H_INC
-        item.style.backgroundColor = `hsl(${h},100%,50%)`
-        if ( h == hue ){
-            item.classList.add('active')
+function colourise(target,colour){
+    // Remvoe active classes
+    const actives = panel.panel.querySelectorAll('.active')
+    actives.forEach( active => active.classList.remove('active'))
+    // Gradient colour selected?
+    if ( target == undefined ){
+        const hues = panel.panel.querySelectorAll('.colours .hues span')
+        hues.forEach( (item,i) => {
+            const h = i * H_INC
+            item.style.backgroundColor = `hsl(${h},100%,50%)`
+            if ( h == hue ){
+                item.classList.add('active')
+            }
+        })
+        const saturations = panel.panel.querySelectorAll('.colours .saturations span')
+        saturations.forEach( (item,i) => {
+            const s = i * S_INC
+            item.style.backgroundColor = `hsl(${hue},${s}%,50%)`
+            if ( s == saturation ){
+                item.classList.add('active')
+            }
+        })
+        const lightnesses = panel.panel.querySelectorAll('.colours .lightnesses span')
+        lightnesses.forEach( (item,i) => {
+            const l = i * L_INC
+            item.style.backgroundColor = `hsl(${hue},50%,${l}%)`
+            if ( l == lightness ){
+                item.classList.add('active')
+            }
+        })
+    // Handle black and white
+    } else {
+        target.classList.add('active')
+        hue = 0
+        saturation = 100
+        if ( colour == 'black' ){
+            lightness = 0
         } else {
-            item.classList.remove('active')
+            lightness = 100
         }
-    })
-    const saturations = panel.panel.querySelectorAll('.colours .saturations span')
-    saturations.forEach( (item,i) => {
-        const s = i * S_INC
-        item.style.backgroundColor = `hsl(${hue},${s}%,50%)`
-        if ( s == saturation ){
-            item.classList.add('active')
-        } else {
-            item.classList.remove('active')
-        }
-    })
-    const lightnesses = panel.panel.querySelectorAll('.colours .lightnesses span')
-    lightnesses.forEach( (item,i) => {
-        const l = i * L_INC
-        item.style.backgroundColor = `hsl(${hue},50%,${l}%)`
-        if ( l == lightness ){
-            item.classList.add('active')
-        } else {
-            item.classList.remove('active')
-        }
-    })
+    }
     panel.panel.querySelector('form .result span').style.backgroundColor = `hsl(${hue},${saturation}%,${lightness}%)`
 }
 
@@ -75,6 +83,7 @@ function form(){
     }
     return `
         <form id="colour-menu">
+
             <div class="colours">
                 <div class="hues">
                     <label>Hue</label>
@@ -92,8 +101,12 @@ function form(){
 
             <div class="result">
                 <label>Result</label>
-                <span>&nbsp;</span>
+                <span class="final">&nbsp;</span>
+                <label>Black and white</label>
+                <span class="black-and-white" data-colour="black">&nbsp;</span>
+                <span class="black-and-white" data-colour="white">&nbsp;</span>
             </div>
+            
         </form>`
 }
 
@@ -127,9 +140,9 @@ function show(){
     hue = 0
     saturation = (DIVISIONS-1) * S_INC
     lightness = 50
-    let title = "Choose a background colour"
+    let title = "Select highlight colour"
     if ( button.tag == 'FGC'){
-        title = "Choose a foreground colour"
+        title = "Select text colour"
     }
     // Display the panel
     panel = new Modal({
@@ -163,6 +176,12 @@ function show(){
                 break
         }
         colourise()
+    }))
+    // Handle black and white
+    const bws = panel.panel.querySelectorAll('span.black-and-white')
+    bws.forEach( bw => bw.addEventListener( 'click', event => {
+        const colour = event.target.dataset.colour
+        colourise(event.target, colour)
     }))
 }
 
@@ -251,7 +270,7 @@ const init = function(editor, button){
 // -----------------------------------------------------------------------------
 
 let options = {init, setState, style:'color', removeStyle:'color:black;'}
-export const FOREGROUND = new ToolbarButton( 'inline', 'FGC', 'Foreground colour', Icons.colourForeground, click, options)
+export const FOREGROUND = new ToolbarButton( 'inline', 'FGC', 'Text colour', Icons.colourForeground, click, options)
 
 options = {init, setState, style:'background-color', removeStyle:'background-color:white;'}
-export const BACKGROUND = new ToolbarButton( 'inline', 'BGC', 'Background colour', Icons.colourBackground, click, options)
+export const BACKGROUND = new ToolbarButton( 'inline', 'BGC', 'Highlight colour', Icons.colourBackground, click, options)
