@@ -1,7 +1,7 @@
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
-import * as Modal from '../Modal.js'
+import Modal from '../Modal.js'
 
 // -----------------------------------------------------------------------------
 // @section Variables
@@ -33,7 +33,7 @@ let node
 let dirty
 
 /**
-  * @var {HTMLElement} panel The container for the edit dialogue
+  * @var {Modal} panel The container for the edit dialogue
   */
 let panel = null
 
@@ -53,8 +53,8 @@ let confirm = null
  * @param {HTMLElement} element The custom node to be edited
  */
 function edit( element ){
-    // If we already have an active edit panel - ignore edit clicks
-    if ( Modal.active() ){
+    // If we already have an active panel - ignore edit clicks
+    if ( panel && panel.active() ){
         return
     }
     node = element
@@ -62,19 +62,19 @@ function edit( element ){
 }
 
 function handleConfirmCancel(){
-    Modal.hide(confirm)
-    Modal.hide(panel)
+    confirm.hide()
+    panel.hide()
 }
 
 function handleConfirmDelete(){
-    Modal.hide(confirm)
-    Modal.hide(panel)
+    confirm.hide()
+    panel.hide()
     deleteItem() 
 }
 
 function handleCancel(){
     if ( dirty ){
-        confirm = Modal.show({ 
+        confirm = new Modal({ 
             type:'confirm',
             severity:'warning',
             title:'Cancel changes', 
@@ -84,13 +84,14 @@ function handleCancel(){
                 {class:'confirm', label:'Yes - lose changes', callback:handleConfirmCancel}
             ]
         })
+        confirm.show()
     } else {
-        Modal.hide(panel)
+        panel.hide()
     }
 }
 
 function handleDelete(){
-    confirm = Modal.show({ 
+    confirm = new Modal({ 
         type:'confirm',
         severity:'danger',
         title:'Delete changes', 
@@ -100,6 +101,7 @@ function handleDelete(){
             {class:'confirm', label:'Yes - delete item', callback:handleConfirmDelete}
         ]
     })
+    confirm.show()
 }
 
 /**
@@ -121,7 +123,6 @@ function show( editFlag ){
         property2: node.querySelector('.property2').innerText,
         property3: node.querySelector('.property3').innerText,
     }
-    const html = form(data)
     let buttons = [{
         class:'hide',
         label:'Cancel',
@@ -139,18 +140,19 @@ function show( editFlag ){
         label:'Save', 
         callback:save
     })
-    panel = Modal.show({
+    panel = new Modal({
         type:'edit',
         title,
-        html,
+        html: form(data),
         buttons
     })
+    panel.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
-    const inputs = panel.querySelectorAll('form input')
+    const inputs = panel.panel.querySelectorAll('form input')
     inputs.forEach(input => input.addEventListener('change', () => dirty=true))
     // Focus the first property
-    const prop1 = panel.querySelector('form #property1')
+    const prop1 = panel.panel.querySelector('form input#property1')
     prop1.focus()
     prop1.setSelectionRange(prop1.value.length, prop1.value.length)
 }
@@ -160,13 +162,13 @@ function show( editFlag ){
  */
 function save(){
     // console.log('Save changes')
-    node.querySelector('.property1').innerText = panel.querySelector('form #property1').value.trim()
-    node.querySelector('.property2').innerText = panel.querySelector('form #property2').value.trim()
-    node.querySelector('.property3').innerText = panel.querySelector('form #property3').value.trim()
+    node.querySelector('.property1').innerText = panel.panel.querySelector('form #property1').value.trim()
+    node.querySelector('.property2').innerText = panel.panel.querySelector('form #property2').value.trim()
+    node.querySelector('.property3').innerText = panel.panel.querySelector('form #property3').value.trim()
     if ( node.parentNode == null ){
         insert()
     }
-    Modal.hide(panel)
+    panel.hide()
     // Format node and add event handler
     format(node)
     // Update state
@@ -301,14 +303,13 @@ function template(props){
 /**
  * On first load of editor, convert the minimal custom HTML into the full
  * editable version
- * @param {object} editor A unique editor instance
- * @param {object} button The button to use
+ * @param {object} edt A unique editor instance
+ * @param {object} btn The button to use
  */
 const init = function( edt, btn ){
-    //console.log('Initialising custom plugin')
     editor = edt
     button = btn
-    const customElements = edt.editorNode.querySelectorAll( TAG )
+    const customElements = edt.editorNode.querySelectorAll( btn.tag )
     customElements.forEach( element => format( element ) )
 }
 
