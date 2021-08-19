@@ -118,7 +118,7 @@ function insert(person){
     let after    = contents.substring(offset)
     // Remove optional @
     if ( after.charAt(0) === '@' ){
-        after = after.slice(1, after.length-1)
+        after = after.slice(1, after.length)
     }
     // Add space before?
     if ( contents.charCodeAt(offset-1) !== 32){
