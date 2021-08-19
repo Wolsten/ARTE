@@ -40,7 +40,7 @@ class Editor {
         }
         // *** TEST THE MODALS ***
         // Uncomment the next two lines for development testing
-        // this.testModals('positioned')  // options are 'overlay', 'positioned' and 'edit'
+        // this.testModals('positioned')  // options are 'overlay', 'positioned' and 'drawer'
         // return
         // Set up event handling
         this.listenForMouseUpEvents()
@@ -607,9 +607,9 @@ class Editor {
             modal.show()
 
         // Edit modal with buttons and callbacks
-        } else if ( type == 'edit' ){
+        } else if ( type == 'drawer' ){
             const modal = new Modal({
-                type:'edit',
+                type:'drawer',
                 title:'Example of an edit modal', 
                 html:`
                     <p>This modal type provides a placeholder for custom content, such as a form with values that can be edited.</p>

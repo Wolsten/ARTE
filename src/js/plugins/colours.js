@@ -201,7 +201,7 @@ const click = function( edt, btn ){
     button = btn
     if ( editor.range === false || editor.range.collapsed ){
         const feedback = new Modal({
-            type:'feedback',
+            type:'overlay',
             severity:'info',
             html:'The colour selection buttons require at least one character to be selected.',
             buttons: { cancel: {label:'Close'} }
