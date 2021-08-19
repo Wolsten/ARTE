@@ -13,7 +13,7 @@ let saturation
 let lightness
 let editor
 let button
-let panel = null
+let drawer = null
 
 
 /**
@@ -24,11 +24,11 @@ let panel = null
  */
 function colourise(target,colour){
     // Remvoe active classes
-    const actives = panel.panel.querySelectorAll('.active')
+    const actives = drawer.panel.querySelectorAll('.active')
     actives.forEach( active => active.classList.remove('active'))
     // Gradient colour selected?
     if ( target == undefined ){
-        const hues = panel.panel.querySelectorAll('.colours .hues span')
+        const hues = drawer.panel.querySelectorAll('.colours .hues span')
         hues.forEach( (item,i) => {
             const h = i * H_INC
             item.style.backgroundColor = `hsl(${h},100%,50%)`
@@ -36,7 +36,7 @@ function colourise(target,colour){
                 item.classList.add('active')
             }
         })
-        const saturations = panel.panel.querySelectorAll('.colours .saturations span')
+        const saturations = drawer.panel.querySelectorAll('.colours .saturations span')
         saturations.forEach( (item,i) => {
             const s = i * S_INC
             item.style.backgroundColor = `hsl(${hue},${s}%,50%)`
@@ -44,7 +44,7 @@ function colourise(target,colour){
                 item.classList.add('active')
             }
         })
-        const lightnesses = panel.panel.querySelectorAll('.colours .lightnesses span')
+        const lightnesses = drawer.panel.querySelectorAll('.colours .lightnesses span')
         lightnesses.forEach( (item,i) => {
             const l = i * L_INC
             item.style.backgroundColor = `hsl(${hue},50%,${l}%)`
@@ -63,7 +63,7 @@ function colourise(target,colour){
             lightness = 100
         }
     }
-    panel.panel.querySelector('form .result span').style.backgroundColor = `hsl(${hue},${saturation}%,${lightness}%)`
+    drawer.panel.querySelector('form .result span').style.backgroundColor = `hsl(${hue},${saturation}%,${lightness}%)`
 }
 
 
@@ -123,7 +123,7 @@ function save(){
         removeStyle:button.removeStyle, 
         element:button.element
     }
-    panel.hide()
+    drawer.hide()
     // Apply the new style
     Styles.click( editor, synthButton )
 }
@@ -145,8 +145,8 @@ function show(){
         title = "Select text colour"
     }
     // Display the panel
-    panel = new Modal({
-        type:'edit',
+    drawer = new Modal({
+        type:'drawer',
         title,
         html:form(),
         buttons: {
@@ -154,11 +154,11 @@ function show(){
             confirm: {label:'Set', callback:save}
         }
     })
-    panel.show()
+    drawer.show()
     // Apply colours
     colourise()
     // Add custom click handlers
-    const colours = panel.panel.querySelectorAll('span.colour')
+    const colours = drawer.panel.querySelectorAll('span.colour')
     colours.forEach(c => c.addEventListener('click', event => {
         // Find out which colour span was clicked and set the appropriate colour value
         const item = event.target
@@ -178,7 +178,7 @@ function show(){
         colourise()
     }))
     // Handle black and white
-    const bws = panel.panel.querySelectorAll('span.black-and-white')
+    const bws = drawer.panel.querySelectorAll('span.black-and-white')
     bws.forEach( bw => bw.addEventListener( 'click', event => {
         const colour = event.target.dataset.colour
         colourise(event.target, colour)
@@ -194,7 +194,7 @@ function show(){
  */
 const click = function( edt, btn ){
     // Ignore if a modal is active
-    if ( panel && panel.active() ){
+    if ( drawer && drawer.active() ){
         return
     }
     editor = edt

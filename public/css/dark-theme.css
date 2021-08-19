@@ -1,0 +1,18 @@
+:root {
+    --text: #ffffff;
+    --text-success: rgb(30, 250, 60);
+    --text-warning: rgb(250, 120, 30);
+    --text-danger: rgb(250, 30, 30);
+    --text-disabled: rgb(120,120,120);
+    --text-link: rgb(102, 102, 235);
+    --text-debug: rgb(104, 207, 104);
+    --background: rgb(40, 40, 40);
+    --background-hover: rgb(80,80,80);
+    --border: #928f8f;
+    --block-quote-border: #ccc;
+    --block-quote-background: rgb(60, 60, 60);
+    --toolbar-button-border: rgb(40, 40, 40);
+    --toolbar-button-background-active:rgb(70, 70, 70);
+    --modal-background: rgba(100,100,100,0.1);
+    --selected-object-border: rgb(150, 150, 200);
+}

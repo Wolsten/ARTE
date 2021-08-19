@@ -30,7 +30,7 @@ let dirty
 /**
  * @var {Modal} panel The container for the modal edit dialogue
  */
-let panel = null
+let drawer = null
 /**
  * @var {Modal} confirm The container for the modal confirm dialogue
  */
@@ -43,7 +43,7 @@ let panel = null
 
 function handleConfirmCancel(){
     confirm.hide()
-    panel.hide()
+    drawer.hide()
 }
 
 function handleCancel(){
@@ -60,7 +60,7 @@ function handleCancel(){
         })
         confirm.show()
     } else {
-        panel.hide()
+        drawer.hide()
     }
 }
 
@@ -76,7 +76,7 @@ function handleCancel(){
 
 function handleConfirmDelete(){
     confirm.hide()
-    panel.hide()
+    drawer.hide()
     deleteItem() 
 }
 
@@ -102,7 +102,7 @@ function handleDelete(){
  */
  function edit( element ){
     // If we already have an active panel - ignore edit clicks
-    if ( panel && panel.active() ){
+    if ( drawer && drawer.active() ){
         return
     }
     // Save the clicked link
@@ -134,14 +134,14 @@ function show( selectedText, editFlag ){
         node.dataset.display = 0
     }
     // Create and display the modal panel
-    panel = new Modal({type:'edit',title,html: form(editFlag), buttons})
-    panel.show()
+    drawer = new Modal({type:'drawer',title,html: form(editFlag), buttons})
+    drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
-    const inputs = panel.panel.querySelectorAll('form input')
+    const inputs = drawer.panel.querySelectorAll('form input')
     inputs.forEach(input => input.addEventListener('change', () => dirty=true))
     // Focus the href
-    const href = panel.panel.querySelector('form #href')
+    const href = drawer.panel.querySelector('form #href')
     href.focus()
     href.setSelectionRange(href.value.length, href.value.length)
 }
@@ -151,13 +151,13 @@ function show( selectedText, editFlag ){
  */
 function save(){
     // console.log('Save changes')
-    node.href = panel.panel.querySelector('form #href').value.trim()
-    node.dataset.label = panel.panel.querySelector('form #label').value.trim()
-    node.dataset.display = parseInt(panel.panel.querySelector('form #display').value)
+    node.href = drawer.panel.querySelector('form #href').value.trim()
+    node.dataset.label = drawer.panel.querySelector('form #label').value.trim()
+    node.dataset.display = parseInt(drawer.panel.querySelector('form #display').value)
     if ( node.parentNode == null ){
         insert(editor, button)
     }
-    panel.hide()
+    drawer.hide()
     // Format link and add event handler
     format(node)
     // Update state
@@ -313,7 +313,7 @@ function form(edit){
  */
 const click = function( edt, btn ){
     // Ignore if a modal is active
-    if ( panel && panel.active() ){
+    if ( drawer && drawer.active() ){
         return
     }
     editor = edt

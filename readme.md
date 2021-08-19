@@ -18,36 +18,36 @@ Lastly, it needs to be open source and free so that there are no commercial draw
 
 *Disclaimer*
 
-ARTE is not a production ready app and has not been tested extensively across a range of browsers. It is licenced under MIT and therefore normal caveats apply.
+ARTE has not been tested extensively across an extensive range of browsers and in particular touch interfaces have not been tested. It is licenced under MIT and therefore normal caveats apply.
 
 ## Usage
 
-To use in development (source) mode, download the src folder files. You can also download the index.html file as a example of how to configure the editor. 
+To use in development (source) mode, download or clone the repository.
 
-In the head of the page add the following lines in order to pull in the bootstrap icons that we use by default and a simple style sheet:
+The root `index.html` file has the following lines in order to pull in the bootstrap icons that we use by default and a simple style sheet:
 
 ```
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="./src/css/styles.css">
+    <link rel="stylesheet" href="./public/css/styles.css">
 ```
 
-Then add a placeholder div in the body of your html, e.g:
+Further down you should see a placeholder div in the body:
 
 ```
 <div id="editor"></div>
 ```
 
-You can also add a button to save the content of the editor:
+There also add a button to demonstrate how to save the content of the editor:
 
 ```
 <button type="button" id="save">Save</button>
 ```
 
-Create a javascript block like this:
+Next we have javascript block:
 
 ```
 <script type="module" charset="utf-8">
-    import * as ARTE from './src/js/ARTE-ES6.JS'
+    import * as ARTE from './src/js/ARTE-bundle-ES6.JS'
     const target = document.getElementById('editor')
     // Set the initial content to the current content of the editor div
     let content = target.innerHTML
@@ -82,11 +82,18 @@ Create a javascript block like this:
 </script>
 ```
 
+
 ## Building production and development versions
 
 ### Prequisites
 
 You'll need the latest versions of node and npm installed, as well as webpack and Babel.
+
+```
+$ npm install --save-dev webpack
+$ npm install --save-dev webpack-cli
+$ npm install @babel/core @babel/preset-env babel-loader
+```
 
 ### Run a build script
 
@@ -94,31 +101,29 @@ Referring to `package.json`, run one of the NPM scripts to create your target ve
 
 ```
   "scripts": {
-    "dev": "webpack --env=mode=development --config webpack.config.js",
-    "test": "webpack --env=mode=development --env=target=ES6 --config webpack.config.js",
-    "build-es6": "webpack --env=mode=production --env=target=ES6 --config webpack.config.js",
-    "build-es5": "webpack --env=mode=production --env=target=ES5 --config webpack.config.js"
+    "copy-files": ". scripts/copy-files.sh",
+    "build-test": "webpack --env=mode=development --env=target=ES6 --config webpack.config.js && npm run copy-files",
+    "build-es6": "webpack --env mode=production --env target=ES6 --config webpack.config.js && npm run copy-files",
+    "build-es5": "webpack --env mode=production --env target=ES5 --config webpack.config.js && npm run copy-files",
+    "build-all": "webpack --env mode=production --env target=ES6 --config webpack.config.js && webpack --env mode=production --env target=ES5 --config webpack.config.js && npm run copy-files"
+
   },
 ```
 
-e.g. run the command:
+e.g. run the command to create a minimised single ES5 compatible file `ARTE-bundle-ES5.js` in the `public/js` folder:
 
 ```
 $ npm run build-es5
 ```
 
-to create a minimised single ES5 compatible file `ARTE.js` in the `public` folder. Then update your html page to replace these lines:
+to create a minimised single ES5 compatible file `ARTE.js` in the `public` folder. Now you can serve the `public/index.html` which has the following script declarations in place of those of the development `index.html` file:
 
 ```
-<script type="module" charset="utf-8">
-    import ARTE from './src/js/ARTE.JS'
-```
-with these lines:
-
-```
-<script src='./public/js/ARTE.js' charset="utf-8"></script>  
+<script src='./public/js/ARTE-bundle-ES5.js' charset="utf-8"></script>  
 <script type="text/javascript"> 
 ```
+
+
 
 ## Customising the appearance
 
@@ -202,13 +207,43 @@ The full set of optional button methods is as follows:
 | clean | `method`. This method will be invoked when the editor `save` method is invoked in order to clean any custom plugin content. For example, a `clean` method could minimise a custom component by removing any decorations applied in the `init` method. |
 | shortcut | `array`. A two-key sequence to trigger the button click event, such as [`@`,`Tab`] where `@` is the shortcut key and `Tab` is the trigger key. |
 
+### Update ARTE.js
+
+The source file `src/js/ARTE.js` defines which modules are available to your application:
+
+```
+import Editor from './Editor.js'
+import Modal from './Modal.js'
+import * as Buffer from './plugins/buffer.js'
+import * as Blocks from './plugins/blocks.js'
+import * as Styles from './plugins/styles.js'
+import * as Mentions from './plugins/mentions.js'
+import * as Links from './plugins/links.js'
+import * as Colours from './plugins/colours.js'
+import * as Custom from './plugins/custom.js'
+
+export {
+    Editor,
+    Modal,
+    Buffer,
+    Blocks,
+    Styles,
+    Mentions,
+    Links,
+    Colours,
+    Custom
+}
+```
+
+Update this file as required, particularly before running a build script.
+
 ## Built-in modal support
 
 ARTE comes with a Modals.js class module which supports three types of modal as well as several other configuration options which can be used when developing your own plugins:
 
 | Option | Descrption and usage |
 |--------|----------------------|
-| type | `string`. One of `overlay`, `positioned` or `edit`. `overlay` modals are displayed in the centre of the page. `positioned` modals are displayed with their top-left corner near where you clicked your mouse and is used for our `mentions` plugin. `edit` modals are slide-down drawers, typically used for creating and editing your own content. The default if not specified is `overlay`.|
+| type | `string`. One of `overlay`, `positioned`, `drawer`, `full-screen`. `overlay` modals are displayed in the centre of the page. `positioned` modals are displayed with their top-left corner near where you clicked your mouse and is used for our `mentions` plugin. `drawer` modals are slide-down drawers, typically used for creating and editing your own content. `full-screen` modals are like `drawer` except take up the whole screen. The default if not specified is `overlay`.|
 | title | `string`. The text to appear in the header of the modal. If blank or not specified no title is displayed. |
 | html | `string`. The html to display in the body of the modal. It would be unusual for this to be empty but it would be possible to display without. |
 | severity | `string`. One of `info`, `warning` or `danger`. Setting this controls whether an icon is displayed (in an appropriate colour) in the modal header. If not set no icon is displayed. |

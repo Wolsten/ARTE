@@ -35,7 +35,7 @@ let dirty
 /**
   * @var {Modal} panel The container for the edit dialogue
   */
-let panel = null
+let drawer = null
 
  /**
   * @var {HTMLElement} confirm The container for the modal confirm dialogue
@@ -54,7 +54,7 @@ let confirm = null
  */
 function edit( element ){
     // If we already have an active panel - ignore edit clicks
-    if ( panel && panel.active() ){
+    if ( drawer && drawer.active() ){
         return
     }
     node = element
@@ -63,12 +63,12 @@ function edit( element ){
 
 function handleConfirmCancel(){
     confirm.hide()
-    panel.hide()
+    drawer.hide()
 }
 
 function handleConfirmDelete(){
     confirm.hide()
-    panel.hide()
+    drawer.hide()
     deleteItem() 
 }
 
@@ -86,7 +86,7 @@ function handleCancel(){
         })
         confirm.show()
     } else {
-        panel.hide()
+        drawer.hide()
     }
 }
 
@@ -129,14 +129,14 @@ function show( editFlag ){
         property3: node.querySelector('.property3').innerText,
     }
     // Create and display the modal panel
-    panel = new Modal({type:'edit',title,html: form(data), buttons})
-    panel.show()
+    drawer = new Modal({type:'drawer',title,html: form(data), buttons})
+    drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
-    const inputs = panel.panel.querySelectorAll('form input')
+    const inputs = drawer.panel.querySelectorAll('form input')
     inputs.forEach(input => input.addEventListener('change', () => dirty=true))
     // Focus the first property
-    const prop1 = panel.panel.querySelector('form input#property1')
+    const prop1 = drawer.panel.querySelector('form input#property1')
     prop1.focus()
     prop1.setSelectionRange(prop1.value.length, prop1.value.length)
 }
@@ -146,13 +146,13 @@ function show( editFlag ){
  */
 function save(){
     // console.log('Save changes')
-    node.querySelector('.property1').innerText = panel.panel.querySelector('form #property1').value.trim()
-    node.querySelector('.property2').innerText = panel.panel.querySelector('form #property2').value.trim()
-    node.querySelector('.property3').innerText = panel.panel.querySelector('form #property3').value.trim()
+    node.querySelector('.property1').innerText = drawer.panel.querySelector('form #property1').value.trim()
+    node.querySelector('.property2').innerText = drawer.panel.querySelector('form #property2').value.trim()
+    node.querySelector('.property3').innerText = drawer.panel.querySelector('form #property3').value.trim()
     if ( node.parentNode == null ){
         insert()
     }
-    panel.hide()
+    drawer.hide()
     // Format node and add event handler
     format(node)
     // Update state
@@ -325,7 +325,7 @@ const setState = function( edt, btn ){
  */
 const click = function( edt, btn ){
     // Ignore if a modal is active
-    if ( panel && panel.active() ){
+    if ( drawer && drawer.active() ){
         return
     }
     editor = edt
