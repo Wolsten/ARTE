@@ -37,13 +37,13 @@ Further down you should see a placeholder div in the body:
 <div id="editor"></div>
 ```
 
-There also add a button to demonstrate how to save the content of the editor:
+There is also a button to demonstrate how to save the content of the editor:
 
 ```
 <button type="button" id="save">Save</button>
 ```
 
-Next we have javascript block:
+Next we have the javascript:
 
 ```
 <script type="module" charset="utf-8">
@@ -87,11 +87,12 @@ Next we have javascript block:
 
 ### Prequisites
 
-You'll need the latest versions of node and npm installed, as well as webpack and Babel.
+You'll need the latest versions of node and npm installed, as well as webpack, the webpack copy plugin and Babel.
 
 ```
 $ npm install --save-dev webpack
 $ npm install --save-dev webpack-cli
+$ npm install copy-webpack-plugin --save-dev
 $ npm install @babel/core @babel/preset-env babel-loader
 ```
 
@@ -114,6 +115,8 @@ e.g. run the command to create a minimised single ES5 compatible file `ARTE-bund
 ```
 $ npm run build-es5
 ```
+
+As well as creating the target bundle, these commands also copy required static files to the public folder.
 
 Now you can serve the `public/index.html` which has the following script declarations in place of those of the development `index.html` file:
 

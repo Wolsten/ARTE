@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-    
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,10 +13,68 @@
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <!-- Github buttons -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
     <title>Active Rich Text Editor</title>
 </head>
 
 <body>
+
+    <style>
+        .header {
+            background-color:var(--colour-secondary);
+            padding:0.5rem;
+        }
+        header {
+            display:flex;
+            justify-content:flex-start;
+            padding:0;
+            margin:0;
+        }
+        img {
+            width:80px;
+            height:80px;
+        }
+        h1 {
+            margin:0;
+            padding:0 0.5rem;
+            font-size: 1.3rem;
+        }
+        h2 {
+            margin:0;
+            padding:0 0.5rem;
+            font-size: 1rem;
+            color:white;
+        }
+        div.buttons {
+            margin:0;
+            display:flex;
+            justify-content: flex-end;
+        }
+        div.buttons span {
+            display:inline-block;
+            padding-left:0.5rem;
+        }
+    </style>
+
+    <div class="header">
+
+        <header>
+            <img src="./img/logo-medium.png" alt="ARTE Logo"/>
+            <div>
+                <h1>The Active Rich Text Editor</h1>
+                <h2>A free, open source and extensible library for implementing WYSIWYG editors in vanilla javascript that supports active components.</h2>
+            </div>
+        </header>
+
+        <div class="buttons">
+            <a class="github-button" href="https://github.com/Wolsten" data-color-scheme="no-preference: light; light: light; dark: dark;" data-size="large" aria-label="Follow @Wolsten on GitHub">Follow @Wolsten</a>     
+            <a class="github-button" href="https://github.com/sponsors/Wolsten" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-heart" data-size="large" aria-label="Sponsor @Wolsten on GitHub">Sponsor</a>
+            <a class="github-button" href="https://github.com/Wolsten/ARTE/subscription" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-eye" data-size="large" aria-label="Watch Wolsten/ARTE on GitHub">Watch</a>
+            <a class="github-button" href="https://github.com/Wolsten/ARTE" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-star" data-size="large" aria-label="Star Wolsten/ARTE on GitHub">Star</a>
+        </div>
+
+    </div>
 
     <!-- The inner html will be replaced with the editor instance -->
     <div id="editor">

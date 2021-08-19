@@ -12,6 +12,11 @@ div, h1, h2, h3, h4, h5, p, label, input, select, button {
     color:var(--text)
 }
 
+h1, h2, h3, h4, h5{
+    color:var(--colour-primary)
+}
+
+
 a {
     color:var(--text-link);
     text-decoration: none;
