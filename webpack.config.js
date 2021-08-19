@@ -1,6 +1,7 @@
 const path = require("path")
 const { env } = require("process")
 const TerserPlugin = require("terser-webpack-plugin")
+const CopyPlugin = require("copy-webpack-plugin");
 
 const libraryName = 'ARTE'
 let fileName = libraryName + '-bundle'
@@ -33,9 +34,10 @@ module.exports = (env) => {
 
     entry: "./src/js/ARTE.js",
 
+    // Output is used by CopyPlugin as the root destination folder 
     output: {
-      path: path.resolve(__dirname, "public/js"),
-      filename: `${fileName}.js`,
+      path: path.resolve(__dirname, "public"),
+      filename: `js/${fileName}.js`,
       library: libraryName,
       libraryTarget: 'umd',
       umdNamedDefine: true,
@@ -47,6 +49,7 @@ module.exports = (env) => {
         new TerserPlugin({
           test: /\.js(\?.*)?$/i,
           terserOptions: {
+            // Filter console outputs
             // https://github.com/terser/terser#compress-options
             compress: {
               drop_console:true
@@ -55,6 +58,26 @@ module.exports = (env) => {
         }),
       ],
     },
+
+    plugins: [
+      // Copy static assets
+      new CopyPlugin({
+        patterns: [
+          {
+            from: "src/img/*",
+            to:"img/[name][ext]"
+          },
+          {
+            from: "src/css/*",
+            to:"css/[name][ext]"
+          },
+          {
+            from: "favicon*.*",
+            to:"[name][ext]"
+          },
+        ],
+      }),
+    ],
 
     module: {
       rules: [ 

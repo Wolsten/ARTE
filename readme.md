@@ -101,11 +101,10 @@ Referring to `package.json`, run one of the NPM scripts to create your target ve
 
 ```
   "scripts": {
-    "copy-files": ". scripts/copy-files.sh",
-    "build-test": "webpack --env=mode=development --env=target=ES6 --config webpack.config.js && npm run copy-files",
-    "build-es6": "webpack --env mode=production --env target=ES6 --config webpack.config.js && npm run copy-files",
-    "build-es5": "webpack --env mode=production --env target=ES5 --config webpack.config.js && npm run copy-files",
-    "build-all": "webpack --env mode=production --env target=ES6 --config webpack.config.js && webpack --env mode=production --env target=ES5 --config webpack.config.js && npm run copy-files"
+    "build-test": "webpack --env=mode=development --env=target=ES6 --config webpack.config.js",
+    "build-es6": "webpack --env mode=production --env target=ES6 --config webpack.config.js",
+    "build-es5": "webpack --env mode=production --env target=ES5 --config webpack.config.js",
+    "build-all": "webpack --env mode=production --env target=ES6 --config webpack.config.js && webpack --env mode=production --env target=ES5 --config webpack.config.js"
 
   },
 ```
@@ -116,14 +115,12 @@ e.g. run the command to create a minimised single ES5 compatible file `ARTE-bund
 $ npm run build-es5
 ```
 
-to create a minimised single ES5 compatible file `ARTE.js` in the `public` folder. Now you can serve the `public/index.html` which has the following script declarations in place of those of the development `index.html` file:
+Now you can serve the `public/index.html` which has the following script declarations in place of those of the development `index.html` file:
 
 ```
-<script src='./public/js/ARTE-bundle-ES5.js' charset="utf-8"></script>  
+<script src="./js/ARTE-bundle-ES6.js" charset="utf-8"></script>
 <script type="text/javascript"> 
 ```
-
-
 
 ## Customising the appearance
 
