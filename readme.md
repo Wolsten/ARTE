@@ -130,14 +130,16 @@ Now you can serve the `public/index.html` which has the following script declara
 ARTE provides three style sheets in `src/css`:
 
 ```
-styles.css
+styles.sccs
 dark-theme.css
 light-theme.css
 ``` 
 
-To switch between light and dark themes simply swap the import statement at the top of `styles.css` in order to change the appearance to the following:
+To switch between light and dark themes simply swap the import statement at the top of `styles.scss` in order to change the appearance to the following:
 
 ![ARTE Rich Text Editor](assets/ARTE-dark-theme.png "ARTE Screen shot - dark theme")
+
+You will need to regenerate the css using a SASS compiler, such as the [Live Sass Compiler](https://github.com/ritwickdey/vscode-live-sass-compiler) in VS Code.
 
 Additional themes can be added easily by adding further theme files with their own variable settings.
 
