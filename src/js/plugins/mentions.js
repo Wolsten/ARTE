@@ -177,7 +177,7 @@ function insert(person){
 }
 
 /**
- * Set the disabled and active states of a button
+ * Set the disabled state of this button. This one can never be active
  * @param {object} editor A unique editor instance
  * @param {object} button The button to act on
  */
@@ -185,8 +185,6 @@ function insert(person){
     if ( editor.range === false  || 
         (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
         button.element.disabled = true
-        // button.element.classList.remove('active')
-    // This button can never be active...
     } else {
         button.element.disabled = false
     }
