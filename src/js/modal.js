@@ -159,8 +159,10 @@ class Modal {
                 }
             })
             this.panel.addEventListener( 'click', event => {
-                event.stopPropagation()
-                this.hide()
+                if ( event.target == this.panel ){
+                    event.stopPropagation()
+                    this.hide()
+                }
             })
         }
     }

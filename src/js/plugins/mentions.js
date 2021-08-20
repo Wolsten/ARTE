@@ -34,12 +34,15 @@ function filterList(filterText){
 
 /**
  * Highlight the selected item as a result of navigating through the list
+ * @param {boolean} scroll Whether to scroll the selected item into view
  */
-function highlightItem(){
+function highlightItem(scroll=true){
     if ( selectedIndex >= 0 && listItemElements.length > 0 ){
         listItemElements.forEach( item => item.classList.remove('selected') )
         listItemElements[selectedIndex].classList.add('selected')
-        listItemElements[selectedIndex].scrollIntoView()
+        if ( scroll ){
+            listItemElements[selectedIndex].scrollIntoView({block: "end", inline: "nearest"})
+        }
     }
 }
 
@@ -169,7 +172,7 @@ function insert(person){
     // Init list items and selection
     listItemElements = listContainerElement.querySelectorAll('li')
     selectedIndex = 0
-    highlightItem()
+    highlightItem(false)
     // Initialise the text input
     inputElement = modal.container.querySelector('input')
     inputElement.value = ''
@@ -199,5 +202,5 @@ export const setup = function(peeps){
     people = peeps.sort()
 }
 
-const options = {setState, shortcut:['@','Tab']}
+const options = {setState, shortcut:['@','@']}
 export const BUTTON = new ToolbarButton( 'custom', 'mention', 'Mention', Icons.person, click, options ) 

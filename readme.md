@@ -18,7 +18,7 @@ Lastly, it needs to be open source and free so that there are no commercial draw
 
 *Disclaimer*
 
-ARTE has not been tested extensively across an extensive range of browsers and in particular touch interfaces have not been tested. It is licenced under MIT and therefore normal caveats apply.
+ARTE has not been tested extensively across an extensive range of browsers and in particular touch interfaces have only been tested briefly on mobile Safari on an iPhone. 
 
 ## Usage
 
@@ -266,4 +266,10 @@ buttons: {
 ARTE uses a small number of SVG icons sourced from the Bootstrap Icon library here:
 
 https://icons.getbootstrap.com
+
+### Licence
+
+It is licenced under [MIT](https://opensource.org/licenses/mit-license.php).
+
+
 
