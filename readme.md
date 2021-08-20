@@ -4,9 +4,9 @@
 
 ## Introduction
 
-ARTE (pronounced *Arty*) stands for *Active Rich Text Editor*. Does the world need another WYSIWYG Rich Text Editor? Possibily not, but in the course of developing my own applications I became frustrated with those I could find online. First of all I wanted something written in vanilla Javascript that could be embedded easily in any website independent of framework.
+ARTE (pronounced *Arty*) stands for *Active Rich Text Editor*. Does the world need another WYSIWYG Rich Text Editor? Absolutely! In the course of developing my own applications I became frustrated with those I could find online. First of all I wanted something written in vanilla Javascript that could be embedded easily in any website, independent of framework.
 
-Secondly, and where I struggled most, it should be easy to extend - including the ability to embed "active" content that can be edited using its own dialogue.
+Secondly, and where I struggled most, it should be easy to extend - including the ability to embed "active" content that can be edited using its own dialogue. Such content can then be manipulated separately if required, a good example would be to easily list all comments in a document.
 
 Thirdly, the whole editor needs to be modular, written using plugins so that there is a single implementation pattern. For example, all the standard toolbar buttons are written as block, list, and inline styling plugins.
 
@@ -46,40 +46,59 @@ There is also a button to demonstrate how to save the content of the editor:
 Next we have the javascript:
 
 ```
-<script type="module" charset="utf-8">
-    import * as ARTE from './src/js/ARTE-bundle-ES6.JS'
-    const target = document.getElementById('editor')
-    // Set the initial content to the current content of the editor div
-    let content = target.innerHTML
-    // Clear any existing content
-    target.innerHTML = ''
-    // Setup toolbar
-    const toolbar = [
-        [ ARTE.Blocks.H1, ARTE.Blocks.H2, ARTE.Blocks.H3, ARTE.Blocks.P, ARTE.Blocks.BQ],
-        [ ARTE.Blocks.OL, ARTE.Blocks.UL],
-        [ ARTE.Styles.B, ARTE.Styles.I, ARTE.Styles.U, ARTE.Colours.FOREGROUND, ARTE.Colours.BACKGROUND, ARTE.Styles.CLEAR],
-        [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
-        [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON ]
-    ]
-    // Setup plugins
-    ARTE.Mentions.setup(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
-    // Define editor options
-    const options = {
-        // Automatically number headings using outline numbering. Allowed values 'on', 'off'       
-        headingNumbers: 'on', 
-        // Number of Undo operations supported, max 10       
-        bufferSize: 10     
-    }
-    // Create editor and add to dom in target position
-    const editor = new ARTE.Editor(target, content, toolbar, options)
-    // Configure save button
-    const save = document.getElementById('save')
-    save.addEventListener('click', ()=>{
-        const xml = editor.save()
-        console.warn('Cleaned editor content:\n'+xml)
-        window.alert('Cleaned editor content:\n'+xml)
-    })
-</script>
+    <script type="module" charset="utf-8">
+
+        import * as ARTE from '../src/js/ARTE.JS'
+
+        // Define where the editor will appear
+        const target = document.getElementById('editor')
+
+        // Setup toolbar (groups)
+        const toolbar = [
+            [ ARTE.Blocks.H1, ARTE.Blocks.H2, ARTE.Blocks.H3, ARTE.Blocks.P, ARTE.Blocks.BQ],
+            [ ARTE.Blocks.OL, ARTE.Blocks.UL],
+            [ ARTE.Styles.B, ARTE.Styles.I, ARTE.Styles.U, ARTE.Colours.FOREGROUND, ARTE.Colours.BACKGROUND, ARTE.Styles.CLEAR],
+            [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
+            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON ]
+        ]
+
+        // Setup Mentions plugin with list of people
+        ARTE.Mentions.setup(['David','William', 'Jenny','Sally', 'Sarah', 'Susan','Brian'])
+
+        // Define editor options
+        const options = {
+            // Automatically number headings using outline numbering. Allowed values true or false     
+            headingNumbers: true, 
+            // Number of Undo operations supported, max 10       
+            bufferSize: 10,
+            // debugging flag, e.g. to output selection ranges
+            debug: true,
+            // Add default content from separate html file
+            // The option will attempt to read in this file and 
+            // override any value for the initial content specified 
+            // by the second parameter when creating the editor instance
+            defaultContent: 'default-content.html'
+        }
+
+        // Create editor and add to dom in target position
+        const editor = new ARTE.Editor(target, '', toolbar, options)
+
+        // Configure save button
+        const save = document.getElementById('save')
+        save.addEventListener('click', ()=>{
+            let xml = editor.save()
+            // Insert line feed before all opening tags to make easier to read
+            xml = xml.replace(/(<[^\/.]+?>)/gm, '\n$1')
+            const drawer = new ARTE.Modal({
+                type:'full-screen', 
+                title:'Cleaned XML to be saved',
+                html:`<textarea style="height:100%;width:100%;padding:2rem;" readonly>${xml}</textarea>`,
+                buttons:{cancel:{label:'Close'}},
+                escape:true
+            })
+            drawer.show()
+        })
+    </script>
 ```
 
 
@@ -241,7 +260,7 @@ Update this file as required, particularly before running a build script.
 
 ## Built-in modal support
 
-ARTE comes with a Modals.js class module which supports three types of modal as well as several other configuration options which can be used when developing your own plugins:
+ARTE comes with a Modals.js class module which supports four types of modal as well as several other configuration options which can be used when developing your own plugins:
 
 | Option | Descrption and usage |
 |--------|----------------------|

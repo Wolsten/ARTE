@@ -16,11 +16,9 @@ class Editor {
      * @param {object[]} toolbar 2-d array of buttons
      * @param {object} options Options, such as the buffer size for undo/redo operations
      */
-    constructor( target, content, toolbar, options ){
+    constructor( target, content='', toolbar, options ){
         // Initialise options
         this.options = this.initOptions(options)
-        // initialise buffering
-        this.initBuffering(content)
         // Initialise the toolbar
         this.toolbar = this.initToolbar(toolbar)
         // Initialise the editor
@@ -28,10 +26,6 @@ class Editor {
         // Grab dom elements
         this.editorNode = target.querySelector('.editor-body')
         this.toolbarNode = target.querySelector('.editor-toolbar')
-        // Add the content
-        this.editorNode.innerHTML = content
-        // Reset range
-        this.range = false
         // Check for debugging
         this.debugTarget = false
         if ( this.options.debug ){
@@ -46,7 +40,6 @@ class Editor {
         this.listenForMouseUpEvents()
         this.listenForPasteEvents()
         this.listenForKeydownEvents()
-        this.initialiseButtons()
         // Optional buffering setup
         if ( this.options.bufferSize > 0 ){
             this.bufferIndex = 0
@@ -62,6 +55,8 @@ class Editor {
         observer.observe(this.editorNode,config)
         // Define an empty modal so can check if any active
         this.modal = new Modal()
+        // Initialise the editor content
+        this.initEditor(content)
     }
 
     /**
@@ -114,6 +109,31 @@ class Editor {
             }
         }
         return options
+    }
+
+    /**
+     * Initialise the editor content, either with the current content passed in or 
+     * optionally using the 
+     * @param {string} content The content passed into the editor when created
+     */
+    async initEditor(content=''){
+        // Request default content?
+        if ( this.options.defaultContent && this.options.defaultContent != '' ){
+            const response = await fetch(this.options.defaultContent)
+            // console.log(response)
+            if ( response.status == 200 ){
+                content = await response.text()
+                // console.log(content)
+            }
+        }
+        // initialise buffering
+        this.initBuffering()
+        // Add the content to the editor node
+        this.editorNode.innerHTML = content
+        // Reset range
+        this.range = false
+        // Initialise buttons (some of which require the editor content to have been loaded)
+        this.initialiseButtons()
     }
 
     /**
