@@ -1,5 +1,5 @@
 @import url(light-theme.css);
-// @import url(dark-theme.css);
+//@import url(dark-theme.css);
 
 // -----------------------------------------------------------------------------
 // @section General
@@ -27,8 +27,9 @@ button[disabled] {
 
 button:not([disabled]):hover {
     cursor:pointer;
-    background:var(--text);
+    background:var(--button-background-hover);
     color:var(--background);
+    border-color:var(--button-background-hover);
 }
 
 // -----------------------------------------------------------------------------
@@ -104,9 +105,6 @@ body.index-body {
 
 .editor-toolbar-group {
     display:inline-block;
-    button.active {
-        background:var(--toolbar-button-background-active);
-    }
 }
 
 .editor-toolbar-group-separator {
@@ -122,6 +120,9 @@ body.index-body {
 .editor-toolbar {
     button {
         border: 1px solid var(--toolbar-button-border);
+    }
+    button.active {
+        background:var(--toolbar-button-background-active);
     }
     button.barred {
         position:relative;
@@ -232,6 +233,8 @@ body.index-body {
     left:0;
     width:100vw;
     height:100vh;
+    font-size:1rem;
+    color:var(--text);
 
     &.no-escape {
         background:var(--modal-background);
@@ -320,6 +323,7 @@ body.index-body {
     font-size: 2rem;
     position:relative;
     margin:0 0 1.5rem 0;
+    color:inherit;
 }
 
 .modal-panel-title i {
@@ -338,13 +342,18 @@ body.index-body {
         justify-content:flex-start;
         margin-bottom: 1rem;
         label {
-            font-size: 0.8rem;
+            font-size: inherit;
             flex-basis:25%;
+            color:inherit;
         }
         a {
             flex-basis: 5%;
             padding-left:0.5rem;
             cursor:pointer;
+            i {
+                color:var(--text);
+                font-size: 1.6rem;
+            }
         }
         .form-control {
             flex-basis:75%;
@@ -352,6 +361,8 @@ body.index-body {
             border: 1px solid var(--border);
             border-radius: 0.4rem;
             padding:0.3rem;
+            color:inherit;
+            font-size: inherit;
         }
         .form-control.with-button {
             flex-basis:70%;
@@ -459,6 +470,26 @@ custom button.edit {
     position: absolute;
     top:0.5rem;
     right:0.5rem;
+}
+
+// -----------------------------------------------------------------------------
+// @section comments.js plugin
+// -----------------------------------------------------------------------------
+
+comment {
+    display:inline-block;
+    position:relative;
+
+    button.edit {
+        position:relative;
+        top:-0.4rem;
+        border:none;
+
+        i {
+            font-weight:bold;
+            color:var(--text-success);
+        }
+    }
 }
 
 // -----------------------------------------------------------------------------

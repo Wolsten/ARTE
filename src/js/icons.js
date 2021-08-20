@@ -50,4 +50,6 @@ export const openLink = '<i class="bi bi-link-45deg"></i>'
 export const info = '<i class="info bi bi-info-circle-fill"></i>'
 export const warning = '<i class="warning bi bi-cone-striped"></i>'
 export const danger = '<i class="danger bi bi-exclamation-circle-fill"></i>'
+export const comment = '<i class="bi bi-chat-dots"></i>'
+export const commentEdit = '<i class="bi bi-chat-dots-fill"></i>'
 

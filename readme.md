@@ -59,7 +59,7 @@ Next we have the javascript:
             [ ARTE.Blocks.OL, ARTE.Blocks.UL],
             [ ARTE.Styles.B, ARTE.Styles.I, ARTE.Styles.U, ARTE.Colours.FOREGROUND, ARTE.Colours.BACKGROUND, ARTE.Styles.CLEAR],
             [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
-            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON ]
+            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON, ARTE.Comments.BUTTON]
         ]
 
         // Setup Mentions plugin with list of people

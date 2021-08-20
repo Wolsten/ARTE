@@ -9,6 +9,7 @@ import * as Mentions from './plugins/mentions.js'
 import * as Links from './plugins/links.js'
 import * as Colours from './plugins/colours.js'
 import * as Custom from './plugins/custom.js'
+import * as Comments from './plugins/comments.js'
 
 export {
     Editor,
@@ -19,5 +20,6 @@ export {
     Mentions,
     Links,
     Colours,
-    Custom
+    Custom,
+    Comments
 }

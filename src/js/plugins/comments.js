@@ -10,7 +10,7 @@ import Modal from '../Modal.js'
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
  */
-const TAG = 'CUSTOM'
+const TAG = 'COMMENT'
 
 /**
  * @var {object} editor The current editor instance
@@ -47,10 +47,10 @@ let confirm = null
 // -----------------------------------------------------------------------------
 
 /**
- * Edit an existing custom node by extracting the data from the node and displaying
+ * Edit an existing comment node by extracting the data from the node and displaying
  * the edit form
  * 
- * @param {HTMLElement} element The custom node to be edited
+ * @param {HTMLElement} element The comment node to be edited
  */
 function edit( element ){
     // If we already have an active panel - ignore edit clicks
@@ -109,36 +109,36 @@ function handleDelete(){
  * @param {boolean} editFlag Whether editing existing custom element or creating new
  */
 function show( editFlag ){
-    let title = 'Create custom element'
+    let title = 'Add comment'
     let buttons = {
         cancel:  { label:'Cancel', callback:handleCancel },
         confirm: { label:'Save', callback:save }
     }
     if ( editFlag ){
-        title = 'Edit custom element'
+        title = 'Edit comment'
         buttons.delete = { label:'Delete', callback:handleDelete }
     } else {
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
         node.setAttribute('contenteditable','false')
-        node.innerHTML = template({property1:' ', property2:' ', property3:' '})
-    }
-    const data = {
-        property1: node.querySelector('.property1').innerText,
-        property2: node.querySelector('.property2').innerText,
-        property3: node.querySelector('.property3').innerText,
+        node.dataset.comment = ' '
     }
     // Create and display the modal panel
-    drawer = new Modal({type:'drawer',title,html: form(data), buttons})
+    drawer = new Modal({
+        type:'drawer',
+        title,
+        html: form(node.dataset.comment), 
+        buttons
+    })
     drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
-    const inputs = drawer.panel.querySelectorAll('form input')
-    inputs.forEach(input => input.addEventListener('change', () => dirty=true))
+    const input = drawer.panel.querySelector('form textarea')
+    input.addEventListener('change', () => dirty=true)
     // Focus the first property
-    const prop1 = drawer.panel.querySelector('form input#property1')
-    prop1.focus()
-    prop1.setSelectionRange(prop1.value.length, prop1.value.length)
+    const comment = drawer.panel.querySelector('form textarea#comment')
+    comment.focus()
+    comment.setSelectionRange(comment.value.length, comment.value.length)
 }
 
 /**
@@ -146,9 +146,7 @@ function show( editFlag ){
  */
 function save(){
     // console.log('Save changes')
-    node.querySelector('.property1').innerText = drawer.panel.querySelector('form #property1').value.trim()
-    node.querySelector('.property2').innerText = drawer.panel.querySelector('form #property2').value.trim()
-    node.querySelector('.property3').innerText = drawer.panel.querySelector('form #property3').value.trim()
+    node.dataset.comment = drawer.panel.querySelector('form #comment').value.trim()
     if ( node.parentNode == null ){
         insert()
     }
@@ -188,9 +186,6 @@ function clean(node){
     // console.log('clean custom element',node)
     // Remove the content editable flag and the ornamentation
     node.removeAttribute('contenteditable')
-    node.querySelector('.title').remove()
-    node.querySelector('.advice').remove()
-    node.querySelector('.label').remove()
     node.querySelector('button').remove()
     return node
 }
@@ -205,19 +200,13 @@ function format( element ){
     if ( element.id == false ){
         element.id = Helpers.generateUid()
     }
-    // Element data
-    const data = {
-        property1: element.querySelector('.property1').innerText,
-        property2: element.querySelector('.property2').innerText,
-        property3: element.querySelector('.property3').innerText,
-    }
-    element.innerHTML = template(data)
+    element.innerHTML = ''
     element.setAttribute('contenteditable',false)
     // Add edit button and listener
     const editButton = document.createElement('button')
     editButton.type = 'button'
     editButton.classList.add('edit')
-    editButton.innerText = 'Edit'
+    editButton.innerHTML = Icons.commentEdit
     editButton.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
@@ -248,40 +237,17 @@ function addEventHandlers(edt){
 
 /**
  * Form template
- * @param {string, string, string} props The form properties to be edited
+ * @param {string} comment The comment to be edited
  * @returns {string} Generated html
  */
-function form(props){
+function form(comment){
     return `
         <form>
             <div class="form-input">
-                <label for="property1">Property 1</label>
-                <input id="property1" type="text" class="form-control" placeholder="Property 1" required value="${props.property1}">
-            </div>
-            <div class="form-input">
-                <label for="property2">Property 2</label>
-                <input id="property2" type="text" class="form-control" placeholder="Property 2" required value="${props.property2}">
-            </div>
-            <div class="form-input">
-                <label for="property3">Property 3</label>
-                <input id="property3" type="text" class="form-control" placeholder="Property 3" required value="${props.property3}">
+                <label for="comment">Comment</label>
+                <textarea id="comment" class="form-control" placeholder="Enter your comment" required>${comment}</textarea>
             </div>
         </form>`
-}
-
-/**
- * Create a template for how the custom element is presented in the editor
- * @param {string,string,string} props The properties to display
- * @returns {string} HTML text to display
- */
-function template(props){
-    return `
-        <span class="title">I am a custom object with 3 properties:</span>
-        <span class="label">Property 1:</span><span class="prop property1">${props.property1}</span>
-        <span class="label">Property 2:</span><span class="prop property2">${props.property2}</span>
-        <span class="label">Property 3:</span><span class="prop property3">${props.property3}</span>
-        <span class="advice">Click the top right-hand button to edit. Select anywhere in the element and then the Enter key to add a new line after this custom element.</span>
-    `
 }
 
 /**
@@ -293,8 +259,8 @@ function template(props){
 const init = function( edt, btn ){
     editor = edt
     button = btn
-    const customElements = edt.editorNode.querySelectorAll( btn.tag )
-    customElements.forEach( element => format( element ) )
+    const comments = edt.editorNode.querySelectorAll( btn.tag )
+    comments.forEach( element => format( element ) )
 }
 
 /**
@@ -343,4 +309,4 @@ const click = function( edt, btn ){
 // -----------------------------------------------------------------------------
 
 const options = {setState, init, addEventHandlers, clean}
-export const BUTTON = new ToolbarButton( 'custom', TAG, 'Custom', Icons.plugin, click, options ) 
+export const BUTTON = new ToolbarButton( 'custom', TAG, 'Custom', Icons.comment, click, options ) 
