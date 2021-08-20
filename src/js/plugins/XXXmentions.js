@@ -185,12 +185,13 @@ function insert(person){
     if ( editor.range === false  || 
         (editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer) ){
         button.element.disabled = true
-        button.element.classList.remove('active')
+        // button.element.classList.remove('active')
+    // This button can never be active...
     } else {
         button.element.disabled = false
-        button.element.classList.add('active')
     }
 }
+
 
 // -----------------------------------------------------------------------------
 // @section Exports
