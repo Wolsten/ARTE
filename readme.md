@@ -121,7 +121,7 @@ As well as creating the target bundle, these commands also copy required static 
 Now you can serve the `public/index.html` which has the following script declarations in place of those of the development `index.html` file:
 
 ```
-<script src="./js/ARTE-bundle-ES6.js" charset="utf-8"></script>
+<script src="./js/ARTE-bundle-ES5.js" charset="utf-8"></script>
 <script type="text/javascript"> 
 ```
 
