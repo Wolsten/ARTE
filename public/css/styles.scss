@@ -36,19 +36,54 @@ button:not([disabled]):hover {
 // -----------------------------------------------------------------------------
 
 
-body {
+body.index-body {
+
     background-color: var(--background);
+
+    .index-header {
+        background-color:var(--colour-secondary);
+        padding:0.5rem;
+
+        > div {
+            display:flex;
+            justify-content:flex-start;
+            padding:0;
+            margin:0;
+        }
+        img {
+            width:80px;
+            height:80px;
+        }
+        h1 {
+            margin:0;
+            padding:0 0.5rem;
+            font-size: 1.3rem;
+            color:var(--colour-primary);
+        }
+        h2 {
+            margin:0;
+            padding:0 0.5rem;
+            font-size: 1rem;
+            color:white;
+            font-weight: normal;
+        }
+        .buttons {
+            margin:0;
+            display:flex;
+            justify-content: flex-end;
+        }
+        .buttons span {
+            display:inline-block;
+            padding-left:0.5rem;
+        }
+    }
+
+    button#save {
+        margin-top:1rem;
+    }
 }
 
-body > button#save {
-    margin-top:1rem;
-}
 
-body > h5 {
-    padding-top:0.5rem;
-    margin-top:1rem;
-    border-top: var(--border) solid 1px;
-}
 
 // -----------------------------------------------------------------------------
 // @section Editor
@@ -340,7 +375,9 @@ body > h5 {
     padding: 0.5rem 0.7rem;
 }
 
-/* mentions.js plugin */
+// -----------------------------------------------------------------------------
+// @section mentions.js plugin
+// -----------------------------------------------------------------------------
 
 .mentions ul {
     padding:0;
@@ -363,7 +400,9 @@ body > h5 {
     background-color:var(--background-hover);
 }
 
-/* custom.js plugin */
+// -----------------------------------------------------------------------------
+// @section custom.js plugin
+// -----------------------------------------------------------------------------
 
 custom {
     position:relative;
@@ -416,7 +455,9 @@ custom button.edit {
     right:0.5rem;
 }
 
-/* colours.js plugin */
+// -----------------------------------------------------------------------------
+// @section colours.js plugin
+// -----------------------------------------------------------------------------
 
 #colour-menu {
 
@@ -490,9 +531,11 @@ custom button.edit {
     }
 }
 
-/* debugging */
+// -----------------------------------------------------------------------------
+// @section debugging
+// -----------------------------------------------------------------------------
 
-div#debug {
+div.debug {
     width:100%;
     display:flex;
     flex-direction: row;
@@ -504,14 +547,14 @@ div#debug {
     }
     div.col {
         width: 50%;
-    }
-    div.col label {
-        display:block;
-        font-weight: bold;
-        color: var(--text);
-    }
-    div.col span {
-        color: var(--text-debug);
-        font-size: 1rem;
+        label {
+            display:block;
+            font-weight: bold;
+            color: var(--text);
+        }
+        span {
+            color: var(--text-debug);
+            font-size: 1rem;
+        }
     }
 }

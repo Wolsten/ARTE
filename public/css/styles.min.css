@@ -24,18 +24,55 @@ button:not([disabled]):hover {
   color: var(--background);
 }
 
-body {
+body.index-body {
   background-color: var(--background);
 }
 
-body > button#save {
-  margin-top: 1rem;
+body.index-body .index-header {
+  background-color: var(--colour-secondary);
+  padding: 0.5rem;
 }
 
-body > h5 {
-  padding-top: 0.5rem;
+body.index-body .index-header > div {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0;
+  margin: 0;
+}
+
+body.index-body .index-header img {
+  width: 80px;
+  height: 80px;
+}
+
+body.index-body .index-header h1 {
+  margin: 0;
+  padding: 0 0.5rem;
+  font-size: 1.3rem;
+  color: var(--colour-primary);
+}
+
+body.index-body .index-header h2 {
+  margin: 0;
+  padding: 0 0.5rem;
+  font-size: 1rem;
+  color: white;
+  font-weight: normal;
+}
+
+body.index-body .index-header .buttons {
+  margin: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+body.index-body .index-header .buttons span {
+  display: inline-block;
+  padding-left: 0.5rem;
+}
+
+body.index-body button#save {
   margin-top: 1rem;
-  border-top: var(--border) solid 1px;
 }
 
 .editor-container {
@@ -363,7 +400,6 @@ body > h5 {
   padding: 0.5rem 0.7rem;
 }
 
-/* mentions.js plugin */
 .mentions ul {
   padding: 0;
   margin: 0;
@@ -388,7 +424,6 @@ body > h5 {
   background-color: var(--background-hover);
 }
 
-/* custom.js plugin */
 custom {
   position: relative;
   display: block;
@@ -443,7 +478,6 @@ custom button.edit {
   right: 0.5rem;
 }
 
-/* colours.js plugin */
 #colour-menu {
   display: flex;
   flex-wrap: wrap;
@@ -523,31 +557,30 @@ custom button.edit {
   z-index: 100;
 }
 
-/* debugging */
-div#debug {
+div.debug {
   width: 100%;
   display: flex;
   flex-direction: row;
 }
 
-div#debug h5 {
+div.debug h5 {
   font-size: 1.2rem;
   padding: 0.4rem 0;
   margin: 0;
   color: var(--text);
 }
 
-div#debug div.col {
+div.debug div.col {
   width: 50%;
 }
 
-div#debug div.col label {
+div.debug div.col label {
   display: block;
   font-weight: bold;
   color: var(--text);
 }
 
-div#debug div.col span {
+div.debug div.col span {
   color: var(--text-debug);
   font-size: 1rem;
 }
