@@ -15,6 +15,6 @@
     --block-quote-background: #f9f9f9;
     --toolbar-button-border: white;
     --toolbar-button-background-active:rgb(230, 230, 230);
-    --modal-background: rgba(100,100,100,0.05);
+    --modal-background: rgba(100,100,100,0.2);
     --selected-object-border: rgb(150, 150, 200);
 }

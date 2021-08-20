@@ -232,7 +232,13 @@ body.index-body {
     left:0;
     width:100vw;
     height:100vh;
-    background:var(--modal-background);
+
+    &.no-escape {
+        background:var(--modal-background);
+    }
+    &.escape {
+        background:transparent;
+    }
 }
 
 .modal-panel-container {

@@ -68,7 +68,11 @@ module.exports = (env) => {
             to:"img/[name][ext]"
           },
           {
-            from: "src/css/*",
+            from: "src/css/styles.min.*",
+            to:"css/[name][ext]"
+          },
+          {
+            from: "src/css/*-theme.css",
             to:"css/[name][ext]"
           },
           {

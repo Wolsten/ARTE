@@ -150,13 +150,17 @@ class Modal {
                 }
             })
         }
-        // Support escape key?
+        // Support escape key and background clicks?
         if ( this.escape ){
             document.addEventListener('keydown', event => {
                 if ( event.key == 'Escape' ){
                     event.stopPropagation()
                     this.hide()
                 }
+            })
+            this.panel.addEventListener( 'click', event => {
+                event.stopPropagation()
+                this.hide()
             })
         }
     }
@@ -167,6 +171,9 @@ class Modal {
         this.panel.id = Helpers.generateUid()
         this.panel.classList.add( 'modal-panel' )
         this.panel.classList.add( `modal-panel-${this.type}`)
+        // Flag whether can select the modal panel to close the modal
+        // (as well as use the escape key)
+        this.panel.classList.add( this.escape ? 'escape' : 'no-escape')
         this.panel.innerHTML = this.template()
         // Add modal to the document
         document.querySelector('body').appendChild(this.panel)

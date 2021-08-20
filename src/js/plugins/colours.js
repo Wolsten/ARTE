@@ -149,6 +149,7 @@ function show(){
         type:'drawer',
         title,
         html:form(),
+        escape: true,
         buttons: {
             cancel: {label:'Cancel'},
             confirm: {label:'Set', callback:save}
