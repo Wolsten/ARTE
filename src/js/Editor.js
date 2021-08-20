@@ -152,6 +152,17 @@ class Editor {
     }
 
     /**
+     * Reset states of all buttons
+     */
+    setStates( type='' ){
+        this.toolbar.forEach( button => {
+            if ( type == '' || button.type == type){
+                this.setState( button )
+            }
+        })
+    }
+
+    /**
      * Initialise the toolbar buttons
      */
     initialiseButtons(){

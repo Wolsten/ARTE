@@ -322,7 +322,8 @@ function parseNode( node, formats, button ){
     // Reset the selection
     Helpers.resetSelection(editor.editorNode)
     editor.updateRange()
-    button.setState( editor, button )
+    // Reset states for all block buttons
+    editor.setStates('block')
 }
 
 /**
