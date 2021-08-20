@@ -49,7 +49,7 @@ function handleConfirmCancel(){
 function handleCancel(){
     if ( dirty ){
         confirm = new Modal({ 
-            type:'confirm',
+            type:'overlay',
             severity:'warning',
             title:'Cancel changes', 
             html:'Do you really want to lose these changes?',
@@ -82,7 +82,7 @@ function handleConfirmDelete(){
 
 function handleDelete(){
     confirm = new Modal({ 
-        type:'confirm',
+        type:'overlay',
         severity:'danger',
         title:'Delete changes', 
         html:'Do you really want to delete this link?',

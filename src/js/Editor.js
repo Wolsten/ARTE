@@ -314,8 +314,10 @@ class Editor {
      * an empty editor, highlight a custom node if selected
      */
     handleMouseUp(){
-        // console.log('Handle mouse up')
-        // console.log('handleMouseUp range=',this.range)
+        if ( this.options.debug ){
+            console.log('Handle mouse up')
+            console.log('handleMouseUp range=',this.range)
+        }
         this.updateRange()
         // let formats = []
         if ( this.range !== false ){
