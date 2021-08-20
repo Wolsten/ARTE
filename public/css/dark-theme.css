@@ -7,13 +7,14 @@
     --text-disabled: rgb(120,120,120);
     --text-link: rgb(102, 102, 235);
     --text-debug: rgb(104, 207, 104);
-    --background: rgb(40, 40, 40);
+    --button-background-hover: hsl(0, 0%, 60%);
+    --background: rgb(70, 67, 67);
     --background-hover: rgb(80,80,80);
-    --border: #928f8f;
+    --border: hsl(0, 0%, 60%);
     --block-quote-border: #ccc;
     --block-quote-background: rgb(60, 60, 60);
-    --toolbar-button-border: rgb(40, 40, 40);
-    --toolbar-button-background-active:rgb(70, 70, 70);
+    --toolbar-button-border: rgb(200,200,200);
+    --toolbar-button-background-active:rgb(160,160,160);
     --modal-background: rgba(100,100,100,0.2);
     --selected-object-border: rgb(150, 150, 200);
 }
