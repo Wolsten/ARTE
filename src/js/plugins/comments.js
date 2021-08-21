@@ -244,7 +244,6 @@ function form(comment){
     return `
         <form>
             <div class="form-input">
-                <label for="comment">Comment</label>
                 <textarea id="comment" class="form-control" placeholder="Enter your comment" required>${comment}</textarea>
             </div>
         </form>`
@@ -269,8 +268,7 @@ const init = function( edt, btn ){
  * @param {object} btn The button to act on
  */
 const setState = function( edt, btn ){
-    if ( edt.range === false  || 
-        (edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer) ){
+    if ( edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer ){
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {

@@ -82,10 +82,10 @@ class Editor {
         this.bufferIgnore = false
         this.bufferUpdate = Buffer.update
         this.bufferIgnoreMutation = Buffer.ignore
-        if ( this.options.debug ){
-            console.log('buffer',this.buffer)
-            console.log('buffer index', this.bufferIndex)
-        }
+        // if ( this.options.debug ){
+        //     console.log('buffer',this.buffer)
+        //     console.log('buffer index', this.bufferIndex)
+        // }
     }
 
     /**
@@ -155,19 +155,24 @@ class Editor {
 
     /**
      * Set the disabled and active states for a button. If not provided
-     * just check if we have a range
+     * just check if we have a range and it isn't a custom element
      * @param {object} button 
      */
     setState( button ){
-        if ( "setState" in button ){
-            button.setState( this, button )
-        } else {
-            if ( this.range === false ){
+        let handled = false
+        // If not a buffer button al buttons are disabled and 
+        // inactive if there is no range or the range is in a custom element
+        if ( button.type !== 'buffer' ){
+            if ( this.range === false || this.range.custom ){
+                handled = true
                 button.element.disabled = true
-            } else {
-                button.element.disabled = false
+                button.element.classList.remove('active')
             }
-            button.element.classList.remove('active')
+        } 
+        if ( handled == false ){
+            if ( "setState" in button ){
+                button.setState( this, button )
+            }
         }
     }
 
@@ -233,33 +238,40 @@ class Editor {
     // -----------------------------------------------------------------------------
 
     /**
-     * Listen for mouseup events on the document 
+     * Listen for mouseup events on the document
      */
     listenForMouseUpEvents(){
         document.addEventListener('mouseup', event => {
-            // Ignore if a modal is active
+            // Get the active element in the document
+            const active = document.activeElement
+            if ( this.options.debug ){
+                console.warn('mouseup on',event.target)
+                console.log( 'active element', document.activeElement)
+            }
+            // Clicked a modal button?
             if ( this.modal.active() ){
                 return
-            }
-            // console.warn('mouseup on',event.target)
-            if ( this.nodeInEditor( event.target ) ){
+            // Clicked in the editor (but not a custom element which returns a
+            // different active element)
+            } else if ( active == this.editorNode ){
                 this.handleMouseUp() 
+            // Clicked in toolbar?
             } else if ( this.nodeInToolbar( event.target) ) {
-                return   
+                return
+            // Must have clicked outside the editor or clicked on
+            // a custom element, in either case reset the range and button states
             } else {
-                this.handleEditorBlur()
+                this.resetRange()
             }
         })
     }
 
     /**
-     * Handle blur event in the editor
-     * @param {Event} event 
+     * Handle resetting of the range and the associated button states
      */
-    handleEditorBlur( event ){
-        // console.log('editor blurred')
+    resetRange(){
+        this.range = false
         this.toolbar.forEach( button => {
-            this.range = false
             this.setState( button )
         })
     }
@@ -270,12 +282,15 @@ class Editor {
      * @returns {boolean} true if the node is in the editor
      */
     nodeInEditor(node){
-        while ( node.nodeType == 3 || node.tagName != 'HTML' ){
+        while ( node.nodeType == 3 || node.tagName != 'HTML' || node.contentEditable != false ){
+            console.log('Checking node in editor', node)
             if ( node == this.editorNode ){
+                console.log('node in editor')
                 return true
             }
             node = node.parentNode
         }
+        console.log('node NOT in editor')
         return false
     }
 
@@ -324,12 +339,12 @@ class Editor {
             this.bufferIgnore = false
             // If enter cursor in an empty editor then make this a paragraph
             // rather than raw text
-            if ( this.range.blockParent == this.editorNode && this.editorNode.innerText == ''){
+            if ( this.range.blockParent == this.editorNode && 
+                 this.editorNode.innerText == ''){
                 this.insertParagraph()
             }
             // Unselect custom blocks and highlight this one if custom 
-            const custom =  Helpers.getCustomParent(this.range)
-            this.highlightCustomNode(custom)
+            this.highlightCustomNode(this.range.blockParent)
         }
         this.setToolbarStates()
     }
@@ -424,10 +439,9 @@ class Editor {
         if ( this.range === false ){
             return
         }
-        const custom =  Helpers.getCustomParent(this.range)
         const endNormal = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
-        if ( custom || endNormal ) {
+        if ( this.range.custom || endNormal ) {
             // console.log(`Creating a ${this.range.blockParent.tagName} node`)
             let n = document.createElement(this.range.blockParent.tagName)
             n.innerText = '\n'
@@ -435,7 +449,7 @@ class Editor {
             Helpers.setCursor( n, 0 )
             handled = true
         }
-        if ( custom ){
+        if ( this.range.custom ){
             this.highlightCustomNode(false)
         }
         // Reset the range which must be done after a delay since this
@@ -710,22 +724,28 @@ class Editor {
      * Get the new range in the editor node and when debugging display this
      */
     updateRange(){
-        this.range = Helpers.getRange()
-        if ( this.options.debug ){
-            Templates.debugRange( this.debugTarget, this.range )
+        console.log('modal active',this.modal.active())
+        if ( this.modal.active() == false ){
+            this.range = Helpers.getRange()
+            if ( this.options.debug ){
+                Templates.debugRange( this.debugTarget, this.range )
+            }
         }
     }
  
     /**
-     * Remove "selected" class from all custom elements and then add to node 
-     * (if not false)
-     * @param {HTMLElement|false} node 
+     * Remove "custom-selected" class from all custom elements and then add to 
+     * any child of the parentNode if it is a custom.
+     * @param {HTMLElement|false} parentNode 
      */
-    highlightCustomNode(node){
+    highlightCustomNode(parentNode){
         const customs = this.editorNode.querySelectorAll('[contenteditable=false]')
-        customs.forEach(custom=>custom.classList.remove('selected'))
-        if ( node ){
-            node.classList.add('selected')
+        customs.forEach(custom => {
+            custom.classList.remove('custom-selected')
+        })
+        const custom = Helpers.getCustomFromNode(parentNode)
+        if ( custom ){
+            custom.classList.add('custom-selected')
         }
     }
 

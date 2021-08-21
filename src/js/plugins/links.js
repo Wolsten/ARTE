@@ -51,11 +51,10 @@ function handleCancel(){
         confirm = new Modal({ 
             type:'overlay',
             severity:'warning',
-            title:'Cancel changes', 
             html:'Do you really want to lose these changes?',
             buttons: {
                 cancel: { label:'No - keep editing'},
-                confirm: { label:'Yes - delete link', callback:handleConfirmCancel}
+                confirm: { label:'Yes - lose changes', callback:handleConfirmCancel}
             }
         })
         confirm.show()
@@ -84,7 +83,6 @@ function handleDelete(){
     confirm = new Modal({ 
         type:'overlay',
         severity:'danger',
-        title:'Delete changes', 
         html:'Do you really want to delete this link?',
         buttons: {
             cancel: { label:'No - keep editing'},
@@ -366,8 +364,7 @@ const clean = function(node){
  * @param {object} btn The button to act on
  */
  const setState = function( edt, btn ){
-    if ( edt.range === false  || 
-        (edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer) ){
+    if ( edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer ){
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {

@@ -214,28 +214,14 @@ function parseBlockNode(node, styles, button, range){
  */
 const setState = function(editor, button){
     // console.log('setting style state')
-    if ( editor.range === false ) {
-
-
-    // }  || 
-    //     editor.range.collapsed==true ) {
-
-        // } || 
-        // //  editor.range.startContainer != editor.range.endContainer) ){
-        // editor.range.rootNode == editor.editorNode ||
-        // Helpers.isList(editor.range.rootNode) ){
-
-        button.element.disabled = true
-        button.element.classList.remove('active')
-    } else if ( button.tag == 'CLEAR' ){
+    if ( button.tag == 'CLEAR' ){
         button.element.disabled = false
         button.element.classList.remove('active')
     } else {
-        // The rootNode should not be a DIV (the editor) or list container - (implying 
-        // multiple blocks selected) or a custom element
-        button.element.disabled = editor.range.rootNode.tagName === 'DIV' || 
-                                Helpers.isList(editor.range.rootNode) ||
-                                Helpers.isCustom(editor.range.rootNode)
+        // The rootNode should not be the editor or list container - (implying 
+        // multiple blocks selected) 
+        button.element.disabled = editor.range.rootNode == editor.rootNode || 
+                                  Helpers.isList(editor.range.rootNode)
         // Check whether the computed style matches the btn
         setStyleProps( button )
         const inlineStyles = Helpers.getInlineStyles( editor.range.startContainer )

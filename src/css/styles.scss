@@ -242,10 +242,15 @@ body.index-body {
     &.escape {
         background:transparent;
     }
+
+    &.show .modal-panel-container {
+        opacity:1;
+    }
 }
 
 .modal-panel-container {
     position:absolute;
+    min-width:400px;
     background:var(--background);
     opacity:0;
     transition: all 0.4s ease-in-out 0s;
@@ -261,93 +266,22 @@ body.index-body {
     }
 }
 
-.modal-panel-overlay .modal-panel-container {
-    width:50%;
-    top:25%;
-    left:25%;
-    padding:2rem 2rem 1rem 2rem;
-    border:1px var(--border) solid;
-    border-radius: 0.5rem;
-}
-
-.modal-panel-drawer .modal-panel-container {
-    top:0;
-    left:0;
-    padding:2rem;
-    width:100%;
-    border-bottom:1px var(--border) solid;
-    transform: translateY(-100%);
-    transition: all 0.3s ease-in-out 0s;
-}
-.modal-panel-drawer .modal-panel-body,
-.modal-panel-drawer .modal-panel-buttons {
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.modal-panel-full-screen .modal-panel-container {
-    width:100vw;
-    height:100vh;
-    padding:2rem;  
-    display:flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-.modal-panel-full-screen .modal-panel-body {
-    flex-grow: 1;
-}
-
-.modal-panel-positioned .modal-panel-container {
-    margin: 0;
-    padding: 0;
-    border: 1px solid var(--border);
-    transition: none;
-}
-
-.modal-panel.show .modal-panel-container {
-    opacity:1;
-}
-
-.modal-panel-drawer.show .modal-panel-container {
-    transform: translateX(0);
-}
-
-.modal-panel-header {
-    display:block;
-}
-
-.modal-panel-title {
-    display:block;
-    text-align: center;
-    font-size: 2rem;
-    position:relative;
-    margin:0 0 1.5rem 0;
-    color:inherit;
-}
-
-.modal-panel-title i {
-    font-size: 3rem;
-    padding-right:2rem;
-    position: relative;
-    top:0.4rem;
-}
-
 .modal-panel-body {
     margin: 2rem 0;
 
     // Forms
     .form-input {
+
         display:flex;
         justify-content:flex-start;
         margin-bottom: 1rem;
         label {
             font-size: inherit;
-            flex-basis:25%;
+            flex-basis:100px;
+            flex-shrink:0;
             color:inherit;
         }
         a {
-            flex-basis: 5%;
             padding-left:0.5rem;
             cursor:pointer;
             i {
@@ -356,7 +290,7 @@ body.index-body {
             }
         }
         .form-control {
-            flex-basis:75%;
+            flex-grow:1;
             background:var(--background);
             border: 1px solid var(--border);
             border-radius: 0.4rem;
@@ -365,7 +299,10 @@ body.index-body {
             font-size: inherit;
         }
         .form-control.with-button {
-            flex-basis:70%;
+            flex-basis:95%;
+        }
+        textarea {
+            width:100%;
         }
     }
     .form-input 
@@ -374,23 +311,101 @@ body.index-body {
         color:inherit;
     }
 }
-.modal-panel-positioned .modal-panel-body {
-    margin:0;
-}
 
 .modal-panel-buttons {
     display:flex;
     justify-content: space-between;
+
+    &.centred {
+        display:block;
+        text-align: right;
+    }
+
+    button {
+        padding: 0.3rem 0.5rem;
+    }
 }
 
-.modal-panel-buttons.centred {
+.modal-panel-title {
     display:block;
-    text-align: right;
+    text-align: center;
+    font-size: 1.6rem;
+    position:relative;
+    margin:0;
+    color:inherit;
+    width:100%;
+    i {
+        font-size: 2.4rem;
+        position: relative;
+        top:0.4rem;
+    }
+    &.with-text i {
+        padding-right:1rem;
+    }
 }
 
-.modal-panel-buttons button {
-    padding: 0.5rem 0.7rem;
+.modal-panel-overlay {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    .modal-panel-container {
+        flex-basis:50%;
+        padding:2rem 2rem 1rem 2rem;
+        border:1px var(--border) solid;
+        border-radius: 0.5rem;
+    }
 }
+
+.modal-panel-drawer {
+    .modal-panel-container {
+        top:0;
+        left:0;
+        padding:2rem;
+        width:100%;
+        border-bottom:1px var(--border) solid;
+        transform: translateY(-100%);
+        transition: all 0.3s ease-in-out 0s;
+    }
+    .modal-panel-header,
+    .modal-panel-body,
+    .modal-panel-buttons {
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    &.show .modal-panel-container {
+        transform: translateX(0);
+    }
+}
+
+.modal-panel-full-screen {
+    .modal-panel-container {
+        width:100vw;
+        height:100vh;
+        padding:2rem;  
+        display:flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .modal-panel-body {
+        flex-grow: 1;
+    }
+}
+
+.modal-panel-positioned {
+    .modal-panel-container {
+        margin: 0;
+        padding: 0;
+        border: 1px solid var(--border);
+        transition: none;
+    }
+    .modal-panel-body {
+        margin:0;
+    }
+}
+
+
 
 // -----------------------------------------------------------------------------
 // @section mentions.js plugin
@@ -426,50 +441,42 @@ custom {
     display:block;
     padding:0.5rem;
     margin: 0.3rem 0;
-    border-radius:0.3rem;
     font-size: 1rem;
     font-weight:normal;
-    border:1px solid var(--border);
+    border:2px solid var(--border);
     transition: border 500ms ease-in-out;
-}
-custom, custom > * {
     background-color: var(--block-quote-background);
-}
+    &.custom-selected {
+        border-color:var(--custom-selected-border);
+    }
 
-custom.selected {
-    border-color:var(--selected-object-border);
-}
-
-custom .title {
-    display:block;
-    margin-bottom:0.3rem;
-}
-
-custom .label {
-    display:inline-block;
-    font-style: italic;
-    margin-left: 0.5rem;
-}
-
-custom .property1 {
-    color:red;
-}
-custom .property2 {
-    color:green;
-}
-custom .property3 {
-    color:rgb(99, 99, 236);
-}
-
-custom .advice {
-    display:block;
-    margin-top:0.5rem;
-}
-
-custom button.edit {
-    position: absolute;
-    top:0.5rem;
-    right:0.5rem;
+    .title {
+        display:block;
+        margin-bottom:0.3rem;
+    }
+    .label {
+        display:inline-block;
+        font-style: italic;
+        margin-left: 0.5rem;
+    }
+    .property1 {
+        color:red;
+    }
+    .property2 {
+        color:green;
+    }
+    .property3 {
+        color:rgb(99, 99, 236);
+    }
+    .advice {
+        display:block;
+        margin-top:0.5rem;
+    }
+    button.edit {
+        position: absolute;
+        top:0.5rem;
+        right:0.5rem;
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -482,13 +489,17 @@ comment {
 
     button.edit {
         position:relative;
-        top:-0.4rem;
+        // top:-0.4rem;
         border:none;
 
         i {
             font-weight:bold;
             color:var(--text-success);
         }
+    }
+
+    &.custom-selected {
+        outline:none;
     }
 }
 

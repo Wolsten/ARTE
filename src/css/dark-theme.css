@@ -16,5 +16,5 @@
     --toolbar-button-border: rgb(200,200,200);
     --toolbar-button-background-active:rgb(160,160,160);
     --modal-background: rgba(100,100,100,0.2);
-    --selected-object-border: rgb(150, 150, 200);
+    --custom-selected-border: rgb(250, 150, 90);
 }

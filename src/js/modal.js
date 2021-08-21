@@ -80,9 +80,10 @@ class Modal {
                 break
         }
         if ( this.title || icon ){
+            const withText = this.title ? 'with-text' : ''
             html += `
                 <header class="modal-panel-header">
-                    <h3 class="modal-panel-title">${icon}${this.title}</h3>
+                    <h3 class="modal-panel-title ${withText}">${icon}${this.title}</h3>
                 </header>`
         }
         if ( this.html ){

@@ -95,7 +95,7 @@ export const replaceNode = function(existingNode, tag, html){
  * @returns {boolean}
  */
 export const isStyle = function( node ){
-    if ( node.tagName == undefined ){
+    if ( node.nodeType != 1 ){
         return false
     }
     return node.tagName === 'SPAN'
@@ -107,7 +107,7 @@ export const isStyle = function( node ){
  * @returns {boolean}
  */
 export const isList = function( node ){
-    if ( node.tagName === undefined ){
+    if ( node.nodeType != 1 ){
         return false
     }
     return node.tagName === 'OL' || node.tagName === 'UL' 
@@ -119,27 +119,29 @@ export const isList = function( node ){
  * @returns {boolean}
  */
 export const isBlock = function( node ){
-    if ( node.tagName == undefined ){
+    // if ( node.tagName == undefined ){
+    if ( node.nodeType != 1 ){
         return false
     }
     return tags.block.includes(node.tagName)
 }
 
 /**
- * Returns the parent container of a custom element or false if not found
+ * Returns the custom node from a range
  * @param {Range} range 
  * @returns {HTMLElement|false}
  */
-export const getCustomParent = function( range ){
-    const firstElementChild = range.blockParent.firstElementChild
-    if ( firstElementChild != null && isCustom(firstElementChild) ){
-        return firstElementChild
-    }
-    return false
+ export const getCustomParentFromRange = function( range ){
+    return getCustomFromNode(range.blockParent)
+    // const firstElementChild = range.blockParent.firstElementChild
+    // if ( firstElementChild != null && isCustom(firstElementChild) ){
+    //     return firstElementChild
+    // }
+    // return false
 }
 
 /**
- * Checks whether teh element is a custom element
+ * Checks whether the element is a custom element
  * @param {HTMLElement} node 
  * @returns {boolean}
  */
@@ -147,7 +149,39 @@ export const isCustom = function( node ){
     if ( node.tagName == undefined ){
         return false
     }
-    return tags.custom.includes(node.tagName)
+    //return tags.custom.includes(node.tagName)
+    console.log( 'node contenteditable',node.getAttribute('contenteditable') )
+    return node.getAttribute('contenteditable') != null
+}
+
+/**
+ * Check whether the selected range is within a custom element
+ * @param {Range} range 
+ * @returns {boolean} true if the range is in a custom element
+ */
+const isCustomFromRange = function( range ){
+    let node = range.startContainer
+    while ( isCustom(node)==false && node.parentNode && node.parentNode.tagName != 'DIV'){
+        node = node.parentNode
+    }
+    return isCustom(node)
+}
+
+/**
+ * Check whether the supplied node contains a custom element and if so return it
+ * @param {HTMLElement} node 
+ * @returns 
+ */
+export const getCustomFromNode = function(node){
+    let result = false
+    if ( node.childNodes ){
+        node.childNodes.forEach(child => {
+            if ( isCustom(child) ){
+                result = child
+            }
+        })
+    }
+    return result
  }
 
  /**
@@ -176,10 +210,12 @@ export const getInlineStyles = function(node){
  * @returns {HTMLElement} 
  */
 export const getParentBlockNode = function(node){
+    // console.log('getParentBlockNode',node)
     // Keep going up the tree while the node is not a block node
     // (the editor is a block node - a DIV)
     while ( isBlock(node)==false ){
         node = node.parentNode
+        // console.log('node',node)
     }
     return node
 }
@@ -301,9 +337,10 @@ export const addMarkers = function( range ){
 /**
  * Add additional properties to the range
  * @param {Range} range 
- * @returns 
+ * @returns {object} The original range object with additional props
  */
 function augmentRange(range){
+    // console.log('augmentRange',range)
     // First parent node that is a block tag
     range.blockParent = getParentBlockNode(range.commonAncestorContainer)
     // First parent node
@@ -311,6 +348,8 @@ function augmentRange(range){
     if ( range.commonAncestorContainer.nodeType === 3 ) {
         range.rootNode = range.commonAncestorContainer.parentNode
     }
+    // et flag to indicate whether the range is in a custom node
+    range.custom = isCustomFromRange(range)
     return range
 }
 
@@ -320,15 +359,13 @@ function augmentRange(range){
  * @returns {Range|false}
  */
 export const getRange = function(){
-    // The selector is looking for a class used with modals so selections
-    // are ignored when modals are active
-    if ( document.querySelector('.show') === null ){
-        let sel = window.getSelection()
-        if ( sel.rangeCount==1 ){
-            let range =  sel.getRangeAt(0)
-            range = augmentRange(range)
-            return range
-        }
+    let sel = window.getSelection()
+    // console.log('new selection',sel)
+    if ( sel.rangeCount==1 ){
+        let range =  sel.getRangeAt(0)
+        // console.log('New range', range)
+        range = augmentRange(range)
+        return range
     }
     return false
 }
@@ -438,8 +475,6 @@ function findMarkerNode( parent, marker ){
  */
 export const resetSelection = function( editorNode ){
     if ( getStartNode( editorNode ) && getEndNode( editorNode ) ){
-        // console.log('startNode',startNode)
-        // console.log('endNode',endNode)
         const range = document.createRange()
         const selection = window.getSelection()
         range.setStart(startNode, startOffset)

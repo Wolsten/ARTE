@@ -94,11 +94,11 @@ function handleDelete(){
     confirm = new Modal({ 
         type:'overlay',
         severity:'danger',
-        title:'Delete changes', 
+        title:'Delete item', 
         html:'Do you really want to delete this item?',
         buttons: {
             cancel: { label:'No - keep editing'},
-            confirm: { label:'Yes - delete custom element', callback:handleConfirmDelete }
+            confirm: { label:'Yes - delete', callback:handleConfirmDelete }
         }
     })
     confirm.show()
@@ -303,8 +303,7 @@ const init = function( edt, btn ){
  * @param {object} btn The button to act on
  */
 const setState = function( edt, btn ){
-    if ( edt.range === false  || 
-        (edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer) ){
+    if ( edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer ){
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {

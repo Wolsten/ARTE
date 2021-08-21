@@ -333,10 +333,7 @@ function parseNode( node, formats, button ){
  */
 const setState = function(editor, button){
     // console.log('setting block state')
-    if ( editor.range === false ){
-        button.element.disabled = true
-        button.element.classList.remove('active')
-    } else if ( button.tag == 'CLEAR' ){
+    if ( button.tag == 'CLEAR' ){
         button.element.disabled = false
         button.element.classList.remove('active')
     } else {

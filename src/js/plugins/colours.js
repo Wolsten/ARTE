@@ -220,18 +220,14 @@ const click = function( edt, btn ){
  */
 const setState = function(edt,btn){
     // console.log('setting colour state')
-    if ( edt.range === false ){
-        btn.element.disabled = true
-        btn.element.classList.remove('active')
-    } else if ( btn.tag == 'CLEAR' ){
+    if ( btn.tag == 'CLEAR' ){
         btn.element.disabled = false
         btn.element.classList.remove('active')
     } else {
-        // The rootNode should not be a DIV (the editor) or list container - (implying 
-        // multiple blocks selected) or a custom element
-        btn.element.disabled = edt.range.rootNode.tagName === 'DIV' || 
-                                Helpers.isList(edt.range.rootNode) ||
-                                Helpers.isCustom(edt.range.rootNode)
+        // The rootNode should not be the editor or list container - (implying 
+        // multiple blocks selected) 
+        btn.element.disabled = edt.range.rootNode == edt.rootNode || 
+                                  Helpers.isList(edt.range.rootNode)
         // Get the inline styles of the selected range
         let value = ''
         let styles = []
