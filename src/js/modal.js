@@ -156,7 +156,12 @@ class Modal {
             document.addEventListener('keydown', event => {
                 if ( event.key == 'Escape' ){
                     event.stopPropagation()
-                    this.hide()
+                    // Invoke cancel callback if available
+                    if ( this.escape  instanceof Function ){
+                        this.escape()
+                    } else {
+                        this.hide()
+                    }
                 }
             })
             this.panel.addEventListener( 'click', event => {

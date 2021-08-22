@@ -10,7 +10,7 @@ import Modal from '../Modal.js'
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
  */
-const TAG = 'OPTIONS'
+const TAG = 'SETTINGS'
 
 
 /**
@@ -155,4 +155,4 @@ const init = function( editor, button ){
 // -----------------------------------------------------------------------------
 
 const options = {setState, init}
-export const BUTTON = new ToolbarButton( 'detached', TAG, 'Custom', Icons.options, click, options ) 
+export const BUTTON = new ToolbarButton( 'detached', TAG, 'Preferences', Icons.options, click, options ) 

@@ -60,7 +60,7 @@ Next we have the javascript:
             [ ARTE.Styles.B, ARTE.Styles.I, ARTE.Styles.U, ARTE.Colours.FOREGROUND, ARTE.Colours.BACKGROUND, ARTE.Styles.CLEAR],
             [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
             [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON, ARTE.Comments.BUTTON],
-            [ ARTE.Options.BUTTON ]
+            [ ARTE.Settings.BUTTON ]
         ]
 
         // Setup Mentions plugin with list of people
@@ -145,9 +145,11 @@ As well as creating the target bundle, these commands also copy required static 
 Now you can serve the `public/index.html` which has the following script declarations in place of those of the development `index.html` file:
 
 ```
-<script src="./js/ARTE-bundle-ES5.js" charset="utf-8"></script>
+<script src="./js/ARTE-bundle-ES5.js?v=2021-08-22a" charset="utf-8"></script>
 <script type="text/javascript"> 
 ```
+
+Note the use of the cache busting parameter.
 
 ## Customising the appearance
 
@@ -291,7 +293,7 @@ ARTE comes with a Modals.js class module which supports four types of modal as w
 | title | `string`. The text to appear in the header of the modal. If blank or not specified no title is displayed. |
 | html | `string`. The html to display in the body of the modal. It would be unusual for this to be empty but it would be possible to display without. |
 | severity | `string`. One of `info`, `warning` or `danger`. Setting this controls whether an icon is displayed (in an appropriate colour) in the modal header. If not set no icon is displayed. |
-| escape | `boolean`. If true the modal can be dismissed by hitting the `Escape` key. The default is false if not specified. |
+| escape | `boolean|function`. If true or a callback function the modal can be dismissed by hitting the `Escape` key. The default is false if not specified. If a callback is specified then this is invoked on escape. |
 | buttons | `object`. A set of upto three buttons with optional callbacks. See example below. |
 | borderRadius | `string`, e.g. `10px`. The default is none. |
 | backgroundColour | `string`. Any allowed css colour specification. The default depends on which theme you selected |

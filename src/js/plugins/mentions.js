@@ -145,6 +145,10 @@ function insert(person){
     editor.bufferUpdate(editor)
 }
 
+const escape = function(){
+    insert('')
+}
+
 /**
  * Handle mentions button click
  * @param {object} edt The editor instance
@@ -159,7 +163,7 @@ function insert(person){
     // Create the modal, show and position
     modal = new Modal({
         type:'positioned',
-        escape:true,
+        escape,
         html:form()
     })
     modal.show()

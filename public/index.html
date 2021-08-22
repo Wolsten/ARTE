@@ -24,9 +24,9 @@
     <!-- Import style sheet (edit this sheet to switch between light and dark themes) -->
     <link rel="stylesheet" href="./css/styles.min.css">
     <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="./favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
     <!-- Github buttons -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <title>ARTE | Active Rich Text Editor</title>
@@ -62,7 +62,7 @@
     <button type="button" id="save">Save</button>
 
     <!-- Replace with ./js/ARTE-bundle-ES5.js for the transpiled version -->
-    <script src="./js/ARTE-bundle-ES6.js" charset="utf-8"></script>
+    <script src="./js/ARTE-bundle-ES6.js?v=2021-08-22a" charset="utf-8"></script>
 
     <script type="text/javascript"> 
 
@@ -75,8 +75,8 @@
             [ ARTE.Blocks.OL, ARTE.Blocks.UL],
             [ ARTE.Styles.B, ARTE.Styles.I, ARTE.Styles.U, ARTE.Colours.FOREGROUND, ARTE.Colours.BACKGROUND, ARTE.Styles.CLEAR],
             [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
-            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON, ARTE.Comments.BUTTON],
-            [ ARTE.Options.BUTTON ]
+            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON, ARTE.Comments.BUTTON]
+            ,[ ARTE.Settings.BUTTON ]
         ]
 
         // Setup Mentions plugin with list of people
