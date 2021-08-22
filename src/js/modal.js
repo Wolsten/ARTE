@@ -43,11 +43,12 @@ class Modal {
             pos = range.getBoundingClientRect()
             //console.log('text node const ',pos)
         }
-        if ( (pos.x + this.container.outerWidth) > window.innerWidth ){
-            pos.x = window.innerWidth - this.container.outerWidth - 20;
+        // Ensure does not go off-screen
+        if ( (pos.x + this.container.offsetWidth) > window.innerWidth ){
+            pos.x = window.innerWidth - this.container.offsetWidth - 20;
         }
-        if ( (pos.y + this.container.outerHeight) > window.innerHeight ){
-            pos.y = window.innerHeight - this.container.outerHeight - 40;
+        if ( (pos.y + this.container.offsetHeight) > window.innerHeight ){
+            pos.y = window.innerHeight - this.container.offsetHeight - 40;
         }
         this.container.style.top = `${pos.y}px`
         this.container.style.left = `${pos.x}px`
