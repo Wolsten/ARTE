@@ -245,7 +245,7 @@ class Editor {
             // Get the active element in the document
             const active = document.activeElement
             if ( this.options.debug ){
-                console.warn('mouseup on',event.target)
+                console.log('mouseup on',event.target)
                 console.log( 'active element', document.activeElement)
             }
             // Clicked a modal button?
@@ -283,14 +283,11 @@ class Editor {
      */
     nodeInEditor(node){
         while ( node.nodeType == 3 || node.tagName != 'HTML' || node.contentEditable != false ){
-            console.log('Checking node in editor', node)
             if ( node == this.editorNode ){
-                console.log('node in editor')
                 return true
             }
             node = node.parentNode
         }
-        console.log('node NOT in editor')
         return false
     }
 

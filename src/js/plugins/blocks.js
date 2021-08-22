@@ -311,7 +311,7 @@ function parseNode( node, formats, button ){
             if ( node == endParentNode ){
                 endNodeFound = true 
                 if ( button.type === 'list' ){
-                    console.log( 'fragment', fragmentNode.innerHTML)
+                    //console.log( 'fragment', fragmentNode.innerHTML)
                     node.outerHTML = fragmentNode.innerHTML 
                 }
                 let removeNodes = editorNode.querySelectorAll('[data-remove=true]')

@@ -65,7 +65,11 @@ function form(){
 function handleKeyUp( event ){
     const key = event.key
     const shiftKey = event.shiftKey
-    
+    let navigated = false
+
+    event.preventDefault()
+    event.stopPropagation()
+
     if ( listItemElements.length == 0 ){
         selectedIndex = -1
     // Move down list
@@ -76,6 +80,7 @@ function handleKeyUp( event ){
         } else {
             selectedIndex = 0
         }
+        navigated = true
         highlightItem()
     // Move up list
     } else if ( key=='ArrowUp' || key=='ArrowLeft' || (key=='Tab' && shiftKey) ){
@@ -85,21 +90,25 @@ function handleKeyUp( event ){
         } else {
             selectedIndex --
         }
+        navigated = true
         highlightItem()
-    // Filter list if not pressed enter
-    } else if ( key!='Enter' ){
-        console.log('filter',inputElement.value.toLowerCase())
-        listContainerElement.innerHTML = filterList( inputElement.value.toLowerCase() )
-        listItemElements = listContainerElement.querySelectorAll('li')
-        selectedIndex = 0
-        highlightItem()
-    }
-    // Enter pressed?
-    if ( key == 'Enter' ){
-        // If have any visible list items then chose the one selected, otherwise
-        // just enter the current input value
-        const chosen = selectedIndex!= -1 ? listItemElements[selectedIndex].textContent : inputElement.value
-        insert(chosen)
+    } 
+    // Not navigated - therefore check if pressed enter or not
+    if ( navigated == false ) {
+        // Filter list if not pressed enter
+        if ( key!='Enter' ){
+            console.log('filter',inputElement.value.toLowerCase())
+            listContainerElement.innerHTML = filterList( inputElement.value.toLowerCase() )
+            listItemElements = listContainerElement.querySelectorAll('li')
+            selectedIndex = 0
+            highlightItem()
+        // Enter pressed?
+        } else {
+            // If have any visible list items then chose the one selected, otherwise
+            // just enter the current input value
+            const chosen = selectedIndex!= -1 ? listItemElements[selectedIndex].textContent : inputElement.value
+            insert(chosen)
+        }
     }
 }
 
@@ -139,6 +148,7 @@ function insert(person){
     // Move offset to the end of the newly inserted person
     offset += person.length
     editor.range = setCursor( editor.range.startContainer, offset )
+    // Hide the modal
     modal.hide()
     // Update the buffer explicity because this operation does not
     // change the dom tree and hence will be missed by the observer

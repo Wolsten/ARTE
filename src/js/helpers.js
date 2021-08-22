@@ -48,10 +48,10 @@ export const registerTag = function(type,tag){
  * Debug function to print out the tags array
  */
  export const debugTags = function(){
-    console.warn('blocks',tags.block.join(', '))
-    console.warn('lists',tags.list.join(', '))
-    console.warn('inline',tags.inline.join(', '))
-    console.warn('customs',tags.custom.join(', '))
+    console.log('blocks',tags.block.join(', '))
+    console.log('lists',tags.list.join(', '))
+    console.log('inline',tags.inline.join(', '))
+    console.log('customs',tags.custom.join(', '))
 }
 
 /**
@@ -149,8 +149,6 @@ export const isCustom = function( node ){
     if ( node.tagName == undefined ){
         return false
     }
-    //return tags.custom.includes(node.tagName)
-    console.log( 'node contenteditable',node.getAttribute('contenteditable') )
     return node.getAttribute('contenteditable') != null
 }
 
@@ -386,8 +384,8 @@ export const setCursorToTargetNode = function(editor, target){
     }
     // If found and it is a text node set the cursor to the end
     if ( target.nodeType === 3 ){
-        console.warn('Found target',target)
-        console.warn('Found length',target.textContent.length)
+        // console.log('Found target',target)
+        // console.log('Found length',target.textContent.length)
         setCursor(target,target.textContent.length)
     // Else set to the start
     } else {

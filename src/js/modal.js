@@ -110,10 +110,20 @@ class Modal {
      * the dom.
      */
     hide(){
+        // Check whether the panel still exists and warn the developer if not
+        // since this means they are calling this method too mane times
+        // The console message is removed in the bundled javascript so the 
+        // this call will fail gracefully.
+        if ( this.panel == null ){
+            console.warn('Attempt to hide panel that is already hidden')
+            return
+        }
         this.panel.classList.remove('show')
-        setTimeout( ()=>{
-            this.panel.remove()
-            this.panel = null
+        setTimeout( () => {
+            if ( this.panel != null ){
+                this.panel.remove()
+                this.panel = null
+            }
         }, 500 )
     }
 
@@ -153,11 +163,11 @@ class Modal {
         }
         // Support escape key and background clicks?
         if ( this.escape ){
-            document.addEventListener('keydown', event => {
+            this.panel.addEventListener('keydown', event => {
                 if ( event.key == 'Escape' ){
                     event.stopPropagation()
                     // Invoke cancel callback if available
-                    if ( this.escape  instanceof Function ){
+                    if ( this.escape instanceof Function ){
                         this.escape()
                     } else {
                         this.hide()
@@ -167,7 +177,12 @@ class Modal {
             this.panel.addEventListener( 'click', event => {
                 if ( event.target == this.panel ){
                     event.stopPropagation()
-                    this.hide()
+                    // Invoke cancel callback if available
+                    if ( this.escape instanceof Function ){
+                        this.escape()
+                    } else {
+                        this.hide()
+                    }
                 }
             })
         }

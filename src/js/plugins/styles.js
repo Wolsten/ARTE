@@ -215,21 +215,20 @@ function parseBlockNode(node, styles, button, range){
 const setState = function(editor, button){
     // console.log('setting style state')
     if ( button.tag == 'CLEAR' ){
-        button.element.disabled = false
         button.element.classList.remove('active')
+    }
+    // The rootNode should not be the editor or list container - (implying 
+    // multiple blocks selected) 
+    button.element.disabled = editor.range.collapsed ||
+                              editor.range.rootNode == editor.rootNode || 
+                              Helpers.isList(editor.range.rootNode)
+    // Check whether the computed style matches the btn
+    setStyleProps( button )
+    const inlineStyles = Helpers.getInlineStyles( editor.range.startContainer )
+    if ( inlineStyles.includes(button.style) ){
+        button.element.classList.add('active')
     } else {
-        // The rootNode should not be the editor or list container - (implying 
-        // multiple blocks selected) 
-        button.element.disabled = editor.range.rootNode == editor.rootNode || 
-                                  Helpers.isList(editor.range.rootNode)
-        // Check whether the computed style matches the btn
-        setStyleProps( button )
-        const inlineStyles = Helpers.getInlineStyles( editor.range.startContainer )
-        if ( inlineStyles.includes(button.style) ){
-            button.element.classList.add('active')
-        } else {
-            button.element.classList.remove('active')
-        }
+        button.element.classList.remove('active')
     }
 }
 

@@ -214,43 +214,37 @@ const click = function( edt, btn ){
 }
 
 /**
- * Set the disabled 
+ * Set the disabled and active states of a button
  * @param {object} edt An editor instance
  * @param {object} btn The button to act on
  */
 const setState = function(edt,btn){
-    // console.log('setting colour state')
-    if ( btn.tag == 'CLEAR' ){
-        btn.element.disabled = false
-        btn.element.classList.remove('active')
-    } else {
-        // The rootNode should not be the editor or list container - (implying 
-        // multiple blocks selected) 
-        btn.element.disabled = edt.range.rootNode == edt.rootNode || 
-                                  Helpers.isList(edt.range.rootNode)
-        // Get the inline styles of the selected range
-        let value = ''
-        let styles = []
-        const inlineStyles = edt.range.startContainer.parentNode.getAttribute('style')
-        if ( inlineStyles != null ){
-            styles = inlineStyles.split(';')
-            // console.log('styles',styles)
-            styles.forEach( item => {
-                // Ignore empty styles (split creates an empty element for last ;)
-                if ( item !== '' ){
-                    const parts = item.split(':')
-                    // Does the inline style match the button?
-                    // If so set the button styling to match
-                    if ( parts[0].trim() === btn.style ){
-                        value = parts[1].trim()
-                        btn.element.querySelector('span.bar').setAttribute('style',`background-color:${value};`)
-                    }
+    //console.log('setting colour state ')
+    btn.element.disabled = edt.range.collapsed ||
+                           edt.range.rootNode == edt.rootNode || 
+                           Helpers.isList(edt.range.rootNode)
+    // Get the inline styles of the selected range
+    let value = ''
+    let styles = []
+    const inlineStyles = edt.range.startContainer.parentNode.getAttribute('style')
+    if ( inlineStyles != null ){
+        styles = inlineStyles.split(';')
+        // console.log('styles',styles)
+        styles.forEach( item => {
+            // Ignore empty styles (split creates an empty element for last ;)
+            if ( item !== '' ){
+                const parts = item.split(':')
+                // Does the inline style match the button?
+                // If so set the button styling to match
+                if ( parts[0].trim() === btn.style ){
+                    value = parts[1].trim()
+                    btn.element.querySelector('span.bar').setAttribute('style',`background-color:${value};`)
                 }
-            })
-        }
-        if ( value == '' ){
-            btn.element.querySelector('span.bar').removeAttribute('style')
-        }
+            }
+        })
+    }
+    if ( value == '' ){
+        btn.element.querySelector('span.bar').removeAttribute('style')
     }
 }
 
