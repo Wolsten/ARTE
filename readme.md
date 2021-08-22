@@ -59,7 +59,8 @@ Next we have the javascript:
             [ ARTE.Blocks.OL, ARTE.Blocks.UL],
             [ ARTE.Styles.B, ARTE.Styles.I, ARTE.Styles.U, ARTE.Colours.FOREGROUND, ARTE.Colours.BACKGROUND, ARTE.Styles.CLEAR],
             [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
-            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON, ARTE.Comments.BUTTON]
+            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON, ARTE.Comments.BUTTON],
+            [ ARTE.Options.BUTTON ]
         ]
 
         // Setup Mentions plugin with list of people
@@ -67,9 +68,13 @@ Next we have the javascript:
 
         // Define editor options
         const options = {
-            // Automatically number headings using outline numbering. Allowed values true or false     
+            // Automatically number headings using outline numbering. Allowed values true or false   
+            // If include the ARTE.Options.BUTTON in the toolbar then this value can be set by the user     
             headingNumbers: true, 
-            // Number of Undo operations supported, max 10       
+            // Styling theme
+            // If include the ARTE.Options.BUTTON in the toolbar then this value can be set by the user   
+            theme: 'theme-light',    
+            // Number of Undo operations supported, max 10
             bufferSize: 10,
             // debugging flag, e.g. to output selection ranges
             debug: true,
@@ -146,21 +151,39 @@ Now you can serve the `public/index.html` which has the following script declara
 
 ## Customising the appearance
 
-ARTE provides three style sheets in `src/css`:
+ARTE provides a single style sheet in `src/css/styles.scss`.
+
+### Customising the theme
+
+To set the default theme in the options add the following to the options passed into the `new ARTE.Editor` statement:
 
 ```
-styles.sccs
-dark-theme.css
-light-theme.css
-``` 
+theme: 'theme-dark',  
+```
 
-To switch between light and dark themes simply swap the import statement at the top of `styles.scss` in order to change the appearance to the following:
+This will change the appearance to something like this:
 
 ![ARTE Rich Text Editor](assets/ARTE-dark-theme.png "ARTE Screen shot - dark theme")
+
+If you include the options plugin in the toolbar settings then the user will be able to switch between settings and their choice will be saved to local storage and will be used in preference to the default value in future.
+
+### Customising heading numbers
+
+Heading numbering can be turned on and off. To turn off heading numbering in the options add the following to the options passed into the `new ARTE.Editor` statement:
+
+```
+headingNumbers: false,  
+```
+
+If you include the options plugin in the toolbar settings then the user will be able to switch between settings and their choice will be saved to local storage and will be used in preference to the default value in future.
+
+### Updating the style sheet
 
 You will need to regenerate the css using a SASS compiler, such as the [Live Sass Compiler](https://github.com/ritwickdey/vscode-live-sass-compiler) in VS Code.
 
 Additional themes can be added easily by adding further theme files with their own variable settings.
+
+### Icons
 
 The icons used in our example code come from Bootstrap but these may be replaced with a different set by importing a different set and updating the file:
 
@@ -189,7 +212,7 @@ Here the button `H1` is created as an instance of the `ToolbarButton` class and 
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `type` | string | Allowed values: 'block','list','style','buffer','custom' |
+| `type` | string | Allowed values: 'block','list','style','detached','custom' |
 | `tag` | string | The tag as inserted in the dom. e.g. H1, P, CUSTOM |
 | `label` | string | Generally used as the title of the button but could also be displayed |
 | `icon` | string | The icon to use for the button |

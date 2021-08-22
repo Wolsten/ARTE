@@ -10,6 +10,7 @@ import * as Links from './plugins/links.js'
 import * as Colours from './plugins/colours.js'
 import * as Custom from './plugins/custom.js'
 import * as Comments from './plugins/comments.js'
+import * as Options from './plugins/options.js'
 
 export {
     Editor,
@@ -21,5 +22,6 @@ export {
     Links,
     Colours,
     Custom,
-    Comments
+    Comments,
+    Options
 }

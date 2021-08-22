@@ -15,7 +15,7 @@ const undo = function(editor){
     setState( editor, UNDO )
     setState( editor, REDO )
     if ( editor.options.debug ){
-        console.log('buffer',editor.buffer)
+        console.log('detached',editor.buffer)
         console.log('buffer index', editor.bufferIndex)
     }
     editor.updateEventHandlers()
@@ -35,7 +35,7 @@ const redo = function(editor){
     setState( editor, UNDO )
     setState( editor, REDO )
     if ( editor.options.debug ){
-        console.log('buffer',editor.buffer)
+        console.log('detached',editor.buffer)
         console.log('buffer index', editor.bufferIndex)
     }
     editor.updateEventHandlers()
@@ -81,7 +81,7 @@ export const update = function(editor){
     // Update buttons
     setState( editor, UNDO )
     setState( editor, REDO )
-    // console.log('buffer',editor.buffer)
+    // console.log('detached',editor.buffer)
     // console.log('buffer index', editor.bufferIndex)
 }
 
@@ -104,5 +104,5 @@ export const ignore = function(editor){
 // -----------------------------------------------------------------------------
 
 const options = {setState}
-export const UNDO = new ToolbarButton('buffer','UNDO','Undo', Icons.undo, undo, options)
-export const REDO = new ToolbarButton('buffer','REDO','Redo', Icons.redo, redo, options)
+export const UNDO = new ToolbarButton('detached','UNDO','Undo', Icons.undo, undo, options)
+export const REDO = new ToolbarButton('detached','REDO','Redo', Icons.redo, redo, options)

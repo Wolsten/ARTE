@@ -88,6 +88,7 @@ function handleKeyUp( event ){
         highlightItem()
     // Filter list if not pressed enter
     } else if ( key!='Enter' ){
+        console.log('filter',inputElement.value.toLowerCase())
         listContainerElement.innerHTML = filterList( inputElement.value.toLowerCase() )
         listItemElements = listContainerElement.querySelectorAll('li')
         selectedIndex = 0

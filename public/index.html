@@ -75,7 +75,8 @@
             [ ARTE.Blocks.OL, ARTE.Blocks.UL],
             [ ARTE.Styles.B, ARTE.Styles.I, ARTE.Styles.U, ARTE.Colours.FOREGROUND, ARTE.Colours.BACKGROUND, ARTE.Styles.CLEAR],
             [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
-            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON, ARTE.Comments.BUTTON]
+            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Custom.BUTTON, ARTE.Comments.BUTTON],
+            [ ARTE.Options.BUTTON ]
         ]
 
         // Setup Mentions plugin with list of people
@@ -83,9 +84,13 @@
 
         // Define editor options
         const options = {
-            // Automatically number headings using outline numbering. Allowed values true or false     
+            // Automatically number headings using outline numbering. Allowed values true or false  
+            // If include the ARTE.Options.BUTTON in the toolbar then this value can be set by the user   
             headingNumbers: true, 
-            // Number of Undo operations supported, max 10       
+            // Styling theme
+            // If include the ARTE.Options.BUTTON in the toolbar then this value can be set by the user   
+            theme: 'theme-light',       
+            // Number of Undo operations supported, max 10    
             bufferSize: 10,
             // debugging flag, e.g. to output selection ranges
             debug: false,

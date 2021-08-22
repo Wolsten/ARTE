@@ -1,5 +1,44 @@
-@import url(light-theme.css);
-//@import url(dark-theme.css);
+// -----------------------------------------------------------------------------
+// @section Themes
+// -----------------------------------------------------------------------------
+
+.theme-light {
+    --colour-text: rgb(90,90,90);
+    --colour-primary: rgb(70,115,200);
+    --colour-secondary: rgb(170,210,140);
+    --colour-success: rgb(35, 190, 55);
+    --colour-warning: rgb(250, 120, 30);
+    --colour-danger: rgb(250, 30, 30);
+    --colour-disabled: rgb(180,180,180);
+    --colour-link: rgb(102, 102, 235);
+    --colour-debug: green;
+    --colour-background-hover: hsl(0, 0%, 60%);
+    --colour-background: hsl(0, 0%, 100%);
+    --colour-border: rgb(90,90,90);
+    --colour-blockquote-background: #f9f9f9;
+    --colour-background-active:rgb(230, 230, 230);
+    --colour-modal-panel-background: rgba(100,100,100,0.2);
+    --custom-selected-border: var(--colour-secondary);
+}
+
+html.theme-dark {
+    --colour-text: #ffffff;
+    --colour-primary: rgb(70,115,200);
+    --colour-secondary: rgb(170,210,140);
+    --colour-success: rgb(30, 250, 60);
+    --colour-warning: rgb(250, 120, 30);
+    --colour-danger: rgb(250, 30, 30);
+    --colour-disabled: rgb(120,120,120);
+    --colour-link: rgb(102, 102, 235);
+    --colour-debug: rgb(104, 207, 104);
+    --colour-background-hover: hsl(0, 0%, 40%);
+    --colour-background: hsl(0, 5%, 20%);
+    --colour-border: hsl(0, 0%, 60%);
+    --colour-blockquote-background: rgb(60, 60, 60);
+    --colour-background-active:rgb(160,160,160);
+    --colour-modal-panel-background: rgba(100,100,100,0.2);
+    --custom-selected-border: rgb(250, 150, 90);
+}
 
 // -----------------------------------------------------------------------------
 // @section General
@@ -12,9 +51,9 @@
 }
 
 button {
-    background:var(--background);
-    border: 1px solid var(--border);
-    color:var(--text);
+    background:var(--colour-background);
+    border: 1px solid var(--colour-border);
+    color:var(--colour-text);
     border-radius: 0.3rem;
     padding:0.3rem 0.5rem;
     -webkit-transition: all 0.5s ease;
@@ -22,14 +61,14 @@ button {
 }
 
 button[disabled] {
-    color:var(--text-disabled);
+    color:var(--colour-disabled);
 }
 
 button:not([disabled]):hover {
     cursor:pointer;
-    background:var(--button-background-hover);
-    color:var(--background);
-    border-color:var(--button-background-hover);
+    background:var(--colour-background-hover);
+    color:var(--colour-text);
+    border-color:var(--colour-background-hover);
 }
 
 // -----------------------------------------------------------------------------
@@ -39,7 +78,7 @@ button:not([disabled]):hover {
 
 body.index-body {
 
-    background-color: var(--background);
+    background-color: var(--colour-background);
 
     .index-header {
         background-color:var(--colour-secondary);
@@ -92,15 +131,15 @@ body.index-body {
 
 .editor-container {
     position: relative;
-    color:var(--text)
+    color:var(--colour-text)
 }
 
 .editor-toolbar {
     padding:0.5rem;
     position:sticky;
     top:0rem;
-    background:var(--background);
-    border:1px solid var(--border);
+    background:var(--colour-background);
+    border:1px solid var(--colour-border);
 }
 
 .editor-toolbar-group {
@@ -109,7 +148,7 @@ body.index-body {
 
 .editor-toolbar-group-separator {
     margin:0 0.3rem;
-    color:var(--text);
+    color:var(--colour-text);
     font-size: 1.2em;
 }
 
@@ -119,10 +158,10 @@ body.index-body {
 
 .editor-toolbar {
     button {
-        border: 1px solid var(--toolbar-button-border);
+        border: 1px solid var(--colour-background);
     }
     button.active {
-        background:var(--toolbar-button-background-active);
+        background:var(--colour-background-active);
     }
     button.barred {
         position:relative;
@@ -138,28 +177,28 @@ body.index-body {
         height:6px;
         left:20%;
         bottom:2px;
-        border:1px var(--border) solid;
-        background-color: var(--background);
+        border:1px var(--colour-border) solid;
+        background-color: var(--colour-background);
     }
     button[disabled] span.bar {
-        border-color:var(--text-disabled);
-        background-color: var(--text-disabled);
+        border-color:var(--colour-disabled);
+        background-color: var(--colour-disabled);
     }
     button span.bar.FGC {
-        background-color: var(--text);
+        background-color: var(--colour-text);
     }
     button[disabled] span.bar.BGC {
-        background-color: var(--background);
-        border-color: var(--text-disabled);
+        background-color: var(--colour-background);
+        border-color: var(--colour-disabled);
     }
 }
 
 .editor-body {
 
     padding:1.4rem;
-    border-bottom: 1px solid var(--border);
-    background-color: var(--background);
-    color:var(--text);
+    border-bottom: 1px solid var(--colour-border);
+    background-color: var(--colour-background);
+    color:var(--colour-text);
     /* Ideally make these options */
     min-height:200px;
     max-height:700px;
@@ -172,9 +211,9 @@ body.index-body {
     }
 
     blockquote {
-        background: var(--block-quote-background);
-        border-left: 10px solid var(--block-quote-border);
-        color:var(--text);
+        background: var(--colour-blockquote-background);
+        border-left: 10px solid var(--colour-border);
+        color:var(--colour-text);
         margin: 1.5em 10px;
         padding: 0.5em 10px;
         font-style: italic;
@@ -185,7 +224,7 @@ body.index-body {
     }
 
     p, label, input, select, button {
-        color:var(--text)
+        color:var(--colour-text)
     }
     
     h1, h2, h3, h4, h5 {
@@ -194,11 +233,11 @@ body.index-body {
     }
     
     a {
-        color:var(--text-link);
+        color:var(--colour-link);
         text-decoration: none;
     }
     a:visited {
-        color:var(--text-link);
+        color:var(--colour-link);
     }
 
     &.heading-numbers { 
@@ -234,10 +273,10 @@ body.index-body {
     width:100vw;
     height:100vh;
     font-size:1rem;
-    color:var(--text);
+    color:var(--colour-text);
 
     &.no-escape {
-        background:var(--modal-background);
+        background:var(--colour-modal-panel-background);
     }
     &.escape {
         background:transparent;
@@ -251,18 +290,18 @@ body.index-body {
 .modal-panel-container {
     position:absolute;
     min-width:400px;
-    background:var(--background);
+    background:var(--colour-background);
     opacity:0;
     transition: all 0.4s ease-in-out 0s;
 
     i.info {
-        color:var(--text)
+        color:var(--colour-text)
     }
     i.warning {
-        color:var(--text-warning)
+        color:var(--colour-warning)
     }
     i.danger {
-        color:var(--text-danger)
+        color:var(--colour-danger)
     }
 }
 
@@ -275,24 +314,31 @@ body.index-body {
         display:flex;
         justify-content:flex-start;
         margin-bottom: 1rem;
+        // Common label attributes apply to the left coloum label and
+        // input labels for radio and checkbox inputs
         label {
             font-size: inherit;
-            flex-basis:100px;
-            flex-shrink:0;
             color:inherit;
+            cursor: pointer;
+        }
+        // Fixed size first label
+        label:first-child {
+            flex-basis:180px;
+            flex-shrink:0;
+            cursor:none;
         }
         a {
             padding-left:0.5rem;
             cursor:pointer;
             i {
-                color:var(--text);
+                color:var(--colour-text);
                 font-size: 1.6rem;
             }
         }
         .form-control {
             flex-grow:1;
-            background:var(--background);
-            border: 1px solid var(--border);
+            background:var(--colour-background);
+            border: 1px solid var(--colour-border);
             border-radius: 0.4rem;
             padding:0.3rem;
             color:inherit;
@@ -303,6 +349,13 @@ body.index-body {
         }
         textarea {
             width:100%;
+        }
+        input[type=radio]{
+            flex-grow:0;
+            margin-left:1rem;
+            &.first {
+                margin-left:0rem;
+            }
         }
     }
     .form-input 
@@ -351,7 +404,7 @@ body.index-body {
     .modal-panel-container {
         flex-basis:50%;
         padding:2rem 2rem 1rem 2rem;
-        border:1px var(--border) solid;
+        border:1px var(--colour-border) solid;
         border-radius: 0.5rem;
     }
 }
@@ -362,7 +415,7 @@ body.index-body {
         left:0;
         padding:2rem;
         width:100%;
-        border-bottom:1px var(--border) solid;
+        border-bottom:1px var(--colour-border) solid;
         transform: translateY(-100%);
         transition: all 0.3s ease-in-out 0s;
     }
@@ -397,7 +450,7 @@ body.index-body {
     .modal-panel-container {
         margin: 0;
         padding: 0;
-        border: 1px solid var(--border);
+        border: 1px solid var(--colour-border);
         transition: none;
     }
     .modal-panel-body {
@@ -411,25 +464,32 @@ body.index-body {
 // @section mentions.js plugin
 // -----------------------------------------------------------------------------
 
-.mentions ul {
-    padding:0;
-    margin:0;
-    max-height: 7.2rem;
-    overflow-y: scroll;
-}
-.mentions li {
-    list-style: none;
-    line-height: 1rem;
-    padding:0.2rem 0 0.2rem 0.3rem;
-    display:block;
-    cursor: pointer;
-}
-.mentions li.selected {
-    background-color:var(--text);
-    color:var(--background);
-}
-.mentions li:hover{
-    background-color:var(--background-hover);
+.mentions {
+    input {
+        display:block;
+        width:100%;
+    }
+    ul {
+        padding:0;
+        margin:0;
+        max-height: 7.2rem;
+        overflow-y: scroll;
+    }
+    li {
+        list-style: none;
+        line-height: 1rem;
+        padding:0.2rem 0 0.2rem 0.3rem;
+        display:block;
+        cursor: pointer;
+        &.selected {
+            background-color:var(--colour-text);
+            color:var(--colour-background);
+        }
+        &:hover{
+            background-color:var(--colour-background-hover);
+            color:var(--colour-text);
+        }
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -443,11 +503,11 @@ custom {
     margin: 0.3rem 0;
     font-size: 1rem;
     font-weight:normal;
-    border:2px solid var(--border);
+    border:2px solid var(--colour-border);
     transition: border 500ms ease-in-out;
-    background-color: var(--block-quote-background);
+    background-color: var(--colour-blockquote-background);
     &.custom-selected {
-        border-color:var(--custom-selected-border);
+        border-color:var(--colour-primary);
     }
 
     .title {
@@ -494,7 +554,7 @@ comment {
 
         i {
             font-weight:bold;
-            color:var(--text-success);
+            color:var(--colour-success);
         }
     }
 
@@ -532,7 +592,7 @@ comment {
         width:56px;
         height:56px;
         margin:0 auto;
-        border: 1px solid var(--border);
+        border: 1px solid var(--colour-border);
         border-radius:40px;
     }
     span.black-and-white[data-colour='white'],
@@ -540,7 +600,7 @@ comment {
         display:inline-block;
         width:36px;
         height:36px;
-        border: 1px solid var(--border)
+        border: 1px solid var(--colour-border)
     }
     span.black-and-white[data-colour='white'] {
         background-color: white;
@@ -558,7 +618,7 @@ comment {
         height:24px;
         padding:0;
         margin:0;
-        border:var(--border);
+        border:var(--colour-border);
         z-index: 1;
     }
     .colours div {
@@ -567,14 +627,14 @@ comment {
     .colours span.active,
     span.black-and-white.active {
         position:relative;
-        outline: 3px solid var(--text);
+        outline: 3px solid var(--colour-text);
         z-index: 100;
     }
     .colours span:hover,
     span.black-and-white:hover {
         position:relative;
         cursor:pointer;
-        outline: 3px solid var(--text);
+        outline: 3px solid var(--colour-text);
         z-index: 100;
     }
 }
@@ -591,17 +651,17 @@ div.debug {
         font-size:1.2rem;
         padding:0.4rem 0;
         margin:0;
-        color: var(--text);
+        color: var(--colour-text);
     }
     div.col {
         width: 50%;
         label {
             display:block;
             font-weight: bold;
-            color: var(--text);
+            color: var(--colour-text);
         }
         span {
-            color: var(--text-debug);
+            color: var(--colour-debug);
             font-size: 1rem;
         }
     }

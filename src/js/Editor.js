@@ -83,7 +83,7 @@ class Editor {
         this.bufferUpdate = Buffer.update
         this.bufferIgnoreMutation = Buffer.ignore
         // if ( this.options.debug ){
-        //     console.log('buffer',this.buffer)
+        //     console.log('detached',this.buffer)
         //     console.log('buffer index', this.bufferIndex)
         // }
     }
@@ -162,7 +162,7 @@ class Editor {
         let handled = false
         // If not a buffer button al buttons are disabled and 
         // inactive if there is no range or the range is in a custom element
-        if ( button.type !== 'buffer' ){
+        if ( button.type !== 'detached' ){
             if ( this.range === false || this.range.custom ){
                 handled = true
                 button.element.disabled = true
@@ -222,7 +222,7 @@ class Editor {
                 }
                 // Prevent default action for all buttons when have no range 
                 // and not the undo-redo buffer buttons
-                if ( this.range === false && button.type !== 'buffer' ){
+                if ( this.range === false && button.type !== 'detached' ){
                     event.preventDefault()
                     return
                 }

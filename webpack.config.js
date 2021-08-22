@@ -72,10 +72,6 @@ module.exports = (env) => {
             to:"css/[name][ext]"
           },
           {
-            from: "src/css/*-theme.css",
-            to:"css/[name][ext]"
-          },
-          {
             from: "default-content.html",
             to:"[name][ext]"
           },

@@ -1,5 +1,5 @@
 {
-  "name": "ARTE",
+  "name": "arte",
   "version": "0.2",
   "description": "Active Rich Text Editor",
   "main": "public/ARTE.js",

@@ -52,4 +52,5 @@ export const warning = '<i class="warning bi bi-cone-striped"></i>'
 export const danger = '<i class="danger bi bi-exclamation-circle-fill"></i>'
 export const comment = '<i class="bi bi-chat-dots"></i>'
 export const commentEdit = '<i class="bi bi-chat-dots-fill"></i>'
+export const options = '<i class="bi bi-gear"></i>'
 
