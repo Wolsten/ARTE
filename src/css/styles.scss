@@ -157,6 +157,8 @@ body.index-body {
 // -----------------------------------------------------------------------------
 
 .editor-toolbar {
+    position:sticky;
+    z-index: 1000;
     button {
         border: 1px solid var(--colour-background);
     }
@@ -194,7 +196,8 @@ body.index-body {
 }
 
 .editor-body {
-
+    position:relative;
+    z-index: 1;
     padding:1.4rem 3rem;
     border-bottom: 1px solid var(--colour-border);
     margin-bottom: 1rem;
