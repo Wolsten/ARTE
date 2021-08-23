@@ -37,10 +37,12 @@ Further down you should see a placeholder div in the body:
 <div id="editor"></div>
 ```
 
-There is also a button to demonstrate how to save the content of the editor:
+There also buttons to demonstrate previewing the cleaned content, downloading and uploading.
 
 ```
-<button type="button" id="save">Save</button>
+<button type="button" id="preview"></button>
+<button type="button" id="download"></button>
+<button type="button" id="upload"></button>
 ```
 
 Next we have the javascript:
@@ -259,6 +261,7 @@ The source file `src/js/ARTE.js` defines which modules are available to your app
 ```
 import Editor from './Editor.js'
 import Modal from './Modal.js'
+import * as Icons from './icons.js'
 import * as Buffer from './plugins/buffer.js'
 import * as Blocks from './plugins/blocks.js'
 import * as Styles from './plugins/styles.js'
@@ -266,6 +269,8 @@ import * as Mentions from './plugins/mentions.js'
 import * as Links from './plugins/links.js'
 import * as Colours from './plugins/colours.js'
 import * as Custom from './plugins/custom.js'
+import * as Comments from './plugins/comments.js'
+import * as Settings from './plugins/settings.js'
 
 export {
     Editor,
@@ -276,7 +281,10 @@ export {
     Mentions,
     Links,
     Colours,
-    Custom
+    Custom,
+    Comments,
+    Settings,
+    Icons
 }
 ```
 
