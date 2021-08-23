@@ -90,10 +90,11 @@ Next we have the javascript:
         // Create editor and add to dom in target position
         const editor = new ARTE.Editor(target, '', toolbar, options)
 
-        // Configure save button
-        const save = document.getElementById('save')
-        save.addEventListener('click', ()=>{
-            let xml = editor.save()
+        // Configure preview button
+        const preview = document.getElementById('preview')
+        preview.innerHTML = `${ARTE.Icons.preview} Preview`
+        preview.addEventListener('click', ()=>{
+            let xml = editor.preview()
             // Insert line feed before all opening tags to make easier to read
             xml = xml.replace(/(<[^\/.]+?>)/gm, '\n$1')
             const drawer = new ARTE.Modal({
@@ -105,6 +106,14 @@ Next we have the javascript:
             })
             drawer.show()
         })
+        // Download
+        const download = document.getElementById('download')
+        download.innerHTML = `${ARTE.Icons.download} Download`
+        download.addEventListener('click', ()=>editor.download())
+        // Upload
+        const upload = document.getElementById('upload')
+        upload.innerHTML = `${ARTE.Icons.fileOpen} Open`
+        upload.addEventListener('click', ()=>editor.upload())
     </script>
 ```
 
