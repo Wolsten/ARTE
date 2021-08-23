@@ -158,7 +158,7 @@ body.index-body {
 
 .editor-toolbar {
     position:sticky;
-    z-index: 1000;
+    z-index: 100;
     button {
         border: 1px solid var(--colour-background);
     }
@@ -283,6 +283,7 @@ body.index-body {
     height:100vh;
     font-size:1rem;
     color:var(--colour-text);
+    z-index: 200;
 
     &.no-escape {
         background:var(--colour-modal-panel-background);

@@ -53,13 +53,22 @@
 
     </div>
 
-    <!-- The inner html will be replaced with the defaultContent 
-    option as specified below -->
+
+    <!-- The inner html will be replaced with the editor instance, in
+         this case the text below is loaded in again as the inital content. -->
     <div id="editor"></div>
 
-    <!-- Add a save button to demonstrate saving the editor content
-         Event handling added in script -->
-    <button type="button" id="save">Save</button>
+    <!-- Add a preview button to demonstrate the editor content that would be saved
+        Event handling added in script -->
+    <button type="button" id="preview"></button>
+
+    <!-- Add a download button to demonstrate downloading the editor content
+        Event handling added in script -->
+    <button type="button" id="download"></button>
+
+    <!-- Add an upload button to demonstrate uploading the editor content
+        Event handling added in script -->
+    <button type="button" id="upload"></button>
 
     <!-- Replace with ./js/ARTE-bundle-ES5.js for the transpiled version -->
     <script src="./js/ARTE-bundle-ES6.js?v=2021-08-22b" charset="utf-8"></script>
@@ -104,10 +113,11 @@
         // Create editor and add to dom in target position
         const editor = new ARTE.Editor(target, '', toolbar, options)
 
-        // Configure save button
-        const save = document.getElementById('save')
-        save.addEventListener('click', ()=>{
-            let xml = editor.save()
+        // Configure preview button
+        const preview = document.getElementById('preview')
+        preview.innerHTML = `${ARTE.Icons.preview} Preview`
+        preview.addEventListener('click', ()=>{
+            let xml = editor.preview()
             // Insert line feed before all opening tags to make easier to read
             xml = xml.replace(/(<[^\/.]+?>)/gm, '\n$1')
             const drawer = new ARTE.Modal({
@@ -119,6 +129,14 @@
             })
             drawer.show()
         })
+        // Download
+        const download = document.getElementById('download')
+        download.innerHTML = `${ARTE.Icons.download} Download`
+        download.addEventListener('click', ()=>editor.download())
+        // Upload
+        const upload = document.getElementById('upload')
+        upload.innerHTML = `${ARTE.Icons.fileOpen} Open`
+        upload.addEventListener('click', ()=>editor.upload())
     </script>
     
 </body>
