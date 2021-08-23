@@ -341,7 +341,7 @@ class Editor {
                 this.insertParagraph()
             }
             // Unselect custom blocks and highlight this one if custom 
-            this.highlightCustomNode(this.range.blockParent)
+            this.highlightCustomNode(this.range.custom)
         }
         this.setToolbarStates()
     }
@@ -733,16 +733,16 @@ class Editor {
     /**
      * Remove "custom-selected" class from all custom elements and then add to 
      * any child of the parentNode if it is a custom.
-     * @param {HTMLElement|false} parentNode 
+     * @param {HTMLElement|false} node Either a custom node or false
      */
-    highlightCustomNode(parentNode){
+    highlightCustomNode(node){
+        //console.log('node',node)
         const customs = this.editorNode.querySelectorAll('[contenteditable=false]')
         customs.forEach(custom => {
             custom.classList.remove('custom-selected')
         })
-        const custom = Helpers.getCustomFromNode(parentNode)
-        if ( custom ){
-            custom.classList.add('custom-selected')
+        if ( node ){
+            node.classList.add('custom-selected')
         }
     }
 

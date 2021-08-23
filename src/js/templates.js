@@ -89,7 +89,7 @@ export const debugRange = function(target, range){
                     <label>commonAncestorC</label><span>${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</span>
                     <label>rootNode</label><span>${range.rootNode.tagName}</span>
                     <label>collapsed</label><span>${range.collapsed}</span>
-                    <label>custom</label><span>${range.custom}</span>
+                    <label>custom</label><span>${range.custom ? range.custom.tagName : 'false'}</span>
                 </div>
                 <div class="col">
                     <label>startC</label><span>${range.startContainer.tagName ? range.startContainer.tagName : range.startContainer.textContent}</span>

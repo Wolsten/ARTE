@@ -155,14 +155,14 @@ export const isCustom = function( node ){
 /**
  * Check whether the selected range is within a custom element
  * @param {Range} range 
- * @returns {boolean} true if the range is in a custom element
+ * @returns {boolean|HTMLElement} The custom element or false if not
  */
-const isCustomFromRange = function( range ){
+const getCustomFromRange = function( range ){
     let node = range.startContainer
     while ( isCustom(node)==false && node.parentNode && node.parentNode.tagName != 'DIV'){
         node = node.parentNode
     }
-    return isCustom(node)
+    return isCustom(node) ? node : false
 }
 
 /**
@@ -346,8 +346,8 @@ function augmentRange(range){
     if ( range.commonAncestorContainer.nodeType === 3 ) {
         range.rootNode = range.commonAncestorContainer.parentNode
     }
-    // et flag to indicate whether the range is in a custom node
-    range.custom = isCustomFromRange(range)
+    // Set flag to indicate whether the range is in a custom node
+    range.custom = getCustomFromRange(range)
     return range
 }
 
