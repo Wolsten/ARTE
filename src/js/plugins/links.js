@@ -268,7 +268,7 @@ function form(edit){
         openBtn = `<a href="${href}" class="panel-link" target="_blank" title="Open link in new tab or window">${Icons.openLink}</a>`
     }
     return `
-        <form>
+        <form class="arte-link">
             <div class="form-input">
                 <label for="href">URL</label>
                 <input id="href" type="url" class="form-control ${openBtn ? 'with-button' : ''}" placeholder="URL" required value="${href}">
@@ -364,7 +364,7 @@ const clean = function(node){
  * @param {object} btn The button to act on
  */
  const setState = function( edt, btn ){
-    if ( edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer ){
+    if ( edt.range===false || edt.range.rootNode == edt.editorNode || Helpers.isBlock(edt.range.rootNode) == false ){
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {

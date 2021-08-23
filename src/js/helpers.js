@@ -30,7 +30,8 @@ export const arraySubset = function( a, b ){
 // @section Dom manipulation
 // -----------------------------------------------------------------------------
 
-let tags = { block: ['DIV','P','LI'], list: ['LI'], custom:[]}
+let tags = { block: ['H1','H2','H3','P','LI', 'BLOCKQUOTE'], list: ['LI'], custom:[]}
+
 
 /**
  * Register a new button type with tag to allow future checking/cleaning
@@ -40,7 +41,7 @@ let tags = { block: ['DIV','P','LI'], list: ['LI'], custom:[]}
 export const registerTag = function(type,tag){
     if ( tags[type]!=undefined && tags[type].includes(tag) == false && tag!='CLEAR'){
         tags[type].push(tag)
-        // console.log('registered tag', tag, 'in type', type)
+        console.log('registered tag', tag, 'in type', type)
     }
 }
 
@@ -119,11 +120,13 @@ export const isList = function( node ){
  * @returns {boolean}
  */
 export const isBlock = function( node ){
-    // if ( node.tagName == undefined ){
+    console.log('node',node)
     if ( node.nodeType != 1 ){
         return false
     }
-    return tags.block.includes(node.tagName)
+    const result = tags.block.includes(node.tagName)
+    console.log('isBlock = ',result)
+    return result
 }
 
 /**

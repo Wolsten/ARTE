@@ -80,7 +80,7 @@ function handleCancel(){
             title:'Cancel changes', 
             html:'Do you really want to lose these changes?',
             buttons: {
-                cancel: { label:'No - keep editing'},
+                cancel: { label:'No'},
                 confirm: { label:'Yes - lose changes', callback:handleConfirmCancel}
             }
         })
@@ -95,10 +95,10 @@ function handleDelete(){
         type:'overlay',
         severity:'danger',
         title:'Delete changes', 
-        html:'Do you really want to delete this item?',
+        html:'Do you really want to delete this comment?',
         buttons: {
-            cancel: { label:'No - keep editing'},
-            confirm: { label:'Yes - delete comment', callback:handleConfirmDelete }
+            cancel: { label:'No'},
+            confirm: { label:'Yes - delete', callback:handleConfirmDelete }
         }
     })
     confirm.show()
@@ -316,10 +316,13 @@ const init = function( edt, btn ){
  * @param {object} btn The button to act on
  */
 const setState = function( edt, btn ){
-    if ( edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer ){
+    console.warn('custom setState edt.range',edt.range)
+    if ( edt.range===false || edt.range.rootNode == edt.editorNode || Helpers.isBlock(edt.range.rootNode) == false ){
+        console.log('Disabling button')
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {
+        console.log('Enabling button')
         btn.element.disabled = false
         const custom = edt.range.blockParent.querySelector(TAG)
         if ( custom != null ){

@@ -303,7 +303,7 @@ const init = function( edt, btn ){
  * @param {object} btn The button to act on
  */
 const setState = function( edt, btn ){
-    if ( edt.range.collapsed==false && edt.range.startContainer != edt.range.endContainer ){
+    if ( edt.range===false || edt.range.rootNode == edt.editorNode || Helpers.isBlock(edt.range.rootNode) == false ){
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {
