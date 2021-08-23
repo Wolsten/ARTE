@@ -11,7 +11,6 @@ class ToolbarButton {
      *  init                - Initial format of custom component, adding event handlers
      *  setState            - set disabled and active states of the button
      *  style               - For inline styles, see plugins styles.js and colours.js
-     *  removeStyle         - Ditto
      *  addEventHandlers    - For active components that can be edited/deleted
      *  clean               - To generate clean versions of custom components
      */

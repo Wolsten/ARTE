@@ -47,7 +47,7 @@ class Editor {
             this.listenForKeyupEvents()
         }
         // Public methods to support saving and updating the editor content
-        this.save = this.getCleanData
+        this.preview = this.getCleanData
         this.update = this.updateEditor
         // Observe changes in the editor
         const config = { attributes: false, childList: true, subtree: true }
@@ -57,6 +57,54 @@ class Editor {
         this.modal = new Modal()
         // Initialise the editor content
         this.initEditor(content)
+    }
+
+    /**
+     * Add a hidden download button to the dom with the encoded contents of hte editor
+     */
+    download(){
+        let xml = this.getCleanData()
+        const link = document.createElement('a')
+        const filename = 'arte-download.arte'
+        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xml))
+        link.setAttribute('download', filename)
+        link.style.display = 'none'
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+    }
+
+    handleFileUpload(input){
+        const file = input.files[0]
+        if (!file) {
+            return
+        }
+        const reader = new FileReader()
+        // reader.onload = function(e) {
+        //     const content = e.target.result
+        //     this.initEditor(content)
+        // }
+        reader.onload = event => {
+            const content = event.target.result
+            console.warn(content)
+            this.initEditor(content)
+        }
+        reader.readAsText(file)
+    }
+
+    upload(){
+        let input = document.getElementById('arte-upload')
+        if ( input == null ){
+            input = document.createElement('input')
+            input.id = 'arte-upload'
+            input.type = 'file'
+            input.style.display = 'none'
+            input.accept = '.arte'
+            console.log('input', input.outerHTML)
+            input.addEventListener('change', () => this.handleFileUpload(input),false)
+            document.body.appendChild(input)
+        }
+        input.click()
     }
 
     /**
@@ -118,7 +166,7 @@ class Editor {
      */
     async initEditor(content=''){
         // Request default content?
-        if ( this.options.defaultContent && this.options.defaultContent != '' ){
+        if ( content=='' && this.options.defaultContent && this.options.defaultContent != '' ){
             const response = await fetch(this.options.defaultContent)
             // console.log(response)
             if ( response.status == 200 ){

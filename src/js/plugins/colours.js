@@ -120,7 +120,6 @@ function save(){
     const synthButton = {
         setState,
         style:`${button.style}:${colour}`, 
-        removeStyle:button.removeStyle, 
         element:button.element
     }
     drawer.hide()
@@ -260,8 +259,8 @@ const init = function(editor, button){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-let options = {init, setState, style:'color', removeStyle:'color:black;'}
+let options = {init, setState, style:'color'}
 export const FOREGROUND = new ToolbarButton( 'inline', 'FGC', 'Text colour', Icons.colourForeground, click, options)
 
-options = {init, setState, style:'background-color', removeStyle:'background-color:white;'}
+options = {init, setState, style:'background-color'}
 export const BACKGROUND = new ToolbarButton( 'inline', 'BGC', 'Highlight colour', Icons.colourBackground, click, options)

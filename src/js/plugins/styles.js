@@ -300,13 +300,13 @@ const setStyleProps = function(button){
     button.setState( editor, button )
 }
 
-let options = {setState, style:'font-weight:bold', removeStyle:'font-weight:normal'}
+let options = {setState, style:'font-weight:bold'}
 export const B = new ToolbarButton( 'style', 'B', 'Bold', Icons.b, click, options)
 
-options = {setState, style:'font-style:italic', removeStyle:'font-style:normal'}
+options = {setState, style:'font-style:italic'}
 export const I = new ToolbarButton( 'style', 'I', 'Italic', Icons.i, click, options)
 
-options = {setState, style:'text-decoration:underline', removeStyle:'text-decoration:none'}
+options = {setState, style:'text-decoration:underline'}
 export const U = new ToolbarButton( 'style', 'U',  'Underline', Icons.u, click, options)
 
 options = {setState, style:'CLEAR'}

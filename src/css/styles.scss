@@ -195,14 +195,20 @@ body.index-body {
 
 .editor-body {
 
-    padding:1.4rem;
+    padding:1.4rem 3rem;
     border-bottom: 1px solid var(--colour-border);
+    margin-bottom: 1rem;
     background-color: var(--colour-background);
     color:var(--colour-text);
-    /* Ideally make these options */
+    // Ideally make these options
     min-height:200px;
     max-height:700px;
     overflow-y: scroll;
+
+    // Ensure easy position of custom elements in their containing elements
+    h1, h2, h3, p, li, blockquote {
+        position:relative;
+    }
 
     p {
         line-height: 1.4rem;
@@ -544,24 +550,46 @@ custom {
 // -----------------------------------------------------------------------------
 
 comment {
-    display:inline-block;
-    position:relative;
-
+    display:block;
+    position:absolute;
+    top:-0.3rem;
+    right:-1.6rem;
     button.edit {
-        position:relative;
-        // top:-0.4rem;
         border:none;
-
         i {
             font-weight:bold;
-            color:var(--colour-success);
+            color:var(--colour-warning);
         }
     }
-
     &.custom-selected {
         outline:none;
     }
+    &[data-resolved='true']{
+        button.edit i {
+            color:var(--colour-success);
+        }
+    }
 }
+form.comment {
+    textarea {
+        min-height:140px;
+    }
+    .timestamps {
+        display:flex;
+        justify-content: space-between;
+    }
+    span {
+        display:inline-block;
+    }
+    label {
+        font-weight: bold;
+    }
+    button {
+        display:block;
+        margin-top:1rem;
+    }
+}
+
 
 // -----------------------------------------------------------------------------
 // @section colours.js plugin

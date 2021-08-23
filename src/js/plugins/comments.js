@@ -104,6 +104,16 @@ function handleDelete(){
     confirm.show()
 }
 
+function handleResolve(event){
+    if ( node.dataset.resolved=='false' ) {
+        node.dataset.resolved = 'true'
+        resolve.innerHTML = Icons.commentUnresolve + ' Unresolve'
+    } else {
+        node.dataset.resolved = 'false'
+    }
+    event.target.innerHTML = resolveLabel()
+}
+
 /**
  * Show the custom dialogue.
  * @param {boolean} editFlag Whether editing existing custom element or creating new
@@ -121,22 +131,27 @@ function show( editFlag ){
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
         node.setAttribute('contenteditable','false')
-        node.dataset.comment = ' '
+        node.dataset.comment = ''
+        node.dataset.created = ''
+        node.dataset.updated = ''
+        node.dataset.resolved = 'false'
     }
     // Create and display the modal panel
     drawer = new Modal({
         type:'drawer',
         title,
-        html: form(node.dataset.comment), 
+        html: form(), 
         buttons
     })
     drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
-    const input = drawer.panel.querySelector('form textarea')
-    input.addEventListener('change', () => dirty=true)
-    // Focus the first property
     const comment = drawer.panel.querySelector('form textarea#comment')
+    comment.addEventListener('change', () => dirty=true)
+    // Handle resolution toggling
+    const resolve = drawer.panel.querySelector('form button#resolve')
+    resolve.addEventListener( 'click', handleResolve)
+    // Focus the comment textarea
     comment.focus()
     comment.setSelectionRange(comment.value.length, comment.value.length)
 }
@@ -147,14 +162,23 @@ function show( editFlag ){
 function save(){
     // console.log('Save changes')
     node.dataset.comment = drawer.panel.querySelector('form #comment').value.trim()
-    if ( node.parentNode == null ){
-        insert()
+    const timestamp = new Date()
+    const localstring = timestamp.toLocaleString().slice(0,-3)
+    console.log('local timestamp', localstring)
+    // Check we have a comment
+    if ( node.dataset.comment != '' ){
+        if ( node.parentNode == null ){
+            node.dataset.created = localstring
+            insert()
+        }
+        node.dataset.updated = localstring
+        drawer.hide()
+        // Format node and add event handler
+        format(node)
+        // Update state
+        editor.range = Helpers.setCursor( node, 0)
     }
-    drawer.hide()
-    // Format node and add event handler
-    format(node)
-    // Update state
-    editor.range = Helpers.setCursor( node, 0)
+
     setState(editor, button)
 } 
 
@@ -236,16 +260,40 @@ function addEventHandlers(edt){
 }
 
 /**
+ * Generates inner html for resolve button
+ * @returns {string} html label for the resolve button
+ */
+function resolveLabel(){
+    return node.dataset.resolved == 'true' 
+        ? Icons.commentUnresolve + ' Unresolve' 
+        : Icons.commentResolve + ' Resolve'
+}
+
+/**
  * Form template
- * @param {string} comment The comment to be edited
  * @returns {string} Generated html
  */
-function form(comment){
+function form(){
+    let timestamps = ''
+    if ( node.dataset.created != '' ){
+        timestamps = `<span><label>Created</label> ${node.dataset.created}</span>`
+    }
+    if ( node.dataset.updated != '' ){
+        timestamps += `<span><label>Updated</label> ${node.dataset.updated}</span>`
+    }
+    let resolve = ''
+    if ( timestamps != '' ){
+        timestamps = `<div class="timestamps">${timestamps}</div>`
+        const title = resolveLabel()
+        resolve = `<button type="button" id="resolve">${title}</button>`
+    }
     return `
-        <form>
+        <form class="comment">
             <div class="form-input">
-                <textarea id="comment" class="form-control" placeholder="Enter your comment" required>${comment}</textarea>
+                <textarea id="comment" class="form-control" placeholder="Enter your comment" required>${node.dataset.comment}</textarea>
             </div>
+            ${timestamps}
+            ${resolve}
         </form>`
 }
 

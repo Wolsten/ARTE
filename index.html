@@ -33,9 +33,17 @@
          this case the text below is loaded in again as the inital content. -->
     <div id="editor"></div>
 
-    <!-- Add a save button to demonstrate saving the editor content
+    <!-- Add a preview button to demonstrate the editor content that would be saved
          Event handling added in script -->
-    <button type="button" id="save">Save</button>
+    <button type="button" id="preview"></button>
+
+    <!-- Add a download button to demonstrate downloading the editor content
+         Event handling added in script -->
+    <button type="button" id="download"></button>
+
+    <!-- Add an upload button to demonstrate uploading the editor content
+         Event handling added in script -->
+    <button type="button" id="upload"></button>
 
     <!-- Refer to readme.md for how to build and use an ES5 compatible version -->
     <script type="module" charset="utf-8">
@@ -81,9 +89,10 @@
         const editor = new ARTE.Editor(target, '', toolbar, options)
 
         // Configure save button
-        const save = document.getElementById('save')
-        save.addEventListener('click', ()=>{
-            let xml = editor.save()
+        const preview = document.getElementById('preview')
+        preview.innerHTML = `${ARTE.Icons.preview} Preview`
+        preview.addEventListener('click', ()=>{
+            let xml = editor.preview()
             // Insert line feed before all opening tags to make easier to read
             xml = xml.replace(/(<[^\/.]+?>)/gm, '\n$1')
             const drawer = new ARTE.Modal({
@@ -95,6 +104,14 @@
             })
             drawer.show()
         })
+        // Download
+        const download = document.getElementById('download')
+        download.innerHTML = `${ARTE.Icons.download} Download`
+        download.addEventListener('click', ()=>editor.download())
+        // Upload
+        const upload = document.getElementById('upload')
+        upload.innerHTML = `${ARTE.Icons.fileOpen} Open`
+        upload.addEventListener('click', ()=>editor.upload())
     </script>
     
 </body>

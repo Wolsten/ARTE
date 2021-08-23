@@ -53,4 +53,10 @@ export const danger = '<i class="danger bi bi-exclamation-circle-fill"></i>'
 export const comment = '<i class="bi bi-chat-dots"></i>'
 export const commentEdit = '<i class="bi bi-chat-dots-fill"></i>'
 export const options = '<i class="bi bi-gear"></i>'
+export const commentResolve = '<i class="bi bi-check-circle-fill"></i>'
+export const commentUnresolve = '<i class="bi bi-x-circle-fill"></i>'
+export const preview = '<i class="bi bi-eye"></i>'
+export const download = '<i class="bi bi-cloud-download"></i>'
+export const fileOpen = '<i class="bi bi-folder2-open"></i>'
+
 
