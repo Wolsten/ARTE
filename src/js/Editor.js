@@ -34,7 +34,7 @@ class Editor {
         }
         // *** TEST THE MODALS ***
         // Uncomment the next two lines for development testing
-        // this.testModals('positioned')  // options are 'overlay', 'positioned' and 'drawer'
+        // this.testModals('positioned')  // options are 'overlay', 'positioned', 'drawer' and 'full-screen'
         // return
         // Set up event handling
         this.listenForMouseUpEvents()
@@ -74,22 +74,25 @@ class Editor {
         link.remove()
     }
 
+    /**
+     * Handle file upload
+     * @param {HTMLElement} input 
+     * @returns 
+     */
     handleFileUpload(input){
         const file = input.files[0]
         if (!file) {
             return
         }
         const reader = new FileReader()
-        // reader.onload = function(e) {
-        //     const content = e.target.result
-        //     this.initEditor(content)
-        // }
         reader.onload = event => {
             const content = event.target.result
             console.warn(content)
             this.initEditor(content)
         }
         reader.readAsText(file)
+        // Remove the input (avoids ,ultiple event listeners amongst other things)
+        input.remove()
     }
 
     upload(){
@@ -191,9 +194,9 @@ class Editor {
      */
     initToolbar(groups){
         let toolbar = []
-        groups.forEach( (group,index) => {
+        groups.forEach( (group,groupIndex) => {
             group.forEach( button => {
-                button.group = index
+                button.group = groupIndex
                 Helpers.registerTag(button.type, button.tag)
                 toolbar.push(button)
             })
@@ -403,6 +406,8 @@ class Editor {
         p.innerText = '\n'
         p = this.editorNode.appendChild(p)
         Helpers.setCursor( p, 0)
+        this.updateRange()
+        this.setToolbarStates()
     }
 
 
@@ -518,7 +523,10 @@ class Editor {
                 type:'overlay', 
                 severity:'info',
                 title: 'Information',
-                html: `<p>To delete a custom element you need to edit it by clicking it and choosing Delete.</p>`,
+                html: `
+                    <p>Your selection contains one or more active elements, such as comments or links.</p>
+                    <p>To delete active elements you need to edit them individually and choose Delete.</p>
+                    `,
                 escape:true,
                 buttons: {cancel:{label:'Close'}}
             })
@@ -556,6 +564,7 @@ class Editor {
         }
         // Reset the range which must be done after a delay since this
         // method was triggered on keydown before added to dom
+        // Must invoke with arrow function so that the instance context is retained
         setTimeout( () => this.updateRange(), 10 )
         return false
     }
@@ -769,7 +778,13 @@ class Editor {
      * Get the new range in the editor node and when debugging display this
      */
     updateRange(){
-        console.log('modal active',this.modal.active())
+        // Check for empty editor - in which case insert a new paragraph
+        if ( this.editorNode.innerHTML.trim() == '' ){
+            this.insertParagraph()
+            // Return as insertParagraph reinvokes this method
+            return
+        }
+        //console.log('modal active',this.modal.active())
         if ( this.modal.active() == false ){
             this.range = Helpers.getRange()
             if ( this.options.debug ){

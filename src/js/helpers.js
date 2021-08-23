@@ -30,7 +30,7 @@ export const arraySubset = function( a, b ){
 // @section Dom manipulation
 // -----------------------------------------------------------------------------
 
-let tags = { block: ['H1','H2','H3','P','LI', 'BLOCKQUOTE'], list: ['LI'], custom:[]}
+let tags = { block: ['DIV','H1','H2','H3','P','LI', 'BLOCKQUOTE'], list: ['LI'], custom:[]}
 
 
 /**
@@ -41,7 +41,7 @@ let tags = { block: ['H1','H2','H3','P','LI', 'BLOCKQUOTE'], list: ['LI'], custo
 export const registerTag = function(type,tag){
     if ( tags[type]!=undefined && tags[type].includes(tag) == false && tag!='CLEAR'){
         tags[type].push(tag)
-        console.log('registered tag', tag, 'in type', type)
+        //console.log('registered tag', tag, 'in type', type)
     }
 }
 
@@ -129,19 +129,19 @@ export const isBlock = function( node ){
     return result
 }
 
-/**
- * Returns the custom node from a range
- * @param {Range} range 
- * @returns {HTMLElement|false}
- */
- export const getCustomParentFromRange = function( range ){
-    return getCustomFromNode(range.blockParent)
-    // const firstElementChild = range.blockParent.firstElementChild
-    // if ( firstElementChild != null && isCustom(firstElementChild) ){
-    //     return firstElementChild
-    // }
-    // return false
-}
+// /**
+//  * Returns the custom node from a range
+//  * @param {Range} range 
+//  * @returns {HTMLElement|false}
+//  */
+//  export const getCustomParentFromRange = function( range ){
+//     return getCustomFromNode(range.blockParent)
+//     // const firstElementChild = range.blockParent.firstElementChild
+//     // if ( firstElementChild != null && isCustom(firstElementChild) ){
+//     //     return firstElementChild
+//     // }
+//     // return false
+// }
 
 /**
  * Checks whether the element is a custom element
@@ -173,17 +173,25 @@ const getCustomFromRange = function( range ){
  * @param {HTMLElement} node 
  * @returns 
  */
-export const getCustomFromNode = function(node){
-    let result = false
-    if ( node.childNodes ){
-        node.childNodes.forEach(child => {
-            if ( isCustom(child) ){
-                result = child
-            }
-        })
-    }
-    return result
- }
+// export const getCustomFromNode = function(node){
+//     let result = false
+//     if ( node.childNodes ){
+//         node.childNodes.forEach(child => {
+//             if ( isCustom(child) ){
+//                 result = child
+//             }
+//         })
+//     }
+//     return result
+//  }
+//  export const getCustomFromNode = function(node){
+//     debugger
+//     const custom = node.querySelector([contenteditable="false"])
+//     if ( custom != null ){
+//         return custom
+//     }
+//     return false
+//  }
 
  /**
  * Get the inline styles for all nodes in the tree from the lowest to the highest that

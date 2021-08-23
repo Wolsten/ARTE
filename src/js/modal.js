@@ -5,6 +5,9 @@ const BUTTON_ORDER = ['cancel','delete','confirm']
 
 class Modal {
 
+    // Static variable to save the modal instance
+    static self
+
     constructor( options ){
         // Defaults
         this.type = 'overlay'
@@ -19,6 +22,8 @@ class Modal {
         for( let option in options ){
             this[option] = options[option]
         }
+        // Require this so can handle the modal instance from a named event handler
+        Modal.self = this
     }
 
     /**
@@ -120,6 +125,8 @@ class Modal {
             return
         }
         this.panel.classList.remove('show')
+        // Remove the event listener so don't keep responding to Escape key
+        document.body.removeEventListener('keydown', this.handleKeydown)
         setTimeout( () => {
             if ( this.panel != null ){
                 this.panel.remove()
@@ -137,6 +144,29 @@ class Modal {
             return true
         }
         return false
+    }
+
+    /**
+     * Run the escape callback if supplied, otherwise just hide immediately
+     */
+    escapeOrHide(){
+        // Invoke cancel callback if available
+        if ( this.escape instanceof Function ){
+            this.escape()
+        } else {
+            this.hide()
+        }
+    }
+
+    /**
+     * Handle keydown events on the document body
+     * @param {Event} event 
+     */
+    handleKeydown(event){
+        if ( event.key == 'Escape' ){
+            event.stopPropagation()
+            Modal.self.escapeOrHide()
+        }  
     }
 
     /**
@@ -164,26 +194,16 @@ class Modal {
         }
         // Support escape key and background clicks?
         if ( this.escape ){
-            this.panel.addEventListener('keydown', event => {
-                if ( event.key == 'Escape' ){
-                    event.stopPropagation()
-                    // Invoke cancel callback if available
-                    if ( this.escape instanceof Function ){
-                        this.escape()
-                    } else {
-                        this.hide()
-                    }
-                }
-            })
+            // Watch for escape key being pressed
+            // Cannot use an arrow function as otherwise multiple event listeners
+            // would be added. Using a named listener like this just replaces
+            // the existing event handler
+            document.body.addEventListener('keydown', this.handleKeydown)
+            // Listen for background clicks
             this.panel.addEventListener( 'click', event => {
                 if ( event.target == this.panel ){
                     event.stopPropagation()
-                    // Invoke cancel callback if available
-                    if ( this.escape instanceof Function ){
-                        this.escape()
-                    } else {
-                        this.hide()
-                    }
+                    this.escapeOrHide()
                 }
             })
         }

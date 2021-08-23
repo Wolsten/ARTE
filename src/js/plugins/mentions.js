@@ -134,15 +134,17 @@ function insert(person){
         after = after.slice(1, after.length)
     }
     // Add space before?
-    if ( contents.charCodeAt(offset-1) !== 32){
-        person = ' ' + person
-    }
-    // Add space after
-    if ( offset<contents.length && contents.charCodeAt(offset) !== 32){
-        if ( after != ''){
-            after = after + ' '
+    if ( person != '' ){
+        if ( contents.charCodeAt(offset-1) !== 32){
+            person = ' ' + person
         }
-        person = person + ' '
+        // Add space after
+        if ( offset<contents.length && contents.charCodeAt(offset) !== 32){
+            if ( after != ''){
+                after = after + ' '
+            }
+            person = person + ' '
+        }
     }
     editor.range.startContainer.textContent = before + person + after
     // Move offset to the end of the newly inserted person
