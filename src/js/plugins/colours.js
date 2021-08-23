@@ -220,8 +220,9 @@ const click = function( edt, btn ){
 const setState = function(edt,btn){
     //console.log('setting colour state ')
     btn.element.disabled = edt.range===false || 
+                           edt.range.collapsed ||
                            edt.range.rootNode == edt.editorNode || 
-                           Helpers.isBlock(edt.range.rootNode) == false
+                           Helpers.isList(edt.range.rootNode)
     // Get the inline styles of the selected range
     let value = ''
     let styles = []

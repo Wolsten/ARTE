@@ -200,11 +200,9 @@ const escape = function(){
  * @param {object} button The button to act on
  */
  const setState = function( editor, button ){
-    if ( editor.range.collapsed==false && editor.range.startContainer != editor.range.endContainer ){
-        button.element.disabled = true
-    } else {
-        button.element.disabled = false
-    }
+    button.element.disabled = 
+        editor.range.collapsed==false || 
+        editor.range.custom !== false
 }
 
 

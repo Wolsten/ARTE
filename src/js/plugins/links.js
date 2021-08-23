@@ -364,7 +364,9 @@ const clean = function(node){
  * @param {object} btn The button to act on
  */
  const setState = function( edt, btn ){
-    if ( edt.range===false || edt.range.rootNode == edt.editorNode || Helpers.isBlock(edt.range.rootNode) == false ){
+    if ( edt.range===false || 
+         edt.range.rootNode == edt.editorNode || 
+         Helpers.isList(edt.range.rootNode) ){
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {

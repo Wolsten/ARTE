@@ -150,7 +150,9 @@ function show( editFlag ){
     comment.addEventListener('change', () => dirty=true)
     // Handle resolution toggling
     const resolve = drawer.panel.querySelector('form button#resolve')
-    resolve.addEventListener( 'click', handleResolve)
+    if ( resolve != null ){
+        resolve.addEventListener( 'click', handleResolve)
+    }
     // Focus the comment textarea
     comment.focus()
     comment.setSelectionRange(comment.value.length, comment.value.length)
@@ -316,13 +318,15 @@ const init = function( edt, btn ){
  * @param {object} btn The button to act on
  */
 const setState = function( edt, btn ){
-    console.warn('custom setState edt.range',edt.range)
-    if ( edt.range===false || edt.range.rootNode == edt.editorNode || Helpers.isBlock(edt.range.rootNode) == false ){
-        console.log('Disabling button')
+    //console.warn('custom setState edt.range',edt.range)
+    if ( edt.range===false || 
+         edt.range.rootNode == edt.editorNode || 
+         Helpers.isBlock(edt.range.rootNode) == false ){
+        //console.log('Disabling button')
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {
-        console.log('Enabling button')
+        //console.log('Enabling button')
         btn.element.disabled = false
         const custom = edt.range.blockParent.querySelector(TAG)
         if ( custom != null ){
