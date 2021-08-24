@@ -271,13 +271,13 @@ class Editor {
                 if ( this.modal.active() ){
                     return
                 }
-                // Prevent default action for all buttons when have no range 
-                // and not the undo-redo buffer buttons
-                if ( this.range === false && button.type !== 'detached' ){
-                    event.preventDefault()
-                    return
+                // Handle clicks for detached buttons (e.g. undo, redo) 
+                // and when have a range
+                if ( button.type === 'detached' || this.range !== false ){
+                    button.click(this,button)
                 }
-                button.click(this,button)
+                // Other prevent default action to ignore
+                event.preventDefault()
             })
         })
     }
@@ -333,9 +333,12 @@ class Editor {
      * @returns {boolean} true if the node is in the editor
      */
     nodeInEditor(node){
-        while ( node.nodeType == 3 || node.tagName != 'HTML' || node.contentEditable != false ){
+        while ( node.nodeType == 3 || node.tagName != 'BODY' || node.contentEditable != false ){
             if ( node == this.editorNode ){
                 return true
+            }
+            if ( node.parentNode == null ){
+                return false
             }
             node = node.parentNode
         }
@@ -348,9 +351,12 @@ class Editor {
      * @returns {boolean} true if the node is in the toolbar
      */
     nodeInToolbar(node){
-        while ( node.nodeType == 3 || node.tagName != 'HTML' ){
+        while ( node.nodeType == 3 || node.tagName != 'BODY' ){
             if ( node == this.toolbarNode ){
                 return true
+            }
+            if ( node.parentNode == null ){
+                return false
             }
             node = node.parentNode
         }
@@ -494,7 +500,8 @@ class Editor {
         if ( this.range.custom || endNormal ) {
             // console.log(`Creating a new node after ${this.range.blockParent.tagName} innerHTML ${this.range.blockParent.innerHTML}`)
             const emptyTag = this.range.blockParent.innerHTML == '<br>'
-            const tag = emptyTag ? 'P' : this.range.blockParent.tagName
+            const listTag = this.range.blockParent.tagName == 'LI'
+            const tag = emptyTag || !listTag ? 'P' : this.range.blockParent.tagName
             let n = document.createElement(tag)
             n.innerText = '\n'
             n = Helpers.insertAfter( n, this.range.blockParent )

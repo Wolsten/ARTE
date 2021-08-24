@@ -2,16 +2,18 @@ describe('Tests inline formatting', function () {
 
     before('Open editor url and start editing', function(){
         cy.arte_visit()
-        cy.arte_edit()
     })
 
-    it('tests single formatting', function(){
+    // after('Screenshot', function(){
+    //     cy.screenshot()
+    // })
 
-        cy.arte_type('This is a paragraph with singly styled elements')
+    it('1. tests single formatting', function(){
+
+        cy.arte_type('{enter}This is a paragraph with singly styled elements')
         cy.arte_click_id('H1')
 
         cy.arte_type('{enter}This is a paragraph with singly styled elements include bold, italic, underlined, coloured and highlighted text.')
-        cy.arte_click_id('P')
 
         cy.arte_set_selection('bold')
         cy.arte_click_id('B')
@@ -31,11 +33,11 @@ describe('Tests inline formatting', function () {
         cy.arte_modal_click('confirm')
     })
 
-    it('tests clearing formatting', function(){
-        cy.arte_type('{enter}{enter}Test clearing styles fully.')
+    it('2. tests clearing formatting', function(){
+        cy.arte_type('{enter}Test clearing styles fully.')
         cy.arte_click_id('H1')
         cy.arte_set_selection('fully.')
-        cy.arte_type('{enter}{enter}START This is a paragraph with no styled elements include bold2, italic2, underlined2, coloured2 and highlighted2 text END')
+        cy.arte_type('{enter}START This is a paragraph with no styled elements include bold2, italic2, underlined2, coloured2 and highlighted2 text END')
 
         cy.arte_set_selection('bold2')
         cy.arte_click_id('B')
@@ -58,12 +60,12 @@ describe('Tests inline formatting', function () {
         cy.arte_click_id('CLEAR')
     })
 
-    it('tests clearing formatting partially', function(){
-        cy.arte_type('{enter}{enter}This tests clearing formatting partially.')
+    it('3. tests clearing formatting partially', function(){
+        cy.arte_type('{enter}This tests clearing formatting partially.')
         cy.arte_click_id('H1')
 
         cy.arte_set_selection('partially.')
-        cy.arte_type('{enter}{enter}This is a paragraph with no styled elements include bo(xxbxx)ld, ita(xxixx)lic, under(xxuxx)lined, colo(xxcxx)ured and high(xxhxx)lighted text.')
+        cy.arte_type('{enter}This is a paragraph with no styled elements include bo(xxbxx)ld, ita(xxixx)lic, under(xxuxx)lined, colo(xxcxx)ured and high(xxhxx)lighted text.')
 
         cy.arte_set_selection('bo(xxbxx)ld')
         cy.arte_click_id('B')

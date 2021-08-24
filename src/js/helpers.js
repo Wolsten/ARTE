@@ -62,6 +62,9 @@ export const registerTag = function(type,tag){
  * @returns {HTMLElement} the new node inserted
  */
 export const insertAfter = function(newNode, existingNode) {
+    if ( newNode == null || existingNode == null){
+        console.warn('Error.  Found when inserting a new node after an existing node')
+    }
     return existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
 
@@ -72,6 +75,9 @@ export const insertAfter = function(newNode, existingNode) {
  * @returns {HTMLElement} the new node inserted
  */
 export const insertBefore = function(newNode, existingNode) {
+    if ( newNode == null || existingNode ){
+        console.warn('Error.  Found when inserting a new node before an existing node')
+    }
     return existingNode.parentNode.insertBefore(newNode, existingNode);
 }
 
@@ -83,6 +89,9 @@ export const insertBefore = function(newNode, existingNode) {
  * @returns 
  */
 export const replaceNode = function(existingNode, tag, html){
+    if ( existingNode == null || existingNode.parentNode ){
+        console.warn('Error.  Found when replacing an existing node with a new node')
+    }
     const replacementNode = document.createElement(tag)
     replacementNode.innerHTML = html
     const node = existingNode.parentNode.insertBefore(replacementNode, existingNode)
@@ -145,8 +154,13 @@ export const isCustom = function( node ){
  * @returns {boolean|HTMLElement} The custom element or false if not
  */
 const getCustomFromRange = function( range ){
+    if ( range === false ){
+        console.warn('Error.  Passed missing range when looking for a custom node')
+    }
     let node = range.startContainer
-    while ( isCustom(node)==false && node.parentNode && node.parentNode.tagName != 'DIV'){
+    while ( isCustom(node)==false && 
+            node.parentNode != null && node.parentNode && 
+            node.parentNode.tagName != 'DIV'){
         node = node.parentNode
     }
     return isCustom(node) ? node : false
@@ -184,6 +198,9 @@ const getCustomFromRange = function( range ){
  * @returns {string} of styles separated by semi-colons
  */
 export const getInlineStyles = function(node){
+    if ( node == null ){
+        console.warn('Found null node when getting inline styles')
+    }
     let styles = ''
     while ( isBlock(node) == false ){
         if ( node.nodeType === 1 ){
@@ -191,6 +208,9 @@ export const getInlineStyles = function(node){
             if ( inlineStyles != null && inlineStyles != '' ){
                 styles += ';' + inlineStyles
             }
+        }
+        if ( node.parentNode == null ){
+            console.warn('Error.  Found missing parent node when getting inline styles')
         }
         node = node.parentNode
     }
@@ -203,10 +223,17 @@ export const getInlineStyles = function(node){
  * @returns {HTMLElement} 
  */
 export const getParentBlockNode = function(node){
+    if ( node == null ){
+        console.warn('Error. Passed null node to getParentBlockNode')
+    }
     // console.log('getParentBlockNode',node)
     // Keep going up the tree while the node is not a block node
     // (the editor is a block node - a DIV)
     while ( isBlock(node)==false ){
+        if ( node.parentNode == null ){
+            console.warn('Error. Found missing parent node when getting parent block node')
+            return false
+        }
         node = node.parentNode
         // console.log('node',node)
     }
@@ -220,6 +247,9 @@ export const getParentBlockNode = function(node){
  */
 export const getEditorNode = function( node ){
     while ( node.getAttribute('contenteditable') !== "true" ) {
+        if ( node.parentNode == null ){
+            console.warn('Error.  Found missing parent node when getting editor node')
+        }
         node = node.parentNode
     }
     return node
@@ -232,9 +262,23 @@ export const getEditorNode = function( node ){
  * @returns {HTMLElement} first node below the stop node (if there is one) otherwise the stopNode
  */
 export const getTopParentNode = function( node, stopNode ){
+    if ( node == null || stopNode == null ){
+        alert('Error. Passed null node or stopNode to getTopParentNode')
+        console.warn('Error. Passed null node or stopNode to getTopParentNode')
+    }
     let saved = node
     while ( node != stopNode ){
         saved = node
+        if ( node == null ){
+            alert('Error.  Found missing node traversing tree in getTopParentNode')
+            console.warn('Error.  Found missing node traversing tree in getTopParentNode')
+            return saved
+        }
+        if ( node.parentNode == null ){
+            alert('Error.  Found missing parent node when getting top parent node')
+            console.warn('Error.  Found missing parent node when getting top parent node')
+            return saved
+        }
         node = node.parentNode
     }
     return saved
@@ -276,6 +320,9 @@ export const cleanForSaving = function( node, buttons ){
         )
         if ( match && "clean" in match ){
             const newNode = match.clean(node)
+            if ( node.parentNode == null ){
+                console.warn('Error.  Found missing parent node when cleaning for saving')
+            }
             node.parentNode.replaceChild(newNode, node)
         }
         return
@@ -334,12 +381,18 @@ export const addMarkers = function( range ){
  * @returns {object} The original range object with additional props
  */
 function augmentRange(range){
+    if ( range === false ){
+        console.warn('Found missing range when augmenting range')
+    }
     // console.log('augmentRange',range)
     // First parent node that is a block tag
     range.blockParent = getParentBlockNode(range.commonAncestorContainer)
     // First parent node
     range.rootNode = range.commonAncestorContainer
     if ( range.commonAncestorContainer.nodeType === 3 ) {
+        if ( range.commonAncestorContainer.parentNode == null ){
+            console.warn('Error.  Found missing parent node when augmenting range')
+        }
         range.rootNode = range.commonAncestorContainer.parentNode
     }
     // Set flag to indicate whether the range is in a custom node

@@ -54,9 +54,7 @@ Cypress.Commands.add('upload_file', (fileName, fileType = ' ', selector, submit=
 
 Cypress.Commands.add('arte_visit', () => {
   cy.visit('http://localhost:5501/index.html')
-  cy.get('.editor-body').within( $editor => {
-    $editor.innerHTML = ''
-  })
+  cy.get('.editor-body').clear().click().wait(500)
 })
 
 Cypress.Commands.add('arte_edit', ()=> {
@@ -64,19 +62,22 @@ Cypress.Commands.add('arte_edit', ()=> {
 })
 
 Cypress.Commands.add('arte_type', txt => {
-  cy.get('.editor-body').type(txt)
-  //cy.get('.editor-body').scrollTo('bottom')
+  // Tried several things to fix odd text entry but this is the only
+  // one that seems to work at all consistently
+  // For example waitForAnimations didn't do the job
+  // presumably because there is a lot going on for key down
+  cy.get('.editor-body').type(txt, {delay:100})
 })
 
 Cypress.Commands.add('arte_click_id', tag => {
-  cy.get(`button#${tag}`).click()
+  cy.get(`button#${tag}`).click().wait(500)
 })
 
 Cypress.Commands.add('arte_set_selection', (text1, text2) => {
   // Make sure editor is selected before setting the selection to 
   // ensure the correct states of the toolbar buttons.
   cy.arte_edit()
-  cy.get('.editor-body').setSelection(text1,text2)
+  cy.get('.editor-body').setSelection(text1,text2).wait(500)
 })
 
 Cypress.Commands.add('arte_modal_click', selector => {
