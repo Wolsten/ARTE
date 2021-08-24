@@ -308,7 +308,7 @@ let endOffset = 0
  * @param {Range} range 
  */
 export const addMarkers = function( range ){
-    console.log('range',range)
+    // console.log('range',range)
     if ( range.startContainer == range.endContainer ){
         range.startContainer.textContent = 
             range.startContainer.textContent.substring(0, range.startOffset) +

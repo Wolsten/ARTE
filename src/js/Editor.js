@@ -595,21 +595,20 @@ class Editor {
      * @param  {...any} args Handle keyup events
      */
     handleKeyupDelayed(...args){
-        // Nav keys that just need to set new toolbar states
+        // Nav keys
         const navigation = ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','End','Home']
         let key = args[0]
         //console.log('key',key)
         const editor = args[1]
-        // Check if navigating in the editor
+        // Always get the new range
+        editor.range = Helpers.getRange()
+        // Reset toolbar states if navigating within editor
         if ( navigation.includes(key) ){
-            editor.range = Helpers.getRange()
             editor.setToolbarStates()
-        // Update the buffer?
-        } else {
-            // Check if a modal dialogue is shown - do not buffer if so
-            if ( document.querySelectorAll('.show').length == 0 ){
-                editor.bufferUpdate(editor)
-            }
+        }
+        // Check if a modal dialogue is shown - do not buffer if so
+        if ( document.querySelectorAll('.show').length == 0 ){
+            editor.bufferUpdate(editor)
         }
     }
 

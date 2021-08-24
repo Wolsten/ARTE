@@ -261,6 +261,7 @@ function parseNode( node, formats, button ){
     // console.warn('root node', editor.range.rootNode)
     // console.log('first parent node', firstParentNode)
     // console.log('end parent node', endParentNode)
+    //
     // Mark the start and end selection points
     Helpers.addMarkers(range)
     // Init phase for block formatting
@@ -320,7 +321,7 @@ function parseNode( node, formats, button ){
         })
     }
     // Reset the selection
-    //Helpers.resetSelection(editor.editorNode)
+    Helpers.resetSelection(editor.editorNode)
     editor.updateRange()
     // Reset states for all block buttons
     editor.setStates('block')
