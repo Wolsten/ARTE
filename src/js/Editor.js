@@ -492,8 +492,9 @@ class Editor {
         const endNormal = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
         if ( this.range.custom || endNormal ) {
-            // console.log(`Creating a ${this.range.blockParent.tagName} node`)
-            let n = document.createElement(this.range.blockParent.tagName)
+            // console.log(`Creating a new node after ${this.range.blockParent.tagName} innerHTML ${this.range.blockParent.innerHTML}`)
+            const tag = this.range.blockParent.innerHTML == '<br>' ? 'P' : this.range.blockParent.tagName
+            let n = document.createElement(tag)
             n.innerText = '\n'
             n = Helpers.insertAfter( n, this.range.blockParent )
             Helpers.setCursor( n, 0 )

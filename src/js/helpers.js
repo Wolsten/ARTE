@@ -120,28 +120,12 @@ export const isList = function( node ){
  * @returns {boolean}
  */
 export const isBlock = function( node ){
-    console.log('node',node)
     if ( node.nodeType != 1 ){
         return false
     }
     const result = tags.block.includes(node.tagName)
-    console.log('isBlock = ',result)
     return result
 }
-
-// /**
-//  * Returns the custom node from a range
-//  * @param {Range} range 
-//  * @returns {HTMLElement|false}
-//  */
-//  export const getCustomParentFromRange = function( range ){
-//     return getCustomFromNode(range.blockParent)
-//     // const firstElementChild = range.blockParent.firstElementChild
-//     // if ( firstElementChild != null && isCustom(firstElementChild) ){
-//     //     return firstElementChild
-//     // }
-//     // return false
-// }
 
 /**
  * Checks whether the element is a custom element
@@ -324,6 +308,7 @@ let endOffset = 0
  * @param {Range} range 
  */
 export const addMarkers = function( range ){
+    console.log('range',range)
     if ( range.startContainer == range.endContainer ){
         range.startContainer.textContent = 
             range.startContainer.textContent.substring(0, range.startOffset) +
