@@ -46,7 +46,7 @@ describe('Tests list formatting', function () {
     })
 
     it('tests creating and indenting lists', function(){
-        cy.arte_type('{enter}{enter}3-level indented list')
+        cy.arte_type('{enter}3-level indented list')
         cy.arte_click_id('H1')
         cy.arte_type('{enter}Numbered bullet A')
         cy.arte_click_id('OL')
@@ -65,7 +65,7 @@ describe('Tests list formatting', function () {
 
 
     it('tests indented existing lists', function(){
-        cy.arte_type('{enter}{enter}Indented existing list')
+        cy.arte_type('{enter}Indented existing list')
         cy.arte_click_id('H1')
         cy.arte_type('{enter}Numbered bullet A')
         cy.arte_click_id('OL')

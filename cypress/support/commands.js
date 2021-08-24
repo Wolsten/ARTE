@@ -47,9 +47,16 @@ Cypress.Commands.add('upload_file', (fileName, fileType = ' ', selector, submit=
   })
 })
 
-Cypress.Commands.add('arte_visit', ()=> {
+// Cypress.Commands.add('arte_visit', ()=> {
+//   cy.visit('http://localhost:5501/index.html')
+//   cy.get('.editor-body').clear()
+// })
+
+Cypress.Commands.add('arte_visit', () => {
   cy.visit('http://localhost:5501/index.html')
-  cy.get('.editor-body').clear()
+  cy.get('.editor-body').within( $editor => {
+    $editor.innerHTML = ''
+  })
 })
 
 Cypress.Commands.add('arte_edit', ()=> {
@@ -58,6 +65,7 @@ Cypress.Commands.add('arte_edit', ()=> {
 
 Cypress.Commands.add('arte_type', txt => {
   cy.get('.editor-body').type(txt)
+  //cy.get('.editor-body').scrollTo('bottom')
 })
 
 Cypress.Commands.add('arte_click_id', tag => {
@@ -75,6 +83,7 @@ Cypress.Commands.add('arte_modal_click', selector => {
   cy.get(`.modal-panel-container button.${selector}`).click()
   cy.arte_edit()
 })
+
 
 
 // Handling selection

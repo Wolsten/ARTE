@@ -8,7 +8,7 @@ describe('Tests block formatting', function () {
 
     it('tests block formatting', function(){
 
-        cy.arte_type('This is a first level heading A')
+        cy.arte_type('{enter}This is a first level heading A')
         cy.arte_click_id('H1')
 
         cy.arte_type('{enter}This is a second level heading B')
