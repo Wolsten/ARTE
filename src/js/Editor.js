@@ -493,12 +493,16 @@ class Editor {
         let handled = false
         if ( this.range.custom || endNormal ) {
             // console.log(`Creating a new node after ${this.range.blockParent.tagName} innerHTML ${this.range.blockParent.innerHTML}`)
-            const tag = this.range.blockParent.innerHTML == '<br>' ? 'P' : this.range.blockParent.tagName
+            const emptyTag = this.range.blockParent.innerHTML == '<br>'
+            const tag = emptyTag ? 'P' : this.range.blockParent.tagName
             let n = document.createElement(tag)
             n.innerText = '\n'
             n = Helpers.insertAfter( n, this.range.blockParent )
             Helpers.setCursor( n, 0 )
             handled = true
+            if ( emptyTag ){
+                this.range.blockParent.remove()
+            }
         }
         if ( this.range.custom ){
             this.highlightCustomNode(false)
