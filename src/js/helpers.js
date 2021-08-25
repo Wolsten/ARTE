@@ -166,31 +166,6 @@ const getCustomFromRange = function( range ){
     return isCustom(node) ? node : false
 }
 
-/**
- * Check whether the supplied node contains a custom element and if so return it
- * @param {HTMLElement} node 
- * @returns 
- */
-// export const getCustomFromNode = function(node){
-//     let result = false
-//     if ( node.childNodes ){
-//         node.childNodes.forEach(child => {
-//             if ( isCustom(child) ){
-//                 result = child
-//             }
-//         })
-//     }
-//     return result
-//  }
-//  export const getCustomFromNode = function(node){
-//     debugger
-//     const custom = node.querySelector([contenteditable="false"])
-//     if ( custom != null ){
-//         return custom
-//     }
-//     return false
-//  }
-
  /**
  * Get the inline styles for all nodes in the tree from the lowest to the highest that
  * isn;t a block node. In practice these are attached only to SPANs
@@ -263,19 +238,16 @@ export const getEditorNode = function( node ){
  */
 export const getTopParentNode = function( node, stopNode ){
     if ( node == null || stopNode == null ){
-        alert('Error. Passed null node or stopNode to getTopParentNode')
         console.warn('Error. Passed null node or stopNode to getTopParentNode')
     }
     let saved = node
     while ( node != stopNode ){
         saved = node
         if ( node == null ){
-            alert('Error.  Found missing node traversing tree in getTopParentNode')
             console.warn('Error.  Found missing node traversing tree in getTopParentNode')
             return saved
         }
         if ( node.parentNode == null ){
-            alert('Error.  Found missing parent node when getting top parent node')
             console.warn('Error.  Found missing parent node when getting top parent node')
             return saved
         }
@@ -349,14 +321,16 @@ let startOffset = 0
 let endNode = null
 let endOffset = 0
 
+
 /**
  * Add start and end marks to the selected text in order to allow reselection at
  * the end of the editing operation
  * @param {Range} range 
  */
 export const addMarkers = function( range ){
-    // console.log('range',range)
+    console.log('range',range)
     if ( range.startContainer == range.endContainer ){
+        console.log('start container matches end container')
         range.startContainer.textContent = 
             range.startContainer.textContent.substring(0, range.startOffset) +
             START_MARKER +
@@ -364,6 +338,7 @@ export const addMarkers = function( range ){
             END_MARKER +
             range.startContainer.textContent.substring(range.endOffset)
     } else {
+        console.log('start container does NOT match end container')
         range.startContainer.textContent = 
             range.startContainer.textContent.substring(0, range.startOffset) +
             START_MARKER +
@@ -410,7 +385,7 @@ export const getRange = function(){
     // console.log('new selection',sel)
     if ( sel.rangeCount==1 ){
         let range =  sel.getRangeAt(0)
-        // console.log('New range', range)
+        console.log('New range found')
         range = augmentRange(range)
         return range
     }
@@ -568,5 +543,4 @@ export const generateUid = function(){
         }, delay)
     }
 }
-
 

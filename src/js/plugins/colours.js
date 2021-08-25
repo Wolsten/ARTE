@@ -115,6 +115,10 @@ function form(){
  * Save the currently selected colour values
  */
 function save(){
+    // Round up values to nearest integer
+    hue = Math.round(hue)
+    saturation = Math.round(saturation)
+    lightness = Math.round(lightness)
     const colour = `hsl(${hue}, ${saturation}%, ${lightness}%)`
     // Synthesise a button using the colour value selected
     const synthButton = {

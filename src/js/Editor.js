@@ -40,22 +40,13 @@ class Editor {
         this.listenForMouseUpEvents()
         this.listenForPasteEvents()
         this.listenForKeydownEvents()
-        // Optional buffering setup
-        if ( this.options.bufferSize > 0 ){
-            this.bufferIndex = 0
-            this.buffer = [this.editorNode.innerHTML]
-            this.listenForKeyupEvents()
-        }
+        this.listenForKeyupEvents()
         // Public methods to support saving and updating the editor content
         this.preview = this.getCleanData
         this.update = this.updateEditor
-        // Observe changes in the editor
-        const config = { attributes: false, childList: true, subtree: true }
-        const observer = new MutationObserver(()=>this.handleMutation())
-        observer.observe(this.editorNode,config)
         // Define an empty modal so can check if any active
         this.modal = new Modal()
-        // Initialise the editor content
+        // Initialise the editor content and buffering
         this.initEditor(content)
     }
 
@@ -146,11 +137,12 @@ class Editor {
      */
     initOptions(options){   
         const headingNumbers = true
-        const bufferSize = 10     
+        const bufferSize = 0  
+        const MAX_BUFFER_SIZE = 10   
         const debug = false
         if ( options ){
             options.headingNumbers = options.headingNumbers == undefined ? headingNumbers : options.headingNumbers
-            options.bufferSize = options.bufferSize == undefined ? bufferSize : Math.max(parseInt(options.bufferSize),bufferSize)
+            options.bufferSize = options.bufferSize == undefined ? bufferSize : Math.max(parseInt(options.bufferSize),MAX_BUFFER_SIZE)
             options.debug = options.debug == undefined ? debug : options.debug
         } else {
             options = {
@@ -168,6 +160,13 @@ class Editor {
      * @param {string} content The content passed into the editor when created
      */
     async initEditor(content=''){
+        // Handle buffering?
+        if ( this.options.bufferSize > 0 ){
+            this.initBuffering()
+            const config = { attributes: false, childList: true, subtree: true }
+            const observer = new MutationObserver(()=>this.handleMutation())
+            observer.observe(this.editorNode,config)
+        }
         // Request default content?
         if ( content=='' && this.options.defaultContent && this.options.defaultContent != '' ){
             const response = await fetch(this.options.defaultContent)
@@ -177,8 +176,6 @@ class Editor {
                 // console.log(content)
             }
         }
-        // initialise buffering
-        this.initBuffering()
         // Add the content to the editor node
         this.editorNode.innerHTML = content
         // Reset range
@@ -211,7 +208,7 @@ class Editor {
      */
     setState( button ){
         let handled = false
-        // If not a buffer button al buttons are disabled and 
+        // If not a detached button all buttons are disabled and 
         // inactive if there is no range or the range is in a custom element
         if ( button.type !== 'detached' ){
             if ( this.range === false || this.range.custom ){
@@ -228,12 +225,14 @@ class Editor {
     }
 
     /**
-     * Reset states of all buttons
+     * Set the state for a button type (or all buttons if blank)
+     * @param {string} type 
      */
-    setStates( type='' ){
+    setStateForButtonType( type='' ){
         this.toolbar.forEach( button => {
-            if ( type == '' || button.type == type){
+            if ( type == '' || button.type == type ){
                 this.setState( button )
+                return
             }
         })
     }
@@ -267,6 +266,8 @@ class Editor {
             }
             // All buttons have a click method
             button.element.addEventListener('click', event => {
+                // Get latest range as debouncing means may not have the latest value when typing
+                this.updateRange()
                 // Ignore if a modal is active
                 if ( this.modal.active() ){
                     return
@@ -491,14 +492,15 @@ class Editor {
      * Handle enter key pressed in editor node
      */
     handleEnter(){
+        // Get latest range as debouncing means may not have the latest value when typing
         this.updateRange()
         if ( this.range === false ){
             return
         }
-        const endNormal = this.range.endContainer.textContent.trim().length == this.range.endOffset
+        const endLineSelected = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
-        if ( this.range.custom || endNormal ) {
-            // console.log(`Creating a new node after ${this.range.blockParent.tagName} innerHTML ${this.range.blockParent.innerHTML}`)
+        if ( this.range.custom || endLineSelected ) {
+            console.log(`handling enter`)
             const emptyTag = this.range.blockParent.innerHTML == '<br>'
             const listTag = this.range.blockParent.tagName == 'LI'
             const tag = emptyTag || !listTag ? 'P' : this.range.blockParent.tagName
@@ -510,13 +512,16 @@ class Editor {
             if ( emptyTag ){
                 this.range.blockParent.remove()
             }
+            // Reset the range which must be done after a delay since this
+            // method was triggered on keydown before added to dom
+            setTimeout( () => {
+                this.updateRange()
+                this.setStateForButtonType('block')
+            }, 10 )
         }
         if ( this.range.custom ){
             this.highlightCustomNode(false)
         }
-        // Reset the range which must be done after a delay since this
-        // method was triggered on keydown before added to dom
-        setTimeout( () => this.updateRange(), 10 )
         return handled
     }
 
@@ -611,14 +616,13 @@ class Editor {
         let key = args[0]
         //console.log('key',key)
         const editor = args[1]
-        // Always get the new range
-        editor.range = Helpers.getRange()
-        // Reset toolbar states if navigating within editor
+        // Reset range and toolbar states if navigating within editor
+        editor.updateRange()
         if ( navigation.includes(key) ){
             editor.setToolbarStates()
         }
         // Check if a modal dialogue is shown - do not buffer if so
-        if ( document.querySelectorAll('.show').length == 0 ){
+        if ( editor.options.bufferSize > 0 && document.querySelectorAll('.show').length == 0 ){
             editor.bufferUpdate(editor)
         }
     }
@@ -789,6 +793,7 @@ class Editor {
      * Get the new range in the editor node and when debugging display this
      */
     updateRange(){
+        const timestamp1 = new Date()
         // Check for empty editor - in which case insert a new paragraph
         if ( this.editorNode.innerHTML.trim() == '' ){
             this.insertParagraph()
@@ -802,6 +807,8 @@ class Editor {
                 Templates.debugRange( this.debugTarget, this.range )
             }
         }
+        const timestamp2 = new Date()
+        console.log(`START: ${timestamp1.getTime()}\nENDED: ${timestamp2.getTime()}`)
     }
  
     /**
