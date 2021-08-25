@@ -43,6 +43,10 @@ Cypress.Commands.add('arte_edit', ()=> {
   cy.get('.editor-body').click({force:true})
 })
 
+Cypress.Commands.add('arte_get', query => {
+  return cy.get(`.editor-body ${query}`)
+})
+
 Cypress.Commands.add('arte_type', txt => {
   cy.get('.editor-body').type(txt)
 })
@@ -54,6 +58,10 @@ Cypress.Commands.add('arte_print', txt => {
 
 Cypress.Commands.add('arte_click_id', tag => {
   cy.get(`button#${tag}`).click().wait(WAIT_TIME)
+})
+
+Cypress.Commands.add('arte_click', selector => {
+  cy.get(`.editor-body ${selector}`).click().wait(WAIT_TIME)
 })
 
 Cypress.Commands.add('arte_set_selection', (text1, text2) => {
@@ -79,12 +87,17 @@ Cypress.Commands.add('arte_count', (query, expected) => {
   cy.get(`.editor-body ${query}`).should('have.length', expected)
 })
 
+Cypress.Commands.add('arte_contains', (query) => {
+  return cy.get(`.editor-body`).contains(query)
+})
+
+
 Cypress.Commands.add('arte_modal_element_click', query => {
   cy.get(`.modal-panel-container ${query}`).click()
 })
 
-Cypress.Commands.add('arte_modal_element_click', query => {
-  cy.get(`.modal-panel-container ${query}`).click()
+Cypress.Commands.add('arte_modal_element_get', query => {
+  cy.get(`.modal-panel-container ${query}`)
 })
 
 Cypress.Commands.add('arte_modal_element_type', (query,text) => {
