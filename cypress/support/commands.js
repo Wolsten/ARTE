@@ -24,37 +24,19 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-Cypress.Commands.add('upload_file', (fileName, fileType = ' ', selector, submit=false) => {
-  return cy.get(selector).then(subject => {
-    cy.fixture(fileName, 'base64')
-
-      .then(Cypress.Blob.base64StringToBlob)
-
-      .then(blob => {
-
-        const el = subject[0];
-        const testFile = new File([blob], fileName, { type: fileType })
-        const dataTransfer = new DataTransfer()
-
-        dataTransfer.items.add(testFile)
-
-        el.files = dataTransfer.files
-
-        if ( submit ){
-          el.closest('form').submit()
-        }
-      })
-  })
-})
 
 // Cypress.Commands.add('arte_visit', ()=> {
 //   cy.visit('http://localhost:5501/index.html')
 //   cy.get('.editor-body').clear()
 // })
 
+// Need a wait to be imposed to allow range setting and buffering to be complete
+// due to debouncing key strokes, etc
+const WAIT_TIME = 50
+
 Cypress.Commands.add('arte_visit', () => {
   cy.visit('http://localhost:5501/index.html')
-  cy.get('.editor-body').clear().click().wait(500)
+  cy.get('.editor-body').clear().click()
 })
 
 Cypress.Commands.add('arte_edit', ()=> {
@@ -62,22 +44,23 @@ Cypress.Commands.add('arte_edit', ()=> {
 })
 
 Cypress.Commands.add('arte_type', txt => {
-  // Tried several things to fix odd text entry but this is the only
-  // one that seems to work at all consistently
-  // For example waitForAnimations didn't do the job
-  // presumably because there is a lot going on for key down
-  cy.get('.editor-body').type(txt, {delay:100})
+  cy.get('.editor-body').type(txt)
+})
+
+Cypress.Commands.add('arte_print', txt => {
+  cy.get('.editor-body').type('{enter}').wait(WAIT_TIME)
+  cy.get('.editor-body').type(txt).wait(WAIT_TIME)
 })
 
 Cypress.Commands.add('arte_click_id', tag => {
-  cy.get(`button#${tag}`).click().wait(500)
+  cy.get(`button#${tag}`).click().wait(WAIT_TIME)
 })
 
 Cypress.Commands.add('arte_set_selection', (text1, text2) => {
   // Make sure editor is selected before setting the selection to 
   // ensure the correct states of the toolbar buttons.
   cy.arte_edit()
-  cy.get('.editor-body').setSelection(text1,text2).wait(500)
+  cy.get('.editor-body').setSelection(text1,text2).wait(WAIT_TIME)
 })
 
 Cypress.Commands.add('arte_modal_click', selector => {
@@ -85,11 +68,19 @@ Cypress.Commands.add('arte_modal_click', selector => {
   cy.arte_edit()
 })
 
+Cypress.Commands.add('arte_count', (query, expected) => {
+  cy.get(`.editor-body ${query}`).should('have.length', expected)
+})
 
 
-// Handling selection
+
+
+
+// -----------------------------------------------------------------------------
+// @section Selections
 // https://github.com/cypress-io/cypress/issues/2839
 // https://github.com/netlify/netlify-cms/blob/a4b7481a99f58b9abe85ab5712d27593cde20096/cypress/support/commands.js#L180
+// -----------------------------------------------------------------------------
 
 function getTextNode(el, match) {
   const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
@@ -167,3 +158,31 @@ Cypress.Commands.add('setCursorBefore', { prevSubject: true }, (subject, query) 
 Cypress.Commands.add('setCursorAfter', { prevSubject: true }, (subject, query) => {
   cy.wrap(subject).setCursor(query);
 });
+
+
+// -----------------------------------------------------------------------------
+// @section Example commands
+// -----------------------------------------------------------------------------
+
+Cypress.Commands.add('upload_file', (fileName, fileType = ' ', selector, submit=false) => {
+  return cy.get(selector).then(subject => {
+    cy.fixture(fileName, 'base64')
+
+      .then(Cypress.Blob.base64StringToBlob)
+
+      .then(blob => {
+
+        const el = subject[0];
+        const testFile = new File([blob], fileName, { type: fileType })
+        const dataTransfer = new DataTransfer()
+
+        dataTransfer.items.add(testFile)
+
+        el.files = dataTransfer.files
+
+        if ( submit ){
+          el.closest('form').submit()
+        }
+      })
+  })
+})
