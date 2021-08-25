@@ -40,7 +40,7 @@ Cypress.Commands.add('arte_visit', () => {
 })
 
 Cypress.Commands.add('arte_edit', ()=> {
-  cy.get('.editor-body').click()
+  cy.get('.editor-body').click({force:true})
 })
 
 Cypress.Commands.add('arte_type', txt => {
@@ -63,6 +63,13 @@ Cypress.Commands.add('arte_set_selection', (text1, text2) => {
   cy.get('.editor-body').setSelection(text1,text2).wait(WAIT_TIME)
 })
 
+Cypress.Commands.add('arte_set_cursor', (text1, atStart=true) => {
+  // Make sure editor is selected before setting the selection to 
+  // ensure the correct states of the toolbar buttons.
+  cy.arte_edit()
+  cy.get('.editor-body').setCursor(text1,atStart).wait(WAIT_TIME)
+})
+
 Cypress.Commands.add('arte_modal_click', selector => {
   cy.get(`.modal-panel-container button.${selector}`).click()
   cy.arte_edit()
@@ -70,6 +77,18 @@ Cypress.Commands.add('arte_modal_click', selector => {
 
 Cypress.Commands.add('arte_count', (query, expected) => {
   cy.get(`.editor-body ${query}`).should('have.length', expected)
+})
+
+Cypress.Commands.add('arte_modal_element_click', query => {
+  cy.get(`.modal-panel-container ${query}`).click()
+})
+
+Cypress.Commands.add('arte_modal_element_click', query => {
+  cy.get(`.modal-panel-container ${query}`).click()
+})
+
+Cypress.Commands.add('arte_modal_element_type', (query,text) => {
+  cy.get(`.modal-panel-container ${query}`).type(text)
 })
 
 

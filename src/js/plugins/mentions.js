@@ -217,4 +217,4 @@ export const setup = function(peeps){
 }
 
 const options = {setState, shortcut:['@','@']}
-export const BUTTON = new ToolbarButton( 'custom', 'mention', 'Mention', Icons.person, click, options ) 
+export const BUTTON = new ToolbarButton( 'custom', 'MENTION', 'Mention', Icons.person, click, options ) 
