@@ -325,6 +325,7 @@ function parseNode( node, formats, button ){
     editor.updateRange()
     // Reset states for all block buttons
     editor.setStateForButtonType('block')
+    editor.buffer()
 }
 
 /**

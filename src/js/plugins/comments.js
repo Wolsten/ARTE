@@ -182,6 +182,7 @@ function save(){
     }
 
     setState(editor, button)
+    editor.buffer()
 } 
 
 /**
@@ -201,6 +202,7 @@ function deleteItem(){
     // Update state
     editor.range = false
     setState(editor, button)
+    editor.buffer()
 }
 
 /**

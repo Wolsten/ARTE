@@ -1,6 +1,5 @@
 import * as Templates from './templates.js'
 import * as Helpers from './helpers.js'
-import * as Buffer from './plugins/buffer.js'
 import Modal from './Modal.js'
 
 class Editor {
@@ -23,6 +22,7 @@ class Editor {
         this.toolbar = this.initToolbar(toolbar)
         // Initialise the editor
         target.innerHTML = Templates.editor(this.toolbar, this.options)
+        this.id = Helpers.generateUid()
         // Grab dom elements
         this.editorNode = target.querySelector('.editor-body')
         this.toolbarNode = target.querySelector('.editor-toolbar')
@@ -48,87 +48,12 @@ class Editor {
         this.modal = new Modal()
         // Initialise the editor content and buffering
         this.initEditor(content)
+        // Initialise buttons (some of which require the editor content to have been loaded)
+        this.initialiseButtons()
     }
 
-    /**
-     * Add a hidden download button to the dom with the encoded contents of hte editor
-     */
-    download(){
-        let xml = this.getCleanData()
-        const link = document.createElement('a')
-        const filename = 'arte-download.arte'
-        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xml))
-        link.setAttribute('download', filename)
-        link.style.display = 'none'
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-    }
 
-    /**
-     * Handle file upload
-     * @param {HTMLElement} input 
-     * @returns 
-     */
-    handleFileUpload(input){
-        const file = input.files[0]
-        if (!file) {
-            return
-        }
-        const reader = new FileReader()
-        reader.onload = event => {
-            const content = event.target.result
-            console.warn(content)
-            this.initEditor(content)
-        }
-        reader.readAsText(file)
-        // Remove the input (avoids ,ultiple event listeners amongst other things)
-        input.remove()
-    }
 
-    upload(){
-        let input = document.getElementById('arte-upload')
-        if ( input == null ){
-            input = document.createElement('input')
-            input.id = 'arte-upload'
-            input.type = 'file'
-            input.style.display = 'none'
-            input.accept = '.arte'
-            console.log('input', input.outerHTML)
-            input.addEventListener('change', () => this.handleFileUpload(input),false)
-            document.body.appendChild(input)
-        }
-        input.click()
-    }
-
-    /**
-     * Handle mutations to the editor node as a result of dom insertions or removals
-     * Keyboard entry is handled separately
-     */
-    handleMutation() {
-        if ( this.bufferIgnoreMutation(this) === false ){
-            if ( this.options.debug ){
-                console.log('MUTATED')
-            }
-            this.bufferUpdate(this)
-            this.updateEventHandlers()
-        }
-    }
-
-    /**
-     * Initialise the buffering vars and methods
-     */
-    initBuffering(){
-        this.bufferIndex = -1
-        this.buffer = []
-        this.bufferIgnore = false
-        this.bufferUpdate = Buffer.update
-        this.bufferIgnoreMutation = Buffer.ignore
-        // if ( this.options.debug ){
-        //     console.log('detached',this.buffer)
-        //     console.log('buffer index', this.bufferIndex)
-        // }
-    }
 
     /**
      * Initialise the optional editor parameters
@@ -137,7 +62,7 @@ class Editor {
      */
     initOptions(options){   
         const headingNumbers = true
-        const bufferSize = 0  
+        const bufferSize = 10  
         const MAX_BUFFER_SIZE = 10   
         const debug = false
         if ( options ){
@@ -160,13 +85,6 @@ class Editor {
      * @param {string} content The content passed into the editor when created
      */
     async initEditor(content=''){
-        // Handle buffering?
-        if ( this.options.bufferSize > 0 ){
-            this.initBuffering()
-            const config = { attributes: false, childList: true, subtree: true }
-            const observer = new MutationObserver(()=>this.handleMutation())
-            observer.observe(this.editorNode,config)
-        }
         // Request default content?
         if ( content=='' && this.options.defaultContent && this.options.defaultContent != '' ){
             const response = await fetch(this.options.defaultContent)
@@ -180,8 +98,7 @@ class Editor {
         this.editorNode.innerHTML = content
         // Reset range
         this.range = false
-        // Initialise buttons (some of which require the editor content to have been loaded)
-        this.initialiseButtons()
+
     }
 
     /**
@@ -243,12 +160,29 @@ class Editor {
     initialiseButtons(){
         // Empty array of shortcuts
         this.shortcuts = []
+        // Initialise buffer callbacks to false - reset if UNDO button found 
+        // and a buffer length set
+        this.updateBuffer = false
         // Do any custom setup required
         this.toolbar.forEach( button => {
             // Add dom element to the button
             button.element = this.toolbarNode.querySelector(`#${button.tag}`)
             // Init formatting etc?
             if ( "init" in button ){
+                
+                // Special handling for undo
+                if ( button.tag === 'UNDO' && this.options.bufferSize > 0 ){
+                    this.updateBuffer = button.update
+                    // this.buffer = {
+                    //     update:button.update,
+                    //     buffering:button.buffering,
+                    //     restart:button.restart,
+                    //     pause:button.pause
+                    // }
+                    // const config = { attributes: false, childList: true, subtree: true }
+                    // const observer = new MutationObserver(()=>this.handleMutation())
+                    // observer.observe(this.editorNode,config)
+                }
                 button.init( this, button )
             }
             // Set initial button state
@@ -388,14 +322,18 @@ class Editor {
             console.log('Handle mouse up')
             console.log('handleMouseUp range=',this.range)
         }
+        console.log('Before update range')
         this.updateRange()
+        console.log('After update range')
         // let formats = []
         if ( this.range !== false ){
-            this.bufferIgnore = false
+            // if ( this.buffer !== false ){
+            //     this.buffer.restart(this.id)
+            // }            
             // If enter cursor in an empty editor then make this a paragraph
             // rather than raw text
-            if ( this.range.blockParent == this.editorNode && 
-                 this.editorNode.innerText == ''){
+            if ( this.editorNode.innerText.trim() == ''){
+                console.log('handleMouseUp: Inserting paragraph in empty editor')
                 this.insertParagraph()
             }
             // Unselect custom blocks and highlight this one if custom 
@@ -408,13 +346,16 @@ class Editor {
      * Insert empty paragraph
      */
     insertParagraph(){
+        // if ( this.buffer ) this.buffer.pause(this.id)
         let p = document.createElement('P')
         // Create a placeholder to ensure set cursor works
         p.innerText = '\n'
+        // if ( this.buffer ) this.buffer.pause(this.id)
         p = this.editorNode.appendChild(p)
         Helpers.setCursor( p, 0)
         this.updateRange()
         this.setToolbarStates()
+        this.buffer()
     }
 
 
@@ -430,6 +371,9 @@ class Editor {
         this.editorNode.addEventListener('keydown', event => {
             let handled = false
             if ( this.options.debug ){
+                console.warn('keydown event')
+                console.log('alt key?',event.altKey)
+                console.log('meta key?',event.metaKey)
                 console.log('control key?',event.ctrlKey)
                 console.log('key',event.key)
             }
@@ -468,7 +412,7 @@ class Editor {
                 })
             }
             // Undo/redo events
-            if ( !handled && this.bufferSize>0){
+            if ( !handled && this.bufferUpdate!==false){
                 if ( (event.ctrlKey || event.metaKey) && event.key == 'z' ){
                     event.preventDefault()
                     // Redo
@@ -479,11 +423,17 @@ class Editor {
                     } else {
                         button = this.toolbar.find( b => b.tag == 'UNDO')
                     }
-                    this.buffer.click(button)
-                    this.updateEventHandlers()
+                    button.element.click()
                     handled = true
                 }
             }
+            // // Filter cut, copy and paste keys as handled separately
+            // if ( !handled ){
+            //     const bufferKeys = ['c','v','x']
+            //     if ( (event.ctrlKey || event.metaKey) && bufferKeys.includes(event.key) ){
+            //         handled = true
+            //     }
+            // }
             this.lastKey = event.key
         })
     }
@@ -534,7 +484,7 @@ class Editor {
         if ( key == 'd' ){
             key = 'Delete'
         }
-        this.updateRange()
+        //this.updateRange()
         if ( this.range ){
             const feedback = new Modal({
                 type:'overlay', 
@@ -597,10 +547,9 @@ class Editor {
         // Set the handleKeyup method to be the debounced method handleKeyupDelayed
         this.handleKeyup = Helpers.debounce(this.handleKeyupDelayed,500)
         this.editorNode.addEventListener( 'keyup', event => {
-            const ignore = ['Shift']
+            const ignore = ['Shift', 'Meta', 'Ctrl']
             // console.log('handle key up event',event)
-            if ( ignore.includes(event.key) == false ){
-                this.bufferIgnore = true
+            if ( ignore.includes(event.key) == false && this.modal.active()==false ){
                 this.handleKeyup(event.key,this)
             }
         })
@@ -611,20 +560,19 @@ class Editor {
      * @param  {...any} args Handle keyup events
      */
     handleKeyupDelayed(...args){
-        // Nav keys
-        const navigation = ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','End','Home']
+        console.warn('handleKeyupDelayed')
         let key = args[0]
         //console.log('key',key)
+        // Nav keys
+        const navigation = ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','End','Home']
         const editor = args[1]
         // Reset range and toolbar states if navigating within editor
         editor.updateRange()
         if ( navigation.includes(key) ){
             editor.setToolbarStates()
         }
-        // Check if a modal dialogue is shown - do not buffer if so
-        if ( editor.options.bufferSize > 0 && document.querySelectorAll('.show').length == 0 ){
-            editor.bufferUpdate(editor)
-        }
+        console.log('Explicitly updating buffer')
+        editor.buffer()
     }
 
     // -----------------------------------------------------------------------------
@@ -657,22 +605,83 @@ class Editor {
         const events = ['cut', 'copy','paste']
         events.forEach( evt =>
             this.editorNode.addEventListener(evt, event=>{
-                if ( this.handleCutCopyPaste() ){
+                const blockEvent = this.handleCutCopyPaste(evt) 
+                console.log({blockEvent})
+                if ( blockEvent ){
                     event.preventDefault()
+                } else {
+                    console.log({evt})
+                    setTimeout( () => {
+                        //console.log({evt})
+                        if ( evt=='paste' ){
+                            this.cleanPasteEvents()
+                        } 
+                        this.buffer()
+                    },100)
                 }
             })
         )
     }
 
     /**
+     * Clean up paste events and buffering changes for cut and paste
+     * events
+     * @param {string} event The event type 'cut'|'paste'
+     */
+    cleanPasteEvents(event){
+        // Look for automatically inserted span styling including css vars
+        // and replace with text content only
+        // @todo This is likely to be fragile and dependent on use of 
+        // of vars in css. May also be browser specific.
+        const spans = this.editorNode.querySelectorAll('span')
+        let node = null
+        let styles = ''
+        let matches = 0
+        console.log({spans})
+        spans.forEach( span => {
+            if ( span.style ){
+                styles = ''
+                matches = 0
+                for( let i=0; i<span.style.length; i++ ){
+                    const s = span.style[i]
+                    console.log({s})
+                    console.log(span.style[s])
+                    const value = span.style[s]
+                    if ( value.includes('var(--')){
+                        matches ++
+                        node = span
+                        break;
+                    }
+                }
+            }
+        })
+        if ( node !== null ) {
+            let newNode = document.createTextNode(node.innerText)
+            newNode = Helpers.insertAfter(newNode,node)
+            node.remove()
+            const offset = newNode.textContent.length
+            Helpers.setCursor(newNode, offset)
+        }
+        // if ( match ){
+        //     console.log('Cleaned pasted text',match)
+        //     const text = document.createTextNode(match.innerText)
+        //     const node = Helpers.insertAfter(text,match)
+        //     match.remove()
+        //     Helpers.setCursor(node, match.innerText.length)
+        // }
+        // this.buffer()
+    }
+
+    /**
      * Handle cut, copy paste events. Prevent any that would involve custom elements
+     * @param {string} evt 'cut'|'copy'|'paste'
      * @returns {boolean} true if should be blocked
      */
-    handleCutCopyPaste(){
+    handleCutCopyPaste(evt){
         // console.log('Detected cut-copy-paste event')
         this.updateRange()
-        // Ensure have a range that is not collapsed
-        if ( this.range==false || this.range.collapsed ){
+        // Ensure have a range that is not collapsed for none paste events
+        if ( this.range==false || (evt!='paste' && this.range.collapsed) ){
             return false
         }
         // Loop from start container to end container checking for a non-editable block
@@ -693,13 +702,15 @@ class Editor {
                 feedback.show()
                 return true
             }
-            parent = parent.nextElementSibling
             if ( parent === endParent ){
                 done = true
             }
+            parent = parent.nextElementSibling
         }
         return false
     }
+
+
 
     // -----------------------------------------------------------------------------
     // @section Testing
@@ -763,6 +774,61 @@ class Editor {
         }
     }
 
+    // -----------------------------------------------------------------------------
+    // @section File handling
+    // -----------------------------------------------------------------------------
+
+    /**
+     * Add a hidden download button to the dom with the encoded contents of hte editor
+     */
+     download(){
+        let xml = this.getCleanData()
+        const link = document.createElement('a')
+        const filename = 'arte-download.arte'
+        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xml))
+        link.setAttribute('download', filename)
+        link.style.display = 'none'
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+    }
+
+    /**
+     * Handle file upload
+     * @param {HTMLElement} input 
+     * @returns 
+     */
+    handleFileUpload(input){
+        const file = input.files[0]
+        if (!file) {
+            return
+        }
+        const reader = new FileReader()
+        reader.onload = event => {
+            const content = event.target.result
+            console.warn(content)
+            this.initEditor(content)
+        }
+        reader.readAsText(file)
+        // Remove the input (avoids ,ultiple event listeners amongst other things)
+        input.remove()
+    }
+
+    upload(){
+        let input = document.getElementById('arte-upload')
+        if ( input == null ){
+            input = document.createElement('input')
+            input.id = 'arte-upload'
+            input.type = 'file'
+            input.style.display = 'none'
+            input.accept = '.arte'
+            console.log('input', input.outerHTML)
+            input.addEventListener('change', () => this.handleFileUpload(input),false)
+            document.body.appendChild(input)
+        }
+        input.click()
+    }
+        
 
     // -----------------------------------------------------------------------------
     // @section Other methods
@@ -793,22 +859,24 @@ class Editor {
      * Get the new range in the editor node and when debugging display this
      */
     updateRange(){
-        const timestamp1 = new Date()
-        // Check for empty editor - in which case insert a new paragraph
-        if ( this.editorNode.innerHTML.trim() == '' ){
-            this.insertParagraph()
-            // Return as insertParagraph reinvokes this method
+        if ( this.modal.active() ){
             return
         }
+        // const timestamp1 = new Date()
+        // Check for empty editor - in which case insert a new paragraph
+        // if ( this.editorNode.innerHTML.trim() == '' ){
+        //     console.log('1. inserting paragraph in empty editor')
+        //     this.insertParagraph()
+        //     // Return as insertParagraph reinvokes this method
+        //     return
+        // }
         //console.log('modal active',this.modal.active())
-        if ( this.modal.active() == false ){
-            this.range = Helpers.getRange()
-            if ( this.options.debug ){
-                Templates.debugRange( this.debugTarget, this.range )
-            }
+        this.range = Helpers.getRange()
+        if ( this.options.debug ){
+            Templates.debugRange( this.debugTarget, this.range )
         }
-        const timestamp2 = new Date()
-        console.log(`START: ${timestamp1.getTime()}\nENDED: ${timestamp2.getTime()}`)
+        // const timestamp2 = new Date()
+        // console.log(`START: ${timestamp1.getTime()}\nENDED: ${timestamp2.getTime()}`)
     }
  
     /**
@@ -826,6 +894,30 @@ class Editor {
             node.classList.add('custom-selected')
         }
     }
+
+    // /**
+    //  * Handle mutations to the editor node as a result of dom insertions or removals
+    //  * Keyboard entry is handled separately
+    //  */
+    // handleMutation() {
+    // if ( this.buffer !== false ){
+    //     if ( this.buffer.buffering(this.id) ){
+    //         if ( this.options.debug ){
+    //             console.log('MUTATED')
+    //         }
+    //         this.buffer.update(this)
+    //         this.updateEventHandlers()
+    //     // } else {
+    //     //     this.buffer.restart(this.id)
+    //     }
+    // }
+
+    buffer(){
+        if ( this.updateBuffer !== false ){
+            this.updateBuffer(this)
+        }
+    }
+
 
 } // End of class definition
 

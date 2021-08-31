@@ -1,22 +1,44 @@
 import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
 
+// -----------------------------------------------------------------------------
+// @section Buffer class and instances - allows for multiple buffers if have 
+// multiple editors on one page
+// -----------------------------------------------------------------------------
+
+class Buffer {
+    constructor(size){
+        this.size = size
+        this.index = -1
+        this.buffer = []
+        // this.buffering = true
+    }
+}
+
+let buffers = []
+
+// -----------------------------------------------------------------------------
+// @section Click functions
+// -----------------------------------------------------------------------------
+
 /**
  * If available update the editor content with the last but one
  * entry in the buffer
  * @param {object} editor The editor instance
  */
 const undo = function(editor){
-    if ( editor.bufferIndex > 0 ){
-        editor.bufferIndex --
-        editor.bufferIgnore = true
-        editor.editorNode.innerHTML = editor.buffer[ editor.bufferIndex ]
+    if ( editor.buffer ) pause(editor.id)
+    const buffer = buffers[editor.id]
+    if ( buffer.index > 0 ){
+        buffer.index --
+        buffer.ignore = true
+        editor.editorNode.innerHTML = buffer.buffer[ buffer.index ]
     }
     setState( editor, UNDO )
     setState( editor, REDO )
     if ( editor.options.debug ){
-        console.log('detached',editor.buffer)
-        console.log('buffer index', editor.bufferIndex)
+        console.log('buffer',buffer.buffer)
+        console.log('buffer index', buffer.index)
     }
     editor.updateEventHandlers()
 }
@@ -27,19 +49,28 @@ const undo = function(editor){
  * @param {object} editor The editor instance
  */
 const redo = function(editor){
-    if ( editor.bufferIndex + 1 < editor.buffer.length ){
-        editor.bufferIndex ++
-        editor.bufferIgnore = true
-        editor.editorNode.innerHTML = editor.buffer[ editor.bufferIndex ]
+    if ( editor.buffer ) pause(editor.id)
+    const buffer = buffers[editor.id]
+    if ( buffer.index + 1 < buffer.buffer.length ){
+        buffer.index ++
+        buffer.ignore = true
+        editor.editorNode.innerHTML = buffer.buffer[ buffer.index ]
     }
     setState( editor, UNDO )
     setState( editor, REDO )
     if ( editor.options.debug ){
-        console.log('detached',editor.buffer)
-        console.log('buffer index', editor.bufferIndex)
+        console.log('buffer',buffer.buffer)
+        console.log('buffer index', buffer.index)
     }
     editor.updateEventHandlers()
 }
+
+// -----------------------------------------------------------------------------
+// @section "Optional" functions" including update and ignore which are 
+// none-standard methods with special handling in the editor. These should NOT
+// be implemented in other plugins.
+// -----------------------------------------------------------------------------
+
 
 /**
  * Set the disabled and active states of a button
@@ -47,10 +78,21 @@ const redo = function(editor){
  * @param {object} button The button to act on
  */
 const setState = function( editor, button ){
+    const buffer = buffers[editor.id]
     if ( button.tag == 'UNDO' ){
-        button.element.disabled = editor.buffer.length<=1 || editor.bufferIndex <= 0
+        button.element.disabled = buffer.buffer.length<=1 || buffer.index <= 0
     } else {
-        button.element.disabled = editor.bufferIndex >= editor.buffer.length - 1
+        button.element.disabled = buffer.index >= buffer.buffer.length - 1
+    }
+}
+
+/**
+ * Initialise the buffering for this editor by creating a dedicated buffer instance
+ * @param {object} editor 
+ */
+const init = function( editor ){
+    if ( editor.buffer && editor.options.bufferSize > 0 ){
+        buffers[editor.id] = new Buffer(editor.options.bufferSize)
     }
 }
 
@@ -59,50 +101,83 @@ const setState = function( editor, button ){
  * when the maximum buffer size is reached
  * @param {object} editor The editor instance
  */
-export const update = function(editor){
-    if ( editor.options.bufferSize == 0 ){
+const update = function(editor){
+    if ( buffers[editor.id] === undefined ){
         return
     }
-    if ( editor.buffer.length > editor.options.bufferSize ){
+    const buffer = buffers[editor.id]
+    // Check that the new value is different
+    // if ( buffer.buffer.length > 0 && 
+    //      editor.editorNode.innerHTML == buffer.buffer[buffer.buffer.length] ){
+    //     return
+    // }
+    if ( buffer.buffer.length > buffer.size ){
         // Remove first element
-        editor.buffer.shift()
+        buffer.buffer.shift()
     }
     // Check buffer index in case need to reset buffer when the user had
     // undone and then made new changes
-    if ( (editor.bufferIndex + 1) < editor.buffer.length ){
-        const items = editor.buffer.length - (editor.bufferIndex + 1)
+    if ( (buffer.index + 1) < buffer.buffer.length ){
+        const items = buffer.buffer.length - (buffer.index + 1)
         for( let i=0; i<items; i++){
-            editor.buffer.pop()
+            buffer.buffer.pop()
         }
     }
     // Add the new one
-    editor.buffer.push(editor.editorNode.innerHTML)
-    editor.bufferIndex = editor.buffer.length - 1
+    buffer.buffer.push(editor.editorNode.innerHTML)
+    buffer.index = buffer.buffer.length - 1
     // Update buttons
     setState( editor, UNDO )
     setState( editor, REDO )
-    // console.log('detached',editor.buffer)
-    // console.log('buffer index', editor.bufferIndex)
+    // Debug
+    if ( editor.options.debug ){
+        console.log('buffer',buffer.buffer)
+        console.log('index', buffer.index)
+    }
 }
 
 /**
- * Return the current value of the buffer ignore flag but at the
- * same time reset the flag so that buffering until set again
- * This facility ensures that not all updates to the editor 
- * content are acted on immediately
- * @param {object} editor The editor instance
- * @returns 
+ * Set buffering on
+ * @param {number} id The editor instance id
  */
-export const ignore = function(editor){
-    let current = editor.bufferIgnore
-    editor.bufferIgnore = false
-    return current
+const restart = function(id){
+    if ( buffers[id] !== undefined ){
+        buffers[id].buffering = true
+    }
 }
+
+/**
+ * Pause buffering for one cycle
+ * @param {number} id The editor instance id
+ */
+const pause = function(id){
+    if ( buffers[id] !== undefined ){
+        buffers[id].buffering = false
+        // setTimeout( () => restart(id), 100)
+    }
+}
+
+/**
+* Get buffering state
+* @param {number} id The editor instance id
+* @returns {boolean} true for on and false for off
+*/
+const buffering = function(id){
+    if ( buffers[id] !== undefined ){
+        return buffers[id].buffering
+    }
+    return false
+}
+
+
+
+
 
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
-const options = {setState}
-export const UNDO = new ToolbarButton('detached','UNDO','Undo', Icons.undo, undo, options)
-export const REDO = new ToolbarButton('detached','REDO','Redo', Icons.redo, redo, options)
+const undoOptions = {init, setState, update, buffering, restart, pause}
+const redoOptions = {setState}
+export const UNDO = new ToolbarButton('detached','UNDO','Undo', Icons.undo, undo, undoOptions)
+export const REDO = new ToolbarButton('detached','REDO','Redo', Icons.redo, redo, redoOptions)

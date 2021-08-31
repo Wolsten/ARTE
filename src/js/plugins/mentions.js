@@ -152,9 +152,7 @@ function insert(person){
     editor.range = setCursor( editor.range.startContainer, offset )
     // Hide the modal
     modal.hide()
-    // Update the buffer explicity because this operation does not
-    // change the dom tree and hence will be missed by the observer
-    editor.bufferUpdate(editor)
+    editor.buffer()
 }
 
 const escape = function(){

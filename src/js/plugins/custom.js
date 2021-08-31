@@ -158,6 +158,7 @@ function save(){
     // Update state
     editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
+    editor.buffer()
 } 
 
 /**
@@ -177,6 +178,7 @@ function deleteItem(){
     // Update state
     editor.range = false
     setState(editor, button)
+    editor.buffer()
 }
 
 /**

@@ -385,7 +385,7 @@ export const getRange = function(){
     // console.log('new selection',sel)
     if ( sel.rangeCount==1 ){
         let range =  sel.getRangeAt(0)
-        console.log('New range found')
+        // console.log('New range found')
         range = augmentRange(range)
         return range
     }

@@ -71,7 +71,7 @@
             // Number of Undo operations supported, max 10
             bufferSize: 10,
             // debugging flag, e.g. to output selection ranges
-            // debug: true,
+            debug: true,
             // Add default content from separate html file
             // The option will attempt to read in this file and 
             // override any value for the initial content specified 
@@ -98,10 +98,12 @@
             })
             drawer.show()
         })
+
         // Download
         const download = document.getElementById('download')
         download.innerHTML = `${ARTE.Icons.download} Download`
         download.addEventListener('click', ()=>editor.download())
+        
         // Upload
         const upload = document.getElementById('upload')
         upload.innerHTML = `${ARTE.Icons.fileOpen} Open`

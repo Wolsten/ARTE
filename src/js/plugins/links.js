@@ -71,6 +71,7 @@ function handleCancel(){
     // Update state
     editor.range = false
     setState(editor, button)
+    editor.buffer()
 }
 
 function handleConfirmDelete(){
@@ -161,6 +162,7 @@ function save(){
     // Update state
     editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
+    editor.buffer()
 } 
 
 /**
