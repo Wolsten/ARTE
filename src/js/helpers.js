@@ -151,11 +151,13 @@ export const isCustom = function( node ){
 }
 
 /**
- * Check whether the selected range is within a custom element
+ * Check whether the selected range is completely within a custom element
+ * Cannot start a selection in a custom block and then select outside of it
+ * so do not need to check the end range
  * @param {Range} range 
- * @returns {boolean|HTMLElement} The custom element or false if not
+ * @returns {boolean|HTMLElement} The custom element containing the range or false if not
  */
-const getCustomFromRange = function( range ){
+const rangeStartContainerInCustom = function( range ){
     if ( range === false ){
         console.warn('Error.  Passed missing range when looking for a custom node')
     }
@@ -166,6 +168,30 @@ const getCustomFromRange = function( range ){
         node = node.parentNode
     }
     return isCustom(node) ? node : false
+}
+
+/**
+ * Return an array of custom blocks contained within the active range
+ * @param {Range} range Active range
+ * @returns {HTMLElement[]} Array of custom blocks, empty if none found
+ */
+export const rangeContainsCustoms = function( range ){
+    let customs = []
+    // Loop from start container to end container checking for a non-editable block
+    let parent = getParentBlockNode(range.startContainer)
+    const endParent = getParentBlockNode(range.endContainer)
+    let done = false
+    while ( !done ){
+        const custom = parent.querySelector('[contenteditable="false"]')
+        if ( custom !== null ){
+            customs.push(custom)
+        }
+        if ( parent === endParent ){
+            done = true
+        }
+        parent = parent.nextElementSibling
+    }
+    return customs
 }
 
  /**
@@ -197,7 +223,7 @@ export const getInlineStyles = function(node){
 /**
  * Get the parent block node or return the block if the node itself is a block
  * @param {HTMLElement} node 
- * @returns {HTMLElement} 
+ * @returns {HTMLElement} parent block node
  */
 export const getParentBlockNode = function(node){
     if ( node == null ){
@@ -404,7 +430,7 @@ function augmentRange(range){
         range.rootNode = range.commonAncestorContainer.parentNode
     }
     // Set flag to indicate whether the range is in a custom node
-    range.custom = getCustomFromRange(range)
+    range.custom = rangeStartContainerInCustom(range)
     return range
 }
 
