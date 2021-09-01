@@ -75,7 +75,7 @@ export const insertAfter = function(newNode, existingNode) {
  * @returns {HTMLElement} the new node inserted
  */
 export const insertBefore = function(newNode, existingNode) {
-    if ( newNode == null || existingNode ){
+    if ( newNode == null || existingNode == null ){
         console.warn('Error.  Found when inserting a new node before an existing node')
     }
     return existingNode.parentNode.insertBefore(newNode, existingNode);
@@ -89,8 +89,10 @@ export const insertBefore = function(newNode, existingNode) {
  * @returns 
  */
 export const replaceNode = function(existingNode, tag, html){
-    if ( existingNode == null || existingNode.parentNode ){
+    if ( existingNode == null || existingNode.parentNode == null ){
         console.warn('Error.  Found when replacing an existing node with a new node')
+        console.warn({existingNode})
+        console.warn(existingNode.parentNode)
     }
     const replacementNode = document.createElement(tag)
     replacementNode.innerHTML = html
@@ -145,7 +147,7 @@ export const isCustom = function( node ){
     if ( node.tagName == undefined ){
         return false
     }
-    return node.getAttribute('contenteditable') != null
+    return node.getAttribute('contenteditable') != null && node.getAttribute('contenteditable') == "false"
 }
 
 /**
@@ -280,8 +282,12 @@ export const cleanForSaving = function( node, buttons ){
          isList(node) === false && 
          isStyle(node) === false && 
          isCustom(node) === false ){
-        //console.warn('removing node',node)
         node.remove()
+        return
+    }
+    // clean styled spans
+    if ( node.tagName == 'SPAN' ){
+        cleanStyledSpan(node)
         return
     }
     // Handle custom nodes
@@ -303,6 +309,33 @@ export const cleanForSaving = function( node, buttons ){
     node.childNodes.forEach( child => {
         cleanForSaving( child, buttons )
     })
+}
+
+/**
+ * Remove none-standard styling from the span
+ * @param {HTMLElement} span The span which should have at least one style
+ */
+function cleanStyledSpan(span){
+    const style = span.getAttribute('style')
+    let newStyle = ''
+    console.log({style})
+    if ( style ){
+        const parts = style.split(';')
+        parts.forEach( part => {
+            if ( part ){
+                if ( part.includes('var(--') == false ){
+                    newStyle += `${part};` 
+                }
+            }
+        })
+    }
+    if ( newStyle ){
+        span.setAttribute('style',newStyle)
+    } else if ( style ) {
+        const text = document.createTextNode(span.textContent.trim())
+        insertBefore( text, span )
+        span.remove()
+    }
 }
 
 
