@@ -131,7 +131,7 @@ body.index-body {
 
 .editor-container {
     position: relative;
-    color:var(--colour-text)
+    // color:var(--colour-text)
 }
 
 .editor-toolbar {
@@ -201,8 +201,8 @@ body.index-body {
     padding:1.4rem 3rem;
     border-bottom: 1px solid var(--colour-border);
     margin-bottom: 1rem;
-    background-color: var(--colour-background);
-    color:var(--colour-text);
+    // background-color: var(--colour-background);
+    // color:var(--colour-text);
     // Ideally make these options
     min-height:200px;
     max-height:700px;
