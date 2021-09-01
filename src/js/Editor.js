@@ -98,7 +98,14 @@ class Editor {
         this.editorNode.innerHTML = content
         // Reset range
         this.range = false
-
+        // Format the content
+        this.toolbar.forEach( button => {
+            // Init formatting for buttons other than undo and redo
+            if ( "init" in button && 
+                  button.tag !== 'UNDO' && button.tag !== 'REDO' ){
+                button.init( this, button )
+            }
+        })
     }
 
     /**
@@ -128,7 +135,7 @@ class Editor {
         // If not a detached button all buttons are disabled and 
         // inactive if there is no range or the range is in a custom element
         if ( button.type !== 'detached' ){
-            if ( this.range === false || this.range.custom ){
+            if ( this.range===undefined || this.range===false || this.range.custom ){
                 handled = true
                 button.element.disabled = true
                 button.element.classList.remove('active')
@@ -167,22 +174,9 @@ class Editor {
         this.toolbar.forEach( button => {
             // Add dom element to the button
             button.element = this.toolbarNode.querySelector(`#${button.tag}`)
-            // Init formatting etc?
-            if ( "init" in button ){
-                
-                // Special handling for undo
-                if ( button.tag === 'UNDO' && this.options.bufferSize > 0 ){
-                    this.updateBuffer = button.update
-                    // this.buffer = {
-                    //     update:button.update,
-                    //     buffering:button.buffering,
-                    //     restart:button.restart,
-                    //     pause:button.pause
-                    // }
-                    // const config = { attributes: false, childList: true, subtree: true }
-                    // const observer = new MutationObserver(()=>this.handleMutation())
-                    // observer.observe(this.editorNode,config)
-                }
+            // Special handling for undo (init of other buttons done after content loaded)
+            if ( button.tag === 'UNDO' && this.options.bufferSize > 0 ){
+                this.updateBuffer = button.update
                 button.init( this, button )
             }
             // Set initial button state
@@ -322,14 +316,8 @@ class Editor {
             console.log('Handle mouse up')
             console.log('handleMouseUp range=',this.range)
         }
-        console.log('Before update range')
         this.updateRange()
-        console.log('After update range')
-        // let formats = []
-        if ( this.range !== false ){
-            // if ( this.buffer !== false ){
-            //     this.buffer.restart(this.id)
-            // }            
+        if ( this.range !== false ){          
             // If enter cursor in an empty editor then make this a paragraph
             // rather than raw text
             if ( this.editorNode.innerText.trim() == ''){
@@ -427,13 +415,6 @@ class Editor {
                     handled = true
                 }
             }
-            // // Filter cut, copy and paste keys as handled separately
-            // if ( !handled ){
-            //     const bufferKeys = ['c','v','x']
-            //     if ( (event.ctrlKey || event.metaKey) && bufferKeys.includes(event.key) ){
-            //         handled = true
-            //     }
-            // }
             this.lastKey = event.key
         })
     }
@@ -459,9 +440,6 @@ class Editor {
             n = Helpers.insertAfter( n, this.range.blockParent )
             Helpers.setCursor( n, 0 )
             handled = true
-            if ( emptyTag ){
-                this.range.blockParent.remove()
-            }
             // Reset the range which must be done after a delay since this
             // method was triggered on keydown before added to dom
             setTimeout( () => {
@@ -491,7 +469,7 @@ class Editor {
                 severity:'info',
                 title: 'Information',
                 html: `
-                    <p>Your selection contains one or more active elements, such as comments or links.</p>
+                    <p>You are attempting to delete one or more active elements, such as comments or links.</p>
                     <p>To delete active elements you need to edit them individually and choose Delete.</p>
                     `,
                 escape:true,
@@ -517,15 +495,10 @@ class Editor {
                 }
             // Back spacing or deleting in a multiple selection
             } else {
-                // Loop from start container to end container checking for a non-editable block
-                let parent = Helpers.getParentBlockNode(this.range.startContainer)
-                const endParent = Helpers.getParentBlockNode(this.range.endContainer)
-                while ( parent !== endParent ){
-                    if ( parent.innerHTML.includes('contenteditable="false"') ){
-                        feedback.show()
-                        return true
-                    }
-                    parent = parent.nextElementSibling
+                const customs = Helpers.rangeContainsCustoms(this.range)
+                if ( customs.length > 0 ){
+                    feedback.show()
+                    return true
                 }
             }
         }
@@ -602,19 +575,14 @@ class Editor {
      * List for cut, copy and paste events in the editor node
      */
     listenForPasteEvents(){
-        const events = ['cut', 'copy','paste']
-        events.forEach( evt =>
-            this.editorNode.addEventListener(evt, event=>{
-                const blockEvent = this.handleCutCopyPaste(evt) 
-                console.log({blockEvent})
+        const operations = ['cut', 'copy','paste']
+        operations.forEach( operation =>
+            this.editorNode.addEventListener(operation, event=>{
+                const blockEvent = this.handleCutCopyPaste(operation) 
                 if ( blockEvent ){
                     event.preventDefault()
                 } else {
-                    console.log({evt})
-                    setTimeout( () => {
-
-                        this.buffer()
-                    },100)
+                    setTimeout( ()=>this.buffer(), 100 )
                 }
             })
         )
@@ -624,38 +592,32 @@ class Editor {
 
     /**
      * Handle cut, copy paste events. Prevent any that would involve custom elements
-     * @param {string} evt 'cut'|'copy'|'paste'
+     * @param {string} operation 'cut'|'copy'|'paste'
      * @returns {boolean} true if should be blocked
      */
-    handleCutCopyPaste(evt){
+    handleCutCopyPaste(operation){
         // console.log('Detected cut-copy-paste event')
         this.updateRange()
         // Ensure have a range that is not collapsed for none paste events
-        if ( this.range==false || (evt!='paste' && this.range.collapsed) ){
+        if ( this.range==false || (operation!='paste' && this.range.collapsed) ){
             return false
         }
-        // Loop from start container to end container checking for a non-editable block
-        let parent = Helpers.getParentBlockNode(this.range.startContainer)
-        const endParent = Helpers.getParentBlockNode(this.range.endContainer)
-        let done = false
-        while ( !done ){
-            if ( parent.innerHTML.includes('contenteditable="false"') ){
-                const feedback = new Modal({
-                    type:'overlay', 
-                    severity:'info',
-                    title: 'Information',
-                    html: `<p>Cut, copy and paste (of or over) selections with custom block elements is not supported.</p>
-                           <p>Please modify your selection and try again.</p>`,
-                    escape:true,
-                    buttons: {cancel:{label:'Close'}}
-                })
-                feedback.show()
-                return true
-            }
-            if ( parent === endParent ){
-                done = true
-            }
-            parent = parent.nextElementSibling
+        const customs = Helpers.rangeContainsCustoms(this.range)
+        if ( customs.length > 0 ){
+            // Empty the clipboard as this prevents previous values being pasted
+            navigator.clipboard.writeText('')
+            // Display modal warning
+            const feedback = new Modal({
+                type:'overlay', 
+                severity:'info',
+                title: 'Information',
+                html: `<p>Cut, copy and paste (of or over) selections with active elements, such as comments or links, is not supported.</p>
+                        <p>Please modify your selection and try again.</p>`,
+                escape:true,
+                buttons: {cancel:{label:'Close'}}
+            })
+            feedback.show()
+            return true
         }
         return false
     }
@@ -729,7 +691,8 @@ class Editor {
     // -----------------------------------------------------------------------------
 
     /**
-     * Add a hidden download button to the dom with the encoded contents of hte editor
+     * Add a hidden download button to the dom with the encoded contents of the
+     * editor, click it programmatically and then remove
      */
      download(){
         let xml = this.getCleanData()
@@ -744,7 +707,7 @@ class Editor {
     }
 
     /**
-     * Handle file upload
+     * Handle file upload from the upload button defined in the upload method
      * @param {HTMLElement} input 
      * @returns 
      */
@@ -756,7 +719,7 @@ class Editor {
         const reader = new FileReader()
         reader.onload = event => {
             const content = event.target.result
-            console.warn(content)
+            //console.warn(content)
             this.initEditor(content)
         }
         reader.readAsText(file)
@@ -764,6 +727,10 @@ class Editor {
         input.remove()
     }
 
+    /**
+     * Add a hidden file input (if not already done so) and then click it
+     * programmatically
+     */
     upload(){
         let input = document.getElementById('arte-upload')
         if ( input == null ){
@@ -772,7 +739,7 @@ class Editor {
             input.type = 'file'
             input.style.display = 'none'
             input.accept = '.arte'
-            console.log('input', input.outerHTML)
+            //console.log('input', input.outerHTML)
             input.addEventListener('change', () => this.handleFileUpload(input),false)
             document.body.appendChild(input)
         }
@@ -844,23 +811,6 @@ class Editor {
             node.classList.add('custom-selected')
         }
     }
-
-    // /**
-    //  * Handle mutations to the editor node as a result of dom insertions or removals
-    //  * Keyboard entry is handled separately
-    //  */
-    // handleMutation() {
-    // if ( this.buffer !== false ){
-    //     if ( this.buffer.buffering(this.id) ){
-    //         if ( this.options.debug ){
-    //             console.log('MUTATED')
-    //         }
-    //         this.buffer.update(this)
-    //         this.updateEventHandlers()
-    //     // } else {
-    //     //     this.buffer.restart(this.id)
-    //     }
-    // }
 
     buffer(){
         if ( this.updateBuffer !== false ){
