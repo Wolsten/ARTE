@@ -56,7 +56,32 @@ function generateText(styles, txt, closeFlag){
     if ( styles.length == 0 ){
         return txt
     }
-    let html = `<span style="${styles.join(';')}">${txt}`
+    // Filter out older versions of the same style, e.g. so that only a later applied
+    // colour is added
+    let items = []
+    let values = []
+    let newStyles = ''
+    for ( let i=0; i<styles.length;i++){
+        const parts = styles[i].split(':')
+        items.push(parts[0].trim())
+        values.push(parts[1].trim())
+    }
+    // Blanks older matching items
+    for( let i=0; i<items.length; i++){
+        for ( let j=0; j<items.length; j++){
+            if ( items[i] == items[j] && i>j ){
+                items[j] = ''
+            }
+        }
+    }
+    // Construct new style attribute value
+    let newStyle = ''
+    for( let i=0; i<items.length; i++){
+        if ( items[i] != '' ){
+            newStyle += `${items[i]}:${values[i]};`
+        }
+    }
+    let html = `<span style="${newStyle}">${txt}`
     if ( closeFlag ){
         html += '</span>'
     }
@@ -71,7 +96,7 @@ function generateText(styles, txt, closeFlag){
  * @param {Range} range apply or remove
  * @returns {string}
  */
- function parseTextNode( node, styles, button, range ) {
+function parseTextNode( node, styles, button, range ) {
     Phase.set( node )
     const {preText, text, postText} = getTextParts(node,range)
     let html = ''
@@ -83,6 +108,7 @@ function generateText(styles, txt, closeFlag){
         // Has the style been applied already?
         const fullStyle = `${button.newStyle}:${button.newValue}`
         const idx = styleApplied(styles, fullStyle)
+
         let closedSpans = true
 
         // PRE TEXT
