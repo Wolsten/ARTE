@@ -612,10 +612,7 @@ class Editor {
                 } else {
                     console.log({evt})
                     setTimeout( () => {
-                        //console.log({evt})
-                        if ( evt=='paste' ){
-                            this.cleanPasteEvents()
-                        } 
+
                         this.buffer()
                     },100)
                 }
@@ -623,54 +620,7 @@ class Editor {
         )
     }
 
-    /**
-     * Clean up paste events and buffering changes for cut and paste
-     * events
-     * @param {string} event The event type 'cut'|'paste'
-     */
-    cleanPasteEvents(event){
-        // Look for automatically inserted span styling including css vars
-        // and replace with text content only
-        // @todo This is likely to be fragile and dependent on use of 
-        // of vars in css. May also be browser specific.
-        const spans = this.editorNode.querySelectorAll('span')
-        let node = null
-        let styles = ''
-        let matches = 0
-        console.log({spans})
-        spans.forEach( span => {
-            if ( span.style ){
-                styles = ''
-                matches = 0
-                for( let i=0; i<span.style.length; i++ ){
-                    const s = span.style[i]
-                    console.log({s})
-                    console.log(span.style[s])
-                    const value = span.style[s]
-                    if ( value.includes('var(--')){
-                        matches ++
-                        node = span
-                        break;
-                    }
-                }
-            }
-        })
-        if ( node !== null ) {
-            let newNode = document.createTextNode(node.innerText)
-            newNode = Helpers.insertAfter(newNode,node)
-            node.remove()
-            const offset = newNode.textContent.length
-            Helpers.setCursor(newNode, offset)
-        }
-        // if ( match ){
-        //     console.log('Cleaned pasted text',match)
-        //     const text = document.createTextNode(match.innerText)
-        //     const node = Helpers.insertAfter(text,match)
-        //     match.remove()
-        //     Helpers.setCursor(node, match.innerText.length)
-        // }
-        // this.buffer()
-    }
+   
 
     /**
      * Handle cut, copy paste events. Prevent any that would involve custom elements
