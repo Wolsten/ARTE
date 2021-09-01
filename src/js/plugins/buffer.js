@@ -107,10 +107,10 @@ const update = function(editor){
     }
     const buffer = buffers[editor.id]
     // Check that the new value is different
-    // if ( buffer.buffer.length > 0 && 
-    //      editor.editorNode.innerHTML == buffer.buffer[buffer.buffer.length] ){
-    //     return
-    // }
+    if ( buffer.buffer.length > 0 && 
+         editor.editorNode.innerHTML == buffer.buffer[buffer.buffer.length-1] ){
+        return
+    }
     if ( buffer.buffer.length > buffer.size ){
         // Remove first element
         buffer.buffer.shift()
