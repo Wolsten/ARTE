@@ -7,7 +7,7 @@ describe('Tests undo and redo', function () {
 
     it('tests undo text entry', function(){
 
-        cy.arte_print('Checking undoing and redoing of text entry')
+        cy.arte_type('Checking undoing and redoing of text entry')
         cy.arte_click_id('H1')
         
         // Add 11 paragraphs using delay to ensure buffered as written
@@ -41,7 +41,7 @@ describe('Tests undo and redo', function () {
 
     it('tests undoing block styling', function(){
 
-        cy.arte_print('Sample text')
+        cy.arte_type('Sample text')
 
         // Apply the formatting
         const WAIT = 100
@@ -75,7 +75,7 @@ describe('Tests undo and redo', function () {
 
     it('tests undoing inline styling', function(){
 
-        cy.arte_print('This is a paragraph with singly styled elements include bold, italic, underlined, coloured and highlighted text.')
+        cy.arte_type('This is a paragraph with singly styled elements include bold, italic, underlined, coloured and highlighted text.')
 
         // Apply the formatting
         const WAIT = 100
@@ -94,11 +94,11 @@ describe('Tests undo and redo', function () {
 
         // Check have the correct styles applied
         cy.arte_count('p',1)
-        cy.arte_count('span[style="font-weight:bold"]',1)
-        cy.arte_count('span[style="font-style:italic"]',1)
-        cy.arte_count('span[style="text-decoration:underline"]',1)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%)"]',1)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%)"]',1)
+        cy.arte_count('span[style="font-weight:bold;"]',1)
+        cy.arte_count('span[style="font-style:italic;"]',1)
+        cy.arte_count('span[style="text-decoration:underline;"]',1)
+        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',1)
 
         // Click undo 3 times
         for( let i=0; i<3; i++ ){
@@ -107,11 +107,11 @@ describe('Tests undo and redo', function () {
 
         // Check have the correct styles applied
         cy.arte_count('p',1)
-        cy.arte_count('span[style="font-weight:bold"]',1)
-        cy.arte_count('span[style="font-style:italic"]',1)
-        cy.arte_count('span[style="text-decoration:underline"]',0)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%)"]',0)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%)"]',0)
+        cy.arte_count('span[style="font-weight:bold;"]',1)
+        cy.arte_count('span[style="font-style:italic;"]',1)
+        cy.arte_count('span[style="text-decoration:underline;"]',0)
+        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',0)
+        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',0)
 
         // Click redo 2 times
         for( let i=0; i<2; i++ ){
@@ -120,11 +120,11 @@ describe('Tests undo and redo', function () {
 
         // Check have the correct styles applied
         cy.arte_count('p',1)
-        cy.arte_count('span[style="font-weight:bold"]',1)
-        cy.arte_count('span[style="font-style:italic"]',1)
-        cy.arte_count('span[style="text-decoration:underline"]',1)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%)"]',1)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%)"]',0)
+        cy.arte_count('span[style="font-weight:bold;"]',1)
+        cy.arte_count('span[style="font-style:italic;"]',1)
+        cy.arte_count('span[style="text-decoration:underline;"]',1)
+        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',0)
     })
 
     it('tests buffer limits', function(){
@@ -134,8 +134,8 @@ describe('Tests undo and redo', function () {
             cy.arte_print(i).wait(1000)
         }
 
-        // Click undo 6 times
-        for( let i=0; i<7; i++ ){
+        // Click undo 5 times
+        for( let i=0; i<6; i++ ){
             cy.arte_click_id('UNDO')
         }
 
@@ -143,8 +143,8 @@ describe('Tests undo and redo', function () {
         cy.get('button#UNDO[disabled]').should('exist')
         cy.get('button#REDO[disabled]').should('not.exist')
 
-        // Click redo 6 times
-        for( let i=0; i<7; i++ ){
+        // Click redo 5 times
+        for( let i=0; i<6; i++ ){
             cy.arte_click_id('REDO')
         }
 

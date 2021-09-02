@@ -382,9 +382,21 @@ const clean = function(node){
     }
 }
 
+const sidebar = function(edt,btn){
+    const links = edt.editorNode.querySelectorAll(btn.tag)
+    let content = ''
+    links.forEach( link => {
+        content += `<p>${link.dataset.label} (${link.href})</p>`
+    })
+    return {
+        label: 'Links',
+        content
+    }
+}
+
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
-const options = {init, setState, addEventHandlers, clean}
+const options = {init, setState, addEventHandlers, clean, sidebar}
 export const BUTTON = new ToolbarButton( 'custom', TAG, 'Link', Icons.link, click, options ) 

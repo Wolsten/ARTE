@@ -359,9 +359,22 @@ const click = function( edt, btn ){
     }
 }
 
+
+const sidebar = function(edt,btn){
+    const comments = edt.editorNode.querySelectorAll(btn.tag)
+    let content = ''
+    comments.forEach( comment => {
+        content += `<p>${comment.dataset.comment}</p>`
+    })
+    return {
+        label: 'Comments',
+        content
+    }
+}
+
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
-const options = {setState, init, addEventHandlers, clean}
+const options = {setState, init, addEventHandlers, clean, sidebar}
 export const BUTTON = new ToolbarButton( 'custom', TAG, 'Custom', Icons.comment, click, options ) 

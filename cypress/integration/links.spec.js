@@ -6,7 +6,7 @@ describe('Tests links', function () {
 
     it('tests entering a link', function(){
 
-        cy.arte_print('This is a paragraph with START END where links can be inserted.')
+        cy.arte_type('This is a paragraph with START END where links can be inserted.')
 
         cy.arte_set_cursor('END')
 
@@ -19,6 +19,11 @@ describe('Tests links', function () {
         cy.arte_modal_element_type('#href', '{movetoend}www.wibble.com')
 
         cy.arte_modal_element_click('button.confirm')
+
+        // Check have the correct elements
+        cy.arte_count('p',1)
+        cy.arte_count('a',1)
+        cy.arte_contains('http://www.wibble.com').should('not.exist')
     })
 
     it('tests editing a link', function(){

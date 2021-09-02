@@ -11,7 +11,7 @@ describe('Tests block formatting', function () {
 
     it('1. tests block formatting', function(){
 
-        cy.arte_print('This is a first level heading A')
+        cy.arte_type('This is a first level heading A')
         cy.arte_click_id('H1')
 
         cy.arte_print('This is a second level heading B')

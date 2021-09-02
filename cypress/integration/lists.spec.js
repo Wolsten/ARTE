@@ -9,7 +9,7 @@ describe('Tests list formatting', function () {
     // })
 
     it('1. tests creating numbered list', function(){
-        cy.arte_print('Numbered list')
+        cy.arte_type('Numbered list')
         cy.arte_click_id('H1')
         cy.arte_print('Numbered bullet A')
         cy.arte_click_id('OL')

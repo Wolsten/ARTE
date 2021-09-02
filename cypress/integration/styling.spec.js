@@ -10,7 +10,7 @@ describe('Tests inline formatting', function () {
 
     it('1. tests single formatting', function(){
 
-        cy.arte_print('This is a paragraph with singly styled elements')
+        cy.arte_type('This is a paragraph with singly styled elements')
         cy.arte_click_id('H1')
 
         cy.arte_print('This is a paragraph with singly styled elements include bold, italic, underlined, coloured and highlighted text.')
@@ -35,13 +35,12 @@ describe('Tests inline formatting', function () {
         // Check have the correct styles applied
         cy.arte_count('h1',1)
         cy.arte_count('p',1)
-        cy.arte_count('span[style="font-weight:bold"]',1)
-        cy.arte_count('span[style="font-style:italic"]',1)
-        cy.arte_count('span[style="text-decoration:underline"]',1)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%)"]',1)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%)"]',1)
+        cy.arte_count('span[style="font-weight:bold;"]',1)
+        cy.arte_count('span[style="font-style:italic;"]',1)
+        cy.arte_count('span[style="text-decoration:underline;"]',1)
+        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',1)
     })
-
 
     it('2. tests clearing formatting', function(){
         cy.arte_print('Test clearing styles fully.')
@@ -70,11 +69,11 @@ describe('Tests inline formatting', function () {
         cy.arte_click_id('CLEAR')
 
         // Check have the correct styles applied (should be same as in previous test)
-        cy.arte_count('span[style="font-weight:bold"]',1)
-        cy.arte_count('span[style="font-style:italic"]',1)
-        cy.arte_count('span[style="text-decoration:underline"]',1)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%)"]',1)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%)"]',1)
+        cy.arte_count('span[style="font-weight:bold;"]',1)
+        cy.arte_count('span[style="font-style:italic;"]',1)
+        cy.arte_count('span[style="text-decoration:underline;"]',1)
+        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',1)
     })
 
     it('3. tests clearing formatting partially', function(){
@@ -118,11 +117,11 @@ describe('Tests inline formatting', function () {
 
         // Check have the correct styles applied (should be 3x as in previous test
         // 1 each from previous plus two each from this)
-        cy.arte_count('span[style="font-weight:bold"]',3)
-        cy.arte_count('span[style="font-style:italic"]',3)
-        cy.arte_count('span[style="text-decoration:underline"]',3)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%)"]',3)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%)"]',3)
+        cy.arte_count('span[style="font-weight:bold;"]',3)
+        cy.arte_count('span[style="font-style:italic;"]',3)
+        cy.arte_count('span[style="text-decoration:underline;"]',3)
+        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',3)
+        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',3)
     })
 
 })

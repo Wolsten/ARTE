@@ -59,5 +59,6 @@ export const commentUnresolve = '<i class="bi bi-x-circle-fill"></i>'
 export const preview = '<i class="bi bi-eye"></i>'
 export const download = '<i class="bi bi-cloud-download"></i>'
 export const fileOpen = '<i class="bi bi-folder2-open"></i>'
+export const sidebarOpen = '<i class="bi bi-chevron-double-left"></i>'
 
 

@@ -109,13 +109,13 @@ function handleDelete(){
  * @param {boolean} editFlag Whether editing existing custom element or creating new
  */
 function show( editFlag ){
-    let title = 'Create custom element'
+    let title = 'Create custom active element'
     let buttons = {
         cancel:  { label:'Cancel', callback:handleCancel },
         confirm: { label:'Save', callback:save }
     }
     if ( editFlag ){
-        title = 'Edit custom element'
+        title = 'Edit custom active element'
         buttons.delete = { label:'Delete', callback:handleDelete }
     } else {
         node = document.createElement(TAG)
@@ -278,7 +278,7 @@ function form(props){
  */
 function template(props){
     return `
-        <span class="title">I am a custom object with 3 properties:</span>
+        <span class="title">I am an active object with 3 properties:</span>
         <span class="label">Property 1:</span><span class="prop property1">${props.property1}</span>
         <span class="label">Property 2:</span><span class="prop property2">${props.property2}</span>
         <span class="label">Property 3:</span><span class="prop property3">${props.property3}</span>

@@ -19,18 +19,19 @@ class Editor {
         // Initialise options
         this.options = this.initOptions(options)
         // Initialise the toolbar
-        this.toolbar = this.initToolbar(toolbar)
-        // Initialise the editor
+        this.toolbar = this.initToolbarArray(toolbar)
+        // Initialise the toolbar and empty editor
         target.innerHTML = Templates.editor(this.toolbar, this.options)
         this.id = Helpers.generateUid()
         // Grab dom elements
-        this.editorNode = target.querySelector('.editor-body')
         this.toolbarNode = target.querySelector('.editor-toolbar')
+        this.editorMain = target.querySelector('.editor-main')
+        this.editorNode = target.querySelector('.editor-body')
         // Check for debugging
         this.debugTarget = false
         if ( this.options.debug ){
             const div = document.createElement('div')
-            this.debugTarget = Helpers.insertAfter( div, this.editorNode )
+            this.debugTarget = Helpers.insertAfter( div, this.editorMain)
         }
         // *** TEST THE MODALS ***
         // Uncomment the next two lines for development testing
@@ -41,15 +42,17 @@ class Editor {
         this.listenForPasteEvents()
         this.listenForKeydownEvents()
         this.listenForKeyupEvents()
+
+        // Optional sidebar
+        this.initSidebar()
+
         // Public methods to support saving and updating the editor content
         this.preview = this.getCleanData
         this.update = this.updateEditor
         // Define an empty modal so can check if any active
         this.modal = new Modal()
         // Initialise the editor content and buffering
-        this.initEditor(content)
-        // Initialise buttons (some of which require the editor content to have been loaded)
-        this.initialiseButtons()
+        setTimeout( ()=>this.initEditor(content), 100)
     }
 
 
@@ -65,15 +68,18 @@ class Editor {
         const bufferSize = 10  
         const MAX_BUFFER_SIZE = 10   
         const debug = false
+        const defaultContent = ''
         if ( options ){
             options.headingNumbers = options.headingNumbers == undefined ? headingNumbers : options.headingNumbers
             options.bufferSize = options.bufferSize == undefined ? bufferSize : Math.max(parseInt(options.bufferSize),MAX_BUFFER_SIZE)
             options.debug = options.debug == undefined ? debug : options.debug
+            options.defaultContent = options.defaultContent == undefined ? '' : options.defaultContent
         } else {
             options = {
                 headingNumbers,
                 bufferSize,
-                debug
+                debug,
+                defaultContent
             }
         }
         return options
@@ -86,26 +92,18 @@ class Editor {
      */
     async initEditor(content=''){
         // Request default content?
-        if ( content=='' && this.options.defaultContent && this.options.defaultContent != '' ){
+        if ( content=='' && this.options.defaultContent != '' ){
             const response = await fetch(this.options.defaultContent)
-            // console.log(response)
             if ( response.status == 200 ){
                 content = await response.text()
-                // console.log(content)
             }
         }
         // Add the content to the editor node
         this.editorNode.innerHTML = content
         // Reset range
         this.range = false
-        // Format the content
-        this.toolbar.forEach( button => {
-            // Init formatting for buttons other than undo and redo
-            if ( "init" in button && 
-                  button.tag !== 'UNDO' && button.tag !== 'REDO' ){
-                button.init( this, button )
-            }
-        })
+        // Initialise buttons (some of which require the editor content to have been loaded)
+        this.initialiseButtons()
     }
 
     /**
@@ -113,7 +111,7 @@ class Editor {
      * @param {object[][]} groups 
      * @returns 
      */
-    initToolbar(groups){
+    initToolbarArray(groups){
         let toolbar = []
         groups.forEach( (group,groupIndex) => {
             group.forEach( button => {
@@ -167,7 +165,7 @@ class Editor {
     initialiseButtons(){
         // Empty array of shortcuts
         this.shortcuts = []
-        // Initialise buffer callbacks to false - reset if UNDO button found 
+        // Initialise buffer callback to false - reset if UNDO button found 
         // and a buffer length set
         this.updateBuffer = false
         // Do any custom setup required
@@ -177,6 +175,11 @@ class Editor {
             // Special handling for undo (init of other buttons done after content loaded)
             if ( button.tag === 'UNDO' && this.options.bufferSize > 0 ){
                 this.updateBuffer = button.update
+                button.init( this, button )
+            }
+            // Init formatting for buttons other than undo and redo
+            if ( "init" in button && 
+                button.tag !== 'UNDO' && button.tag !== 'REDO' ){
                 button.init( this, button )
             }
             // Set initial button state
@@ -211,6 +214,74 @@ class Editor {
         })
     }
 
+    // -----------------------------------------------------------------------------
+    // @section Sidebar
+    // -----------------------------------------------------------------------------
+    
+    initSidebar(){
+        const hasSidebar = this.toolbar.find( btn => btn.sidebar !== undefined )
+        if ( hasSidebar == undefined ){
+            return
+        }
+        let tabList = []
+        this.toolbar.forEach( button => {
+            if ( button.sidebar ){
+                console.log('Opening sidebar for button ', button.tag)
+                tabList.push(button.sidebar(this,button))
+            }
+        })
+        // Add the empty sidebar to the editor
+        let sidebar = document.createElement('DIV')
+        sidebar.innerHTML = Templates.sidebar(tabList)
+        sidebar.classList.add('editor-sidebar')
+        sidebar = this.editorMain.appendChild(sidebar)
+        // Event handling
+        const open = sidebar.querySelector('.editor-sidebar-open')
+        open.addEventListener( 'click', event => this.handleSidebarClick(event,sidebar) )
+        // Tab menu clicks
+        const tabMenu = sidebar.querySelector('.tab-menu')
+        tabMenu.addEventListener('click', event => this.handleTabMenuClicks(event, tabMenu, sidebar) )
+    }
+    
+    handleTabMenuClicks(event,tabMenu,sidebar){
+        event.preventDefault()
+        event.stopPropagation()
+        const tab = event.target
+        const tabTarget = tab.dataset.tabTarget
+        // Remove existing active and show classes
+        tabMenu.querySelectorAll('a').forEach( item => item.classList.remove('active'))
+        sidebar.querySelectorAll('.tab-item').forEach( item => item.classList.remove('show') )
+        // Add new classes
+        tab.classList.add('active')
+        const tabItem = sidebar.querySelector(`[data-tab-id="${tabTarget}"]`)
+        tabItem.classList.add('show')
+    }
+
+    handleSidebarClick( event,sidebar ){
+        event.preventDefault()
+        event.stopPropagation()
+        let tabList = []
+        // Hide the sidebar
+        if ( sidebar.classList.contains('show') ){
+            sidebar.classList.remove('show') 
+        // Populate and display the sidebar
+        } else {
+            // Get latest content
+            this.toolbar.forEach( button => {
+                if ( button.sidebar ){
+                    tabList.push(button.sidebar(this,button))
+                }
+            })
+            // Populate latest content
+            tabList.forEach( (item,index) => {
+                const content = sidebar.querySelector(`[data-tab-id="tab-${index}"]`)
+                content.innerHTML = item.content
+            })
+            // Show the sidebar
+            sidebar.classList.add('show')
+        }
+
+    }
 
 
     // -----------------------------------------------------------------------------
@@ -320,8 +391,8 @@ class Editor {
         if ( this.range !== false ){          
             // If enter cursor in an empty editor then make this a paragraph
             // rather than raw text
-            if ( this.editorNode.innerText.trim() == ''){
-                console.log('handleMouseUp: Inserting paragraph in empty editor')
+            if ( this.editorNode.innerText == ''){
+                //console.log('handleMouseUp: Inserting paragraph in empty editor')
                 this.insertParagraph()
             }
             // Unselect custom blocks and highlight this one if custom 

@@ -1,3 +1,6 @@
+import * as Helpers from './helpers.js'
+import * as Icons from './icons.js'
+
 /**
  * Return HTML for a toolbar button
  * @param {object} button 
@@ -62,8 +65,8 @@ export const editor = function(buttons,options){
             <div class="editor-toolbar">
                 ${toolbar}
             </div>
-            <div class="editor-body ${classes}" contenteditable="true">
-                ...
+            <div class="editor-main">
+                <div class="editor-body ${classes}" contenteditable="true"></div>
             </div>
         </div>`
 }
@@ -99,4 +102,22 @@ export const debugRange = function(target, range){
                 </div>
             </div>`
     }
+}
+
+
+
+export const sidebar = function(tabList){
+    let menu = ''
+    let content = ''
+    tabList.forEach( (item,index) => {
+        const active = index==0 ? 'active' : ''
+        const show = index==0 ? 'show' : ''
+        menu += `<li><a href="#" class="tab-menu ${active}" data-tab-target="tab-${index}">${item.label}</a></li>`
+        content += `<div class="tab-item ${show}" data-tab-id="tab-${index}"></div>`
+    })
+    return `
+        <a href="#" class="editor-sidebar-open" title="Click to open/close explorer">${Icons.sidebarOpen}</a>
+        <div class="editor-sidebar-content">
+            <ul class="tab-menu">${menu}</ul>${content}
+        </div>`
 }

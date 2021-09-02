@@ -24,18 +24,12 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-
-// Cypress.Commands.add('arte_visit', ()=> {
-//   cy.visit('http://localhost:5501/index.html')
-//   cy.get('.editor-body').clear()
-// })
-
 // Need a wait to be imposed to allow range setting and buffering to be complete
 // due to debouncing key strokes, etc
-const WAIT_TIME = 100
+const WAIT_TIME = 200
 
 Cypress.Commands.add('arte_visit', () => {
-  cy.visit('http://localhost:5501/index.html')
+  cy.visit('http://localhost:5501/index.html').wait(WAIT_TIME)
   cy.get('.editor-body').clear().click()
 })
 

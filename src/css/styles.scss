@@ -81,7 +81,7 @@ body.index-body {
     background-color: var(--colour-background);
 
     .index-header {
-        background-color:var(--colour-secondary);
+        background-color:var(--colour-primary);
         padding:0.5rem;
 
         header {
@@ -98,7 +98,7 @@ body.index-body {
             margin:0;
             padding:0 0.5rem;
             font-size: 1.3rem;
-            color:var(--colour-primary);
+            color:var(--colour-secondary);
         }
         h2 {
             margin:0;
@@ -195,17 +195,86 @@ body.index-body {
     }
 }
 
+.editor-main {
+    display:flex;
+    position:relative;
+    justify-content: center;
+}
+
+
+// -----------------------------------------------------------------------------
+// @section Sidebar - optional component
+// -----------------------------------------------------------------------------
+
+div.editor-sidebar {
+
+    margin:1rem 0;
+    padding:0.3rem;
+    border-left: 2px var(--colour-primary) solid;
+
+    a.editor-sidebar-open {
+        color:var(--colour-primary);
+        display:inline-block;
+        transform: rotate(180deg);
+        transition: transform 0.4s ease-in-out;
+    }
+    .editor-sidebar-content {
+        max-width:0;
+        overflow:hidden;
+        transform: translateX(-100%);
+        opacity:0;
+        transition: all 0.4s ease-in-out;
+    }
+
+    &.show {
+
+        a.editor-sidebar-open {
+            transform: rotate(0deg);
+        }
+
+        .editor-sidebar-content {
+            max-width:30%;
+            opacity:1;
+            transform: translateX(0);
+        }
+    }
+
+    ul.tab-menu {
+        list-style: none;
+        display:flex;
+        a {
+            padding:0.3rem;
+        }
+        a.active {
+            background-color: var(--colour-background-active);
+        }
+    }
+
+    div.tab-item {
+        display:none;
+        &.show {
+            display:block;
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// @section Editor body
+// -----------------------------------------------------------------------------
+
 .editor-body {
     position:relative;
     z-index: 1;
-    padding:1.4rem 3rem;
-    border-bottom: 1px solid var(--colour-border);
-    margin-bottom: 1rem;
-    // background-color: var(--colour-background);
-    // color:var(--colour-text);
+    padding:1.4rem 3%;
+
+    //border-bottom: 1px solid var(--colour-border);
+    margin: 1rem 0;
+    background-color: var(--colour-background);
+    color:var(--colour-text);
     // Ideally make these options
     min-height:200px;
     max-height:700px;
+    max-width:21.7cm;
     overflow-y: scroll;
 
     // Ensure easy position of custom elements in their containing elements
@@ -566,7 +635,7 @@ comment {
     display:block;
     position:absolute;
     top:-0.3rem;
-    right:-1.6rem;
+    right:-3%;
     button.edit {
         border:none;
         i {
