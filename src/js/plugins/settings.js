@@ -1,5 +1,5 @@
 import * as Icons from '../icons.js'
-import * as Helpers from '../helpers.js'
+// import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
 import Modal from '../Modal.js'
 
@@ -46,6 +46,15 @@ function setTheme(theme) {
     document.documentElement.className = theme
 }
 
+function setExplorer(editor){
+    localStorage.setItem('explorer', editor.options.explorer)
+    if ( editor.options.explorer ){
+        editor.showSidebar()
+    } else {
+        editor.hideSidebar()
+    }
+}
+
 function handleCancel(){
     drawer.hide()
 }
@@ -71,10 +80,12 @@ function show(editor){
         if ( event.target.name == 'headingNumbers' ){
             editor.options.headingNumbers = event.target.id == 'on'
             setHeadingNumbers(editor)
-        }
-        if ( event.target.name == 'theme' ){
+        } else if ( event.target.name == 'theme' ){
             editor.options.theme = event.target.id
             setTheme(editor.options.theme)
+        } else if ( event.target.name == 'explorer' ){
+            editor.options.explorer = event.target.id == 'show-explorer'
+            setExplorer(editor)
         }
     }))
 }
@@ -103,6 +114,15 @@ function form(options){
                 </label>
                 <label>
                     <input name="theme" id="theme-dark" type="radio" class="form-control" ${options.theme=='theme-dark'  ? 'checked' : ''}/> Dark
+                </label>
+            </div>
+            <div class="form-input">
+                <label>Explorer</label>
+                <label>
+                    <input name="explorer" id="show-explorer" type="radio" class="form-control first" ${options.explorer ? 'checked' : '' }/> Show
+                </label>
+                <label>
+                    <input name="explorer" id="hide-explorer" type="radio" class="form-control" ${options.explorer==false ? 'checked' : ''}/> Hide
                 </label>
             </div>
         </form>`

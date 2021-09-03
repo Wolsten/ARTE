@@ -26,8 +26,8 @@ class Editor {
         // Grab dom elements
         this.toolbarNode = target.querySelector('.editor-toolbar')
         this.mainNode= target.querySelector('.editor-main')
-        this.sidebarNode = target.querySelector('.editor-sidebar')
         this.editorNode = target.querySelector('.editor-body')
+        this.sidebarNode = null
         // Check for debugging
         this.debugTarget = false
         if ( this.options.debug ){
@@ -44,8 +44,6 @@ class Editor {
         this.listenForPasteEvents()
         this.listenForKeydownEvents()
         this.listenForKeyupEvents()
-        // Optional sidebar
-        this.initSidebar()
         // Public methods to support saving and updating the editor content
         this.preview = this.getCleanData
         this.update = this.updateEditor
@@ -54,9 +52,6 @@ class Editor {
         // Initialise the editor content and buffering
         setTimeout( ()=>this.initEditor(content), 100)
     }
-
-
-
 
     /**
      * Initialise the optional editor parameters
@@ -69,17 +64,20 @@ class Editor {
         const MAX_BUFFER_SIZE = 10   
         const debug = false
         const defaultContent = ''
+        const explorer = true
         if ( options ){
             options.headingNumbers = options.headingNumbers == undefined ? headingNumbers : options.headingNumbers
             options.bufferSize = options.bufferSize == undefined ? bufferSize : Math.max(parseInt(options.bufferSize),MAX_BUFFER_SIZE)
             options.debug = options.debug == undefined ? debug : options.debug
             options.defaultContent = options.defaultContent == undefined ? '' : options.defaultContent
+            options.explorer = options.explorer == undefined ? explorer : options.explorer
         } else {
             options = {
                 headingNumbers,
                 bufferSize,
                 debug,
-                defaultContent
+                defaultContent,
+                explorer
             }
         }
         return options
@@ -104,6 +102,10 @@ class Editor {
         this.range = false
         // Initialise buttons (some of which require the editor content to have been loaded)
         this.initialiseButtons()
+        // Optional sidebar
+        if ( this.options.explorer && this.toolbar.find(btn => btn.sidebar !== undefined)){
+            this.showSidebar()
+        }
     }
 
     /**
@@ -219,50 +221,44 @@ class Editor {
     // -----------------------------------------------------------------------------
     
     /**
-     * Initialise the sidebar if there is at least one button with a sidebar method
+     * Insert the sidebar in the dom
      */
-    initSidebar(){
-        const hasSidebar = this.toolbar.find( btn => btn.sidebar !== undefined )
-        if ( hasSidebar == undefined ){
+    showSidebar(){
+        if ( this.mainNode.querySelector('.editor-sidebar') != null ){
+            this.updateSidebar()
             return
         }
         let tabList = []
         this.toolbar.forEach( button => {
             if ( button.sidebar ){
-                console.log('Opening sidebar for button ', button.tag)
+                //console.log('Opening sidebar for button ', button.tag)
                 tabList.push(button.sidebar(this))
             }
         })
         // Populate the sidebar
-        const {menu,content} = Templates.sidebar(tabList)
-        this.sidebarNode.querySelector('.tab-menu').innerHTML = menu
-        this.sidebarNode.querySelector('.tab-content').innerHTML = content
-        // Event handling
-        const open = this.sidebarNode.querySelector('.editor-sidebar-open')
-        open.addEventListener( 'click', event => this.handleSidebarClick(event) )
+        this.sidebarNode = document.createElement('DIV')
+        this.sidebarNode.classList.add('editor-sidebar')
+        this.sidebarNode.classList.add('dont-break-out')
+        this.sidebarNode.innerHTML = Templates.sidebarContent(tabList)
         // Tab menu clicks
         const tabMenu = this.sidebarNode.querySelector('.tab-menu')
         const tabMenuItems = tabMenu.querySelectorAll('a')
         tabMenuItems.forEach( 
             item => item.addEventListener('click', event => this.handleTabMenuClicks(event,tabMenuItems)) 
         )
-        this.sidebarNode.style.display = 'block'
+        // Append to the editor
+        this.mainNode.appendChild(this.sidebarNode)
+    }
+
+    hideSidebar(){
+        this.sidebarNode.remove()
     }
 
     /**
-     * Update the content of the side and/or toggle its display
-     * @param {boolean} toggle Whether to toggle display or just update
+     * Update the content of the sidebar
      */
-    updateSidebar(toggle=true){
-        // Hide the sidebar
-        if ( toggle==true && this.sidebarNode.classList.contains('show') ){
-            this.sidebarNode.classList.remove('show')
-            // Clear the tab contents so the sidebar can shrink
-            this.sidebarNode.querySelectorAll('.tab-item').forEach(item=>item.innerHTML='')
-            return
-        }
-        // Stop if not toggling and the sidebar is hidden
-        if ( toggle == false && this.sidebarNode.classList.contains('show') == false ){
+    updateSidebar(){
+        if ( this.mainNode.querySelector('.editor-sidebar') == null ){
             return
         }
         // Get latest content
@@ -276,25 +272,10 @@ class Editor {
         tabList.forEach( (item,index) => {
             const content = this.sidebarNode.querySelector(`[data-tab-id="tab-${index}"]`)
             if ( item.content == '' ){
-                item.content = `You have no ${item.label} in your document`
+                item.content = `You have no ${item.label} in your document.`
             }
             content.innerHTML = item.content
         })
-        // Show the sidebar if have any content
-        if ( tabList.length > 0 && toggle == true ){
-            this.sidebarNode.classList.add('show')
-        }
-    }
-
-    /**
-     * Handle the click of the sidebar button to toggle the display of the 
-     * sidevar
-     * @param {Event} event 
-     */
-    handleSidebarClick( event ){
-        event.preventDefault()
-        event.stopPropagation()
-        this.updateSidebar()
     }
     
     /**
@@ -925,7 +906,7 @@ class Editor {
         if ( this.updateBuffer !== false ){
             this.updateBuffer(this)
         }
-        // Always update the sidebar
+        // Update the sidebar if we have one
         this.updateSidebar(false)
     }
 

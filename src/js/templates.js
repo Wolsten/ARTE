@@ -67,29 +67,32 @@ export const editor = function(buttons,options){
                 ${toolbar}
             </div>
             <div class="editor-main">
-                <div class="editor-sidebar dont-break-out">
-                    <a href="#" class="editor-sidebar-open" title="Click to open/close explorer">Explore ${Icons.sidebarOpen}</a>
-                    <div class="editor-sidebar-content">
-                        <ul class="tab-menu"></ul>
-                        <div class="tab-content"></div>
-                    </div>
-                </div>
+                <!-- Sidebar can go here --> 
                 <div class="editor-body ${classes}" contenteditable="true"></div>
             </div>
         </div>`
 }
 
 
-export const sidebar = function(tabList){
+export const sidebarContent = function(tabList){
     let menu = ''
     let content = ''
     tabList.forEach( (item,index) => {
         const active = index==0 ? 'active' : ''
         const show = index==0 ? 'show' : ''
+        const itemContent = item.content ? item.content : `You have no ${item.label} in your document.`
         menu += `<li><a href="#" class="tab-menu ${active}" data-tab-target="tab-${index}" title="${item.label}">${item.icon}</a></li>`
-        content += `<div class="tab-item ${show}" data-tab-id="tab-${index}"></div>`
+        content += `
+            <div class="tab-item ${show}" data-tab-id="tab-${index}">
+                ${itemContent}
+            </div>`
     })
-    return {menu, content}
+    const html = `
+            <div class="editor-sidebar-content">
+                <ul class="tab-menu">${menu}</ul>
+                <div class="tab-content">${content}</div>
+            </div>`
+    return html
 }
 
 

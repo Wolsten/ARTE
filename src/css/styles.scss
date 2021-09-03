@@ -41,6 +41,14 @@
 }
 
 // -----------------------------------------------------------------------------
+// @section Other variables
+// -----------------------------------------------------------------------------
+
+
+// Screen widths used in media queries cannot use css vars
+$screen-width-small: 600px;
+
+// -----------------------------------------------------------------------------
 // @section General
 // -----------------------------------------------------------------------------
 
@@ -166,6 +174,7 @@ body.index-body {
         color:var(--colour-primary);
         padding:0 0 0.5rem 0;
     }
+
 }
 
 .editor-toolbar {
@@ -189,6 +198,13 @@ body.index-body {
 .editor-main {
     display:flex;
     justify-content: space-evenly;
+    flex-direction:row;
+}
+
+@media screen AND ( max-width: $screen-width-small ){
+    .editor-main {
+        flex-direction:column-reverse;
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -245,38 +261,20 @@ body.index-body {
 // @section Sidebar
 // -----------------------------------------------------------------------------
 
-div.editor-sidebar {
+.editor-sidebar {
 
-    display:none;
+    display:block;
     margin:1rem 0;
-    //border-right: 5px var(--colour-primary) solid;
     color:var(--colour-text);
     background-color:var(--colour-background);
-    //width:35px;
-    max-width:30%;
-    max-height:700px;
-    overflow:hidden;
-    flex-shrink: 1;
+    
+    flex-shrink:0;
+    flex-grow:0;
+    flex-basis:250px;
 
-    a.editor-sidebar-open {
-        display:block;
-        text-align: right;
-        margin:0.5rem;
-        text-decoration: none;
-        i {
-            color:var(--colour-primary);
-            display:inline-block;
-            transform: rotate(180deg);
-            transition: transform 0.4s ease-in-out;
-        }
-    }
     .editor-sidebar-content {
         display:block;
         padding:0.5rem;
-        transform: translateX(-100%);
-        opacity:0;
-        transition: transform 0.4s ease-in-out;
-
         h1 {
             font-size: 1.1rem;
         }
@@ -295,37 +293,27 @@ div.editor-sidebar {
         }
     }
 
-    &.show {
-        width:40%;
-        overflow-y: scroll;
-        a.editor-sidebar-open {
-            i {
-                transform: rotate(270deg);
-            }
-        }
-        .editor-sidebar-content {
-            width:100%;
-            opacity:1;
-            transform: translateX(0);
-        }
-    }
-
     ul.tab-menu {
         list-style: none;
         display:flex;
         justify-content: flex-start;
-        // width:100%;
+        width:100%;
         overflow-x:scroll;
         padding:0;
+        margin:0;
         a {
             display:inline-block;
-            margin:0.3rem 0;
+            margin:0 0.1rem;
             padding:0.2rem 0.8rem;
             text-decoration: none;
             color:var(--colour-text);
+            border-top: 1px var(--colour-background-active) solid;
+            border-left: 1px var(--colour-background-active) solid;
+            border-right: 1px var(--colour-background-active) solid;
+            border-bottom: 1px var(--colour-background) solid;
             border-top-left-radius:0.5rem;
             border-top-right-radius:0.5rem;
-            border-bottom:1px solid var(--colour-border);
+            background-color: var(--colour-background);
             transition: background-color 0.4s ease-in-out;
             &:hover {
                 background-color: var(--colour-background-hover);
@@ -333,12 +321,17 @@ div.editor-sidebar {
         }
         a.active {
             background-color: var(--colour-background-active);
+            border-bottom-color:var(--colour-background-active);
             cursor:default;
         }
     }
 
     .tab-content {
-        // width:100%;
+        padding:0.5rem;
+        border-top:1px var(--colour-background-active) solid;
+        border-bottom:1px var(--colour-background-active) solid;
+        max-height:700px;
+        overflow:scroll;
         .tab-item {
             display:none;
             &.show {
@@ -372,24 +365,32 @@ div.editor-sidebar {
     }
 }
 
+@media screen AND ( max-width: $screen-width-small ){
+    .editor-sidebar {
+        flex-basis:100%;
+    
+        .tab-content {
+            max-height:200px;
+        }
+
+    }
+}
+
 // -----------------------------------------------------------------------------
 // @section Editor body
 // -----------------------------------------------------------------------------
 
 .editor-body {
     position:relative;
+    flex-grow:1;
     z-index: 1;
     padding:1.4rem 3%;
-    flex-grow:1;
-
-    //border-bottom: 1px solid var(--colour-border);
-    margin: 1rem 0 1rem 1rem;
+    margin: 1rem 0;
     background-color: var(--colour-background);
-    border:1px var(--colour-border) solid;
+    border:1px var(--colour-background-active) solid;
     color:var(--colour-text);
     // Ideally make these options
-    // min-width:70%;
-    min-height:200px;
+    min-height:300px;
     max-height:700px;
     max-width:21.7cm;
     overflow-y: scroll;
@@ -738,9 +739,11 @@ comment {
     right:-3%;
     button.edit {
         border:none;
+        background-color:transparent;
         i {
             font-weight:bold;
             color:var(--colour-warning);
+            background-color:transparent;
         }
     }
     &.custom-selected {

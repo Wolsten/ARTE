@@ -365,7 +365,7 @@ const setState = function(editor, button){
  */
 const sidebar = function(edt){
     const headings = edt.editorNode.querySelectorAll('H1,H2,H3')
-    console.log('Headings',headings)
+    //console.log('Headings',headings)
     let content = ''
     headings.forEach( heading => {
         const level = heading.tagName

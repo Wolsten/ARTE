@@ -253,7 +253,7 @@ const setState = function(edt,btn){
 }
 
 const init = function(editor, button){
-    console.log('Initialising colour button',button.tag)
+    // console.log('Initialising colour button',button.tag)
     const bar = document.createElement('span')
     bar.classList.add('bar')
     bar.classList.add(button.tag)
