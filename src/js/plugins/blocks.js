@@ -358,15 +358,48 @@ const setState = function(editor, button){
     }
 }
 
+/**
+ * Display custom html in the sidebar
+ * @param {Object} edt 
+ * @returns {Object} {icon,label,content}
+ */
+const sidebar = function(edt){
+    const headings = edt.editorNode.querySelectorAll('H1,H2,H3')
+    console.log('Headings',headings)
+    let content = ''
+    headings.forEach( heading => {
+        const level = heading.tagName
+        heading.id = Helpers.generateUid()
+        content += `<${level}><a href="#${heading.id}">${heading.innerHTML}</a></${level}>`
+    })
+    return {
+        icon: Icons.outline,
+        label: 'headings',
+        content: `${content}`
+    }
+}
+
+/**
+ * Optional method to reformat/clean the element as it should be saved in a file or database
+ * @param {HTMLElement} node
+ * @returns HTMLElement as cleaned
+ */
+ function clean(node){
+    if ( node.id ){
+        node.removeAttribute('id')
+    }
+    return node
+}
+
 // -----------------------------------------------------------------------------
 // @section Exports
 // -----------------------------------------------------------------------------
 
 const options = {setState}
-export const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click, options )
-export const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click, options )
-export const H3 = new ToolbarButton( 'block', 'H3', 'Heading 3', Icons.h3, click, options )
-export const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click, options )
+export const H1 = new ToolbarButton( 'block', 'H1', 'Heading 1', Icons.h1, click, {clean, sidebar, setState})
+export const H2 = new ToolbarButton( 'block', 'H2', 'Heading 2', Icons.h2, click, {clean, setState} )
+export const H3 = new ToolbarButton( 'block', 'H3', 'Heading 3', Icons.h3, click, {clean, setState} )
+export const P  = new ToolbarButton( 'block', 'P',  'Paragraph', Icons.p,  click, options  )
 export const BQ = new ToolbarButton( 'block', 'BLOCKQUOTE', 'Blockquote', Icons.bq, click, options )
 export const OL = new ToolbarButton( 'list',  'OL', 'Ordered list',   Icons.ol, click, options )
 export const UL = new ToolbarButton( 'list',  'UL', 'Unordered list', Icons.ul, click, options )

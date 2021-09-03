@@ -288,7 +288,7 @@ export const getTopParentNode = function( node, stopNode ){
  * Cleans the node, removing any non-supported tags/styles
  * Invokes custom plugin cleaning if defined
  * @param {HTMLElement} node 
- * @param {object[]} buttons array of button objects
+ * @param {object[]} buttons array of button objects which have clean methods
  */
 export const cleanForSaving = function( node, buttons ){
     // Trim text nodes with CR's
@@ -316,20 +316,23 @@ export const cleanForSaving = function( node, buttons ){
         cleanStyledSpan(node)
         return
     }
-    // Handle custom nodes
-    if ( buttons.length>0 && isCustom(node)  ){
+    // Handle custom cleaning - not just for custom nodes
+    if ( buttons.length>0 ){
         // Does it require cleaning?
         const match = buttons.find( 
             button => button.tag.toUpperCase()===node.tagName
         )
-        if ( match && "clean" in match ){
+        if ( match ){
             const newNode = match.clean(node)
             if ( node.parentNode == null ){
                 console.warn('Error.  Found missing parent node when cleaning for saving')
             }
             node.parentNode.replaceChild(newNode, node)
         }
-        return
+        // Only stop processing if this is a custom node
+        if ( isCustom(node) ){
+            return
+        }
     } 
     // Handle child nodes
     node.childNodes.forEach( child => {

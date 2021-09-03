@@ -10,7 +10,7 @@
     --colour-warning: rgb(250, 120, 30);
     --colour-danger: rgb(250, 30, 30);
     --colour-disabled: rgb(180,180,180);
-    --colour-link: rgb(102, 102, 235);
+    --colour-link: var(--colour-primary);
     --colour-debug: green;
     --colour-background-hover: hsl(0, 0%, 60%);
     --colour-background: hsl(0, 0%, 100%);
@@ -21,7 +21,7 @@
     --custom-selected-border: var(--colour-secondary);
 }
 
-html.theme-dark {
+.theme-dark {
     --colour-text: #ffffff;
     --colour-primary: rgb(70,115,200);
     --colour-secondary: rgb(170,210,140);
@@ -29,7 +29,7 @@ html.theme-dark {
     --colour-warning: rgb(250, 120, 30);
     --colour-danger: rgb(250, 30, 30);
     --colour-disabled: rgb(120,120,120);
-    --colour-link: rgb(102, 102, 235);
+    --colour-link: var(--colour-primary);
     --colour-debug: rgb(104, 207, 104);
     --colour-background-hover: hsl(0, 0%, 40%);
     --colour-background: hsl(0, 5%, 20%);
@@ -69,6 +69,28 @@ button:not([disabled]):hover {
     background:var(--colour-background-hover);
     color:var(--colour-text);
     border-color:var(--colour-background-hover);
+}
+
+// https://css-tricks.com/snippets/css/prevent-long-urls-from-breaking-out-of-container/
+.dont-break-out {
+    // These are technically the same, but use both
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    // This is the dangerous one in WebKit, as it breaks things wherever
+    word-break: break-all;
+    // Instead use this non-standard one:
+    word-break: break-word;
+    // Adds a hyphen where the word breaks, if supported (No Blink)
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+// Highlight all targeted items
+*:target {
+    border-bottom: 2px var(--colour-secondary) dashed;
 }
 
 // -----------------------------------------------------------------------------
@@ -129,9 +151,24 @@ body.index-body {
 // @section Editor
 // -----------------------------------------------------------------------------
 
+
+
 .editor-container {
     position: relative;
-    // color:var(--colour-text)
+    a {
+        color:var(--colour-link);
+        text-decoration: none;
+        &:hover{
+            text-decoration: underline;
+        }
+        &:visited {
+            color:var(--colour-link);
+        }
+    }
+    h1, h2, h3, h4, h5 {
+        color:var(--colour-primary);
+        padding:0 0 0.5rem 0;
+    }
 }
 
 .editor-toolbar {
@@ -203,37 +240,67 @@ body.index-body {
 
 
 // -----------------------------------------------------------------------------
-// @section Sidebar - optional component
+// @section Sidebar
 // -----------------------------------------------------------------------------
 
 div.editor-sidebar {
 
+    display:none;
     margin:1rem 0;
-    padding:0.3rem;
-    border-left: 2px var(--colour-primary) solid;
+    border-right: 5px var(--colour-primary) solid;
+    color:var(--colour-text);
+    background-color:var(--colour-background);
+    width:35px;
+    max-width:40%;
+    max-height:700px;
+    overflow:hidden;
 
     a.editor-sidebar-open {
-        color:var(--colour-primary);
-        display:inline-block;
-        transform: rotate(180deg);
-        transition: transform 0.4s ease-in-out;
+        display:block;
+        text-align: right;
+        margin:0.5rem;
+        i {
+            color:var(--colour-primary);
+            display:inline-block;
+            transform: rotate(180deg);
+            transition: transform 0.4s ease-in-out;
+        }
     }
     .editor-sidebar-content {
-        max-width:0;
-        overflow:hidden;
+        display:block;
+        padding:0.5rem;
         transform: translateX(-100%);
         opacity:0;
-        transition: all 0.4s ease-in-out;
+        transition: transform 0.4s ease-in-out;
+
+        h1 {
+            font-size: 1.1rem;
+        }
+        h2 {
+            font-size: 1rem;
+            padding-left:0.5rem;
+        }
+        h3 {
+            font-size: 0.9rem;
+            padding-left:1rem;
+        }
+        h1, h2, h3 {
+            a {
+                font-size:inherit;
+            }
+        }
     }
 
     &.show {
-
+        width:40%;
+        overflow-y: scroll;
         a.editor-sidebar-open {
-            transform: rotate(0deg);
+            i {
+                transform: rotate(0deg);
+            }
         }
-
         .editor-sidebar-content {
-            max-width:30%;
+            width:100%;
             opacity:1;
             transform: translateX(0);
         }
@@ -242,18 +309,61 @@ div.editor-sidebar {
     ul.tab-menu {
         list-style: none;
         display:flex;
+        justify-content: flex-start;
+        width:100%;
+        overflow-x:scroll;
+        padding:0;
         a {
-            padding:0.3rem;
+            display:inline-block;
+            margin:0.3rem 0;
+            padding:0.2rem 0.8rem;
+            text-decoration: none;
+            color:var(--colour-text);
+            border-top-left-radius:0.5rem;
+            border-top-right-radius:0.5rem;
+            border-bottom:1px solid var(--colour-border);
+            transition: background-color 0.4s ease-in-out;
+            &:hover {
+                background-color: var(--colour-background-hover);
+            }
         }
         a.active {
             background-color: var(--colour-background-active);
+            cursor:default;
         }
     }
 
-    div.tab-item {
-        display:none;
-        &.show {
-            display:block;
+    .tab-content {
+        width:100%;
+        .tab-item {
+            display:none;
+            &.show {
+                display:block;
+                width:100%;
+            }
+        }
+        article {
+            position:relative;
+            margin-top:0.5rem;
+            padding-bottom:0.5rem;
+            border-bottom:1px var(--colour-border) solid;
+            .sub-title {
+                margin:0.3rem 0 0 0;
+                font-size: smaller;
+                padding:0;
+            }
+        }
+
+        .comment-bubble {
+            position:absolute;
+            top:0;
+            right:0;
+            &.comment-unresolved {
+                color:var(--colour-warning)
+            }
+            &.comment-resolved {
+                color:var(--colour-success)
+            }
         }
     }
 }
@@ -305,29 +415,13 @@ div.editor-sidebar {
         color:var(--colour-text)
     }
     
-    h1, h2, h3, h4, h5 {
-        color:var(--colour-primary);
-        padding:0 0 0.5rem 0;
-    }
-    
-    a {
-        color:var(--colour-link);
-        text-decoration: none;
-    }
-    a:visited {
-        color:var(--colour-link);
-    }
-
     &.heading-numbers { 
-
         counter-reset: h1;
-
         h1 {counter-reset: h2}
         h2 {counter-reset: h3}
         h3 {counter-reset: h4}
         h4 {counter-reset: h5}
         h5 {counter-reset: h6}
-
         h1:before {counter-increment: h1; content: counter(h1) ". "};
         h2:before {counter-increment: h2; content: counter(h1) "." counter(h2) " "}
         h3:before {counter-increment: h3; content: counter(h1) "." counter(h2) "." counter(h3) " "}
@@ -335,7 +429,6 @@ div.editor-sidebar {
         h5:before {counter-increment: h5; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " "}
         h5:before {counter-increment: h6; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". " counter(h6)}
     }
-
 
 }
 
@@ -651,6 +744,7 @@ comment {
             color:var(--colour-success);
         }
     }
+
 }
 form.comment {
     textarea {
@@ -753,12 +847,12 @@ form.comment {
 // @section debugging
 // -----------------------------------------------------------------------------
 
-div.debug {
+div.editor-debug {
     width:100%;
     display:flex;
     flex-direction: row;
     h5 {
-        font-size:1.2rem;
+        font-size:1rem;
         padding:0.4rem 0;
         margin:0;
         color: var(--colour-text);

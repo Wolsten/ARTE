@@ -382,15 +382,24 @@ const clean = function(node){
     }
 }
 
-const sidebar = function(edt,btn){
-    const links = edt.editorNode.querySelectorAll(btn.tag)
+/**
+ * Display custom html in the sidebar
+ * @param {Object} edt 
+ * @returns {Object} {icon,label,content}
+ */
+const sidebar = function(edt){
+    const links = edt.editorNode.querySelectorAll(TAG)
     let content = ''
     links.forEach( link => {
-        content += `<p>${link.dataset.label} (${link.href})</p>`
+        content += `
+            <article>
+                <a href="#${link.id}">${link.dataset.label} (${link.href})</a>
+            </article>`
     })
     return {
-        label: 'Links',
-        content
+        icon: Icons.link,
+        label: 'links',
+        content: `${content}`
     }
 }
 

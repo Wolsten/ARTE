@@ -49,7 +49,8 @@ function editorToolbar(buttons){
 }
 
 /**
- * Return the HTML for the editor container including toolbar and editor body
+ * Return the HTML for the editor container including toolbar, editor body
+ * and an optional sidebar
  * @param {object[]} buttons 
  * @param {object} options 
  * @returns {string}
@@ -66,27 +67,47 @@ export const editor = function(buttons,options){
                 ${toolbar}
             </div>
             <div class="editor-main">
+                <div class="editor-sidebar dont-break-out">
+                    <a href="#" class="editor-sidebar-open" title="Click to open/close explorer">${Icons.sidebarOpen}</a>
+                    <div class="editor-sidebar-content">
+                        <ul class="tab-menu"></ul>
+                        <div class="tab-content"></div>
+                    </div>
+                </div>
                 <div class="editor-body ${classes}" contenteditable="true"></div>
             </div>
         </div>`
 }
+
+
+export const sidebar = function(tabList){
+    let menu = ''
+    let content = ''
+    tabList.forEach( (item,index) => {
+        const active = index==0 ? 'active' : ''
+        const show = index==0 ? 'show' : ''
+        menu += `<li><a href="#" class="tab-menu ${active}" data-tab-target="tab-${index}" title="${item.label}">${item.icon}</a></li>`
+        content += `<div class="tab-item ${show}" data-tab-id="tab-${index}"></div>`
+    })
+    return {menu, content}
+}
+
 
 /**
  * Debugging function to display the current selected range
  * @param {HTMLElement|false} target where to display debug info
  * @param {object} range Augmented range object
  */
-export const debugRange = function(target, range){
+ export const debugRange = function(target, range){
     if ( target == false ){
         return
     }
     // console.warn('debugRange',range)
     if ( range === false ){
-        target.innerHTML = 'No range selected'
+        target.innerHTML = '<p>No range selected</p>'
     } else {
         target.innerHTML = `
-            <h5>Selection info:</h5>
-            <div class="debug">
+                <h5>Selection info:</h5>
                 <div class="col">
                     <label>Block parent</label><span>${range.blockParent.tagName}</span>
                     <label>commonAncestorC</label><span>${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</span>
@@ -99,25 +120,6 @@ export const debugRange = function(target, range){
                     <label>startOffset</label><span>${range.startOffset}</span>
                     <label>endC</label><span>${range.endContainer.tagName ? range.endContainer.tagName : range.endContainer.textContent}</span>
                     <label>endOffset</label><span>${range.endOffset}</span>
-                </div>
-            </div>`
+                </div>`
     }
-}
-
-
-
-export const sidebar = function(tabList){
-    let menu = ''
-    let content = ''
-    tabList.forEach( (item,index) => {
-        const active = index==0 ? 'active' : ''
-        const show = index==0 ? 'show' : ''
-        menu += `<li><a href="#" class="tab-menu ${active}" data-tab-target="tab-${index}">${item.label}</a></li>`
-        content += `<div class="tab-item ${show}" data-tab-id="tab-${index}"></div>`
-    })
-    return `
-        <a href="#" class="editor-sidebar-open" title="Click to open/close explorer">${Icons.sidebarOpen}</a>
-        <div class="editor-sidebar-content">
-            <ul class="tab-menu">${menu}</ul>${content}
-        </div>`
 }

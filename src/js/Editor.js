@@ -25,13 +25,15 @@ class Editor {
         this.id = Helpers.generateUid()
         // Grab dom elements
         this.toolbarNode = target.querySelector('.editor-toolbar')
-        this.editorMain = target.querySelector('.editor-main')
+        this.mainNode= target.querySelector('.editor-main')
+        this.sidebarNode = target.querySelector('.editor-sidebar')
         this.editorNode = target.querySelector('.editor-body')
         // Check for debugging
         this.debugTarget = false
         if ( this.options.debug ){
             const div = document.createElement('div')
-            this.debugTarget = Helpers.insertAfter( div, this.editorMain)
+            div.classList.add('editor-debug')
+            this.debugTarget = Helpers.insertAfter( div, this.mainNode)
         }
         // *** TEST THE MODALS ***
         // Uncomment the next two lines for development testing
@@ -42,10 +44,8 @@ class Editor {
         this.listenForPasteEvents()
         this.listenForKeydownEvents()
         this.listenForKeyupEvents()
-
         // Optional sidebar
         this.initSidebar()
-
         // Public methods to support saving and updating the editor content
         this.preview = this.getCleanData
         this.update = this.updateEditor
@@ -218,6 +218,9 @@ class Editor {
     // @section Sidebar
     // -----------------------------------------------------------------------------
     
+    /**
+     * Initialise the sidebar if there is at least one button with a sidebar method
+     */
     initSidebar(){
         const hasSidebar = this.toolbar.find( btn => btn.sidebar !== undefined )
         if ( hasSidebar == undefined ){
@@ -227,62 +230,94 @@ class Editor {
         this.toolbar.forEach( button => {
             if ( button.sidebar ){
                 console.log('Opening sidebar for button ', button.tag)
-                tabList.push(button.sidebar(this,button))
+                tabList.push(button.sidebar(this))
             }
         })
-        // Add the empty sidebar to the editor
-        let sidebar = document.createElement('DIV')
-        sidebar.innerHTML = Templates.sidebar(tabList)
-        sidebar.classList.add('editor-sidebar')
-        sidebar = this.editorMain.appendChild(sidebar)
+        // Populate the sidebar
+        const {menu,content} = Templates.sidebar(tabList)
+        this.sidebarNode.querySelector('.tab-menu').innerHTML = menu
+        this.sidebarNode.querySelector('.tab-content').innerHTML = content
         // Event handling
-        const open = sidebar.querySelector('.editor-sidebar-open')
-        open.addEventListener( 'click', event => this.handleSidebarClick(event,sidebar) )
+        const open = this.sidebarNode.querySelector('.editor-sidebar-open')
+        open.addEventListener( 'click', event => this.handleSidebarClick(event) )
         // Tab menu clicks
-        const tabMenu = sidebar.querySelector('.tab-menu')
-        tabMenu.addEventListener('click', event => this.handleTabMenuClicks(event, tabMenu, sidebar) )
+        const tabMenu = this.sidebarNode.querySelector('.tab-menu')
+        const tabMenuItems = tabMenu.querySelectorAll('a')
+        tabMenuItems.forEach( 
+            item => item.addEventListener('click', event => this.handleTabMenuClicks(event,tabMenuItems)) 
+        )
+        this.sidebarNode.style.display = 'block'
+    }
+
+    /**
+     * Update teh content of the side and/or toggle its display
+     * @param {boolean} toggle Whether to toggle display or just update
+     */
+    updateSidebar(toggle=true){
+        // Hide the sidebar
+        if ( toggle==true && this.sidebarNode.classList.contains('show') ){
+            this.sidebarNode.classList.remove('show')
+            return
+        }
+        // Stop if not toggling and the sidebar is hidden
+        if ( toggle == false && this.sidebarNode.classList.contains('show') == false ){
+            return
+        }
+        // Get latest content
+        let tabList = []
+        this.toolbar.forEach( button => {
+            if ( button.sidebar ){
+                tabList.push(button.sidebar(this))
+            }
+        })
+        // Populate latest content if we have any
+        tabList.forEach( (item,index) => {
+            const content = this.sidebarNode.querySelector(`[data-tab-id="tab-${index}"]`)
+            if ( item.content == '' ){
+                item.content = `You have no ${item.label} in your document`
+            }
+            content.innerHTML = item.content
+        })
+        // Show the sidebar if have any content
+        if ( tabList.length > 0 && toggle == true ){
+            this.sidebarNode.classList.add('show')
+        }
+    }
+
+    /**
+     * Handle the click of the sidebar button to toggle the display of the 
+     * sidevar
+     * @param {Event} event 
+     */
+    handleSidebarClick( event ){
+        event.preventDefault()
+        event.stopPropagation()
+        this.updateSidebar()
     }
     
-    handleTabMenuClicks(event,tabMenu,sidebar){
+    /**
+     * Handle clicking on a tab menu item (the current target)
+     * @param {Event} event 
+     * @param {HTMLElement[]} tabMenuItems 
+     */
+    handleTabMenuClicks(event,tabMenuItems){
         event.preventDefault()
         event.stopPropagation()
-        const tab = event.target
+        // Find the clicked tab, i.e. the element with the data-tab-target attribute
+        const tab = event.currentTarget
         const tabTarget = tab.dataset.tabTarget
+        while ( tabTarget == null ){
+            tab = tab.parentNode
+            tabTarget = tab.dataset.tabTarget
+        }
         // Remove existing active and show classes
-        tabMenu.querySelectorAll('a').forEach( item => item.classList.remove('active'))
-        sidebar.querySelectorAll('.tab-item').forEach( item => item.classList.remove('show') )
+        tabMenuItems.forEach( item => item.classList.remove('active') )
+        this.sidebarNode.querySelectorAll('.tab-item').forEach( item => item.classList.remove('show') )
         // Add new classes
         tab.classList.add('active')
-        const tabItem = sidebar.querySelector(`[data-tab-id="${tabTarget}"]`)
-        tabItem.classList.add('show')
+        const tabItemTarget = this.sidebarNode.querySelector(`[data-tab-id="${tabTarget}"]`)
+        tabItemTarget.classList.add('show')
     }
-
-    handleSidebarClick( event,sidebar ){
-        event.preventDefault()
-        event.stopPropagation()
-        let tabList = []
-        // Hide the sidebar
-        if ( sidebar.classList.contains('show') ){
-            sidebar.classList.remove('show') 
-        // Populate and display the sidebar
-        } else {
-            // Get latest content
-            this.toolbar.forEach( button => {
-                if ( button.sidebar ){
-                    tabList.push(button.sidebar(this,button))
-                }
-            })
-            // Populate latest content
-            tabList.forEach( (item,index) => {
-                const content = sidebar.querySelector(`[data-tab-id="tab-${index}"]`)
-                content.innerHTML = item.content
-            })
-            // Show the sidebar
-            sidebar.classList.add('show')
-        }
-
-    }
-
 
     // -----------------------------------------------------------------------------
     // @section Mouse up events
@@ -295,10 +330,10 @@ class Editor {
         document.addEventListener('mouseup', event => {
             // Get the active element in the document
             const active = document.activeElement
-            if ( this.options.debug ){
-                console.log('mouseup on',event.target)
-                console.log( 'active element', document.activeElement)
-            }
+            // if ( this.options.debug ){
+            //     console.log('mouseup on',event.target)
+            //     console.log( 'active element', document.activeElement)
+            // }
             // Clicked a modal button?
             if ( this.modal.active() ){
                 return
@@ -437,7 +472,7 @@ class Editor {
                 console.log('key',event.key)
             }
             // Check if a modal dialogue is shown - ignore key entry?
-            if ( document.querySelectorAll('.show').length > 0 ){
+            if ( this.modal.active() ){
                 event.preventDefault()
                 handled = true
             }
@@ -828,8 +863,9 @@ class Editor {
      */
     getCleanData(){
         let node = this.editorNode.cloneNode(true)
-        const customButtons = this.toolbar.filter( button => button.type==='custom' )
-        Helpers.cleanForSaving(node, customButtons)
+        // Get list of buttons with clean methods
+        const cleanButtons = this.toolbar.filter( button => button.clean != undefined )
+        Helpers.cleanForSaving(node, cleanButtons)
         // Remove new lines and spaces before opening tags
         node.innerHTML = node.innerHTML.replace(/[\n ]*?</gm, '<')
         return node.innerHTML
@@ -887,6 +923,8 @@ class Editor {
         if ( this.updateBuffer !== false ){
             this.updateBuffer(this)
         }
+        // Always update the sidebar
+        this.updateSidebar(false)
     }
 
 

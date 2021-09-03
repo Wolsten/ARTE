@@ -192,8 +192,9 @@ function clean(node){
     node.removeAttribute('contenteditable')
     node.querySelector('.title').remove()
     node.querySelector('.advice').remove()
-    node.querySelector('.label').remove()
+    node.querySelectorAll('.label').forEach(label => label.remove() )
     node.querySelector('button').remove()
+    // console.log('cleaned custom element',node)
     return node
 }
 

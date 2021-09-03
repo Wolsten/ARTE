@@ -359,16 +359,26 @@ const click = function( edt, btn ){
     }
 }
 
-
-const sidebar = function(edt,btn){
-    const comments = edt.editorNode.querySelectorAll(btn.tag)
+/**
+ * Display custom html in the sidebar
+ * @param {Object} edt 
+ * @returns {Object} {icon,label,content}
+ */
+const sidebar = function(edt){
+    const comments = edt.editorNode.querySelectorAll(TAG)
     let content = ''
     comments.forEach( comment => {
-        content += `<p>${comment.dataset.comment}</p>`
+        const resolved = comment.dataset.resolved == 'true' ? 'comment-resolved' : 'comment-unresolved'
+        content += `
+            <article>
+                <a href="#${comment.id}">${comment.dataset.comment} <span class="comment-bubble ${resolved}">${Icons.commentEdit}</span></a>
+                <p class="sub-title">Added: ${comment.dataset.created}</p>
+            </article>`
     })
     return {
-        label: 'Comments',
-        content
+        icon: Icons.comment,
+        label: 'comments',
+        content: `${content}`
     }
 }
 

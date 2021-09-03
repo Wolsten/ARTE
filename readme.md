@@ -260,8 +260,12 @@ The full set of optional button methods is as follows:
 | setState | `method`. Set the disabled and active states of a button. All buttons should be disabled if no range is selected in the editor, apart from the two buffer buttons, which depend on the state of the editor buffer. The active state is implemented by adding the `active` class to a button element in the toolbar, in order to match the current selection. So for example, selecting `bold` text should make the `bold` button active.
 | style | `string`. For inline styles only, the style is represented as a string in one of two formats: such as `style:value` pairs in the `src/plugins/styles.js` plugin or style only, such as `color` in the `src/plugins/colours.js` plugin. Note that the `styles.js` plugin also exports its `click` method so that other plugins can take advantage of its styling capabaility. `colours.js` is a good example of the way this works, since the style value is not known until run time when it is chosen by the user via a dialogue. |
 | addEventHandlers | `method`. This method should reapply any required events handlers after any operations updating the editor dom tree. |
-| clean | `method`. This method will be invoked when the editor `save` method is invoked in order to clean any custom plugin content. For example, a `clean` method could minimise a custom component by removing any decorations applied in the `init` method. |
+| clean | `method`. This method will be invoked when the editor `save` method is invoked in order to clean any custom content. For example, a `clean` method could minimise a custom component by removing any decorations applied in the `init` method. This method can be added for any button, not just active elements.|
 | shortcut | `array`. A two-key sequence to trigger the button click event, such as [`@`,`Tab`] where `@` is the shortcut key and `Tab` is the trigger key. |
+| sidebar | `method`. Returns an object with with properties: `icon`, `label` and `content` with which to populate a tabbed sidebar. This method can be added for any button, not just active elements. A sidebar is added to the editor automatically if there is at least one button with a sidebar method. Each sidebar method populates its own tab in the sidebar. The sidebar can be opened and closed as required. Typically, content in the sidebar will be hyperlinked to the matching content in the editor body to aid navigation.|
+
+
+
 
 ### Update ARTE.js
 
