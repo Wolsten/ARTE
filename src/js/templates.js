@@ -68,7 +68,7 @@ export const editor = function(buttons,options){
             </div>
             <div class="editor-main">
                 <div class="editor-sidebar dont-break-out">
-                    <a href="#" class="editor-sidebar-open" title="Click to open/close explorer">${Icons.sidebarOpen}</a>
+                    <a href="#" class="editor-sidebar-open" title="Click to open/close explorer">Explore ${Icons.sidebarOpen}</a>
                     <div class="editor-sidebar-content">
                         <ul class="tab-menu"></ul>
                         <div class="tab-content"></div>

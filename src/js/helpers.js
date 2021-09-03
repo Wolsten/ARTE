@@ -329,11 +329,13 @@ export const cleanForSaving = function( node, buttons ){
             }
             node.parentNode.replaceChild(newNode, node)
         }
-        // Only stop processing if this is a custom node
-        if ( isCustom(node) ){
-            return
-        }
     } 
+
+    // Only stop processing if this is a custom node
+    if ( isCustom(node) ){
+        return
+    }
+
     // Handle child nodes
     node.childNodes.forEach( child => {
         cleanForSaving( child, buttons )

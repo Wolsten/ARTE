@@ -26,7 +26,7 @@
 
 // Need a wait to be imposed to allow range setting and buffering to be complete
 // due to debouncing key strokes, etc
-const WAIT_TIME = 200
+const WAIT_TIME = 250
 
 Cypress.Commands.add('arte_visit', () => {
   cy.visit('http://localhost:5501/index.html').wait(WAIT_TIME)

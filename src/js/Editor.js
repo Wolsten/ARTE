@@ -250,13 +250,15 @@ class Editor {
     }
 
     /**
-     * Update teh content of the side and/or toggle its display
+     * Update the content of the side and/or toggle its display
      * @param {boolean} toggle Whether to toggle display or just update
      */
     updateSidebar(toggle=true){
         // Hide the sidebar
         if ( toggle==true && this.sidebarNode.classList.contains('show') ){
             this.sidebarNode.classList.remove('show')
+            // Clear the tab contents so the sidebar can shrink
+            this.sidebarNode.querySelectorAll('.tab-item').forEach(item=>item.innerHTML='')
             return
         }
         // Stop if not toggling and the sidebar is hidden

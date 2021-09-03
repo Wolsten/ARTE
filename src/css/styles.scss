@@ -146,12 +146,9 @@ body.index-body {
 }
 
 
-
 // -----------------------------------------------------------------------------
 // @section Editor
 // -----------------------------------------------------------------------------
-
-
 
 .editor-container {
     position: relative;
@@ -187,6 +184,11 @@ body.index-body {
     margin:0 0.3rem;
     color:var(--colour-text);
     font-size: 1.2em;
+}
+
+.editor-main {
+    display:flex;
+    justify-content: space-evenly;
 }
 
 // -----------------------------------------------------------------------------
@@ -247,18 +249,20 @@ div.editor-sidebar {
 
     display:none;
     margin:1rem 0;
-    border-right: 5px var(--colour-primary) solid;
+    //border-right: 5px var(--colour-primary) solid;
     color:var(--colour-text);
     background-color:var(--colour-background);
-    width:35px;
-    max-width:40%;
+    //width:35px;
+    max-width:30%;
     max-height:700px;
     overflow:hidden;
+    flex-shrink: 1;
 
     a.editor-sidebar-open {
         display:block;
         text-align: right;
         margin:0.5rem;
+        text-decoration: none;
         i {
             color:var(--colour-primary);
             display:inline-block;
@@ -296,7 +300,7 @@ div.editor-sidebar {
         overflow-y: scroll;
         a.editor-sidebar-open {
             i {
-                transform: rotate(0deg);
+                transform: rotate(270deg);
             }
         }
         .editor-sidebar-content {
@@ -310,7 +314,7 @@ div.editor-sidebar {
         list-style: none;
         display:flex;
         justify-content: flex-start;
-        width:100%;
+        // width:100%;
         overflow-x:scroll;
         padding:0;
         a {
@@ -334,7 +338,7 @@ div.editor-sidebar {
     }
 
     .tab-content {
-        width:100%;
+        // width:100%;
         .tab-item {
             display:none;
             &.show {
@@ -376,12 +380,15 @@ div.editor-sidebar {
     position:relative;
     z-index: 1;
     padding:1.4rem 3%;
+    flex-grow:1;
 
     //border-bottom: 1px solid var(--colour-border);
-    margin: 1rem 0;
+    margin: 1rem 0 1rem 1rem;
     background-color: var(--colour-background);
+    border:1px var(--colour-border) solid;
     color:var(--colour-text);
     // Ideally make these options
+    // min-width:70%;
     min-height:200px;
     max-height:700px;
     max-width:21.7cm;
