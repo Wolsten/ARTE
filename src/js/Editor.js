@@ -520,7 +520,7 @@ class Editor {
         const endLineSelected = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
         if ( this.range.custom || endLineSelected ) {
-            console.log(`handling enter`)
+            // console.log(`handling enter`)
             const emptyTag = this.range.blockParent.innerHTML == '<br>'
             const listTag = this.range.blockParent.tagName == 'LI'
             const tag = emptyTag || !listTag ? 'P' : this.range.blockParent.tagName
@@ -622,7 +622,7 @@ class Editor {
      * @param  {...any} args Handle keyup events
      */
     handleKeyupDelayed(...args){
-        console.warn('handleKeyupDelayed')
+        // console.warn('handleKeyupDelayed')
         let key = args[0]
         //console.log('key',key)
         // Nav keys
@@ -633,7 +633,7 @@ class Editor {
         if ( navigation.includes(key) ){
             editor.setToolbarStates()
         }
-        console.log('Explicitly updating buffer')
+        // console.log('Explicitly updating buffer')
         editor.buffer()
     }
 

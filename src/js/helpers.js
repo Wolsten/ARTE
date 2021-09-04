@@ -392,9 +392,9 @@ let endOffset = 0
  * @param {Range} range 
  */
 export const addMarkers = function( range ){
-    console.log('range',range)
+    // console.log('range',range)
     if ( range.startContainer == range.endContainer ){
-        console.log('start container matches end container')
+        // console.log('start container matches end container')
         range.startContainer.textContent = 
             range.startContainer.textContent.substring(0, range.startOffset) +
             START_MARKER +
@@ -402,7 +402,7 @@ export const addMarkers = function( range ){
             END_MARKER +
             range.startContainer.textContent.substring(range.endOffset)
     } else {
-        console.log('start container does NOT match end container')
+        // console.log('start container does NOT match end container')
         range.startContainer.textContent = 
             range.startContainer.textContent.substring(0, range.startOffset) +
             START_MARKER +
