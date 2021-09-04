@@ -26,7 +26,8 @@
 
 // Need a wait to be imposed to allow range setting and buffering to be complete
 // due to debouncing key strokes, etc
-const WAIT_TIME = 250
+// If run into odd problems in testing try increasing this value in small increments
+const WAIT_TIME = 200
 
 Cypress.Commands.add('arte_visit', () => {
   cy.visit('http://localhost:5501/index.html').wait(WAIT_TIME)
@@ -38,7 +39,25 @@ Cypress.Commands.add('arte_edit', ()=> {
 })
 
 Cypress.Commands.add('arte_get', query => {
-  return cy.get(`.editor-body ${query}`)
+  return cy.get(`.editor-main ${query}`)
+})
+
+Cypress.Commands.add('arte_print_check', (tag, txt, sidebar=false) => {
+  cy.get('.editor-body').type(`{enter}${txt}`)
+  cy.arte_click_id(tag.toUpperCase())
+  cy.get(`.editor-body ${tag}`).contains(txt)
+  if ( sidebar ){
+    cy.get(`.editor-sidebar ${tag}`).contains(txt)
+  }
+})
+
+
+Cypress.Commands.add('arte_get_sidebar', query => {
+  return cy.get(`.editor-sidebar ${query}`)
+})
+
+Cypress.Commands.add('arte_contains_sidebar', query => {
+  return cy.get('.editor-sidebar').contains(query)
 })
 
 Cypress.Commands.add('arte_type', txt => {
@@ -51,6 +70,7 @@ Cypress.Commands.add('arte_print', txt => {
 })
 
 Cypress.Commands.add('arte_click_id', tag => {
+  tag = tag.toUpperCase()
   cy.get(`button#${tag}`).click().wait(WAIT_TIME)
 })
 

@@ -5,25 +5,24 @@ describe('Tests undo and redo', function () {
         cy.arte_visit()
     })
 
+
     it('tests undo text entry', function(){
 
-        cy.arte_type('Checking undoing and redoing of text entry')
+        cy.arte_type('Checking undoing and redoing of text entry.')
         cy.arte_click_id('H1')
-        
-        // Add 11 paragraphs using delay to ensure buffered as written
-        for( let i=1; i<12; i++ ){
-            cy.arte_print(i).wait(1000)
-        }
-
-        // Check have the correct block styles before
         cy.arte_count('h1',1)
-        cy.arte_count('p',11)
+        
+        // Add 11 paragraphs - with wait to ensure correct buffer per para
+        for( let i=1; i<12; i++ ){
+            cy.arte_print(`p${i}`).wait(500)
+            cy.arte_contains(`p${i}`)
+        }
 
         // Click undo 5 times
         for( let i=0; i<5; i++ ){
             cy.arte_click_id('UNDO')
         }
-
+        
         // Check have the correct block styles after
         cy.arte_count('h1',1)
         cy.arte_count('p',6)
@@ -41,7 +40,9 @@ describe('Tests undo and redo', function () {
 
     it('tests undoing block styling', function(){
 
-        cy.arte_type('Sample text')
+        cy.arte_print_check('h1','tests undoing block styling.',true)
+
+        cy.arte_print_check('p','Sample text')
 
         // Apply the formatting
         const WAIT = 100
@@ -70,12 +71,15 @@ describe('Tests undo and redo', function () {
 
         // Check have the correct block style
         cy.arte_count('blockquote',0)
-        cy.arte_count('P',1)
+        cy.arte_count('P',2) // Including initial empty one
     })
+
 
     it('tests undoing inline styling', function(){
 
-        cy.arte_type('This is a paragraph with singly styled elements include bold, italic, underlined, coloured and highlighted text.')
+        cy.arte_print_check('h1', 'tests undoing inline styling',true)
+
+        cy.arte_print_check('p','This is a paragraph with singly styled elements include bold, italic, underlined, coloured and highlighted text.')
 
         // Apply the formatting
         const WAIT = 100
@@ -93,7 +97,7 @@ describe('Tests undo and redo', function () {
         cy.arte_modal_click('confirm').wait(WAIT)
 
         // Check have the correct styles applied
-        cy.arte_count('p',1)
+        cy.arte_count('p',2)
         cy.arte_count('span[style="font-weight:bold;"]',1)
         cy.arte_count('span[style="font-style:italic;"]',1)
         cy.arte_count('span[style="text-decoration:underline;"]',1)
@@ -106,7 +110,7 @@ describe('Tests undo and redo', function () {
         }
 
         // Check have the correct styles applied
-        cy.arte_count('p',1)
+        cy.arte_count('p',2)
         cy.arte_count('span[style="font-weight:bold;"]',1)
         cy.arte_count('span[style="font-style:italic;"]',1)
         cy.arte_count('span[style="text-decoration:underline;"]',0)
@@ -119,7 +123,7 @@ describe('Tests undo and redo', function () {
         }
 
         // Check have the correct styles applied
-        cy.arte_count('p',1)
+        cy.arte_count('p',2)
         cy.arte_count('span[style="font-weight:bold;"]',1)
         cy.arte_count('span[style="font-style:italic;"]',1)
         cy.arte_count('span[style="text-decoration:underline;"]',1)
@@ -127,36 +131,44 @@ describe('Tests undo and redo', function () {
         cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',0)
     })
 
+
     it('tests buffer limits', function(){
+
+        cy.arte_print_check('h1', 'tests buffer limits',true)
 
         // Add 5 paragraphs using delay to ensure buffered as written
         for( let i=0; i<6; i++ ){
-            cy.arte_print(i).wait(1000)
+            cy.arte_print(`p${i}`).wait(500)
         }
 
-        // Click undo 5 times
-        for( let i=0; i<6; i++ ){
+        // Click undo 6 times (allows for header)
+        for( let i=0; i<7; i++ ){
             cy.arte_click_id('UNDO')
         }
 
-        // Check the button states
+        // Check the state
+        cy.arte_contains('tests buffer limits').should('not.exist')
         cy.get('button#UNDO[disabled]').should('exist')
         cy.get('button#REDO[disabled]').should('not.exist')
 
-        // Click redo 5 times
-        for( let i=0; i<6; i++ ){
+        // Click redo 6 times
+        for( let i=0; i<7; i++ ){
             cy.arte_click_id('REDO')
         }
 
-        // Check the button states
+        // Check the state
+        cy.arte_contains('tests buffer limits')
         cy.get('button#UNDO[disabled]').should('not.exist')
         cy.get('button#REDO[disabled]').should('exist')
 
         // Undo once
         cy.arte_click_id('UNDO')
 
-        // Check the button states
+        // Check the state
+        cy.arte_contains('tests buffer limits')
         cy.get('button#UNDO[disabled]').should('not.exist')
         cy.get('button#REDO[disabled]').should('not.exist')
+        cy.arte_contains('p4')
+        cy.arte_contains('p5').should('not.exist')
     })
 })
