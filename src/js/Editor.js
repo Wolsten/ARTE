@@ -111,10 +111,10 @@ class Editor {
         // behaviour  scrolls the linked element off the top of the editor out of sight.
         window.onhashchange = event => {
             // event.preventDefault()
-            console.log('URL changed',window.location.hash)
+            // console.log('URL changed',window.location.hash)
             const element = document.getElementById(window.location.hash.substring(1))
             if ( element != null ){
-                console.log('scrolled into view')
+                //console.log('scrolled into view')
                 element.scrollIntoView({block:'center',behaviour:'smooth'})
             }
         }
@@ -413,10 +413,10 @@ class Editor {
      * an empty editor, highlight a custom node if selected
      */
     handleMouseUp(){
-        if ( this.options.debug ){
-            console.log('Handle mouse up')
-            console.log('handleMouseUp range=',this.range)
-        }
+        // if ( this.options.debug ){
+        //     console.log('Handle mouse up')
+        //     console.log('handleMouseUp range=',this.range)
+        // }
         this.updateRange()
         if ( this.range !== false ){          
             // If enter cursor in an empty editor then make this a paragraph
@@ -459,13 +459,13 @@ class Editor {
         this.lastKey = ''
         this.editorNode.addEventListener('keydown', event => {
             let handled = false
-            if ( this.options.debug ){
-                console.warn('keydown event')
-                console.log('alt key?',event.altKey)
-                console.log('meta key?',event.metaKey)
-                console.log('control key?',event.ctrlKey)
-                console.log('key',event.key)
-            }
+            // if ( this.options.debug ){
+            //     console.warn('keydown event')
+            //     console.log('alt key?',event.altKey)
+            //     console.log('meta key?',event.metaKey)
+            //     console.log('control key?',event.ctrlKey)
+            //     console.log('key',event.key)
+            // }
             // Check if a modal dialogue is shown - ignore key entry?
             if ( this.modal.active() ){
                 event.preventDefault()
@@ -531,7 +531,7 @@ class Editor {
         }
         const endLineSelected = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
-        console.log(`handling enter with customs`, this.range.customs)
+        // console.log(`handling enter with customs`, this.range.customs)
         if ( this.range.custom || endLineSelected ) {
             const emptyTag = this.range.blockParent.innerHTML == '<br>'
             const listTag = this.range.blockParent.tagName == 'LI'
@@ -593,11 +593,11 @@ class Editor {
             if ( this.range.collapsed ){
                 // Check for back spacing from a single selection point 
                 if ( key == 'Backspace' && this.range.startOffset == 0 ){
-                    console.log('backspacing into custom block')
+                    // console.log('backspacing into custom block')
                     // Back spacing into a block containing one or more non-editable blocks?
                     const previous = this.range.blockParent.previousElementSibling
                     previous.childNodes.forEach( child => {
-                        console.log('Found custom block')
+                        // console.log('Found custom block')
                         // Found block, move back to the previous element after a delay
                         // to overcome the default behaviour which is to delete the block
                         if ( child.contentEditable == "false" ){
@@ -937,6 +937,7 @@ class Editor {
 
     buffer(){
         if ( this.updateBuffer !== false ){
+            // console.log('Updating buffer')
             this.updateBuffer(this)
         }
         // Update the sidebar if we have one

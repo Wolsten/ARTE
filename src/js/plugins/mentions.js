@@ -97,7 +97,7 @@ function handleKeyUp( event ){
     if ( navigated == false ) {
         // Filter list if not pressed enter
         if ( key!='Enter' ){
-            console.log('filter',inputElement.value.toLowerCase())
+            // console.log('filter',inputElement.value.toLowerCase())
             listContainerElement.innerHTML = filterList( inputElement.value.toLowerCase() )
             listItemElements = listContainerElement.querySelectorAll('li')
             selectedIndex = 0
@@ -166,7 +166,7 @@ const escape = function(){
  */
  function click(edt,btn){
     if ( edt.range === false ){
-        console.log('No range selected')
+        // console.log('No range selected')
         return
     }
     editor = edt

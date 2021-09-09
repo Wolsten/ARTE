@@ -36,10 +36,10 @@ const undo = function(editor){
     }
     setState( editor, UNDO )
     setState( editor, REDO )
-    if ( editor.options.debug ){
-        console.log('buffer',buffer.buffer)
-        console.log('buffer index', buffer.index)
-    }
+    // if ( editor.options.debug ){
+    //     console.log('buffer',buffer.buffer)
+    //     console.log('buffer index', buffer.index)
+    // }
     editor.updateEventHandlers()
 }
 
@@ -58,10 +58,10 @@ const redo = function(editor){
     }
     setState( editor, UNDO )
     setState( editor, REDO )
-    if ( editor.options.debug ){
-        console.log('buffer',buffer.buffer)
-        console.log('buffer index', buffer.index)
-    }
+    // if ( editor.options.debug ){
+    //     console.log('buffer',buffer.buffer)
+    //     console.log('buffer index', buffer.index)
+    // }
     editor.updateEventHandlers()
 }
 
@@ -130,10 +130,10 @@ const update = function(editor){
     setState( editor, UNDO )
     setState( editor, REDO )
     // Debug
-    if ( editor.options.debug ){
-        console.log('buffer',buffer.buffer)
-        console.log('index', buffer.index)
-    }
+    // if ( editor.options.debug ){
+    //     console.log('buffer',buffer.buffer)
+    //     console.log('index', buffer.index)
+    // }
 }
 
 /**

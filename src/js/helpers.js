@@ -349,7 +349,7 @@ export const cleanForSaving = function( node, buttons ){
 function cleanStyledSpan(span){
     const style = span.getAttribute('style')
     let newStyle = ''
-    console.log({style})
+    // console.log({style})
     if ( style ){
         const parts = style.split(';')
         parts.forEach( part => {

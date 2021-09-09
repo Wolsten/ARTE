@@ -7,7 +7,7 @@ describe('Tests inline formatting', function () {
 
     it('1. tests single formatting', function(){
 
-        cy.arte_print_check('h1','Testing singly styled elements',true)
+        cy.arte_type_check('h1','Testing singly styled elements',true)
 
         cy.arte_print_check('p','This is a paragraph with singly styled elements include bold, italic, underlined, coloured and highlighted text.')
         cy.arte_set_selection('bold')
@@ -39,7 +39,7 @@ describe('Tests inline formatting', function () {
 
     it('2. tests clearing formatting', function(){
 
-        cy.arte_print_check('h1','Test clearing styles fully.',true)
+        cy.arte_type_check('h1','Test clearing styles fully.',true)
 
         cy.arte_print_check('p','START This is a paragraph with no styled elements include bold, italic, underlined, coloured and highlighted text END')
         cy.arte_set_selection('bold')
@@ -79,7 +79,7 @@ describe('Tests inline formatting', function () {
 
     it('3. tests clearing formatting partially', function(){
 
-        cy.arte_print_check('h1','This tests clearing formatting partially.', true)
+        cy.arte_type_check('h1','This tests clearing formatting partially.', true)
         
         cy.arte_print_check('p','This is a paragraph with no styled elements include bo(xxbxx)ld, ita(xxixx)lic, under(xxuxx)lined, colo(xxcxx)ured and high(xxhxx)lighted text.')
 

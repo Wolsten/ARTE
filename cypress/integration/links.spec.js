@@ -6,7 +6,7 @@ describe('Tests links', function () {
 
     it('tests entering a link', function(){
 
-        cy.arte_print_check('h1','Tests entering links',true)
+        cy.arte_type_check('h1','Tests entering links',true)
         cy.arte_print_check('p','This is a paragraph with START END where links can be inserted.')
         
         cy.arte_set_cursor('END')
