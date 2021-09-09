@@ -106,6 +106,18 @@ class Editor {
         if ( this.options.explorer && this.toolbar.find(btn => btn.sidebar !== undefined)){
             this.showSidebar()
         }
+        // Try to ensure that the referenced content is scrolled to a visible area in the middle of the editor. 
+        // This is an attempt to normalise behaviour across browsers. For example, on Safari the default
+        // behaviour  scrolls the linked element off the top of the editor out of sight.
+        window.onhashchange = event => {
+            // event.preventDefault()
+            console.log('URL changed',window.location.hash)
+            const element = document.getElementById(window.location.hash.substring(1))
+            if ( element != null ){
+                console.log('scrolled into view')
+                element.scrollIntoView({block:'center',behaviour:'smooth'})
+            }
+        }
     }
 
     /**
