@@ -531,8 +531,8 @@ class Editor {
         }
         const endLineSelected = this.range.endContainer.textContent.trim().length == this.range.endOffset
         let handled = false
+        console.log(`handling enter with customs`, this.range.customs)
         if ( this.range.custom || endLineSelected ) {
-            // console.log(`handling enter`)
             const emptyTag = this.range.blockParent.innerHTML == '<br>'
             const listTag = this.range.blockParent.tagName == 'LI'
             const tag = emptyTag || !listTag ? 'P' : this.range.blockParent.tagName
@@ -547,7 +547,20 @@ class Editor {
                 this.updateRange()
                 this.setStateForButtonType('block')
             }, 10 )
-        }
+        // Check for handling enter within a parent block element that has a custom node at the end
+        // @todo Multiple custom nodes?
+        }  
+        // If any of the immediate child of the block parent are not editable - then move these 
+        // back to the original block parent since otherwise they will be transferred to the 
+        // next block on Enter
+        const p = this.range.blockParent
+        p.childNodes.forEach( child => {
+            if ( child.contentEditable == 'false' ){
+                setTimeout( () => {
+                    p.appendChild(child)
+                },10)
+            }
+        })
         if ( this.range.custom ){
             this.highlightCustomNode(false)
         }
@@ -578,14 +591,22 @@ class Editor {
             })
             // Single selection
             if ( this.range.collapsed ){
-                // Check for back spacing from a single selection point
+                // Check for back spacing from a single selection point 
                 if ( key == 'Backspace' && this.range.startOffset == 0 ){
-                    // Back spacing into a block containing a non-editable block?
+                    console.log('backspacing into custom block')
+                    // Back spacing into a block containing one or more non-editable blocks?
                     const previous = this.range.blockParent.previousElementSibling
-                    if ( previous && previous.querySelector( '[contenteditable="false"]') ){
-                        feedback.show()
-                        return true
-                    }
+                    previous.childNodes.forEach( child => {
+                        console.log('Found custom block')
+                        // Found block, move back to the previous element after a delay
+                        // to overcome the default behaviour which is to delete the block
+                        if ( child.contentEditable == "false" ){
+                            setTimeout( ()=> {
+                                previous.appendChild(child)
+                            },1)
+                            
+                        }
+                    })
                 // Forward delete in a none-editable block?
                 } else if ( key == 'Delete' && this.range.endContainer.textContent.trim().length == this.range.endOffset ){
                     const next = this.range.endContainer.nextElementSibling
