@@ -202,9 +202,9 @@ body.index-body {
 }
 
 @media screen AND ( max-width: $screen-width-small ){
-    .editor-main {
-        flex-direction:column-reverse;
-    }
+    // .editor-main {
+    //     flex-direction:column-reverse;
+    // }
 }
 
 // -----------------------------------------------------------------------------
@@ -367,8 +367,7 @@ body.index-body {
 
 @media screen AND ( max-width: $screen-width-small ){
     .editor-sidebar {
-        flex-basis:100%;
-    
+        flex-basis:50%;
         .tab-content {
             max-height:200px;
         }
