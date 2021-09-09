@@ -325,6 +325,7 @@ const setStyleProps = function(button){
     editor.updateRange()
     button.setState( editor, button )
     editor.buffer()
+    editor.updateEventHandlers()
 }
 
 let options = {setState, style:'font-weight:bold'}
