@@ -468,7 +468,7 @@ body.index-body {
 
 .modal-panel-container {
     position:absolute;
-    min-width:400px;
+    min-width:100%;
     background:var(--colour-background);
     opacity:0;
     transition: all 0.4s ease-in-out 0s;
@@ -499,13 +499,14 @@ body.index-body {
             font-size: inherit;
             color:inherit;
             cursor: pointer;
+            flex-basis:25%;
         }
         // Fixed size first label
-        label:first-child {
-            flex-basis:180px;
-            flex-shrink:0;
-            cursor:none;
-        }
+        // label:first-child {
+        //     flex-basis:180px;
+        //     flex-shrink:0;
+        //     cursor:none;
+        // }
         a {
             padding-left:0.5rem;
             cursor:pointer;
@@ -541,6 +542,17 @@ body.index-body {
     .form-input a,
     .form-input a:visited {
         color:inherit;
+    }
+}
+
+@media screen AND ( max-width: $screen-width-small ){
+    .modal-panel-body {
+        .form-input {
+            flex-direction: column;
+            label {
+                margin-bottom: 0.3rem;;
+            }
+        }
     }
 }
 
@@ -734,8 +746,8 @@ custom {
 comment {
     display:block;
     position:absolute;
-    top:-0.3rem;
-    right:-3%;
+    top:-1.3rem;
+    right:0rem;
     button.edit {
         border:none;
         background-color:transparent;
