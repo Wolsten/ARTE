@@ -547,7 +547,7 @@ body.index-body {
 
 @media screen AND ( max-width: $screen-width-small ){
     .modal-panel-body {
-        .form-input {
+        .form-input:not(.options) {
             flex-direction: column;
             label {
                 margin-bottom: 0.3rem;;

@@ -98,7 +98,7 @@ function show(editor){
 function form(options){
     return `
         <form>
-            <div class="form-input">
+            <div class="form-input options">
                 <label>Heading numbers</label>
                 <label>
                     <input name="headingNumbers" id="on" type="radio" class="form-control first" ${options.headingNumbers ? 'checked' : '' }/> On
@@ -107,7 +107,7 @@ function form(options){
                     <input name="headingNumbers" id="off" type="radio" class="form-control" ${!options.headingNumbers ? 'checked' : ''}/> Off
                 </label>
             </div>
-            <div class="form-input">
+            <div class="form-input options">
                 <label>Theme</label>
                 <label>
                     <input name="theme" id="theme-light" type="radio" class="form-control first" ${options.theme=='theme-light' ? 'checked' : '' }/> Light
@@ -116,7 +116,7 @@ function form(options){
                     <input name="theme" id="theme-dark" type="radio" class="form-control" ${options.theme=='theme-dark'  ? 'checked' : ''}/> Dark
                 </label>
             </div>
-            <div class="form-input">
+            <div class="form-input options">
                 <label>Explorer</label>
                 <label>
                     <input name="explorer" id="show-explorer" type="radio" class="form-control first" ${options.explorer ? 'checked' : '' }/> Show
