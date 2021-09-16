@@ -255,9 +255,13 @@ function parseNode( node, formats, button ){
     lastNodeAdded = false
     setStyleProps(button)
     // Ensure start from a block node
-    range.rootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
+    const newRootNode = Helpers.getTopParentNode( range.rootNode, editorNode )
     const firstParentNode = Helpers.getTopParentNode( range.startContainer, editorNode )
     const endParentNode = Helpers.getTopParentNode( range.endContainer, editorNode )
+    if ( newRootNode === false || firstParentNode === false || endParentNode === false ){
+        return
+    }
+    range.rootNode = newRootNode
     // console.warn('root node', editor.range.rootNode)
     // console.log('first parent node', firstParentNode)
     // console.log('end parent node', endParentNode)
@@ -342,9 +346,14 @@ const setState = function(editor, button){
     } else {
         // Use the first parent node to set disabled state
         let firstParentNode = Helpers.getParentBlockNode( editor.range.startContainer, editor.editorNode )
+        if ( firstParentNode === false ){
+            return
+        }
         //console.log('firstParentNode',firstParentNode)
         // The firstParentNode should not be a DIV (the editor) or a custom element
-        button.element.disabled = firstParentNode.tagName === 'DIV' || Helpers.isCustom(firstParentNode)
+        button.element.disabled = firstParentNode.tagName === 'DIV' || 
+                                  Helpers.isCustom(firstParentNode) ||
+                                  firstParentNode.tagName == button.tag
         //console.log('disabled',btn.element.disabled)
         // If this is a list type get the list parent
         if ( button.type === 'list' && firstParentNode.tagName === 'LI'){

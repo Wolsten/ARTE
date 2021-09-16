@@ -42,7 +42,7 @@ Cypress.Commands.add('arte_get', query => {
   return cy.get(`.editor-main ${query}`)
 })
 
-Cypress.Commands.add('arte_type_check', (tag, txt, sidebar=false) => {
+Cypress.Commands.add('arte_type_format', (tag, txt, sidebar=false) => {
   cy.get('.editor-body').type(`${txt}`)
   cy.arte_click_id(tag.toUpperCase())
   cy.get(`.editor-body ${tag}`).contains(txt)
@@ -51,7 +51,7 @@ Cypress.Commands.add('arte_type_check', (tag, txt, sidebar=false) => {
   }
 })
 
-Cypress.Commands.add('arte_print_check', (tag, txt, sidebar=false) => {
+Cypress.Commands.add('arte_print_format', (tag, txt, sidebar=false) => {
   cy.get('.editor-body').type(`{enter}${txt}`)
   cy.arte_click_id(tag.toUpperCase())
   cy.get(`.editor-body ${tag}`).contains(txt)
@@ -59,7 +59,6 @@ Cypress.Commands.add('arte_print_check', (tag, txt, sidebar=false) => {
     cy.get(`.editor-sidebar ${tag}`).contains(txt)
   }
 })
-
 
 Cypress.Commands.add('arte_get_sidebar', query => {
   return cy.get(`.editor-sidebar ${query}`)
@@ -74,8 +73,8 @@ Cypress.Commands.add('arte_type', txt => {
 })
 
 Cypress.Commands.add('arte_print', txt => {
-  cy.get('.editor-body').type('{enter}').wait(WAIT_TIME)
-  cy.get('.editor-body').type(txt).wait(WAIT_TIME)
+  cy.get('.editor-body').type(`{enter}${txt}`) //.wait(WAIT_TIME)
+  cy.get('.editor-body').contains(txt)
 })
 
 Cypress.Commands.add('arte_click_id', tag => {

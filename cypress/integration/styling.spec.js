@@ -7,9 +7,9 @@ describe('Tests inline formatting', function () {
 
     it('1. tests single formatting', function(){
 
-        cy.arte_type_check('h1','Testing singly styled elements',true)
+        cy.arte_type_format('h1','Testing singly styled elements',true)
 
-        cy.arte_print_check('p','This is a paragraph with singly styled elements include bold, italic, underlined, coloured and highlighted text.')
+        cy.arte_print('This is a paragraph with singly styled elements include bold, italic, underlined, coloured and highlighted text.')
         cy.arte_set_selection('bold')
         cy.arte_click_id('B')
         cy.arte_get('span[style="font-weight:bold;"]')
@@ -39,9 +39,9 @@ describe('Tests inline formatting', function () {
 
     it('2. tests clearing formatting', function(){
 
-        cy.arte_type_check('h1','Test clearing styles fully.',true)
+        cy.arte_type_format('h1','Test clearing styles fully.',true)
 
-        cy.arte_print_check('p','START This is a paragraph with no styled elements include bold, italic, underlined, coloured and highlighted text END')
+        cy.arte_print('START This is a paragraph with no styled elements include bold, italic, underlined, coloured and highlighted text END')
         cy.arte_set_selection('bold')
         cy.arte_click_id('B')
         cy.arte_count('span[style="font-weight:bold;"]',1)
@@ -79,9 +79,9 @@ describe('Tests inline formatting', function () {
 
     it('3. tests clearing formatting partially', function(){
 
-        cy.arte_type_check('h1','This tests clearing formatting partially.', true)
+        cy.arte_type_format('h1','This tests clearing formatting partially.', true)
         
-        cy.arte_print_check('p','This is a paragraph with no styled elements include bo(xxbxx)ld, ita(xxixx)lic, under(xxuxx)lined, colo(xxcxx)ured and high(xxhxx)lighted text.')
+        cy.arte_print('This is a paragraph with no styled elements include bo(xxbxx)ld, ita(xxixx)lic, under(xxuxx)lined, colo(xxcxx)ured and high(xxhxx)lighted text.')
 
         cy.arte_set_selection('bo(xxbxx)ld')
         cy.arte_click_id('B')

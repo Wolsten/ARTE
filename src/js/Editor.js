@@ -147,7 +147,9 @@ class Editor {
         // If not a detached button all buttons are disabled and 
         // inactive if there is no range or the range is in a custom element
         if ( button.type !== 'detached' ){
-            if ( this.range===undefined || this.range===false || this.range.custom ){
+            if ( this.range===undefined || 
+                 this.range===false || 
+                 this.range.custom ){
                 handled = true
                 button.element.disabled = true
                 button.element.classList.remove('active')
@@ -162,9 +164,9 @@ class Editor {
 
     /**
      * Set the state for a button type (or all buttons if blank)
-     * @param {string} type 
+     * @param {string} type Type of button
      */
-    setStateForButtonType( type='' ){
+    setStateForButtonType( type=''){
         this.toolbar.forEach( button => {
             if ( type == '' || button.type == type ){
                 this.setState( button )
@@ -210,7 +212,12 @@ class Editor {
                 })
             }
             // All buttons have a click method
+            this.buttonClicked = false
             button.element.addEventListener('click', event => {
+                if ( this.buttonClicked ){
+                    return
+                }
+                this.buttonClicked = true
                 // Get latest range as debouncing means may not have the latest value when typing
                 this.updateRange()
                 // Ignore if a modal is active
@@ -224,6 +231,7 @@ class Editor {
                 }
                 // Other prevent default action to ignore
                 event.preventDefault()
+                this.buttonClicked = false
             })
         })
     }
@@ -911,7 +919,8 @@ class Editor {
         //     return
         // }
         //console.log('modal active',this.modal.active())
-        this.range = Helpers.getRange()
+        this.range = Helpers.getRange(this.editorNode)
+
         if ( this.options.debug ){
             Templates.debugRange( this.debugTarget, this.range )
         }

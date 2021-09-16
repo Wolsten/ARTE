@@ -6,9 +6,9 @@ describe('Tests mentions', function () {
 
     it('tests inserting names using the mentions button by clicking', function(){
 
-        cy.arte_type_check('h1','tests inserting names using the mentions by clicking',true)
+        cy.arte_type_format('h1','tests inserting names using the mentions by clicking',true)
 
-        cy.arte_print_check('p', 'This is a paragraph with START END where names can be added.')
+        cy.arte_print('This is a paragraph with START END where names can be added.')
 
         cy.arte_set_cursor('END')
 
@@ -23,9 +23,9 @@ describe('Tests mentions', function () {
 
     it('tests inserting names using the @@ shortcut', function(){
 
-        cy.arte_type_check('h1','tests inserting names using the double @ shortcut',true)
+        cy.arte_type_format('h1','tests inserting names using the double @ shortcut',true)
 
-        cy.arte_print_check('p','This is a paragraph with START END where names can be added.')
+        cy.arte_print('This is a paragraph with START END where names can be added.')
 
         cy.arte_set_cursor('END').wait(200)
 
@@ -40,9 +40,9 @@ describe('Tests mentions', function () {
 
     it('tests inserting names using the mentions button by entering text', function(){
 
-        cy.arte_type_check('h1','tests inserting names using the mentions button by entering text',true)
+        cy.arte_type_format('h1','tests inserting names using the mentions button by entering text',true)
 
-        cy.arte_print_check('p', 'This is a paragraph with START END where names can be added.')
+        cy.arte_print('This is a paragraph with START END where names can be added.')
 
         cy.arte_set_cursor('END')
 

@@ -7,7 +7,7 @@ describe('Tests list formatting', function () {
 
     it('1. tests creating numbered list', function(){
 
-        cy.arte_type_check('h1','Numbered list',true)
+        cy.arte_type_format('h1','Numbered list',true)
 
         cy.arte_print('Numbered bullet A')
         cy.arte_click_id('OL')
@@ -24,7 +24,7 @@ describe('Tests list formatting', function () {
 
     it('2. test creating unordered lists',function(){
 
-        cy.arte_type_check('h1','Unordered list',true)
+        cy.arte_type_format('h1','Unordered list',true)
 
         cy.arte_print('Unordered bullet A')
         cy.arte_click_id('UL')
@@ -41,7 +41,7 @@ describe('Tests list formatting', function () {
 
     it('3. tests creating and changing list type from ordered to unordered', function(){
         
-        cy.arte_type_check('h1','Numbered to unordered list',true)
+        cy.arte_type_format('h1','Numbered to unordered list',true)
 
         cy.arte_print('Was numbered bullet A')
         cy.arte_click_id('OL')
@@ -63,7 +63,7 @@ describe('Tests list formatting', function () {
 
     it('4. tests creating and changing list type from unordered to numbered', function(){
         
-        cy.arte_type_check('h1','Unordered to numbered list',true)
+        cy.arte_type_format('h1','Unordered to numbered list',true)
 
         cy.arte_print('Was unordered bullet A')
         cy.arte_click_id('UL')
@@ -85,7 +85,7 @@ describe('Tests list formatting', function () {
 
     it('5. tests creating and indenting lists', function(){
 
-        cy.arte_type_check('h1','3-level indented list',true)
+        cy.arte_type_format('h1','3-level indented list',true)
 
         cy.arte_print('Numbered bullet A')
         cy.arte_click_id('OL')
@@ -130,7 +130,7 @@ describe('Tests list formatting', function () {
 
     it('6. tests indenting existing lists', function(){
 
-        cy.arte_type_check('h1','Indenting existing list',true)
+        cy.arte_type_format('h1','Indenting existing list',true)
 
         cy.arte_print('Numbered bullet A')
         cy.arte_click_id('OL')

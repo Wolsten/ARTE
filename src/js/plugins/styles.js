@@ -311,7 +311,11 @@ const setStyleProps = function(button){
     const range = editor.range
     // Adjust rootNode if required
     if ( Helpers.isBlock(range.rootNode) == false ){
-        range.rootNode = Helpers.getParentBlockNode( range.rootNode )
+        const newRootNode = Helpers.getParentBlockNode( range.rootNode )
+        if ( newRootNode === false ){
+            return
+        }
+        range.rootNode = newRootNode
     }
     // Set newStyle, newValue and action
     setStyleProps(button)

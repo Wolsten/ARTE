@@ -218,6 +218,7 @@ body.index-body {
         border: 1px solid var(--colour-background);
     }
     button.active {
+        color: var(--colour-text);
         background:var(--colour-background-active);
     }
     button.barred {

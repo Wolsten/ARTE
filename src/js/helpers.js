@@ -151,6 +151,16 @@ export const isCustom = function( node ){
 }
 
 /**
+ * Return true if child is not the parent but contains the parent
+ * @param {HTMLElement} parent 
+ * @param {HTMLElement} child 
+ * @returns {boolean}
+ */
+function contains(parent, child) {
+    return parent !== child && parent.contains(child)
+}
+
+/**
  * Check whether the selected range is completely within a custom element
  * Cannot start a selection in a custom block and then select outside of it
  * so do not need to check the end range
@@ -179,7 +189,13 @@ export const rangeContainsCustoms = function( range ){
     let customs = []
     // Loop from start container to end container checking for a non-editable block
     let parent = getParentBlockNode(range.startContainer)
+    if ( parent === false ){
+        return []
+    }
     const endParent = getParentBlockNode(range.endContainer)
+    if ( endParent === false ){
+        return []
+    }
     let done = false
     while ( !done ){
         const custom = parent.querySelector('[contenteditable="false"]')
@@ -223,11 +239,12 @@ export const getInlineStyles = function(node){
 /**
  * Get the parent block node or return the block if the node itself is a block
  * @param {HTMLElement} node 
- * @returns {HTMLElement} parent block node
+ * @returns {HTMLElement|false} parent block node or false if error occurs
  */
 export const getParentBlockNode = function(node){
     if ( node == null ){
         console.warn('Error. Passed null node to getParentBlockNode')
+        return false
     }
     // console.log('getParentBlockNode',node)
     // Keep going up the tree while the node is not a block node
@@ -262,7 +279,8 @@ export const getEditorNode = function( node ){
  * Get the top parent node for a child node 
  * @param {HTMLElement} node A child node
  * @param {HTMLElement} stopNode A parent node defining when to stop going back up the dom tree
- * @returns {HTMLElement} first node below the stop node (if there is one) otherwise the stopNode
+ * @returns {HTMLElement|false} first node below the stop node (if there is one) 
+ * otherwise the stopNode or false if error
  */
 export const getTopParentNode = function( node, stopNode ){
     if ( node == null || stopNode == null ){
@@ -273,11 +291,11 @@ export const getTopParentNode = function( node, stopNode ){
         saved = node
         if ( node == null ){
             console.warn('Error.  Found missing node traversing tree in getTopParentNode')
-            return saved
+            return false
         }
         if ( node.parentNode == null ){
             console.warn('Error.  Found missing parent node when getting top parent node')
-            return saved
+            return false
         }
         node = node.parentNode
     }
@@ -417,7 +435,7 @@ export const addMarkers = function( range ){
 /**
  * Add additional properties to the range
  * @param {Range} range 
- * @returns {object} The original range object with additional props
+ * @returns {object|false} The original range object with additional props or false on error
  */
 function augmentRange(range){
     if ( range === false ){
@@ -425,12 +443,17 @@ function augmentRange(range){
     }
     // console.log('augmentRange',range)
     // First parent node that is a block tag
-    range.blockParent = getParentBlockNode(range.commonAncestorContainer)
+    const blockParent = getParentBlockNode(range.commonAncestorContainer)
+    if ( blockParent === false ){
+        return false
+    }
+    range.blockParent = blockParent
     // First parent node
     range.rootNode = range.commonAncestorContainer
     if ( range.commonAncestorContainer.nodeType === 3 ) {
         if ( range.commonAncestorContainer.parentNode == null ){
             console.warn('Error.  Found missing parent node when augmenting range')
+            return false
         }
         range.rootNode = range.commonAncestorContainer.parentNode
     }
@@ -442,16 +465,22 @@ function augmentRange(range){
 
 /**
  * Get the document range or return false if not set
+ * @param {HTMLElement} editorNode
  * @returns {Range|false}
  */
-export const getRange = function(){
+export const getRange = function( editorNode){
     let sel = window.getSelection()
     // console.log('new selection',sel)
     if ( sel.rangeCount==1 ){
         let range =  sel.getRangeAt(0)
-        // console.log('New range found')
-        range = augmentRange(range)
-        return range
+        // Check if common ancestor is the editor node or contained in the editor node
+        // Ignore all other selectins since they don;t belong to the editor
+        if ( range.commonAncestorContainer == editorNode || 
+             contains(editorNode,range.commonAncestorContainer) ){
+            // console.log('New range found')
+            range = augmentRange(range)
+            return range
+        }
     }
     return false
 }
