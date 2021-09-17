@@ -226,6 +226,7 @@ class Modal {
         // Add the show class
         setTimeout( () => {
             this.panel.classList.add('show')
+            this.panel.scrollIntoView()
         }, 10 )
     }
 

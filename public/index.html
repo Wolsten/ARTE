@@ -59,12 +59,10 @@
 
     <!-- Buttons to demonstrate the editor content previewing, downloading and 
          uploading. Event handling added in script -->
-    <button type="button" id="preview"></button>
-    <button type="button" id="download"></button>
-    <button type="button" id="upload"></button>
+         <div id="index-buttons"></div>
 
     <!-- Replace with ./js/ARTE-bundle-ES5.js for the transpiled version -->
-    <script src="./js/ARTE-bundle-ES6.js?v=2021-09-04a" charset="utf-8"></script>
+    <script src="./js/ARTE-bundle-ES6.js?v=2021-09-16" charset="utf-8"></script>
 
     <script type="text/javascript"> 
 
@@ -108,8 +106,11 @@
         // Create editor and add to dom in target position
         const editor = new ARTE.Editor(target, '', toolbar, options)
 
+        // Configure buttons
+        const buttons = document.getElementById('index-buttons')
+
         // Configure preview button
-        const preview = document.getElementById('preview')
+        const preview = document.createElement('button')
         preview.innerHTML = `${ARTE.Icons.preview} Preview`
         preview.addEventListener('click', ()=>{
             let xml = editor.preview()
@@ -124,14 +125,25 @@
             })
             drawer.show()
         })
+        buttons.appendChild(preview)
+
         // Download
-        const download = document.getElementById('download')
+        const download = document.createElement('button')
         download.innerHTML = `${ARTE.Icons.download} Download`
         download.addEventListener('click', ()=>editor.download())
+        buttons.appendChild(download)
+
         // Upload
-        const upload = document.getElementById('upload')
+        const upload = document.createElement('button')
         upload.innerHTML = `${ARTE.Icons.fileOpen} Open`
         upload.addEventListener('click', ()=>editor.upload())
+        buttons.appendChild(upload)
+
+        // Clear
+        const clear = document.createElement('button')
+        clear.innerHTML = `${ARTE.Icons.clear} Clear`
+        clear.addEventListener('click', ()=>editor.editorNode.innerHTML = '' )
+        buttons.appendChild(clear)
     </script>
     
 </body>

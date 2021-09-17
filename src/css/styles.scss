@@ -148,8 +148,9 @@ body.index-body {
         }
     }
 
-    button#save {
-        margin-top:1rem;
+    #index-buttons {
+        display:flex;
+        justify-content: space-between;
     }
 }
 
