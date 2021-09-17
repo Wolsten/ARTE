@@ -1,6 +1,6 @@
 {
   "name": "arte",
-  "version": "0.4",
+  "version": "0.5",
   "description": "Active Rich Text Editor",
   "main": "public/ARTE.js",
   "scripts": {
