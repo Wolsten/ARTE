@@ -89,9 +89,11 @@
         const preview = document.createElement('button')
         preview.innerHTML = `${ARTE.Icons.preview} Preview`
         preview.addEventListener('click', ()=>{
+            // Get the preview from the editor
             let xml = editor.preview()
             // Insert line feed before all opening tags to make easier to read
             xml = xml.replace(/(<[^\/.]+?>)/gm, '\n$1')
+            // Instantiate the modal
             const drawer = new ARTE.Modal({
                 type:'full-screen', 
                 title:'Cleaned XML to be saved',
@@ -99,6 +101,7 @@
                 buttons:{cancel:{label:'Close'}},
                 escape:true
             })
+            // Display the modal
             drawer.show()
         })
         buttons.appendChild(preview)
