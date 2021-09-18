@@ -72,6 +72,10 @@ module.exports = (env) => {
             to:"css/[name][ext]"
           },
           {
+            from: "src/css/styles.scss",
+            to:"css/[name][ext]"
+          },
+          {
             from: "default-content.html",
             to:"[name][ext]"
           },
