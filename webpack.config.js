@@ -36,7 +36,7 @@ module.exports = (env) => {
 
     // Output is used by CopyPlugin as the root destination folder 
     output: {
-      path: path.resolve(__dirname, "public"),
+      path: path.resolve(__dirname, "docs"),
       filename: `js/${fileName}.js`,
       library: libraryName,
       libraryTarget: 'umd',
