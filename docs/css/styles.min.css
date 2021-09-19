@@ -561,6 +561,7 @@ body.index-body #index-buttons {
 }
 
 .modal-panel-positioned .modal-panel-container {
+  min-width: 0;
   margin: 0;
   padding: 0;
   border: 1px solid var(--colour-border);

@@ -48,10 +48,22 @@
 
 <blockquote>But remember that with great power comes great responsibility</blockquote>
 
-<h2>Saving editor contents</h2>
+<h2>Saving ARTE content</h2>
+
+<p>It is not currently possible (in a cross-browser way) to save files to an arbirary folder on your computer. However, you may download a file by clicking the `Download` button and then move it somewhere else on your computer.</p>
+
+<h3>Cleaning saved data</h3>
 
 <p>When the editor content is saved the data is cleaned to remove any non-supported elements or styling. Additionally, custom elements can have an optional "clean" method that is invoked automatically on save to handle any custom cleaning required. This includes compressing the custom element to create a more compact, data-oriented version for saving. On load, a custom element is expanded from this compact version and required interactions added, such as listening for an edit button click.</p>
 
 <p>Click the Preview button below to see how this editor content is cleaned for saving. This version is output with line-breaks before all opening tags but the original saved contents is more compact but less readable.</p>
     
 <p>You can try adding non-supported elements but these will be filtered out on saving, providing not only a more compact representation but also adding a good level of security preventing the injection of malicious code. Try entering some malicious code, e.g. a script tag and code, and then see how it is filtered out on saving. You should still follow best practice and sanitise all such output before saving to a database.</p>
+
+<h2>Opening files</h2>
+
+<p>ARTE can only open files it has generated and downloaded. These have an extension `.arte`. If you click the `Open` button you can open a previously downloaded ARTE file. Note that any files without an `.arte` extension will be shown as greyed out.</p>
+
+<h2>Starting from scratch</h2>
+
+<p>To start with a blank page simply click the `Clear` button below.</p>
