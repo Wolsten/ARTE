@@ -1,8 +1,6 @@
 const path = require("path")
 const { env } = require("process")
 const TerserPlugin = require("terser-webpack-plugin")
-const CopyPlugin = require("copy-webpack-plugin");
-
 const libraryName = 'ARTE'
 let fileName = libraryName + '-bundle'
 
@@ -58,34 +56,6 @@ module.exports = (env) => {
         }),
       ],
     },
-
-    plugins: [
-      // Copy static assets
-      new CopyPlugin({
-        patterns: [
-          {
-            from: "src/img/*",
-            to:"img/[name][ext]"
-          },
-          {
-            from: "src/css/styles.min.*",
-            to:"css/[name][ext]"
-          },
-          {
-            from: "src/css/styles.scss",
-            to:"css/[name][ext]"
-          },
-          {
-            from: "default-content.html",
-            to:"[name][ext]"
-          },
-          {
-            from: "favicon*.*",
-            to:"[name][ext]"
-          },
-        ],
-      }),
-    ],
 
     module: {
       rules: [ 
