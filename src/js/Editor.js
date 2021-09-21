@@ -184,6 +184,10 @@ class Editor {
         // Initialise buffer callback to false - reset if UNDO button found 
         // and a buffer length set
         this.updateBuffer = false
+        // Mobile menu
+        const menuItems = this.toolbarNode.querySelector('section')
+        this.toolbarNode.querySelector('.menu-icon').addEventListener('click', ()=>menuItems.classList.toggle('show'))
+        window.addEventListener('resize', ()=>menuItems.classList.remove('show') )
         // Do any custom setup required
         this.toolbar.forEach( button => {
             // Add dom element to the button
@@ -266,6 +270,7 @@ class Editor {
         tabMenuItems.forEach( 
             item => item.addEventListener('click', event => this.handleTabMenuClicks(event,tabMenuItems)) 
         )
+        this.sidebarNode.querySelector('button.close').addEventListener('click', ()=>this.hideSidebar())
         // Append to the editor
         this.mainNode.appendChild(this.sidebarNode)
     }

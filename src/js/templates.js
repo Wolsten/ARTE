@@ -10,7 +10,7 @@ function editorToolbarButton(button){
     const {type, tag, label, icon} = button
     return `
         <button id="${tag}" type="button" class="btn btn-light ${type}" title="${label}">
-            ${icon}
+            ${icon} <span class="mobile">${label}</span>
         </button>`
 }
 
@@ -21,7 +21,9 @@ function editorToolbarButton(button){
  * @returns {string}
  */
 function editorToolBarGroup(title,html){
-    return `<div class="editor-toolbar-group block" role="group" title="${title}">${html}</div>`
+    return `<div class="editor-toolbar-group block" role="group" title="${title}">
+                ${html}
+            </div>`
 }
 
 /**
@@ -44,8 +46,9 @@ function editorToolbar(buttons){
             buttonsHtml = ''
         }
     })
-    // console.log('groups',groups)
-    return groups.join('<span class="editor-toolbar-group-separator">|</span>')
+    const groupsHTML = groups.join('<span class="editor-toolbar-group-separator"></span>')
+    
+    return `<span class="menu-icon mobile" title="Toggle menu">${Icons.menu} Menu</span><section>${groupsHTML}</section></details>`
 }
 
 /**
@@ -91,6 +94,7 @@ export const sidebarContent = function(tabList){
             <div class="editor-sidebar-content">
                 <ul class="tab-menu">${menu}</ul>
                 <div class="tab-content">${content}</div>
+                <button class="close">Close explorer</button>
             </div>`
     return html
 }
