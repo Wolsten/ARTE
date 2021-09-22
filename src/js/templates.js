@@ -87,11 +87,14 @@ export const sidebarContent = function(tabList){
         menu += `<li><a href="#" class="tab-menu ${active}" data-tab-target="tab-${index}" title="${item.label}">${item.icon}</a></li>`
         content += `
             <div class="tab-item ${show}" data-tab-id="tab-${index}">
+                <header><h2>${item.label}</h2></header>
                 ${itemContent}
             </div>`
     })
     const html = `
+            
             <div class="editor-sidebar-content">
+                <header><h1>Explorer</h1></header>
                 <ul class="tab-menu">${menu}</ul>
                 <div class="tab-content">${content}</div>
                 <button class="close">Close explorer</button>

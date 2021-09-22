@@ -1,28 +1,28 @@
 /** 
  * 
  * File format (optional due date):
- * <action id="ktvikq1z8hbmksr1wvg" data-status="0" data-created="22/09/2021, 14:00" data-updated="22/09/2021, 14:00" data-notes="Some notes">
- *      <span class="todo">A test action</span>
- *      <span class="owners">Dave and Jill</span>
- *      [<span class="due">15th May 2022</span>]
+ * <action id="id" data-status="0" data-created="date" data-updated="date" data-notes="Some notes">
+ *      <span class="todo">todo</span>
+ *      <span class="owners">owners</span>
+ *      [<span class="due">date</span>]
  * </action>
  * 
  * Editor format (optional due date):
- * <action id="ktvikq1z8hbmksr1wvg" contenteditable="false" data-status="0" data-created="22/09/2021, 14:00" data-updated="22/09/2021, 14:00" data-notes="Some notes">
+ * <action id="id" contenteditable="false" data-status="0" data-created="date" data-updated="date" data-notes="notes">
  *      <label class="status-class"><i>icon</i></label>
- *      <a href="#" title="Click to edit action">
- *          <span class="todo">A test action</span>
+ *      <button type="button" title="Click to edit action">
+ *          <span class="todo">todo</span>
  *          <label>Owners:</label>
- *          <span class="owners">Dave and Jill</span>
+ *          <span class="owners">owners</span>
  *          [<label>Due:</label>
- *          <span class="due">15th May 2022</span>]
- *      </a>
+ *          <span class="due">date</span>]
+ *      </button>
  * </action>
  * 
  * Sidebar format (optional due date):
  * <article class="action">
- *      <a href="#id">tod</a>
- *      <p>Owned by: owners}[,<br/>Due: due]</p>
+ *      <a href="#id">todo</a>
+ *      <p>Owned by: owners}[,<br/>Due: date]</p>
  * </article>`
  */
 
@@ -270,7 +270,7 @@ function format( element ){
     element.innerHTML = template(element)
     element.setAttribute('contenteditable',false)
     // Add event listener
-    element.querySelector('a').addEventListener('click', event => {
+    element.querySelector('button').addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
         edit(element) 
@@ -318,8 +318,8 @@ function addEventHandlers(edt){
         owners = {innerHTML:''}
     }
     let html = `
-        <label class="${status}">${Icons.action}</label>
-        <a hef="#" title="Edit this action">
+        <button type="button" title="Edit this action">
+            <label class="${status}">${Icons.action}</label>
             <span class="todo">${todo.innerHTML}</span>
             <label>Owners:</label>
             <span class="owners">${owners.innerHTML}</span>`
@@ -329,7 +329,7 @@ function addEventHandlers(edt){
             <label>Due:</label>
             <span class="due">${due.innerText.trim()}</span>`
     }
-    html += `</a>`
+    html += `</button>`
     return html
 }
 

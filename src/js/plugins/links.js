@@ -1,5 +1,20 @@
 /** 
- * Create active links, ie. links which can be edited rather than a normal html 
+ * Create active links, ie. links which can be edited rather than a normal html. 
+ * @todo Link ids are not retained in file. May need to add this if linking
+ * across documents in future
+ * 
+ * File format:
+ * <a href="https://github.com/Wolsten/ARTE" data-label="label" data-display="0"></a>
+ * 
+ * Editor format:
+ * <a id="id" href="url" data-label="label" data-display="0" contenteditable="false" title="Click to edit">
+ *  [url|label (url)|label]
+ * </a>
+ * 
+ * Sidebar format:
+ * <article>
+ *      <a href="#id" >label (url)</a>
+ * </article>
  */
 
 import ToolbarButton from '../ToolbarButton.js'
@@ -167,12 +182,14 @@ function save(){
 
 /**
  * Insert a new link in the editor at the end of the current 
+ * @todo Generalise this in helpers.js to support any plugin that needs
+ * to replace selected text with new element
  * range's startContainer
  * @param {object} editor A unique editor instance
  */
  function insert(editor){
     const parent = editor.range.startContainer.parentNode
-    // Get any pretext pr post text in the current container that is not selected
+    // Get any pretext or post text in the current container that is not selected
     let preText = editor.range.startContainer.textContent.substring(0,editor.range.startOffset)
     let postText
     if ( editor.range.collapsed ){
@@ -355,6 +372,7 @@ const clean = function(node){
     // console.log('clean link',node)
     node.removeAttribute('id')
     node.removeAttribute('contenteditable')
+    node.removeAttribute('title')
     // Clear inner text because label saved in dataset
     node.innerText = ' '
     return node
@@ -393,7 +411,9 @@ const sidebar = function(edt){
     links.forEach( link => {
         content += `
             <article>
-                <a href="#${link.id}">${link.dataset.label} (${link.href})</a>
+                <a href="#${link.id}" title="Click to view link in context">
+                    ${link.dataset.label} (${link.href})
+                </a>
             </article>`
     })
     return {

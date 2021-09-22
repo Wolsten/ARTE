@@ -1,3 +1,29 @@
+/**
+ * Add comments to paragraphs
+ * 
+ * File format:
+ * <p>Paragraph text 
+ *   <comment id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false"></comment>
+ * </p>
+ * 
+ * Editor format:
+ * <p>Paragraph text 
+ *   <comment id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false" contenteditable="false">
+ *      <button type="button" title="edit this comment"><i>icon</i></button>
+ *   </comment>
+ * </p>
+ * 
+ * Sidebar format:
+ * <article>
+ *      <a href="#id" title="Click to view comment">
+ *          <span class="comment-bubble comment-resolved|comment-unresolved"><i>icon</i></span> comment
+ *      </a>
+ *      <p class="sub-title">Added: $date</p>
+ * </article>
+ * 
+ */
+
+
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
@@ -234,7 +260,6 @@ function format( element ){
     const editButton = document.createElement('button')
     editButton.type = 'button'
     editButton.title = 'Edit this comment'
-    editButton.classList.add('edit')
     editButton.innerHTML = Icons.commentEdit
     editButton.addEventListener('click', event => {
         event.preventDefault()
@@ -372,7 +397,9 @@ const sidebar = function(edt){
         const resolved = comment.dataset.resolved == 'true' ? 'comment-resolved' : 'comment-unresolved'
         content += `
             <article>
-                <a href="#${comment.id}">${comment.dataset.comment} <span class="comment-bubble ${resolved}">${Icons.commentEdit}</span></a>
+                <a href="#${comment.id}" title="Click to view comment in context">
+                    <span class="comment-bubble ${resolved}">${Icons.commentEdit}</span> ${comment.dataset.comment}
+                </a>
                 <p class="sub-title">Added: ${comment.dataset.created}</p>
             </article>`
     })

@@ -380,7 +380,7 @@ const sidebar = function(edt){
     headings.forEach( heading => {
         const level = heading.tagName
         heading.id = Helpers.generateUid()
-        content += `<${level}><a href="#${heading.id}">${heading.innerHTML}</a></${level}>`
+        content += `<${level}><a href="#${heading.id}" title="Click to view heading in context">${heading.innerHTML}</a></${level}>`
     })
     return {
         icon: Icons.outline,
