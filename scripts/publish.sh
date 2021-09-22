@@ -3,8 +3,8 @@
 # Also, the spaces after and before the [] are vital as are spaces around the equality tests
 
 # Copy required source files
-cp -R src/img docs/img
-cp -R src/css docs/css
+cp -R src/img docs
+cp -R src/css docs
 cp favicon*.* docs
 cp default-content.html docs
 
