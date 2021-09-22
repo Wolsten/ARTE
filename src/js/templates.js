@@ -48,7 +48,7 @@ function editorToolbar(buttons){
     })
     const groupsHTML = groups.join('<span class="editor-toolbar-group-separator"></span>')
     
-    return `<span class="menu-icon mobile" title="Toggle menu">${Icons.menu} Menu</span><section>${groupsHTML}</section></details>`
+    return `<span class="menu-icon mobile" title="Click to toggle toolbar menu">${Icons.menu} Menu</span><section>${groupsHTML}</section></details>`
 }
 
 /**

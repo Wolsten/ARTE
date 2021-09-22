@@ -27,6 +27,8 @@ class Editor {
         this.toolbarNode = target.querySelector('.editor-toolbar')
         this.mainNode= target.querySelector('.editor-main')
         this.editorNode = target.querySelector('.editor-body')
+        this.menuIcon = this.toolbarNode.querySelector('.menu-icon')
+        this.menuItems = this.toolbarNode.querySelector('section')
         this.sidebarNode = null
         // Check for debugging
         this.debugTarget = false
@@ -184,10 +186,6 @@ class Editor {
         // Initialise buffer callback to false - reset if UNDO button found 
         // and a buffer length set
         this.updateBuffer = false
-        // Mobile menu
-        const menuItems = this.toolbarNode.querySelector('section')
-        this.toolbarNode.querySelector('.menu-icon').addEventListener('click', ()=>menuItems.classList.toggle('show'))
-        window.addEventListener('resize', ()=>menuItems.classList.remove('show') )
         // Do any custom setup required
         this.toolbar.forEach( button => {
             // Add dom element to the button
@@ -241,6 +239,36 @@ class Editor {
     }
 
     // -----------------------------------------------------------------------------
+    // @section Responsiveness
+    // -----------------------------------------------------------------------------
+    
+    // /**
+    //  * Handle changes in window size using debouncing
+    //  */
+    // initResponsiveness(){
+    //     this.handleResize = Helpers.debounce(this.handleResizeDelayed,500)
+    //     window.addEventListener('resize', ()=>this.handleResize(this) )
+    // }
+
+    // handleResizeDelayed(...args){
+    //     const editor = args[0]
+    //     editor.menuItems.classList.remove('show')
+    // }
+
+    /**
+     * Handle mobile menu clicks (invoked from listenForMouseUpEvents)
+     */
+    handleMenuClick(){
+        this.menuItems.classList.toggle('show')
+        if ( this.menuItems.classList.contains('show') ){
+            if ( this.range !== false ){
+                this.range = Helpers.restoreSelectedRange(this.range)
+                this.setToolbarStates()
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
     // @section Sidebar
     // -----------------------------------------------------------------------------
     
@@ -277,6 +305,7 @@ class Editor {
 
     hideSidebar(){
         this.sidebarNode.remove()
+        this.options.explorer = false
     }
 
     /**
@@ -338,10 +367,9 @@ class Editor {
         document.addEventListener('mouseup', event => {
             // Get the active element in the document
             const active = document.activeElement
-            // if ( this.options.debug ){
-            //     console.log('mouseup on',event.target)
-            //     console.log( 'active element', document.activeElement)
-            // }
+            const target = event.target
+            console.log( 'mouseup on', event.target )
+            console.log( 'active element', document.activeElement )
             // Clicked a modal button?
             if ( this.modal.active() ){
                 return
@@ -349,8 +377,11 @@ class Editor {
             // different active element)
             } else if ( active == this.editorNode ){
                 this.handleMouseUp() 
+            // Clicked menu icon?
+            } else if ( target == this.menuIcon ){
+                this.handleMenuClick()
             // Clicked in toolbar?
-            } else if ( this.nodeInToolbar( event.target) ) {
+            } else if ( this.nodeInToolbar(target) ) {
                 return
             // Must have clicked outside the editor or clicked on
             // a custom element, in either case reset the range and button states
@@ -925,7 +956,6 @@ class Editor {
         // }
         //console.log('modal active',this.modal.active())
         this.range = Helpers.getRange(this.editorNode)
-
         if ( this.options.debug ){
             Templates.debugRange( this.debugTarget, this.range )
         }
