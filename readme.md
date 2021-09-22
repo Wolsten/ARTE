@@ -20,12 +20,19 @@ Lastly, it needs to be open source and free so that there are no commercial draw
 
 ARTE has not been tested extensively across a range of browsers and, in particular, touch interfaces have only been tested briefly on mobile Safari on an iPhone. 
 
+## User Guide and Demo
+
 For a full user guide on how to use and customise ARTE please check out our [ARTE wiki](https://github.com/Wolsten/ARTE/wiki).
 
 Try ARTE out here:
 
 [https://wolsten.github.io/ARTE/](https://wolsten.github.io/ARTE/)
 
+## Get involved
+
+Sign up to the ARTE Discord Server:
+
+[ARTE Discord Server](https://discord.gg/y322hmbxGq)
 
 ## Acknowledgements
 
