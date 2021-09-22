@@ -8,7 +8,7 @@
   --colour-disabled: rgb(180,180,180);
   --colour-link: var(--colour-primary);
   --colour-debug: green;
-  --colour-background-hover: hsl(0, 0%, 60%);
+  --colour-background-hover: hsl(0, 0%, 93%);
   --colour-background: hsl(0, 0%, 100%);
   --colour-border: rgb(90,90,90);
   --colour-border-faint: rgb(180,180,180);
@@ -28,7 +28,7 @@
   --colour-disabled: rgb(120,120,120);
   --colour-link: var(--colour-primary);
   --colour-debug: rgb(104, 207, 104);
-  --colour-background-hover: hsl(0, 0%, 40%);
+  --colour-background-hover: hsl(0, 0%, 35%);
   --colour-background: hsl(0, 5%, 20%);
   --colour-border: hsl(0, 0%, 60%);
   --colour-border-faint: rgb(100, 100, 100);
@@ -281,7 +281,13 @@ body.index-body #index-buttons {
 }
 .editor-sidebar .editor-sidebar-content {
   display: block;
-  padding: 0.5rem;
+  padding: 0 0.5rem;
+}
+.editor-sidebar .editor-sidebar-content header h1, .editor-sidebar .editor-sidebar-content header h2 {
+  text-transform: capitalize;
+  color: var(--colour-secondary);
+  padding: 0;
+  font-weight: normal;
 }
 .editor-sidebar .editor-sidebar-content h1 {
   font-size: 1.1rem;
@@ -312,9 +318,9 @@ body.index-body #index-buttons {
   padding: 0.2rem 0.8rem;
   text-decoration: none;
   color: var(--colour-text);
-  border-top: 1px var(--colour-background-active) solid;
-  border-left: 1px var(--colour-background-active) solid;
-  border-right: 1px var(--colour-background-active) solid;
+  border-top: 1px var(--colour-background-hover) solid;
+  border-left: 1px var(--colour-background-hover) solid;
+  border-right: 1px var(--colour-background-hover) solid;
   border-bottom: 1px var(--colour-background) solid;
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
@@ -353,17 +359,6 @@ body.index-body #index-buttons {
   margin: 0.3rem 0 0 0;
   font-size: smaller;
   padding: 0;
-}
-.editor-sidebar .tab-content .comment-bubble {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-.editor-sidebar .tab-content .comment-bubble.comment-unresolved {
-  color: var(--colour-warning);
-}
-.editor-sidebar .tab-content .comment-bubble.comment-resolved {
-  color: var(--colour-success);
 }
 .editor-sidebar button.close {
   font-size: 0.8rem;
@@ -666,6 +661,30 @@ form.arte-link a.panel-link i {
   color: var(--colour-text);
 }
 
+action {
+  display: inline-block;
+}
+action label {
+  font-weight: bold;
+}
+action button {
+  border: none;
+}
+action .status-open {
+  color: var(--colour-warning);
+}
+action .status-closed-incomplete {
+  color: var(--colour-danger);
+}
+action .status-closed-complete {
+  color: var(--colour-success);
+}
+
+article.action p {
+  font-size: 0.8rem;
+  margin-top: 0;
+}
+
 custom {
   position: relative;
   display: block;
@@ -709,16 +728,16 @@ custom button.edit {
 }
 
 comment {
-  display: block;
-  position: absolute;
-  top: -1.3rem;
-  right: 0rem;
+  display: inline-block;
+  position: relative;
+  top: -0.3rem;
+  right: 0.5rem;
 }
-comment button.edit {
+comment button {
   border: none;
   background-color: transparent;
 }
-comment button.edit i {
+comment button i {
   font-weight: bold;
   color: var(--colour-warning);
   background-color: transparent;
@@ -727,6 +746,13 @@ comment.custom-selected {
   outline: none;
 }
 comment[data-resolved=true] button.edit i {
+  color: var(--colour-success);
+}
+
+.editor-sidebar .comment-bubble.comment-unresolved {
+  color: var(--colour-warning);
+}
+.editor-sidebar .comment-bubble.comment-resolved {
   color: var(--colour-success);
 }
 

@@ -2,10 +2,18 @@
 
 <h2>Introduction</h2>
 
-<p>ARTE stands for "Active Rich Text Editor" and is pronounced "Arty". It is a free, open source and extensible library for implementing WYSIWYG (What You See is What You Get) editors in vanilla javascript that supports active components, such as comments like the one attached to this paragraph. Try clicking the orange balloon to view it. <comment id="ksocpcmqdgebjtafp4o" contenteditable="false" data-comment="This is an example comment" data-created="23/08/2021, 09:01" data-updated="23/08/2021, 09:01
-    " data-resolved="false">
+<p>ARTE stands for "Active Rich Text Editor" and is pronounced "Arty". It is a free, open source and extensible library for implementing WYSIWYG (What You See is What You Get) editors in vanilla javascript that supports active components, such as comments like the one attached to this paragraph. Try clicking the orange balloon to view it. 
+    <comment id="ksocpcmqdgebjtafp4o" data-comment="This is an example comment" data-created="23/08/2021, 09:01" data-updated="23/08/2021, 09:01
+    " data-resolved="false"></comment>
+</p>
 
-<p>With most editors, generated content is usually passive with no interaction capability. However, in ARTE content can be <strong>active</strong>, i.e. one is able to interact with it in ways appropriate to that content, for example creating <strong>protected</strong> content that can be edited in its own right.</p>
+<p>With most editors, generated content is usually passive with no interaction capability. However, in ARTE content can be <strong>active</strong>, i.e. one is able to interact with it in ways appropriate to that content, for example creating <strong>protected</strong> content that can be edited in its own right. For example this paragraph has a meeting action associated with it - the sort of thing you might use when writing minutes.
+    <action id="ktvikq1z8hbmksr1wvg" data-status="0" data-created="22/09/2021, 14:00" data-updated="22/09/2021, 14:00" data-notes="Some notes">
+        <span class="todo">A test action</span>
+        <span class="owners">Dave and Jill</span>
+        <span class="due">15th May 2022</span>
+    </action>
+</p>
 
 <p>ARTE supports the following features, all implemented with a consistent plugin model:</p>
 
@@ -50,7 +58,7 @@
 
 <h2>Saving ARTE content</h2>
 
-<p>It is not currently possible (in a cross-browser way) to save files to an arbirary folder on your computer. However, you may download a file by clicking the `Download` button and then move it somewhere else on your computer.</p>
+<p>It is not currently possible (in a cross-browser way) to save files to an arbitrary folder on your computer. However, you may download a file by clicking the `Download` button and then move it somewhere else on your computer.</p>
 
 <h3>Cleaning saved data</h3>
 
