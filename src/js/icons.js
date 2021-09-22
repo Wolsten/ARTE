@@ -61,5 +61,6 @@ export const download = '<i class="bi bi-cloud-download"></i>'
 export const fileOpen = '<i class="bi bi-folder2-open"></i>'
 export const sidebarOpen = '<i class="bi bi-chevron-double-left"></i>'
 export const outline = '<i class="bi bi-card-heading"></i>'
+export const menu = '<i class="bi bi-list"></i>'
 
 

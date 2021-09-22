@@ -533,6 +533,19 @@ export const setCursor = function( node, offset ){
 }
 
 /**
+ * Restore a previously selected range
+ * @param {Range} range 
+ * @returns {Range}
+ */
+export const restoreSelectedRange = function( range ){
+    const selection = window.getSelection()
+    selection.removeAllRanges()
+    selection.addRange(range)
+    range = augmentRange(range)
+    return range
+}
+
+/**
  * Find the node containing the start marker
  * @param {HTMLElement} parent 
  * @returns {HTMLElement}
