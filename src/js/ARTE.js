@@ -10,6 +10,7 @@ import * as Mentions from './plugins/mentions.js'
 import * as Links from './plugins/links.js'
 import * as Colours from './plugins/colours.js'
 import * as Custom from './plugins/custom.js'
+import * as Actions from './plugins/actions.js'
 import * as Comments from './plugins/comments.js'
 import * as Settings from './plugins/settings.js'
 
@@ -24,6 +25,7 @@ export {
     Links,
     Colours,
     Custom,
+    Actions,
     Comments,
     Settings,
     Icons

@@ -1,3 +1,31 @@
+/** 
+ * 
+ * File format (optional due date):
+ * <action id="ktvikq1z8hbmksr1wvg" data-status="0" data-created="22/09/2021, 14:00" data-updated="22/09/2021, 14:00" data-notes="Some notes">
+ *      <span class="todo">A test action</span>
+ *      <span class="owners">Dave and Jill</span>
+ *      [<span class="due">15th May 2022</span>]
+ * </action>
+ * 
+ * Editor format (optional due date):
+ * <action id="ktvikq1z8hbmksr1wvg" contenteditable="false" data-status="0" data-created="22/09/2021, 14:00" data-updated="22/09/2021, 14:00" data-notes="Some notes">
+ *      <label class="status-class"><i>icon</i></label>
+ *      <a href="#" title="Click to edit action">
+ *          <span class="todo">A test action</span>
+ *          <label>Owners:</label>
+ *          <span class="owners">Dave and Jill</span>
+ *          [<label>Due:</label>
+ *          <span class="due">15th May 2022</span>]
+ *      </a>
+ * </action>
+ * 
+ * Sidebar format (optional due date):
+ * <article class="action">
+ *      <a href="#id">tod</a>
+ *      <p>Owned by: owners}[,<br/>Due: due]</p>
+ * </article>`
+ */
+
 import * as Icons from '../icons.js'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
@@ -10,7 +38,7 @@ import Modal from '../Modal.js'
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
  */
-const TAG = 'COMMENT'
+const TAG = 'ACTION'
 
 /**
  * @var {object} editor The current editor instance
@@ -42,12 +70,13 @@ let drawer = null
   */
 let confirm = null
 
+
 // -----------------------------------------------------------------------------
 // @section Private methods
 // -----------------------------------------------------------------------------
 
 /**
- * Edit an existing comment node by extracting the data from the node and displaying
+ * Edit an existing action node by extracting the data from the node and displaying
  * the edit form
  * 
  * @param {HTMLElement} element The comment node to be edited
@@ -95,7 +124,7 @@ function handleDelete(){
         type:'overlay',
         severity:'danger',
         title:'Delete changes', 
-        html:'Do you really want to delete this comment?',
+        html:'Do you really want to delete this action?',
         buttons: {
             cancel: { label:'No'},
             confirm: { label:'Yes - delete', callback:handleConfirmDelete }
@@ -104,37 +133,31 @@ function handleDelete(){
     confirm.show()
 }
 
-function handleResolve(event){
-    if ( node.dataset.resolved=='false' ) {
-        node.dataset.resolved = 'true'
-        resolve.innerHTML = Icons.commentUnresolve + ' Unresolve'
-    } else {
-        node.dataset.resolved = 'false'
-    }
-    event.target.innerHTML = resolveLabel()
-}
 
 /**
  * Show the custom dialogue.
  * @param {boolean} editFlag Whether editing existing custom element or creating new
  */
 function show( editFlag ){
-    let title = 'Add comment'
+    let title = 'Add action'
     let buttons = {
         cancel:  { label:'Cancel', callback:handleCancel },
         confirm: { label:'Save', callback:save }
     }
     if ( editFlag ){
-        title = 'Edit comment'
+        title = 'Edit action'
         buttons.delete = { label:'Delete', callback:handleDelete }
     } else {
+        // Create an action as saved to file
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
-        node.setAttribute('contenteditable','false')
-        node.dataset.comment = ''
+        node.dataset.status = '0'
         node.dataset.created = ''
         node.dataset.updated = ''
-        node.dataset.resolved = 'false'
+        node.dataset.notes = ''
+        node.innerHTML = template( node )
+        // Mark with contenteditable false
+        node.setAttribute('contenteditable','false')
     }
     // Create and display the modal panel
     drawer = new Modal({
@@ -146,16 +169,17 @@ function show( editFlag ){
     drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
-    const comment = drawer.panel.querySelector('form textarea#comment')
-    comment.addEventListener('change', () => dirty=true)
-    // Handle resolution toggling
-    const resolve = drawer.panel.querySelector('form button#resolve')
-    if ( resolve != null ){
-        resolve.addEventListener( 'click', handleResolve)
-    }
+    const todo = drawer.panel.querySelector('#todo')
+    todo.addEventListener('change', () => dirty=true)
+    const owners = drawer.panel.querySelector('#owners')
+    owners.addEventListener('change', () => dirty=true)
+    const due = drawer.panel.querySelector('#due')
+    due.addEventListener('change', () => dirty=true)
+    const status = drawer.panel.querySelector('#status')
+    status.addEventListener('change', () => dirty=true)
     // Focus the comment textarea
-    comment.focus()
-    comment.setSelectionRange(comment.value.length, comment.value.length)
+    todo.focus()
+    todo.setSelectionRange(todo.value.length, todo.value.length)
 }
 
 /**
@@ -163,12 +187,19 @@ function show( editFlag ){
  */
 function save(){
     // console.log('Save changes')
-    node.dataset.comment = drawer.panel.querySelector('form #comment').value.trim()
+    node.querySelector('.todo').innerHTML = drawer.panel.querySelector('#todo').value.trim()
+    node.querySelector('.owners').innerHTML = drawer.panel.querySelector('#owners').value.trim()
+    const due = drawer.panel.querySelector('#due').value.trim()
+    if ( due != '' ){
+        node.querySelector('.due').innerHTML = due
+    }
+    node.dataset.status = parseInt(drawer.panel.querySelector('#status').value.trim())
+    node.dataset.notes = drawer.panel.querySelector('#notes').value.trim()
     const timestamp = new Date()
     const localstring = timestamp.toLocaleString().slice(0,-3)
     console.log('local timestamp', localstring)
-    // Check we have a comment
-    if ( node.dataset.comment != '' ){
+    // Check we have a todo
+    if ( node.dataset.todo != '' ){
         if ( node.parentNode == null ){
             node.dataset.created = localstring
             insert()
@@ -186,7 +217,7 @@ function save(){
 } 
 
 /**
- * Insert a new custom element in the editor at the end of the current 
+ * Insert a new action in the editor at the end of the current 
  * range's startContainer
  */
 function insert(){
@@ -214,12 +245,20 @@ function clean(node){
     // console.log('clean custom element',node)
     // Remove the content editable flag and the ornamentation
     node.removeAttribute('contenteditable')
-    node.querySelector('button').remove()
+    // Remove all labels
+    const labels = node.querySelectorAll('label')
+    labels.forEach(label => label.remove())
+    // Save the data by moving to end of node
+    const data = node.querySelectorAll('span')
+    data.forEach( item => node.appendChild(item) )
+    // Remove the now empty link
+    node.querySelector('a').remove()
     return node
 }
 
 /**
- * Format the given custom element and add click event handler
+ * Format the given action and add click event handler
+ * 
  * @param {HTMLElement} element
  */
 function format( element ){
@@ -228,20 +267,14 @@ function format( element ){
     if ( element.id == false ){
         element.id = Helpers.generateUid()
     }
-    element.innerHTML = ''
+    element.innerHTML = template(element)
     element.setAttribute('contenteditable',false)
-    // Add edit button and listener
-    const editButton = document.createElement('button')
-    editButton.type = 'button'
-    editButton.title = 'Edit this comment'
-    editButton.classList.add('edit')
-    editButton.innerHTML = Icons.commentEdit
-    editButton.addEventListener('click', event => {
+    // Add event listener
+    element.querySelector('a').addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
         edit(element) 
     })
-    element.appendChild(editButton)
     // Add set state listener
     element.addEventListener( 'click', ()=> {
         setState( editor, button )
@@ -265,13 +298,39 @@ function addEventHandlers(edt){
 }
 
 /**
- * Generates inner html for resolve button
- * @returns {string} html label for the resolve button
+ * Create a template for how the action is presented in the editor
+ * @param {string,string,string} action The properties to display
+ * @returns {string} HTML text to display
  */
-function resolveLabel(){
-    return node.dataset.resolved == 'true' 
-        ? Icons.commentUnresolve + ' Unresolve' 
-        : Icons.commentResolve + ' Resolve'
+ function template(action){
+    let status = 'status-open'
+    if ( action.dataset.status == '1' ){
+        status = 'status-closed-incomplete'
+    } else if ( action.dataset.status == '2' ){
+        status = 'status-closed-complete'
+    }
+    let todo = action.querySelector('.todo')
+    if ( todo == null ){
+        todo = {innerHTML:''}
+    }
+    let owners = action.querySelector('.owners')
+    if ( owners == null ){
+        owners = {innerHTML:''}
+    }
+    let html = `
+        <label class="${status}">${Icons.action}</label>
+        <a hef="#" title="Edit this action">
+            <span class="todo">${todo.innerHTML}</span>
+            <label>Owners:</label>
+            <span class="owners">${owners.innerHTML}</span>`
+    const due = action.querySelector('.due')
+    if ( due != null ){
+        html += `
+            <label>Due:</label>
+            <span class="due">${due.innerText.trim()}</span>`
+    }
+    html += `</a>`
+    return html
 }
 
 /**
@@ -279,26 +338,41 @@ function resolveLabel(){
  * @returns {string} Generated html
  */
 function form(){
-    let timestamps = ''
-    if ( node.dataset.created != '' ){
-        timestamps = `<span><label>Created</label> ${node.dataset.created}</span>`
-    }
-    if ( node.dataset.updated != '' ){
-        timestamps += `<span><label>Updated</label> ${node.dataset.updated}</span>`
-    }
-    let resolve = ''
-    if ( timestamps != '' ){
-        timestamps = `<div class="timestamps">${timestamps}</div>`
-        const title = resolveLabel()
-        resolve = `<button type="button" id="resolve">${title}</button>`
+    const todo = node.querySelector('.todo').innerHTML.trim()
+    const owners = node.querySelector('.owners').innerHTML.trim()
+    const optional = node.querySelector('.due')
+    let due
+    if ( optional == null ){
+        due = ''
+    } else {
+        due = optional.innerHTML.trim()
     }
     return `
         <form class="comment">
             <div class="form-input">
-                <textarea id="comment" class="form-control" placeholder="Enter your comment" required>${node.dataset.comment}</textarea>
+                <label for="todo">What needs to be done</label>
+                <textarea id="todo" class="form-control" required>${todo}</textarea>
             </div>
-            ${timestamps}
-            ${resolve}
+            <div class="form-input">
+                <label for="owners">Owners</label>
+                <input type="text" id="owners" class="form-control" value="${owners}" required />
+            </div>
+            <div class="form-input">
+                <label for="due">Due by</label>
+                <input type="text" id="due" class="form-control" value="${due}"/>
+            </div>
+            <div class="form-input">
+                <label for="status">Status</label>
+                <select id="status" class="form-control">
+                    <option value="0" ${node.dataset.status==0 ? 'selected' : ''}>Open</option>
+                    <option value="1" ${node.dataset.status==1 ? 'selected' : ''}>Closed - Incomplete</option>
+                    <option value="2" ${node.dataset.status==2 ? 'selected' : ''}>Closed - Complete</option>
+                </select>
+            </div>
+            <div class="form-input">
+                <label for="notes">Notes</label>
+                <textarea id="notes" class="form-control">${node.dataset.notes}</textarea>
+            </div>
         </form>`
 }
 
@@ -311,8 +385,8 @@ function form(){
 const init = function( edt, btn ){
     editor = edt
     button = btn
-    const comments = edt.editorNode.querySelectorAll( btn.tag )
-    comments.forEach( element => format( element ) )
+    const actions = edt.editorNode.querySelectorAll( btn.tag )
+    actions.forEach( element => format( element ) )
 }
 
 /**
@@ -331,8 +405,8 @@ const setState = function( edt, btn ){
     } else {
         //console.log('Enabling button')
         btn.element.disabled = false
-        const custom = edt.range.blockParent.querySelector(TAG)
-        if ( custom != null ){
+        const action = edt.range.blockParent.querySelector(TAG)
+        if ( action != null ){
             btn.element.classList.add('active')
         } else {
             btn.element.classList.remove('active')
@@ -352,9 +426,9 @@ const click = function( edt, btn ){
     }
     editor = edt
     button = btn
-    const custom = editor.range.blockParent.querySelector(TAG)
-    if ( custom != null ){
-        edit(custom)
+    const action = editor.range.blockParent.querySelector(TAG)
+    if ( action != null ){
+        edit(action)
     } else {
         show(false)
     }
@@ -366,19 +440,25 @@ const click = function( edt, btn ){
  * @returns {Object} {icon,label,content}
  */
 const sidebar = function(edt){
-    const comments = edt.editorNode.querySelectorAll(TAG)
+    const actions = edt.editorNode.querySelectorAll(TAG)
     let content = ''
-    comments.forEach( comment => {
-        const resolved = comment.dataset.resolved == 'true' ? 'comment-resolved' : 'comment-unresolved'
+    actions.forEach( action => {
+        const todo = action.querySelector('.todo').innerHTML.trim()
+        const owners = action.querySelector('.owners').innerHTML.trim()
+        const due = action.querySelector('.due')
+        let html = ''
+        if ( due != null ){
+            html += `,<br/>Due: ${due.innerText.trim()}`
+        }
         content += `
-            <article>
-                <a href="#${comment.id}">${comment.dataset.comment} <span class="comment-bubble ${resolved}">${Icons.commentEdit}</span></a>
-                <p class="sub-title">Added: ${comment.dataset.created}</p>
+            <article class="action">
+                <a href="#${action.id}">${todo}</a>
+                <p>Owned by: ${owners}${html}</p>
             </article>`
     })
     return {
-        icon: Icons.comment,
-        label: 'comments',
+        icon: Icons.action,
+        label: 'actions',
         content: `${content}`
     }
 }
@@ -388,4 +468,4 @@ const sidebar = function(edt){
 // -----------------------------------------------------------------------------
 
 const options = {setState, init, addEventHandlers, clean, sidebar}
-export const BUTTON = new ToolbarButton( 'custom', TAG, 'Custom', Icons.comment, click, options ) 
+export const BUTTON = new ToolbarButton( 'custom', TAG, 'Action', Icons.action, click, options ) 

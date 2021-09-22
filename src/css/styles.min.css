@@ -666,6 +666,31 @@ form.arte-link a.panel-link i {
   color: var(--colour-text);
 }
 
+action {
+  display: block;
+}
+action label {
+  font-weight: bold;
+}
+action a {
+  color: var(--colour-link);
+  cursor: pointer;
+}
+action .status-open {
+  color: var(--colour-warning);
+}
+action .status-closed-incomplete {
+  color: var(--colour-danger);
+}
+action .status-closed-complete {
+  color: var(--colour-success);
+}
+
+article.action p {
+  font-size: 0.8rem;
+  margin-top: 0;
+}
+
 custom {
   position: relative;
   display: block;

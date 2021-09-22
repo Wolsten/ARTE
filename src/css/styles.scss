@@ -758,6 +758,39 @@ form.arte-link {
 }
 
 // -----------------------------------------------------------------------------
+// @section actions.js plugin
+// -----------------------------------------------------------------------------
+
+// Editor styling
+action {
+    display:block;
+    label {
+        font-weight:bold;
+    }
+    a {
+        color:var(--colour-link);
+        cursor: pointer;
+    }
+    .status-open {
+        color:var(--colour-warning);
+    }
+    .status-closed-incomplete {
+        color:var(--colour-danger);
+    }
+    .status-closed-complete {
+        color:var(--colour-success);
+    }
+}
+
+// Sidebar styling
+article.action {
+    p {
+        font-size:0.8rem;
+        margin-top:0;
+    }
+}
+
+// -----------------------------------------------------------------------------
 // @section custom.js plugin
 // -----------------------------------------------------------------------------
 
