@@ -251,8 +251,8 @@ function clean(node){
     // Save the data by moving to end of node
     const data = node.querySelectorAll('span')
     data.forEach( item => node.appendChild(item) )
-    // Remove the now empty link
-    node.querySelector('a').remove()
+    // Remove the now empty button
+    node.querySelector('button').remove()
     return node
 }
 

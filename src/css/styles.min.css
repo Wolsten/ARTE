@@ -664,6 +664,7 @@ form.arte-link a.panel-link i {
 action {
   display: inline-block;
 }
+action i,
 action label {
   font-weight: bold;
 }

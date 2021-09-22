@@ -1,10 +1,8 @@
 /** 
  * Create active links, ie. links which can be edited rather than a normal html. 
- * @todo Link ids are not retained in file. May need to add this if linking
- * across documents in future
  * 
  * File format:
- * <a href="https://github.com/Wolsten/ARTE" data-label="label" data-display="0"></a>
+ * <a id="id" href="https://github.com/Wolsten/ARTE" data-label="label" data-display="0"></a>
  * 
  * Editor format:
  * <a id="id" href="url" data-label="label" data-display="0" contenteditable="false" title="Click to edit">
@@ -370,7 +368,6 @@ const addEventHandlers = function(edt){
  */
 const clean = function(node){
     // console.log('clean link',node)
-    node.removeAttribute('id')
     node.removeAttribute('contenteditable')
     node.removeAttribute('title')
     // Clear inner text because label saved in dataset
