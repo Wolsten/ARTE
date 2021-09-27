@@ -10,6 +10,7 @@
   --colour-debug: green;
   --colour-background-hover: hsl(0, 0%, 93%);
   --colour-background: hsl(0, 0%, 100%);
+  --colour-background-modal: hsl(0, 0%, 99%);
   --colour-border: rgb(90,90,90);
   --colour-border-faint: rgb(180,180,180);
   --colour-blockquote-background: #f9f9f9;
@@ -30,6 +31,7 @@
   --colour-debug: rgb(104, 207, 104);
   --colour-background-hover: hsl(0, 0%, 35%);
   --colour-background: hsl(0, 5%, 20%);
+  --colour-background-modal: hsl(0, 5%, 20%);
   --colour-border: hsl(0, 0%, 60%);
   --colour-border-faint: rgb(100, 100, 100);
   --colour-blockquote-background: rgb(60, 60, 60);
@@ -474,7 +476,7 @@ body.index-body #index-buttons {
 
 .modal-panel-container {
   position: absolute;
-  background: var(--colour-background);
+  background: var(--colour-background-modal);
   opacity: 0;
   transition: all 0.4s ease-in-out 0s;
 }
@@ -557,7 +559,8 @@ body.index-body #index-buttons {
   text-align: right;
 }
 .modal-panel-buttons button {
-  padding: 0.3rem 0.5rem;
+  padding: 0.3rem 0.7rem;
+  border: none;
 }
 
 .modal-panel-title {
@@ -584,10 +587,15 @@ body.index-body #index-buttons {
   align-items: center;
 }
 .modal-panel-overlay .modal-panel-container {
-  flex-basis: 50%;
+  width: 50%;
   padding: 2rem 2rem 1rem 2rem;
-  border: 1px var(--colour-border) solid;
+  border: 1px var(--colour-border-faint) solid;
   border-radius: 0.5rem;
+}
+@media screen and (max-width: 600px) {
+  .modal-panel-overlay .modal-panel-container {
+    width: 90%;
+  }
 }
 
 .modal-panel-drawer .modal-panel-container {
