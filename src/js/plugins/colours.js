@@ -4,17 +4,10 @@ import * as Icons from '../icons.js'
 import ToolbarButton from '../ToolbarButton.js'
 import Modal from '../Modal.js'
 
-const DIVISIONS = 30
-const H_INC = 360 / DIVISIONS
-const S_INC = 100 / DIVISIONS
-const L_INC = 100 / DIVISIONS
-let hue
-let saturation
-let lightness
+const PALETTE = ['black','white','violet','indigo','blue','green','yellow','orange','red']
 let editor
 let button
 let drawer = null
-
 
 /**
  * Set the colours in the colours dialogue according to the curerntly selected
@@ -22,8 +15,8 @@ let drawer = null
  * @param {HTMLElement} target black and white button
  * @param {string} colour 'black' or 'white'
  */
-function colourise(target,colour){
-    // Remvoe active classes
+function XXXcolourise(target,colour){
+    // Remove active classes
     const actives = drawer.panel.querySelectorAll('.active')
     actives.forEach( active => active.classList.remove('active'))
     // Gradient colour selected?
@@ -71,50 +64,23 @@ function colourise(target,colour){
  * Construct the colour dialogue
  * @param {object} button 
  * @returns 
- */
-function form(){
-    let hues = ''
-    let saturations = ''
-    let lightnesses = ''
-    for( let i=0; i<DIVISIONS; i++ ){
-        hues += `<span class="colour" data-colour="hue" data-index="${i}">&nbsp;</span>`
-        saturations += `<span class="colour" data-colour="saturation" data-index="${i}">&nbsp;</span>`
-        lightnesses += `<span class="colour" data-colour="lightness" data-index="${i}">&nbsp;</span>`
+ */function form(){
+    let colours = ''
+    for( let i=0; i<PALETTE.length; i++ ){
+        colours += `<span class="colour" data-index="${i}" style="background-color:${PALETTE[i]}">&nbsp;</span>`
     }
     return `
         <form id="colour-menu">
-
             <div class="colours">
-                <div class="hues">
-                    <label>Hue</label>
-                    <div>${hues}</div>
-                </div>
-                <div class="saturations">
-                    <label>Saturation</label>
-                    <div>${saturations}</div>
-                </div>
-                <div class="lightnesses">
-                    <label>Lightness</label>
-                    <div>${lightnesses}</div>
-                </div>
+                ${colours}
             </div>
-
-            <div class="result">
-                <label>Result</label>
-                <span class="final">&nbsp;</span>
-                <label>Black and white</label>
-                <span class="black-and-white" data-colour="black">&nbsp;</span>
-                <span class="black-and-white" data-colour="white">&nbsp;</span>
-            </div>
-            
         </form>`
 }
-
 
 /**
  * Save the currently selected colour values
  */
-function save(){
+function XXXsave(){
     // Round up values to nearest integer
     hue = Math.round(hue)
     saturation = Math.round(saturation)
@@ -139,10 +105,6 @@ function save(){
  * Clicking on this triggers the input event.
  */
 function show(){
-    // Set initial colours
-    hue = 0
-    saturation = (DIVISIONS-1) * S_INC
-    lightness = 50
     let title = "Select highlight colour"
     if ( button.tag == 'FGC'){
         title = "Select text colour"
@@ -154,38 +116,24 @@ function show(){
         html:form(),
         escape: true,
         buttons: {
-            cancel: {label:'Cancel'},
-            confirm: {label:'Set', callback:save}
+            cancel: {label:'Cancel'}
         }
     })
     drawer.show()
-    // Apply colours
-    colourise()
     // Add custom click handlers
     const colours = drawer.panel.querySelectorAll('span.colour')
     colours.forEach(c => c.addEventListener('click', event => {
         // Find out which colour span was clicked and set the appropriate colour value
-        const item = event.target
-        const colour = item.dataset.colour
-        const index = item.dataset.index
-        switch ( colour ){
-            case 'hue':
-                hue = index * H_INC
-                break
-            case 'saturation':
-                saturation = index * S_INC
-                break
-            case 'lightness':
-                lightness = index * L_INC 
-                break
+        const colour = PALETTE[event.target.dataset.index]
+        // Synthesise a button using the colour value selected
+        const synthButton = {
+            setState,
+            style:`${button.style}:${colour}`, 
+            element:button.element
         }
-        colourise()
-    }))
-    // Handle black and white
-    const bws = drawer.panel.querySelectorAll('span.black-and-white')
-    bws.forEach( bw => bw.addEventListener( 'click', event => {
-        const colour = event.target.dataset.colour
-        colourise(event.target, colour)
+        drawer.hide()
+        // Apply the new style
+        Styles.click( editor, synthButton )
     }))
 }
 

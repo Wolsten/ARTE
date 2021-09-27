@@ -790,61 +790,16 @@ form.comment button {
   flex-wrap: wrap;
   justify-content: center;
 }
-#colour-menu .colours {
-  flex-basis: 80%;
-}
-#colour-menu label {
-  display: block;
-  padding: 1rem 0 0.2rem 0;
-}
-#colour-menu .result {
-  flex-basis: 20%;
-  text-align: center;
-}
-#colour-menu span.final {
-  display: block;
-  width: 56px;
-  height: 56px;
-  margin: 0 auto;
-  border: 1px solid var(--colour-border);
-  border-radius: 40px;
-}
-#colour-menu span.black-and-white[data-colour=white],
-#colour-menu span.black-and-white[data-colour=black] {
-  display: inline-block;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--colour-border);
-}
-#colour-menu span.black-and-white[data-colour=white] {
-  background-color: white;
-}
-#colour-menu span.black-and-white[data-colour=black] {
-  background-color: black;
-}
-#colour-menu .buttons {
-  padding-top: 1rem;
-}
 #colour-menu .colours span {
   display: inline-block;
-  width: 3%;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   margin: 0;
   border: var(--colour-border);
   z-index: 1;
 }
-#colour-menu .colours div {
-  position: relative;
-}
-#colour-menu .colours span.active,
-#colour-menu span.black-and-white.active {
-  position: relative;
-  outline: 3px solid var(--colour-text);
-  z-index: 100;
-}
-#colour-menu .colours span:hover,
-#colour-menu span.black-and-white:hover {
+#colour-menu .colours span:hover {
   position: relative;
   cursor: pointer;
   outline: 3px solid var(--colour-text);

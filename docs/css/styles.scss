@@ -44,6 +44,8 @@
     --custom-selected-border: rgb(250, 150, 90);
 }
 
+
+
 // -----------------------------------------------------------------------------
 // @section Other variables
 // -----------------------------------------------------------------------------
@@ -910,73 +912,23 @@ form.comment {
 // -----------------------------------------------------------------------------
 
 #colour-menu {
-
     display:flex;
     flex-wrap: wrap;
     justify-content: center;
-
-    .colours {
-        flex-basis:80%;
-    }
-
-    label {
-        display:block;
-        padding: 1rem 0 0.2rem 0;
-    }
-
-    .result {
-        flex-basis:20%;
-        text-align: center;
-    }
-
-    span.final {
-        display:block;
-        width:56px;
-        height:56px;
-        margin:0 auto;
-        border: 1px solid var(--colour-border);
-        border-radius:40px;
-    }
-    span.black-and-white[data-colour='white'],
-    span.black-and-white[data-colour='black'] {
-        display:inline-block;
-        width:36px;
-        height:36px;
-        border: 1px solid var(--colour-border)
-    }
-    span.black-and-white[data-colour='white'] {
-        background-color: white;
-    }
-    span.black-and-white[data-colour='black'] {
-        background-color: black;
-    }
-    .buttons {
-        padding-top:1rem;
-    }
     .colours span {
         display:inline-block;
-        width:3%;
-        height:24px;
+        width:30px;
+        height:30px;
         padding:0;
         margin:0;
         border:var(--colour-border);
         z-index: 1;
-    }
-    .colours div {
-        position:relative;
-    }
-    .colours span.active,
-    span.black-and-white.active {
-        position:relative;
-        outline: 3px solid var(--colour-text);
-        z-index: 100;
-    }
-    .colours span:hover,
-    span.black-and-white:hover {
-        position:relative;
-        cursor:pointer;
-        outline: 3px solid var(--colour-text);
-        z-index: 100;
+        &:hover{
+            position:relative;
+            cursor:pointer;
+            outline: 3px solid var(--colour-text);
+            z-index: 100;
+        }
     }
 }
 
