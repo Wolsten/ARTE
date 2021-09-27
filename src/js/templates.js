@@ -133,3 +133,16 @@ export const sidebarContent = function(tabList){
                 </div>`
     }
 }
+
+
+export const save = function(filename='arte-download'){
+    console.log('filename is',filename)
+    return `
+        <form class="save">
+            <p class="advice">Enter the filename without extension. The file will be saved in your <strong>Downloads</strong> folder with the extension <strong>arte</strong>.</>
+            <div class="form-input">
+                <input type="text" id="filename" title="filename" class="form-control" placeholder="Filename" required value="${filename}"/>
+            </div>
+            <p class="feedback"></p>
+        </form>`
+}

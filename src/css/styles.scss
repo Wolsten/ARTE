@@ -160,7 +160,7 @@ body.index-body {
 
     #index-buttons {
         display:flex;
-        justify-content: space-between;
+        justify-content: space-around;
     }
 }
 
@@ -532,11 +532,9 @@ body.index-body {
 
 .modal-panel-container {
     position:absolute;
-    min-width:100%;
     background:var(--colour-background);
     opacity:0;
     transition: all 0.4s ease-in-out 0s;
-
     i.info {
         color:var(--colour-text)
     }
@@ -545,6 +543,9 @@ body.index-body {
     }
     i.danger {
         color:var(--colour-danger)
+    }
+    .feedback {
+        color:var(--colour-warning)
     }
 }
 
@@ -656,7 +657,7 @@ body.index-body {
     display:flex;
     justify-content: center;
     align-items: center;
-    .modal-panel-container {
+    .modal-panel-container{
         flex-basis:50%;
         padding:2rem 2rem 1rem 2rem;
         border:1px var(--colour-border) solid;

@@ -129,7 +129,7 @@ body.index-body .index-header .buttons span {
 }
 body.index-body #index-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 
 .editor-container {
@@ -474,7 +474,6 @@ body.index-body #index-buttons {
 
 .modal-panel-container {
   position: absolute;
-  min-width: 100%;
   background: var(--colour-background);
   opacity: 0;
   transition: all 0.4s ease-in-out 0s;
@@ -487,6 +486,9 @@ body.index-body #index-buttons {
 }
 .modal-panel-container i.danger {
   color: var(--colour-danger);
+}
+.modal-panel-container .feedback {
+  color: var(--colour-warning);
 }
 
 .modal-panel-body {

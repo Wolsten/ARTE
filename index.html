@@ -84,6 +84,18 @@
         // Configure buttons
         const buttons = document.getElementById('index-buttons')
 
+        // Clear
+        const clear = document.createElement('button')
+        clear.innerHTML = `${ARTE.Icons.clear} New`
+        clear.addEventListener('click', ()=>editor.clear())
+        buttons.appendChild(clear)
+
+        // Upload
+        const upload = document.createElement('button')
+        upload.innerHTML = `${ARTE.Icons.fileOpen} Open`
+        upload.addEventListener('click', ()=>editor.upload())
+        buttons.appendChild(upload)
+
         // Configure preview button
         const preview = document.createElement('button')
         preview.innerHTML = `${ARTE.Icons.preview} Preview`
@@ -107,21 +119,9 @@
 
         // Download
         const download = document.createElement('button')
-        download.innerHTML = `${ARTE.Icons.download} Download`
+        download.innerHTML = `${ARTE.Icons.download} Save`
         download.addEventListener('click', ()=>editor.download())
         buttons.appendChild(download)
-
-        // Upload
-        const upload = document.createElement('button')
-        upload.innerHTML = `${ARTE.Icons.fileOpen} Open`
-        upload.addEventListener('click', ()=>editor.upload())
-        buttons.appendChild(upload)
-
-        // Clear
-        const clear = document.createElement('button')
-        clear.innerHTML = `${ARTE.Icons.clear} Clear`
-        clear.addEventListener('click', ()=>editor.editorNode.innerHTML = '' )
-        buttons.appendChild(clear)
 
     </script>
     

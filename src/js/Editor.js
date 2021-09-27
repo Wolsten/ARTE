@@ -49,6 +49,8 @@ class Editor {
         // Public methods to support saving and updating the editor content
         this.preview = this.getCleanData
         this.update = this.updateEditor
+        // Reset currently edited filename
+        this.filename = ''
         // Define an empty modal so can check if any active
         this.modal = new Modal()
         // Initialise the editor content and buffering
@@ -368,8 +370,8 @@ class Editor {
             // Get the active element in the document
             const active = document.activeElement
             const target = event.target
-            console.log( 'mouseup on', event.target )
-            console.log( 'active element', document.activeElement )
+            // console.log( 'mouseup on', event.target )
+            // console.log( 'active element', document.activeElement )
             // Clicked a modal button?
             if ( this.modal.active() ){
                 return
@@ -857,13 +859,38 @@ class Editor {
     // -----------------------------------------------------------------------------
 
     /**
+     * Display modal dialogue requesting the filename to download as
+     */
+     download(){
+        if ( this.modal.active() ){
+            return
+        }
+        this.modal = new Modal({
+            type:'drawer',
+            title:'Save file',
+            html:Templates.save(this.filename),
+            escape: true,
+            buttons:{
+                cancel: {label:'Cancel',callback:()=>this.modal.hide()},
+                confirm:{label:'Save',callback:()=>this.save()}
+            }
+        })
+        this.modal.show()
+    }
+
+    /**
      * Add a hidden download button to the dom with the encoded contents of the
      * editor, click it programmatically and then remove
      */
-     download(){
+    save(){
+        let filename = document.querySelector('form.save #filename').value.trim().toLowerCase()
+        if ( filename == '' ){
+            document.querySelector('form.save .feedback').innerHTML = "You must provide a filename. Click <strong>Cancel</strong> or press the <strong>Escape</strong> key to close this dialogue without saving."
+            return
+        }
+        filename += '.arte'
         let xml = this.getCleanData()
         const link = document.createElement('a')
-        const filename = 'arte-download.arte'
         link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xml))
         link.setAttribute('download', filename)
         link.style.display = 'none'
@@ -882,14 +909,18 @@ class Editor {
         if (!file) {
             return
         }
+        const ext = file.name.slice(-4).toLowerCase()
+        if ( ext != 'arte' ){
+            return
+        }
+        this.filename = file.name.slice(0,-5)
         const reader = new FileReader()
-        reader.onload = event => {
+        reader.onload = (event) => {
             const content = event.target.result
-            //console.warn(content)
             this.initEditor(content)
         }
         reader.readAsText(file)
-        // Remove the input (avoids ,ultiple event listeners amongst other things)
+        // Remove the input (avoids multiple event listeners amongst other things)
         input.remove()
     }
 
@@ -910,6 +941,28 @@ class Editor {
             document.body.appendChild(input)
         }
         input.click()
+    }
+
+    clear(){
+        if ( this.modal.active() ){
+            return
+        }
+        this.modal = new Modal({
+            type:'overlay',
+            severity:'warning',
+            title:'Start new document?',
+            html:'<p>Are you sure you want to clear the editor and start a new document? Any changes will be lost.</p>',
+            escape: true,
+            buttons:{
+                cancel: {label:'Cancel',callback:()=>this.modal.hide()},
+                confirm:{label:'Yes',callback:()=>{
+                    this.editorNode.innerHTML = ''
+                    this.filename = ''
+                    this.modal.hide()
+                }}
+            }
+        })
+        this.modal.show()
     }
         
 
