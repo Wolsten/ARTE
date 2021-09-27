@@ -5,60 +5,7 @@ import ToolbarButton from '../ToolbarButton.js'
 import Modal from '../Modal.js'
 
 const PALETTE = ['black','white','violet','indigo','blue','green','yellow','orange','red']
-let editor
-let button
 let drawer = null
-
-/**
- * Set the colours in the colours dialogue according to the curerntly selected
- * hue, saturation and lightness values
- * @param {HTMLElement} target black and white button
- * @param {string} colour 'black' or 'white'
- */
-function XXXcolourise(target,colour){
-    // Remove active classes
-    const actives = drawer.panel.querySelectorAll('.active')
-    actives.forEach( active => active.classList.remove('active'))
-    // Gradient colour selected?
-    if ( target == undefined ){
-        const hues = drawer.panel.querySelectorAll('.colours .hues span')
-        hues.forEach( (item,i) => {
-            const h = i * H_INC
-            item.style.backgroundColor = `hsl(${h},100%,50%)`
-            if ( h == hue ){
-                item.classList.add('active')
-            }
-        })
-        const saturations = drawer.panel.querySelectorAll('.colours .saturations span')
-        saturations.forEach( (item,i) => {
-            const s = i * S_INC
-            item.style.backgroundColor = `hsl(${hue},${s}%,50%)`
-            if ( s == saturation ){
-                item.classList.add('active')
-            }
-        })
-        const lightnesses = drawer.panel.querySelectorAll('.colours .lightnesses span')
-        lightnesses.forEach( (item,i) => {
-            const l = i * L_INC
-            item.style.backgroundColor = `hsl(${hue},50%,${l}%)`
-            if ( l == lightness ){
-                item.classList.add('active')
-            }
-        })
-    // Handle black and white
-    } else {
-        target.classList.add('active')
-        hue = 0
-        saturation = 100
-        if ( colour == 'black' ){
-            lightness = 0
-        } else {
-            lightness = 100
-        }
-    }
-    drawer.panel.querySelector('form .result span').style.backgroundColor = `hsl(${hue},${saturation}%,${lightness}%)`
-}
-
 
 /**
  * Construct the colour dialogue
@@ -77,25 +24,6 @@ function XXXcolourise(target,colour){
         </form>`
 }
 
-/**
- * Save the currently selected colour values
- */
-function XXXsave(){
-    // Round up values to nearest integer
-    hue = Math.round(hue)
-    saturation = Math.round(saturation)
-    lightness = Math.round(lightness)
-    const colour = `hsl(${hue}, ${saturation}%, ${lightness}%)`
-    // Synthesise a button using the colour value selected
-    const synthButton = {
-        setState,
-        style:`${button.style}:${colour}`, 
-        element:button.element
-    }
-    drawer.hide()
-    // Apply the new style
-    Styles.click( editor, synthButton )
-}
 
 /**
  * Show the colour input for the button supplied, saving in the global input 
@@ -104,7 +32,7 @@ function XXXsave(){
  * a HTML5 colour input dialogue. 
  * Clicking on this triggers the input event.
  */
-function show(){
+function show(editor,button){
     let title = "Select highlight colour"
     if ( button.tag == 'FGC'){
         title = "Select text colour"
@@ -141,16 +69,14 @@ function show(){
 /**
  * Mandatory button click function which displays the colour dialogue
  * for the supplied button
- * @param {object} edt A unique editor instance
- * @param {object} btn The button to act on
+ * @param {object} editor A unique editor instance
+ * @param {object} button The button to act on
  */
-const click = function( edt, btn ){
+const click = function( editor, button ){
     // Ignore if a modal is active
     if ( drawer && drawer.active() ){
         return
     }
-    editor = edt
-    button = btn
     if ( editor.range === false || editor.range.collapsed ){
         const feedback = new Modal({
             type:'overlay',
@@ -161,7 +87,7 @@ const click = function( edt, btn ){
         feedback.show()
         return
     }
-    show(editor, btn)
+    show(editor, button)
 }
 
 /**
