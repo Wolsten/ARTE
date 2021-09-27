@@ -11,7 +11,8 @@ let drawer = null
  * Construct the colour dialogue
  * @param {object} button 
  * @returns 
- */function form(){
+ */
+function form(){
     let colours = ''
     for( let i=0; i<PALETTE.length; i++ ){
         colours += `<span class="colour" data-index="${i}" style="background-color:${PALETTE[i]}">&nbsp;</span>`
