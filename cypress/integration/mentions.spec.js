@@ -1,4 +1,4 @@
-describe('Tests mentions', function () {
+describe('Tests mentions plugin', function () {
 
     beforeEach('Open editor url and start editing', function(){
         cy.arte_visit()

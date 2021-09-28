@@ -137,6 +137,7 @@ function show( editFlag ){
         node.setAttribute('contenteditable','false')
         node.dataset.src = ''
         node.dataset.alt = ''
+        node.dataset.caption = ''
     }
     // Create and display the modal panel
     drawer = new Modal({

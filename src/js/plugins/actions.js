@@ -6,8 +6,8 @@
  * 
  * Editor format (optional due date):
  * <arte-action id="id" data-status="0" data-todo="todo" data-owners="owners" data-due="due" data-created="date" data-updated="date" data-notes="notes" contenteditable="false" >
- *      <label class="status-class"><i>icon</i></label>
  *      <button type="button" title="Click to edit action">
+ *          <label class="status-open|status-closed-incomplete|status-closed-complete"><i>icon</i></label>
  *          <span class="todo">todo</span>
  *          <label>Owners:</label>
  *          <span class="owners">owners</span>

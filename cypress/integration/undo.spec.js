@@ -1,5 +1,5 @@
 
-describe('Tests undo and redo', function () {
+describe('Tests undo and redo buffer plugin', function () {
 
     beforeEach('Open editor url and start editing', function(){
         cy.arte_visit()

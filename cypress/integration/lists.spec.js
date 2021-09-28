@@ -1,4 +1,4 @@
-describe('Tests list formatting', function () {
+describe('Tests block plugin - lists', function () {
 
     beforeEach('Open editor url and start editing', function(){
         cy.arte_visit()

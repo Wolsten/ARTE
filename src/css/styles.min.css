@@ -714,8 +714,8 @@ article.action p {
 arte-comment {
   display: inline-block;
   position: relative;
-  top: -0.3rem;
-  right: 0.5rem;
+  top: -0.4rem;
+  right: 0.4rem;
 }
 arte-comment button {
   border: none;
@@ -729,7 +729,7 @@ arte-comment button i {
 arte-comment.custom-selected {
   outline: none;
 }
-arte-comment[data-resolved=true] button.edit i {
+arte-comment[data-resolved=true] button i {
   color: var(--colour-success);
 }
 

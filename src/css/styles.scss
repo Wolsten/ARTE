@@ -863,8 +863,8 @@ article.action {
 arte-comment {
     display:inline-block;
     position:relative;
-    top:-0.3rem;
-    right:0.5rem;
+    top:-0.4rem;
+    right:0.4rem;
     button {
         border:none;
         background-color:transparent;
@@ -877,8 +877,8 @@ arte-comment {
     &.custom-selected {
         outline:none;
     }
-    &[data-resolved='true']{
-        button.edit i {
+    &[data-resolved="true"]{
+        button i {
             color:var(--colour-success);
         }
     }

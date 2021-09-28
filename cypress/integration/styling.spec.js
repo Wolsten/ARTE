@@ -1,4 +1,4 @@
-describe('Tests inline formatting', function () {
+describe('Tests styling plugin', function () {
 
     beforeEach('Open editor url and start editing', function(){
         cy.arte_visit()

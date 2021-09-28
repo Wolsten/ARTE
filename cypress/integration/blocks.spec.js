@@ -1,5 +1,5 @@
 
-describe('Tests block formatting', function () {
+describe('Tests blocks plugin', function () {
 
     before('Open editor url and start editing', function(){
         cy.arte_visit()
