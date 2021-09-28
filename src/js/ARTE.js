@@ -8,6 +8,7 @@ import * as Blocks from './plugins/blocks.js'
 import * as Styles from './plugins/styles.js'
 import * as Mentions from './plugins/mentions.js'
 import * as Links from './plugins/links.js'
+import * as Images from './plugins/images.js'
 import * as Colours from './plugins/colours.js'
 import * as Actions from './plugins/actions.js'
 import * as Comments from './plugins/comments.js'
@@ -22,6 +23,7 @@ export {
     Styles,
     Mentions,
     Links,
+    Images,
     Colours,
     Actions,
     Comments,

@@ -47,10 +47,10 @@ class Editor {
         this.listenForKeydownEvents()
         this.listenForKeyupEvents()
         // Public methods to support saving and updating the editor content
-        this.preview = this.getCleanData
+        this.preview = ()=>this.getCleanData(true)
         this.update = this.updateEditor
         // Reset currently edited filename
-        this.filename = ''
+        this.filename = 'arte-download'
         // Define an empty modal so can check if any active
         this.modal = new Modal()
         // Initialise the editor content and buffering
@@ -957,7 +957,7 @@ class Editor {
                 cancel: {label:'Cancel',callback:()=>this.modal.hide()},
                 confirm:{label:'Yes',callback:()=>{
                     this.editorNode.innerHTML = ''
-                    this.filename = ''
+                    this.filename = 'arte-download'
                     this.modal.hide()
                 }}
             }
@@ -972,16 +972,15 @@ class Editor {
     
     /**
      * Clean the editor node contents
+     * @param {boolean} pretty Whether to pretty print
      * @returns {string} The cleaned html data
      */
-    getCleanData(){
+    getCleanData(pretty=false){
         let node = this.editorNode.cloneNode(true)
         // Get list of buttons with clean methods
         const cleanButtons = this.toolbar.filter( button => button.clean != undefined )
         Helpers.cleanForSaving(node, cleanButtons)
-        // Remove new lines and spaces before opening tags
-        node.innerHTML = node.innerHTML.replace(/[\n ]*?</gm, '<')
-        return node.innerHTML
+        return pretty ? Helpers.prettyPrint(node) : node.innerHTML
     }
 
     /**

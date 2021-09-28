@@ -567,15 +567,11 @@ body.index-body {
         label {
             font-size: inherit;
             color:inherit;
-            cursor: pointer;
             flex-basis:25%;
         }
-        // Fixed size first label
-        // label:first-child {
-        //     flex-basis:180px;
-        //     flex-shrink:0;
-        //     cursor:none;
-        // }
+        &.options label {
+            cursor: pointer;
+        }
         a {
             padding-left:0.5rem;
             cursor:pointer;
@@ -637,6 +633,7 @@ body.index-body {
     button {
         padding: 0.3rem 0.7rem;
         border:none;
+        color:var(--colour-primary)
     }
 }
 
@@ -665,7 +662,7 @@ body.index-body {
     .modal-panel-container {
         width:50%;
         padding:2rem 2rem 1rem 2rem;
-        border:1px var(--colour-border-faint) solid;
+        border:1px var(--colour-border) solid;
         border-radius: 0.5rem;
         @media screen AND (max-width:$screen-width-small){
             width:90%;
@@ -730,8 +727,20 @@ body.index-body {
 // -----------------------------------------------------------------------------
 
 form.arte-link {
-    a.panel-link i {
-        color:var(--colour-success)
+    a.link {
+        position:relative;
+        text-decoration: none;
+        padding-left:0;
+        color: var(--colour-primary);
+        &:hover {
+            border-bottom: 1px var(--colour-primary) solid;
+        }
+        i {
+            position:relative;
+            top:0.1rem;
+            color:inherit;
+            font-size:1.2rem;
+        }
     }
 }
 
@@ -772,7 +781,7 @@ form.arte-link {
 // -----------------------------------------------------------------------------
 
 // Editor styling
-action {
+arte-action {
     display:inline-block;
     i,
     label {
@@ -804,54 +813,54 @@ article.action {
 // @section custom.js plugin
 // -----------------------------------------------------------------------------
 
-custom {
-    position:relative;
-    display:block;
-    padding:0.5rem;
-    margin: 0.3rem 0;
-    font-size: 1rem;
-    font-weight:normal;
-    border:2px solid var(--colour-border);
-    transition: border 500ms ease-in-out;
-    background-color: var(--colour-blockquote-background);
-    &.custom-selected {
-        border-color:var(--colour-primary);
-    }
+// custom {
+//     position:relative;
+//     display:block;
+//     padding:0.5rem;
+//     margin: 0.3rem 0;
+//     font-size: 1rem;
+//     font-weight:normal;
+//     border:2px solid var(--colour-border);
+//     transition: border 500ms ease-in-out;
+//     background-color: var(--colour-blockquote-background);
+//     &.custom-selected {
+//         border-color:var(--colour-primary);
+//     }
 
-    .title {
-        display:block;
-        margin-bottom:0.3rem;
-    }
-    .label {
-        display:inline-block;
-        font-style: italic;
-        margin-left: 0.5rem;
-    }
-    .property1 {
-        color:red;
-    }
-    .property2 {
-        color:green;
-    }
-    .property3 {
-        color:rgb(99, 99, 236);
-    }
-    .advice {
-        display:block;
-        margin-top:0.5rem;
-    }
-    button.edit {
-        position: absolute;
-        top:0.5rem;
-        right:0.5rem;
-    }
-}
+//     .title {
+//         display:block;
+//         margin-bottom:0.3rem;
+//     }
+//     .label {
+//         display:inline-block;
+//         font-style: italic;
+//         margin-left: 0.5rem;
+//     }
+//     .property1 {
+//         color:red;
+//     }
+//     .property2 {
+//         color:green;
+//     }
+//     .property3 {
+//         color:rgb(99, 99, 236);
+//     }
+//     .advice {
+//         display:block;
+//         margin-top:0.5rem;
+//     }
+//     button.edit {
+//         position: absolute;
+//         top:0.5rem;
+//         right:0.5rem;
+//     }
+// }
 
 // -----------------------------------------------------------------------------
 // @section comments.js plugin
 // -----------------------------------------------------------------------------
 
-comment {
+arte-comment {
     display:inline-block;
     position:relative;
     top:-0.3rem;
@@ -931,6 +940,33 @@ form.comment {
         }
     }
 }
+
+// -----------------------------------------------------------------------------
+// @section images.js
+// -----------------------------------------------------------------------------
+
+arte-image {
+    display:block;
+    text-align: center;
+    img {
+        max-width:100%;
+    }
+    caption {
+        display:block;
+        font-style: italic;
+    }
+}
+.editor-sidebar {
+    .tab-item.images {
+        img {
+            max-width: 100px;
+            max-height: 100px;
+            height:auto;
+            padding:0.5rem;
+        }
+    }
+}
+
 
 // -----------------------------------------------------------------------------
 // @section debugging

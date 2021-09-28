@@ -2,16 +2,16 @@
  * Create active links, ie. links which can be edited rather than a normal html. 
  * 
  * File format:
- * <a id="id" href="https://github.com/Wolsten/ARTE" data-label="label" data-display="0"></a>
+ * <arte-link id="id" data-href="url" data-label="label" data-display="0"></arte-link>
  * 
  * Editor format:
- * <a id="id" href="url" data-label="label" data-display="0" contenteditable="false" title="Click to edit">
- *  [url|label (url)|label]
- * </a>
+ * <arte-link id="id" data-label="label" data-display="0" contenteditable="false" title="Click to edit">
+ *      <a href="url">[url|label (url)|label]</a>
+ * </arte-link>
  * 
  * Sidebar format:
  * <article>
- *      <a href="#id" >label (url)</a>
+ *      <a href="#id">label (url)</a>
  * </article>
  */
 
@@ -23,7 +23,7 @@ import Modal from '../Modal.js'
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
  */
-const TAG = 'A'
+const TAG = 'ARTE-LINK'
 /**
  * @var {object} editor The current editor instance
  */
@@ -64,6 +64,7 @@ function handleCancel(){
         confirm = new Modal({ 
             type:'overlay',
             severity:'warning',
+            title: 'Cancel changes?',
             html:'Do you really want to lose these changes?',
             buttons: {
                 cancel: { label:'No - keep editing'},
@@ -97,6 +98,7 @@ function handleDelete(){
     confirm = new Modal({ 
         type:'overlay',
         severity:'danger',
+        title: 'Delete link?',
         html:'Do you really want to delete this link?',
         buttons: {
             cancel: { label:'No - keep editing'},
@@ -141,12 +143,17 @@ function show( selectedText, editFlag ){
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
         node.setAttribute('contenteditable','false')
-        node.href = ''
+        node.dataset.href = ''
         node.dataset.label = selectedText
         node.dataset.display = 0
     }
     // Create and display the modal panel
-    drawer = new Modal({type:'drawer',title,html: form(editFlag), buttons})
+    drawer = new Modal({
+        type:'drawer',
+        title,
+        html: form(editFlag), 
+        buttons
+    })
     drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
@@ -163,7 +170,7 @@ function show( selectedText, editFlag ){
  */
 function save(){
     // console.log('Save changes')
-    node.href = drawer.panel.querySelector('form #href').value.trim()
+    node.dataset.href = drawer.panel.querySelector('form #href').value.trim()
     node.dataset.label = drawer.panel.querySelector('form #label').value.trim()
     node.dataset.display = parseInt(drawer.panel.querySelector('form #display').value)
     if ( node.parentNode == null ){
@@ -233,11 +240,11 @@ function label(link){
             break
         // Display as the href
         case 1:
-            return link.href
+            return link.dataset.href
         // Assuming they are different display as "label (href)""
         case 2:
-            if ( link.dataset.label && link.dataset.label != link.href ){
-                return `${link.dataset.label} (${link.href})`
+            if ( link.dataset.label && link.dataset.label != link.dataset.href ){
+                return `${link.dataset.label} (${link.dataset.href})`
             }
     }
     // Default to the href
@@ -245,13 +252,7 @@ function label(link){
 }
 
 /**
- * The format of a source link element is:
- * <a href="href" data-label="label" data-display="0|1|2"> </a>
- * 
- * The formatted link looks like this:
- * <a href="href" id="unique-editor-id" data-label="label" data-display="0|1|2" contenteditable="false">
- *      [label|link|label (link)]
- * </a>
+ * Format a link node
  * 
  * @param {HTMLElement} element
  */
@@ -262,8 +263,14 @@ function format( element ){
     }
     element.setAttribute('contenteditable',false)
     element.title = 'Click to edit'
-    element.innerText = label(element)
-    element.addEventListener('click', event => {
+    // Initialise and add anchor tag
+    element.innerHTML = ''
+    const link = document.createElement('a')
+    link.href = element.dataset.href
+    link.innerText = label(element)
+    element.appendChild(link)
+    // Add event listener
+    link.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
         edit(element) 
@@ -277,23 +284,19 @@ function format( element ){
  */
 function form(edit){
     let openBtn = ''
-    let href = 'http://'
-    let label = node.dataset.label
     let display = node.dataset.display ? node.dataset.display : 0
     if ( edit ) {
-        href = node.href
-        openBtn = `<a href="${href}" class="panel-link" target="_blank" title="Open link in new tab or window">${Icons.openLink}</a>`
+        openBtn = `(<a href="${node.dataset.href}" class="link" target="_blank" title="Open link in new tab or window">${Icons.openLink} Open</a>)`
     }
     return `
         <form class="arte-link">
             <div class="form-input">
-                <label for="href">URL</label>
-                <input id="href" type="url" class="form-control ${openBtn ? 'with-button' : ''}" placeholder="URL" required value="${href}">
-                ${openBtn}
+                <label for="href">URL ${openBtn}</label>
+                <input id="href" type="text" class="form-control" placeholder="URL" required value="${node.dataset.href}">
             </div>
             <div class="form-input">
                 <label for="label">Label (optional)</label>
-                <input id="label" type="text" class="form-control" placeholder="Label" value="${label}">
+                <input id="label" type="text" class="form-control" placeholder="Label" value="${node.dataset.label}">
             </div>
             <div class="form-input">
                 <label for="label">Display option</label>
@@ -370,8 +373,7 @@ const clean = function(node){
     // console.log('clean link',node)
     node.removeAttribute('contenteditable')
     node.removeAttribute('title')
-    // Clear inner text because label saved in dataset
-    node.innerText = ' '
+    node.innerHTML = ''
     return node
 }
 
@@ -409,7 +411,7 @@ const sidebar = function(edt){
         content += `
             <article>
                 <a href="#${link.id}" title="Click to view link in context">
-                    ${link.dataset.label} (${link.href})
+                    ${link.dataset.label} (${link.dataset.href})
                 </a>
             </article>`
     })

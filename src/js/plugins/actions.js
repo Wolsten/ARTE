@@ -1,14 +1,11 @@
 /** 
  * 
  * File format (optional due date):
- * <action id="id" data-status="0" data-created="date" data-updated="date" data-notes="Some notes">
- *      <span class="todo">todo</span>
- *      <span class="owners">owners</span>
- *      [<span class="due">date</span>]
- * </action>
+ * <arte-action id="id" data-status="0" data-todo="todo" data-owners="owners" data-due="due" data-created="date" data-updated="date" data-notes="Some notes">
+ * </arte-action>
  * 
  * Editor format (optional due date):
- * <action id="id" contenteditable="false" data-status="0" data-created="date" data-updated="date" data-notes="notes">
+ * <arte-action id="id" data-status="0" data-todo="todo" data-owners="owners" data-due="due" data-created="date" data-updated="date" data-notes="notes" contenteditable="false" >
  *      <label class="status-class"><i>icon</i></label>
  *      <button type="button" title="Click to edit action">
  *          <span class="todo">todo</span>
@@ -17,7 +14,7 @@
  *          [<label>Due:</label>
  *          <span class="due">date</span>]
  *      </button>
- * </action>
+ * </arte-action>
  * 
  * Sidebar format (optional due date):
  * <article class="action">
@@ -38,7 +35,7 @@ import Modal from '../Modal.js'
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
  */
-const TAG = 'ACTION'
+const TAG = 'ARTE-ACTION'
 
 /**
  * @var {object} editor The current editor instance
@@ -106,7 +103,7 @@ function handleCancel(){
         confirm = new Modal({ 
             type:'overlay',
             severity:'warning',
-            title:'Cancel changes', 
+            title:'Cancel changes?', 
             html:'Do you really want to lose these changes?',
             buttons: {
                 cancel: { label:'No'},
@@ -123,7 +120,7 @@ function handleDelete(){
     confirm = new Modal({ 
         type:'overlay',
         severity:'danger',
-        title:'Delete changes', 
+        title:'Delete action?', 
         html:'Do you really want to delete this action?',
         buttons: {
             cancel: { label:'No'},
@@ -151,13 +148,14 @@ function show( editFlag ){
         // Create an action as saved to file
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
+        node.setAttribute('contenteditable','false')
         node.dataset.status = '0'
+        node.dataset.todo = ''
+        node.dataset.owners = ''
+        node.dataset.due = ''
         node.dataset.created = ''
         node.dataset.updated = ''
         node.dataset.notes = ''
-        node.innerHTML = template( node )
-        // Mark with contenteditable false
-        node.setAttribute('contenteditable','false')
     }
     // Create and display the modal panel
     drawer = new Modal({
@@ -169,15 +167,10 @@ function show( editFlag ){
     drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
+    const inputs = drawer.panel.querySelectorAll('form input, form textarea, form select')
+    inputs.forEach(input => input.addEventListener('change', () => dirty=true))
+    // Focus the todo
     const todo = drawer.panel.querySelector('#todo')
-    todo.addEventListener('change', () => dirty=true)
-    const owners = drawer.panel.querySelector('#owners')
-    owners.addEventListener('change', () => dirty=true)
-    const due = drawer.panel.querySelector('#due')
-    due.addEventListener('change', () => dirty=true)
-    const status = drawer.panel.querySelector('#status')
-    status.addEventListener('change', () => dirty=true)
-    // Focus the comment textarea
     todo.focus()
     todo.setSelectionRange(todo.value.length, todo.value.length)
 }
@@ -187,31 +180,24 @@ function show( editFlag ){
  */
 function save(){
     // console.log('Save changes')
-    node.querySelector('.todo').innerHTML = drawer.panel.querySelector('#todo').value.trim()
-    node.querySelector('.owners').innerHTML = drawer.panel.querySelector('#owners').value.trim()
-    const due = drawer.panel.querySelector('#due').value.trim()
-    if ( due != '' ){
-        node.querySelector('.due').innerHTML = due
-    }
+    node.dataset.todo = drawer.panel.querySelector('#todo').value.trim()
+    node.dataset.owners = drawer.panel.querySelector('#owners').value.trim()
+    node.dataset.due = drawer.panel.querySelector('#due').value.trim()
     node.dataset.status = parseInt(drawer.panel.querySelector('#status').value.trim())
     node.dataset.notes = drawer.panel.querySelector('#notes').value.trim()
     const timestamp = new Date()
     const localstring = timestamp.toLocaleString().slice(0,-3)
-    console.log('local timestamp', localstring)
-    // Check we have a todo
-    if ( node.dataset.todo != '' ){
-        if ( node.parentNode == null ){
-            node.dataset.created = localstring
-            insert()
-        }
-        node.dataset.updated = localstring
-        drawer.hide()
-        // Format node and add event handler
-        format(node)
-        // Update state
-        editor.range = Helpers.setCursor( node, 0)
+    //console.log('local timestamp', localstring)
+    if ( node.dataset.created == '' ){
+        node.dataset.created = localstring
+        insert()
     }
-
+    node.dataset.updated = localstring
+    drawer.hide()
+    // Format node and add event handler
+    format(node)
+    // Update state
+    editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
     editor.buffer()
 } 
@@ -243,16 +229,8 @@ function deleteItem(){
  */
 function clean(node){
     // console.log('clean custom element',node)
-    // Remove the content editable flag and the ornamentation
     node.removeAttribute('contenteditable')
-    // Remove all labels
-    const labels = node.querySelectorAll('label')
-    labels.forEach(label => label.remove())
-    // Save the data by moving to end of node
-    const data = node.querySelectorAll('span')
-    data.forEach( item => node.appendChild(item) )
-    // Remove the now empty button
-    node.querySelector('button').remove()
+    node.innerHTML = ''
     return node
 }
 
@@ -267,8 +245,8 @@ function format( element ){
     if ( element.id == false ){
         element.id = Helpers.generateUid()
     }
-    element.innerHTML = template(element)
     element.setAttribute('contenteditable',false)
+    element.innerHTML = template(element)
     // Add event listener
     element.querySelector('button').addEventListener('click', event => {
         event.preventDefault()
@@ -298,39 +276,37 @@ function addEventHandlers(edt){
 }
 
 /**
+ * Return the status class for the current action status
+ * @param {string} status 
+ * @returns {string}
+ */
+function getStatusClass(status){
+    switch ( parseInt(status) ){
+        case 0: return 'status-open'
+        case 1: return 'status-closed-incomplete'
+        case 2: return 'status-closed-complete'
+    }
+    return 'status-unknown'
+}
+
+/**
  * Create a template for how the action is presented in the editor
  * @param {string,string,string} action The properties to display
  * @returns {string} HTML text to display
  */
- function template(action){
-    let status = 'status-open'
-    if ( action.dataset.status == '1' ){
-        status = 'status-closed-incomplete'
-    } else if ( action.dataset.status == '2' ){
-        status = 'status-closed-complete'
-    }
-    let todo = action.querySelector('.todo')
-    if ( todo == null ){
-        todo = {innerHTML:''}
-    }
-    let owners = action.querySelector('.owners')
-    if ( owners == null ){
-        owners = {innerHTML:''}
-    }
-    let html = `
+function template(action){
+    const statusClass = getStatusClass(action.dataset.status)
+    const due = action.dataset.due == '' ? '' : `
+        <label>Due:</label>
+        <span class="due">${action.dataset.due}</span>`
+    return `
         <button type="button" title="Edit this action">
-            <label class="${status}">${Icons.action}</label>
-            <span class="todo">${todo.innerHTML}</span>
+            <label class="${statusClass}">${Icons.action}</label>
+            <span class="todo">${action.dataset.todo}</span>
             <label>Owners:</label>
-            <span class="owners">${owners.innerHTML}</span>`
-    const due = action.querySelector('.due')
-    if ( due != null ){
-        html += `
-            <label>Due:</label>
-            <span class="due">${due.innerText.trim()}</span>`
-    }
-    html += `</button>`
-    return html
+            <span class="owners">${action.dataset.owners}</span>
+            ${due}
+        </button>`
 }
 
 /**

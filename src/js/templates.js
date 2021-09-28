@@ -83,10 +83,11 @@ export const sidebarContent = function(tabList){
     tabList.forEach( (item,index) => {
         const active = index==0 ? 'active' : ''
         const show = index==0 ? 'show' : ''
+        const tabClass = item.label.replaceAll(' ','-')
         const itemContent = item.content ? item.content : `You have no ${item.label} in your document.`
         menu += `<li><a href="#" class="tab-menu ${active}" data-tab-target="tab-${index}" title="${item.label}">${item.icon}</a></li>`
         content += `
-            <div class="tab-item ${show}" data-tab-id="tab-${index}">
+            <div class="tab-item ${tabClass} ${show}" data-tab-id="tab-${index}">
                 <header><h2>${item.label}</h2></header>
                 ${itemContent}
             </div>`
@@ -136,7 +137,7 @@ export const sidebarContent = function(tabList){
 
 
 export const save = function(filename='arte-download'){
-    console.log('filename is',filename)
+    //console.log('filename is',filename)
     return `
         <form class="save">
             <p class="advice">Enter the filename without extension. The file will be saved in your <strong>Downloads</strong> folder with the extension <strong>arte</strong>.</>

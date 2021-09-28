@@ -3,14 +3,14 @@
  * 
  * File format:
  * <p>Paragraph text 
- *   <comment id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false"></comment>
+ *   <arte-comment id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false"></arte-comment>
  * </p>
  * 
  * Editor format:
  * <p>Paragraph text 
- *   <comment id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false" contenteditable="false">
+ *   <arte-comment id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false" contenteditable="false">
  *      <button type="button" title="edit this comment"><i>icon</i></button>
- *   </comment>
+ *   </arte-comment>
  * </p>
  * 
  * Sidebar format:
@@ -36,7 +36,7 @@ import Modal from '../Modal.js'
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
  */
-const TAG = 'COMMENT'
+const TAG = 'ARTE-COMMENT'
 
 /**
  * @var {object} editor The current editor instance
@@ -193,20 +193,16 @@ function save(){
     const timestamp = new Date()
     const localstring = timestamp.toLocaleString().slice(0,-3)
     console.log('local timestamp', localstring)
-    // Check we have a comment
-    if ( node.dataset.comment != '' ){
-        if ( node.parentNode == null ){
-            node.dataset.created = localstring
-            insert()
-        }
-        node.dataset.updated = localstring
-        drawer.hide()
-        // Format node and add event handler
-        format(node)
-        // Update state
-        editor.range = Helpers.setCursor( node, 0)
+    if ( node.dataset.created  == '' ){
+        node.dataset.created = localstring
+        insert()
     }
-
+    node.dataset.updated = localstring
+    drawer.hide()
+    // Format node and add event handler
+    format(node)
+    // Update state
+    editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
     editor.buffer()
 } 
@@ -238,9 +234,8 @@ function deleteItem(){
  */
 function clean(node){
     // console.log('clean custom element',node)
-    // Remove the content editable flag and the ornamentation
     node.removeAttribute('contenteditable')
-    node.querySelector('button').remove()
+    node.innerHTML = ''
     return node
 }
 

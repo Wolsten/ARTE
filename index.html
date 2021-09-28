@@ -50,7 +50,7 @@
             [ ARTE.Blocks.OL, ARTE.Blocks.UL],
             [ ARTE.Styles.B, ARTE.Styles.I, ARTE.Styles.U, ARTE.Colours.FOREGROUND, ARTE.Colours.BACKGROUND, ARTE.Styles.CLEAR],
             [ ARTE.Buffer.UNDO, ARTE.Buffer.REDO ],
-            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Comments.BUTTON, ARTE.Actions.BUTTON],
+            [ ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Images.BUTTON, ARTE.Comments.BUTTON, ARTE.Actions.BUTTON],
             [ ARTE.Settings.BUTTON ]
         ]
 
@@ -103,7 +103,7 @@
             // Get the preview from the editor
             let xml = editor.preview()
             // Insert line feed before all opening tags to make easier to read
-            xml = xml.replace(/(<[^\/.]+?>)/gm, '\n$1')
+            // xml = xml.replace(/(<[^\/.]+?>)/gm, '\n$1')
             // Instantiate the modal
             const drawer = new ARTE.Modal({
                 type:'full-screen', 

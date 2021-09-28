@@ -30,7 +30,10 @@ export const arraySubset = function( a, b ){
 // @section Dom manipulation
 // -----------------------------------------------------------------------------
 
-let tags = { block: ['DIV','H1','H2','H3','P','LI', 'BLOCKQUOTE'], list: ['LI'], custom:[]}
+// Comon tags to be supported
+//let tags = { block: ['DIV','H1','H2','H3','P','LI','BLOCKQUOTE'], list: ['LI'], custom:[]}
+let tags = { block: ['DIV','LI'], list: ['LI'], custom:[]}
+
 
 
 /**
@@ -41,7 +44,7 @@ let tags = { block: ['DIV','H1','H2','H3','P','LI', 'BLOCKQUOTE'], list: ['LI'],
 export const registerTag = function(type,tag){
     if ( tags[type]!=undefined && tags[type].includes(tag) == false && tag!='CLEAR'){
         tags[type].push(tag)
-        //console.log('registered tag', tag, 'in type', type)
+        console.log('registered tag', tag, 'in type', type)
     }
 }
 
@@ -110,7 +113,7 @@ export const isStyle = function( node ){
     if ( node.nodeType != 1 ){
         return false
     }
-    return node.tagName === 'SPAN'
+    return node.tagName === 'SPAN' || node.tagName === 'I'
 }
 
 /**
@@ -147,7 +150,9 @@ export const isCustom = function( node ){
     if ( node.tagName == undefined ){
         return false
     }
-    return node.getAttribute('contenteditable') != null && node.getAttribute('contenteditable') == "false"
+    return tags.custom.includes(node.tagName)
+    // return node.getAttribute('contenteditable') != null && 
+    //        node.getAttribute('contenteditable') == "false"
 }
 
 /**
@@ -309,6 +314,7 @@ export const getTopParentNode = function( node, stopNode ){
  * @param {object[]} buttons array of button objects which have clean methods
  */
 export const cleanForSaving = function( node, buttons ){
+
     // Trim text nodes with CR's
     if ( node.nodeType === 3 ){
         if ( node.textContent.includes('\n') ){
@@ -321,11 +327,16 @@ export const cleanForSaving = function( node, buttons ){
         node.remove()
         return
     }
+
+    // Check for custom node before cleaning as will remove contenteditable identifier
+    const custom = isCustom(node) 
+
     // Remove anything we don't recognise
     if ( isBlock(node) === false && 
          isList(node) === false && 
          isStyle(node) === false && 
-         isCustom(node) === false ){
+         custom === false ){
+        console.warn('Removing node',node.tagName)
         node.remove()
         return
     }
@@ -334,6 +345,7 @@ export const cleanForSaving = function( node, buttons ){
         cleanStyledSpan(node)
         return
     }
+
     // Handle custom cleaning - not just for custom nodes
     if ( buttons.length>0 ){
         // Does it require cleaning?
@@ -350,7 +362,7 @@ export const cleanForSaving = function( node, buttons ){
     } 
 
     // Only stop processing if this is a custom node
-    if ( isCustom(node) ){
+    if ( custom ){
         return
     }
 
@@ -386,6 +398,82 @@ function cleanStyledSpan(span){
         span.remove()
     }
 }
+
+let prettyHtml = ''
+
+function tabs(level){
+    let t = '\n'
+    for( let i=0; i<level; i++ ){
+        t += '    '
+    }
+    return t
+}
+
+function indentTag(node){
+    let inline = false
+    if ( isCustom(node) ){
+        if ( node.nextElementSibling != null && node.nextElementSibling.nodeType === 3 ){
+            return false
+        }
+        return true
+    }
+    return isBlock(node) || isList(node)
+}
+
+function prettyPrintNode( node, level){
+    // Text node?
+    if ( node.nodeType == 3 ){
+        const text = node.textContent
+        if ( text != '' ){
+            // Indent first text nodes
+            if ( node.previousElementSibling == null ){
+                level ++
+                prettyHtml += tabs(level)
+            }
+            prettyHtml += text
+            //console.log(`Found text node ${text} at level ${level}`)
+        }
+    // Parent node
+    } else if ( node.nodeType == 1 ){
+        let indent = false
+        if ( node.tagName != 'DIV' ){
+            const atts = node.attributes
+            let tagHtml = node.tagName
+            for( let i=0; i<atts.length; i++ ){
+                const att = atts[i]
+                tagHtml += ` ${att.nodeName}="${att.nodeValue}"`
+            }
+            if ( indentTag(node) ){
+                indent = true
+                level ++
+                prettyHtml += tabs(level)
+            }
+            prettyHtml +=  `<${tagHtml}>`
+            //console.log(`Found node ${node.tagName} at level ${level}`)
+        }
+        // Children
+        node.childNodes.forEach( child => {
+            prettyPrintNode(child, level)
+        })
+        // Closing tag
+        if ( node.tagName != 'DIV' ){
+            if ( indent && isCustom(node)==false){
+                prettyHtml += tabs(level)
+            }
+            prettyHtml += `</${node.tagName}>`
+        }
+    } else {
+        console.warn('Found unknown node type', node.nodeType)
+    }
+}
+
+export const prettyPrint = function(node){
+    prettyHtml = ''
+    let level = -1
+    prettyPrintNode(node, level)
+    return prettyHtml
+}
+
 
 
 // -----------------------------------------------------------------------------
