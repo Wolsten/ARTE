@@ -61,17 +61,7 @@ function handleConfirmCancel(){
 
 function handleCancel(){
     if ( dirty ){
-        confirm = new Modal({ 
-            type:'overlay',
-            severity:'warning',
-            title: 'Cancel changes?',
-            html:'Do you really want to lose these changes?',
-            buttons: {
-                cancel: { label:'No - keep editing'},
-                confirm: { label:'Yes - lose changes', callback:handleConfirmCancel}
-            }
-        })
-        confirm.show()
+        confirm = Helpers.modalRequestCancel(handleConfirmCancel)
     } else {
         drawer.hide()
     }
@@ -95,17 +85,7 @@ function handleConfirmDelete(){
 }
 
 function handleDelete(){
-    confirm = new Modal({ 
-        type:'overlay',
-        severity:'danger',
-        title: 'Delete link?',
-        html:'Do you really want to delete this link?',
-        buttons: {
-            cancel: { label:'No - keep editing'},
-            confirm: { label:'Yes - delete link', callback:handleConfirmDelete }
-        }
-    })
-    confirm.show()
+    confirm = Helpers.modalRequestDelete( 'link', handleConfirmDelete )
 }
 
 

@@ -17,10 +17,10 @@
  * </article>
  */
 
- import ToolbarButton from '../ToolbarButton.js'
- import * as Icons from '../icons.js'
- import * as Helpers from '../helpers.js'
- import Modal from '../Modal.js'
+import ToolbarButton from '../ToolbarButton.js'
+import * as Icons from '../icons.js'
+import * as Helpers from '../helpers.js'
+import Modal from '../Modal.js'
  
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
@@ -69,17 +69,7 @@ function handleConfirmCancel(){
  */
 function handleCancel(){
     if ( dirty ){
-        confirm = new Modal({ 
-            type:'overlay',
-            severity:'warning',
-            title: 'Cancel changes',
-            html:'Do you really want to lose these changes?',
-            buttons: {
-                cancel: { label:'No - keep editing'},
-                confirm: { label:'Yes - lose changes', callback:handleConfirmCancel}
-            }
-        })
-        confirm.show()
+        confirm = Helpers.modalRequestCancel( handleConfirmCancel )
     } else {
         drawer.hide()
     }
@@ -109,17 +99,7 @@ function handleConfirmDelete(){
  * Ask to confirm delete
  */
 function handleDelete(){
-    confirm = new Modal({ 
-        type:'overlay',
-        severity:'warning',
-        title:'Delete image?',
-        html:'Do you really want to delete this image?',
-        buttons: {
-            cancel: { label:'No - keep editing'},
-            confirm: { label:'Yes - delete image', callback:handleConfirmDelete }
-        }
-    })
-    confirm.show()
+    confirm = Helpers.modalRequestDelete( 'image', handleConfirmDelete )
 }
  
 /**
@@ -204,7 +184,7 @@ function save(editFlag=false){
  * @param {HTMLElement} element
  */
 function format( element ){
-    console.log('arte-image', element)
+    //console.log('arte-image', element)
     // Generate new id if required
     if ( element.id == false ){
         element.id = Helpers.generateUid()
@@ -345,7 +325,7 @@ const setState = function( edt, btn ){
  * @returns {Object} {icon,label,content}
  */
 const sidebar = function(edt){
-    console.log('Updating image sidebar')
+    // console.log('Updating image sidebar')
     const elements = edt.editorNode.querySelectorAll(TAG)
     let content = ''
     elements.forEach( element => {

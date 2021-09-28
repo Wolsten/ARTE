@@ -177,6 +177,7 @@ class Modal {
         // Button callbacks
         if ( this.buttons ){
             BUTTON_ORDER.forEach( type => {
+                console.warn({type})
                 if ( this.buttons[type] ){
                     const button = this.buttons[type]
                     const element = this.panel.querySelector(`button.${type}`)

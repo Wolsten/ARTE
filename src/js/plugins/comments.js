@@ -2,16 +2,12 @@
  * Add comments to paragraphs
  * 
  * File format:
- * <p>Paragraph text 
  *   <arte-comment id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false"></arte-comment>
- * </p>
  * 
  * Editor format:
- * <p>Paragraph text 
  *   <arte-comment id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false" contenteditable="false">
  *      <button type="button" title="edit this comment"><i>icon</i></button>
  *   </arte-comment>
- * </p>
  * 
  * Sidebar format:
  * <article>
@@ -100,34 +96,14 @@ function handleConfirmDelete(){
 
 function handleCancel(){
     if ( dirty ){
-        confirm = new Modal({ 
-            type:'overlay',
-            severity:'warning',
-            title:'Cancel changes', 
-            html:'Do you really want to lose these changes?',
-            buttons: {
-                cancel: { label:'No'},
-                confirm: { label:'Yes - lose changes', callback:handleConfirmCancel}
-            }
-        })
-        confirm.show()
+        confirm = Helpers.modalRequestCancel( handleConfirmCancel )
     } else {
         drawer.hide()
     }
 }
 
 function handleDelete(){
-    confirm = new Modal({ 
-        type:'overlay',
-        severity:'danger',
-        title:'Delete changes', 
-        html:'Do you really want to delete this comment?',
-        buttons: {
-            cancel: { label:'No'},
-            confirm: { label:'Yes - delete', callback:handleConfirmDelete }
-        }
-    })
-    confirm.show()
+    confirm = Helpers.modalRequestDelete( 'comment', handleConfirmDelete )
 }
 
 function handleResolve(event){

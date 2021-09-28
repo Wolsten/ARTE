@@ -100,36 +100,15 @@ function handleConfirmDelete(){
 
 function handleCancel(){
     if ( dirty ){
-        confirm = new Modal({ 
-            type:'overlay',
-            severity:'warning',
-            title:'Cancel changes?', 
-            html:'Do you really want to lose these changes?',
-            buttons: {
-                cancel: { label:'No'},
-                confirm: { label:'Yes - lose changes', callback:handleConfirmCancel}
-            }
-        })
-        confirm.show()
+        confirm = Helpers.modalRequestCancel( handleConfirmCancel )
     } else {
         drawer.hide()
     }
 }
 
 function handleDelete(){
-    confirm = new Modal({ 
-        type:'overlay',
-        severity:'danger',
-        title:'Delete action?', 
-        html:'Do you really want to delete this action?',
-        buttons: {
-            cancel: { label:'No'},
-            confirm: { label:'Yes - delete', callback:handleConfirmDelete }
-        }
-    })
-    confirm.show()
+    confirm = Helpers.modalRequestDelete( 'action', handleConfirmDelete )
 }
-
 
 /**
  * Show the custom dialogue.
@@ -145,7 +124,7 @@ function show( editFlag ){
         title = 'Edit action'
         buttons.delete = { label:'Delete', callback:handleDelete }
     } else {
-        // Create an action as saved to file
+        // Initialise an action as saved to file
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
         node.setAttribute('contenteditable','false')
@@ -314,28 +293,19 @@ function template(action){
  * @returns {string} Generated html
  */
 function form(){
-    const todo = node.querySelector('.todo').innerHTML.trim()
-    const owners = node.querySelector('.owners').innerHTML.trim()
-    const optional = node.querySelector('.due')
-    let due
-    if ( optional == null ){
-        due = ''
-    } else {
-        due = optional.innerHTML.trim()
-    }
     return `
         <form class="comment">
             <div class="form-input">
                 <label for="todo">What needs to be done</label>
-                <textarea id="todo" class="form-control" required>${todo}</textarea>
+                <textarea id="todo" class="form-control" required>${node.dataset.todo}</textarea>
             </div>
             <div class="form-input">
                 <label for="owners">Owners</label>
-                <input type="text" id="owners" class="form-control" value="${owners}" required />
+                <input type="text" id="owners" class="form-control" value="${node.dataset.owners}" required />
             </div>
             <div class="form-input">
                 <label for="due">Due by</label>
-                <input type="text" id="due" class="form-control" value="${due}"/>
+                <input type="text" id="due" class="form-control" value="${node.dataset.due}"/>
             </div>
             <div class="form-input">
                 <label for="status">Status</label>

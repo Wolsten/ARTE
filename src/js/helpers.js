@@ -1,3 +1,5 @@
+import Modal from './Modal.js'
+
 // -----------------------------------------------------------------------------
 // @section Arrays
 // -----------------------------------------------------------------------------
@@ -44,7 +46,7 @@ let tags = { block: ['DIV','LI'], list: ['LI'], custom:[]}
 export const registerTag = function(type,tag){
     if ( tags[type]!=undefined && tags[type].includes(tag) == false && tag!='CLEAR'){
         tags[type].push(tag)
-        console.log('registered tag', tag, 'in type', type)
+        //console.log('registered tag', tag, 'in type', type)
     }
 }
 
@@ -705,6 +707,53 @@ export const resetSelection = function( editorNode ){
     }
     return false
 }
+
+
+// -----------------------------------------------------------------------------
+// @section Modals confirmation dialogues
+// -----------------------------------------------------------------------------
+
+/**
+ * Display confirmation dialogue for cancel any edits
+ * @param {Function} callback Function to invoke on formation of cancel
+ * @returns {Object}
+ */
+export const modalRequestCancel = function( callback ){
+    const confirm = new Modal({ 
+        type:'overlay',
+        severity:'warning',
+        title:'Cancel changes?',
+        html:'Do you really want to lose changes?',
+        buttons: {
+            cancel: { label:'No - keep editing'},
+            confirm: { label:'Yes - lose changes', callback}
+        }
+    })
+    confirm.show()
+    return confirm
+}
+
+/**
+ * Display confirmation dialogue for deleting an item
+ * @param {string} label The name of the item
+ * @param {Function} callback Function to invoke on formation of delete
+ * @returns {Object}
+ */
+export const modalRequestDelete = function( label, callback ){
+    const confirm = new Modal({ 
+        type:'overlay',
+        severity:'warning',
+        title:`Delete ${label}?`,
+        html:`Do you really want to delete this ${label}?`,
+        buttons: {
+            cancel: { label:'No - keep editing'},
+            confirm: { label:'Yes - delete', callback}
+        }
+    })
+    confirm.show()
+    return confirm
+}
+
 
 // -----------------------------------------------------------------------------
 // @section Miscellaneous
