@@ -1,0 +1,77 @@
+
+<p>
+    <arte-image id="abcdpcmqdgebjtafp4o" data-src="https://wolsten.github.io/ARTE/img/logo-medium.png" data-alt="Our logo" data-caption="Active Rich Text Editor"/></arte-image>
+</p>
+
+<h1>Welcome to ARTE</h1>
+
+<h2>Introduction</h2>
+
+<p>ARTE, pronounced "Arty", is a free, open source and extensible library for implementing WYSIWYG (What You See is What You Get) editors in vanilla javascript that supports active components, such as comments like the one attached to this paragraph. Try clicking the orange balloon to view it. 
+    <arte-comment id="ksocpcmqdgebjtafp4o" data-comment="This is an example comment" data-created="23/08/2021, 09:01" data-updated="23/08/2021, 09:01" data-resolved="false"></arte-comment>
+</p>
+
+<p>With most editors, generated content is usually passive with no interaction capability. However, in ARTE content can be <span style="font-weight:bold">active</span>, i.e. one is able to interact with it in ways appropriate to that content, for example creating <span style="font-weight:bold">protected</span> content that can be edited in its own right. For example this paragraph has a meeting action associated with it - the sort of thing you might use when writing minutes.
+    <arte-action id="ktvikq1z8hbmksr1wvg" data-status="0" data-todo="A test action" data-owners="Dave and Jill" data-due="15th May 2022" data-created="22/09/2021, 14:00" data-updated="22/09/2021, 14:00" data-notes="Some notes"></arte-action>
+</p>
+
+<p>ARTE supports the following features, all implemented with a consistent plugin model:</p>
+
+<ol>
+    <li>Simple block level formatting, such headings, paragraphs and blockquotes.</li>
+    <li>Lists, including:
+        <ul>
+            <li>Ordered</li>
+            <li>Unordered</li>
+            <li>Indented - implemented by selecting any list items apart from the first one. If you select the first list item it will change the current list type. To see how this works select this bullet and the one above and then click the ordered list button (<i class="bi bi-list-ol"></i>).</li>
+        </ul>
+    <li>Inline styles such as italic, bold, underline and text colour. You can also clear all selected styling in one go using the clear button .</li>
+    <li>Undo and redo buttons.</li>
+    <li>Passive custom elements, such as mentions.</li>
+    <li>Active custom elements, such as links, e.g. <arte-link id="ksocpdmqtgebjtafp4o" data-href="https://github.com/Wolsten/ARTE" data-label="the ARTE Repository" data-display="0"></arte-link>, comments and arbitrary custom blocks. Examples of these are provided in the toolbar above. Trying clicking the link to edit it or add a new one using the <i class="bi bi-link"></i> button.</li>
+</ol>
+
+<p>Additionally, ARTE supports shortcuts. To see how this works enter the <span style="font-weight:bold">@</span> character twice at any point in the text. You should see a popup window with a set of scrollable, filterable names that can be inserted in the text via pressing `Enter` or selecting with the mouse. Using `@@` means that this shortcut will be available more easily on touch devices, rather than using a control, shift or tab key for example.</p>
+
+<h2>Customisation</h2>
+
+<p>ARTE supports rapid customisation since all the toolbar buttons are implemented using javascript modules following a similar pattern. They are therefore easy to modify and use as a starting point for your own plugins.</p>
+
+<p>There are several configuration options available when the editor is embedded in a web page:</p>
+
+<ol>
+    <li>Choice of which plugins to implement down to the level of individual buttons in the toolbar.</li>
+    <li>Automatically outline numbering headings (as has been done here).</li>
+    <li>Setting the undo-redo buffer size (set to 10 here).</li>
+    <li>Turning debugging on or off to help during development. Currently set to off.</li>
+</ol>
+
+<h2>Building your own version</h2>
+
+<p>ARTE is written in the latest version of javascript but can be transpiled to support older browsers. Webpack is used for this purpose but you can replace this with your preferred build tools.</p>
+
+<p>ARTE is licenced under MIT so there are no commercial constraints to using however you like or to modifying the source code for your own purposes.</p>
+
+<p>The source styling is implemented use SCSS and if you want to update this file you will need to use a SASS compiler, such as the Live Sass Compiler extension for VS Code. By default the CSS generated is minified.</p>
+
+<blockquote>But remember that with great power comes great responsibility</blockquote>
+
+<h2>Saving ARTE content</h2>
+
+<p>It is not currently possible (in a cross-browser way) to save files to an arbitrary folder on your computer. However, you may download a file by clicking the `Save` button and then move it somewhere else on your computer. You will be prompted to provide a filename. Any file you save will not overwrite an existing file with the same name but instead will have a version number appended.</p>
+
+<h3>Cleaning saved data</h3>
+
+<p>When the editor content is saved the data is cleaned to remove any non-supported elements or styling. Additionally, custom elements can have an optional "clean" method that is invoked automatically on save to handle any custom cleaning required. This includes compressing the custom element to create a more compact, data-oriented version for saving. On load, a custom element is expanded from this compact version and required interactions added, such as listening for an edit button click.</p>
+
+<p>Click the Preview button below to see how this editor content is cleaned for saving. This version is output with line-breaks before all opening tags but the original saved contents is more compact but less readable.</p>
+    
+<p>You can try adding non-supported elements but these will be filtered out on saving, providing not only a more compact representation but also adding a good level of security preventing the injection of malicious code. Try entering some malicious code, e.g. a script tag and code, and then see how it is filtered out on saving. You should still follow best practice and sanitise all such output before saving to a database.</p>
+
+<h2>Opening files</h2>
+
+<p>ARTE can only open files it has generated and downloaded. These have an extension `.arte`. If you click the `Open` button you can open a previously downloaded ARTE file. Note that any files without an `.arte` extension will be shown as greyed out.</p>
+
+<h2>Starting from scratch</h2>
+
+<p>To start with a blank page simply click the `New` button below. Note that no warning is provided so make sure you save any changes to an existing document.</p>

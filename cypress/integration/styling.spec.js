@@ -23,20 +23,20 @@ describe('Tests inline formatting', function () {
         cy.arte_get('span[style="text-decoration:underline;"]')
 
         cy.arte_set_selection('coloured')
-        cy.arte_click_id('FGC')
-        cy.arte_modal_click('confirm')
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_click_id('ARTE-COLOR')
+        cy.get('span[data-index="8"]').click()
+        cy.arte_count('span[style="color:red;"]',1)
 
         cy.arte_set_selection('highlighted')
-        cy.arte_click_id('BGC')
-        cy.arte_modal_click('confirm')
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_click_id('ARTE-BACKGROUND-COLOR')
+        cy.get('span[data-index="6"]').click()
+        cy.arte_count('span[style="background-color:yellow;"]',1)
 
         // Count the blocks
         cy.arte_count('h1',1)
     })
 
-
+    
     it('2. tests clearing formatting', function(){
 
         cy.arte_type_format('h1','Test clearing styles fully.',true)
@@ -55,14 +55,14 @@ describe('Tests inline formatting', function () {
         cy.arte_count('span[style="text-decoration:underline;"]',1)
         
         cy.arte_set_selection('coloured')
-        cy.arte_click_id('FGC')
-        cy.arte_modal_click('confirm')
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_click_id('ARTE-COLOR')
+        cy.get('span[data-index="8"]').click()
+        cy.arte_count('span[style="color:red;"]',1)
 
         cy.arte_set_selection('highlighted')
-        cy.arte_click_id('BGC')
-        cy.arte_modal_click('confirm')
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_click_id('ARTE-BACKGROUND-COLOR')
+        cy.get('span[data-index="6"]').click()
+        cy.arte_count('span[style="background-color:yellow;"]',1)
 
         cy.arte_set_selection('START','END')
         cy.arte_click_id('CLEAR')
@@ -71,8 +71,8 @@ describe('Tests inline formatting', function () {
         cy.arte_count('span[style="font-weight:bold;"]',0)       
         cy.arte_count('span[style="font-style:italic;"]',0) 
         cy.arte_count('span[style="text-decoration:underline;"]',0)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',0)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',0)
+        cy.arte_count('span[style="color:red;"]',0)
+        cy.arte_count('span[style="background-color:yellow;"]',0)
         
     })
 
@@ -96,14 +96,14 @@ describe('Tests inline formatting', function () {
         cy.arte_count('span[style="text-decoration:underline;"]',1)
 
         cy.arte_set_selection('colo(xxcxx)ured')
-        cy.arte_click_id('FGC',false)
-        cy.arte_modal_click('confirm')
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_click_id('ARTE-COLOR',false)
+        cy.get('span[data-index="8"]').click()
+        cy.arte_count('span[style="color:red;"]',1)
 
         cy.arte_set_selection('high(xxhxx)lighted')
-        cy.arte_click_id('BGC',false)
-        cy.arte_modal_click('confirm')
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_click_id('ARTE-BACKGROUND-COLOR',false)
+        cy.get('span[data-index="6"]').click()
+        cy.arte_count('span[style="background-color:yellow;"]',1)
 
         cy.arte_set_selection('xxbxx')
         cy.arte_click_id('CLEAR')
@@ -119,11 +119,11 @@ describe('Tests inline formatting', function () {
 
         cy.arte_set_selection('xxcxx')
         cy.arte_click_id('CLEAR')
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',2)
+        cy.arte_count('span[style="color:red;"]',2)
 
         cy.arte_set_selection('xxhxx')
         cy.arte_click_id('CLEAR')
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',2)
+        cy.arte_count('span[style="background-color:yellow;"]',2)
 
     })
 

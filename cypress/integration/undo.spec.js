@@ -88,19 +88,19 @@ describe('Tests undo and redo', function () {
         cy.arte_set_selection('underlined')
         cy.arte_click_id('U').wait(WAIT)
         cy.arte_set_selection('coloured')
-        cy.arte_click_id('FGC')
-        cy.arte_modal_click('confirm').wait(WAIT)
+        cy.arte_click_id('ARTE-COLOR')
+        cy.get('span[data-index="8"]').click().wait(WAIT)
         cy.arte_set_selection('highlighted')
-        cy.arte_click_id('BGC')
-        cy.arte_modal_click('confirm').wait(WAIT)
+        cy.arte_click_id('ARTE-BACKGROUND-COLOR')
+        cy.get('span[data-index="6"]').click().wait(WAIT)
 
         // Check have the correct styles applied
         cy.arte_count('p',1)
         cy.arte_count('span[style="font-weight:bold;"]',1)
         cy.arte_count('span[style="font-style:italic;"]',1)
         cy.arte_count('span[style="text-decoration:underline;"]',1)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',1)
+        cy.arte_count('span[style="color:red;"]',1)
+        cy.arte_count('span[style="background-color:yellow;"]',1)
 
         // Click undo 3 times
         for( let i=0; i<3; i++ ){
@@ -112,8 +112,8 @@ describe('Tests undo and redo', function () {
         cy.arte_count('span[style="font-weight:bold;"]',1)
         cy.arte_count('span[style="font-style:italic;"]',1)
         cy.arte_count('span[style="text-decoration:underline;"]',0)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',0)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',0)
+        cy.arte_count('span[style="color:red;"]',0)
+        cy.arte_count('span[style="background-color:yellow;"]',0)
 
         // Click redo 2 times
         for( let i=0; i<2; i++ ){
@@ -125,8 +125,8 @@ describe('Tests undo and redo', function () {
         cy.arte_count('span[style="font-weight:bold;"]',1)
         cy.arte_count('span[style="font-style:italic;"]',1)
         cy.arte_count('span[style="text-decoration:underline;"]',1)
-        cy.arte_count('span[style="color:hsl(0, 97%, 50%);"]',1)
-        cy.arte_count('span[style="background-color:hsl(0, 97%, 50%);"]',0)
+        cy.arte_count('span[style="color:red;"]',1)
+        cy.arte_count('span[style="background-color:yellow;"]',0)
     })
 
 

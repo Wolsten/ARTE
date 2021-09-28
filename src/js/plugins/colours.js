@@ -35,7 +35,7 @@ function form(){
  */
 function show(editor,button){
     let title = "Select highlight colour"
-    if ( button.tag == 'FGC'){
+    if ( button.tag == 'ARTE-COLOR'){
         title = "Select text colour"
     }
     // Display the panel
@@ -141,7 +141,7 @@ const init = function(editor, button){
 // -----------------------------------------------------------------------------
 
 let options = {init, setState, style:'color'}
-export const FOREGROUND = new ToolbarButton( 'inline', 'FGC', 'Text colour', Icons.colourForeground, click, options)
+export const FOREGROUND = new ToolbarButton( 'inline', 'ARTE-COLOR', 'Text colour', Icons.colourForeground, click, options)
 
 options = {init, setState, style:'background-color'}
-export const BACKGROUND = new ToolbarButton( 'inline', 'BGC', 'Highlight colour', Icons.colourBackground, click, options)
+export const BACKGROUND = new ToolbarButton( 'inline', 'ARTE-BACKGROUND-COLOR', 'Highlight colour', Icons.colourBackground, click, options)

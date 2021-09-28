@@ -12,9 +12,9 @@ describe('Tests links', function () {
         cy.arte_set_cursor('END')
         cy.arte_type('www.wibble.com ')
         cy.arte_set_selection('www.wibble.com')
-        cy.arte_click_id('A')
+        cy.arte_click_id('ARTE-LINK')
 
-        cy.arte_modal_element_type('#href', '{movetoend}www.wibble.com')
+        cy.arte_modal_element_type('#href', '{movetoend}http://www.wibble.com')
         cy.arte_modal_element_click('button.confirm')
 
         // Check have the correct elements - default is label only so the 
@@ -27,15 +27,15 @@ describe('Tests links', function () {
 
         // Click the link
         cy.arte_contains('www.wibble.com').click()
-
+        
         // Change the display type to option 2 to display the link and label
         cy.arte_modal_element_get('select').select("2")
-
+        
         // Save changes
         cy.arte_modal_element_get('button.confirm').click()
 
         // Check the full link has been updated correctly
-        cy.arte_contains('www.wibble.com (http://www.wibble.com/)')
+        cy.arte_contains('www.wibble.com (http://www.wibble.com)')
     })
 
 

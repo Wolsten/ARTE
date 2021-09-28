@@ -214,7 +214,7 @@ function label(link){
         // Display as text label?
         case 0:
             // Label is an optional parameter
-            if ( link.dataset.label ){
+            if ( link.dataset.label != '' ){
                 return link.dataset.label
             }
             break
@@ -223,12 +223,12 @@ function label(link){
             return link.dataset.href
         // Assuming they are different display as "label (href)""
         case 2:
-            if ( link.dataset.label && link.dataset.label != link.dataset.href ){
+            if ( link.dataset.label != '' && link.dataset.label != link.dataset.href ){
                 return `${link.dataset.label} (${link.dataset.href})`
             }
     }
     // Default to the href
-    return link.href
+    return link.dataset.href
 }
 
 /**

@@ -6,7 +6,7 @@
 cp -R src/img docs
 cp -R src/css docs
 cp favicon*.* docs
-cp default-content.html docs
+cp sample.arte docs
 
 # Set version for index.html
 read -p "Enter version (number/[current datetime]):" version
