@@ -1,14 +1,14 @@
 {
   "name": "arte",
-  "version": "0.6",
+  "version": "1.0",
   "description": "Active Rich Text Editor",
   "main": "public/ARTE.js",
   "scripts": {
     "publish": ". scripts/publish.sh"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Steve Davison",
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",

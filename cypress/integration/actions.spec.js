@@ -12,11 +12,17 @@ describe('Tests actions plug', function () {
         cy.arte_set_selection('action')
         cy.arte_click_id('ARTE-ACTION')
 
+        // Enter data without a todo (a required field)
         cy.get('button').contains('Delete').should('not.exist')
-        cy.arte_modal_element_type('#todo', 'An interesting action')
         cy.arte_modal_element_type('#owners', 'Action owners')
         cy.arte_modal_element_type('#notes', 'Added action')
 
+        // This should not close the modal
+        cy.arte_modal_element_click('button.confirm')
+        cy.get('.modal-panel-container')
+
+        // Add the missing data and confirm
+        cy.arte_modal_element_type('#todo', 'An interesting action')
         cy.arte_modal_element_click('button.confirm')
 
         cy.get('arte-action button label.status-open')

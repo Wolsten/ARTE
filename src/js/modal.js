@@ -85,6 +85,7 @@ class Modal {
                 icon = Icons.danger
                 break
         }
+        // Title
         if ( this.title || icon ){
             const withText = this.title ? 'with-text' : ''
             html += `
@@ -92,21 +93,30 @@ class Modal {
                     <h3 class="modal-panel-title ${withText}">${icon}${this.title}</h3>
                 </header>`
         }
-        if ( this.html ){
-            html += `<div class="modal-panel-body">${this.html}</div>`
-        }
+
+        html += `<div class="modal-panel-body">${this.html}</div>`
+
+        // Buttons - need inserting in body at the end of any form 
+        // or just appending in their own form if no form exists yet
         if ( this.buttons ){
             let buttonHTML = ''
             let buttonCount = 0
             BUTTON_ORDER.forEach( type => {
                 if ( this.buttons[type] ){
                     buttonCount ++
-                    buttonHTML += `<button type="button" class="${type}">${this.buttons[type].label}</button>`
+                    const bType = type=='confirm' ? 'submit' : 'button'
+                    buttonHTML += `<button type="${bType}" class="${type}">${this.buttons[type].label}</button>`
                 }
             })
             const centred = buttonCount == 1 ? 'centred' : ''
-            html += `<div class="modal-panel-buttons ${centred}">${buttonHTML}</div>`
+            const buttonsHTML = `<div class="modal-panel-buttons ${centred}">${buttonHTML}</div>`
+            if ( html.includes('</form') ){
+                html = html.replace('</form>', buttonsHTML+'</form>')
+            } else {
+                html += `<form>${buttonsHTML}</form>`
+            }
         }
+        // Close modal-panel-container div
         html += `</div>`
         return html
     }
@@ -170,19 +180,28 @@ class Modal {
     }
 
     /**
-     * Add event listeners to the optional buttons with classes: 'cancel|delete|confirm'
+     * Add event listeners to the optional buttons/form with classes: 'cancel|delete|confirm'
      * Also optionally check for Escape key to close the modal
      */
     addEventListeners(){
         // Button callbacks
         if ( this.buttons ){
             BUTTON_ORDER.forEach( type => {
-                console.warn({type})
+                //console.warn({type})
                 if ( this.buttons[type] ){
+                    // For confirm submit the form to support html5 validation of 'required' attribute
                     const button = this.buttons[type]
                     const element = this.panel.querySelector(`button.${type}`)
                     if ( element ){
-                        element.addEventListener('click', ()=> {
+                        let method = 'click'
+                        let object = element
+                        if ( type == 'confirm' ){
+                            method = 'submit'
+                            object = this.panel.querySelector(`form`)
+                        }
+                        object.addEventListener(method, event => {
+                            event.preventDefault()
+                            event.stopPropagation()
                             if ( button.callback ){
                                 button.callback()
                             } else {
