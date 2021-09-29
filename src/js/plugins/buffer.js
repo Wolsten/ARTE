@@ -32,6 +32,7 @@ const undo = function(editor){
     if ( buffer.index > 0 ){
         buffer.index --
         buffer.ignore = true
+        console.warn(buffer.buffer[ buffer.index ])
         editor.editorNode.innerHTML = buffer.buffer[ buffer.index ]
     }
     setState( editor, UNDO )

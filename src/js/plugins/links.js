@@ -150,12 +150,15 @@ function show( selectedText, editFlag ){
  */
 function save(){
     // console.log('Save changes')
+    // Replace node in editor
+    if ( node.parentNode == null ){
+        node = Helpers.replaceSelectionWithNode(editor, node)
+    }
+    // Save new properties
     node.dataset.href = drawer.panel.querySelector('form #href').value.trim()
     node.dataset.label = drawer.panel.querySelector('form #label').value.trim()
     node.dataset.display = parseInt(drawer.panel.querySelector('form #display').value)
-    if ( node.parentNode == null ){
-        insert(editor, button)
-    }
+    // Close the modal
     drawer.hide()
     // Format link and add event handler
     format(node)
@@ -163,44 +166,6 @@ function save(){
     editor.range = Helpers.setCursor( node, 0)
     setState(editor, button)
     editor.buffer()
-} 
-
-/**
- * Insert a new link in the editor at the end of the current 
- * @todo Generalise this in helpers.js to support any plugin that needs
- * to replace selected text with new element
- * range's startContainer
- * @param {object} editor A unique editor instance
- */
- function insert(editor){
-    const parent = editor.range.startContainer.parentNode
-    // Get any pretext or post text in the current container that is not selected
-    let preText = editor.range.startContainer.textContent.substring(0,editor.range.startOffset)
-    let postText
-    if ( editor.range.collapsed ){
-        postText = editor.range.startContainer.textContent.substring(editor.range.startOffset)
-        // Insert leading and trailing spaces if needed
-        if ( preText.charAt(preText.length+1) != ' ' ){
-            preText = preText + ' '
-        }
-        if ( postText.charAt(0) != ' ' ){
-            postText = ' ' + postText
-        }
-    } else {
-        postText = editor.range.startContainer.textContent.substring(editor.range.endOffset)
-    }
-    // Insert pretext before the current container
-    if ( preText ) {
-        parent.insertBefore(document.createTextNode(preText), editor.range.startContainer)
-    }
-    // Insert the node before the current container
-    node = parent.insertBefore(node, editor.range.startContainer)
-    // Insert post text before the current container
-    if ( postText ) {
-        parent.insertBefore(document.createTextNode(postText), editor.range.startContainer)
-    }
-    // Remove the pre-existing container
-    editor.range.startContainer.remove()
 }
 
 /**

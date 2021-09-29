@@ -789,7 +789,7 @@ arte-image {
 arte-image img {
   max-width: 100%;
 }
-arte-image caption {
+arte-image .caption {
   display: block;
   font-style: italic;
 }

@@ -20,7 +20,7 @@ describe('Tests images plugin', function () {
 
         cy.get('arte-image[data-src="./src/img/logo-medium.png"]')
         cy.get('arte-image img[src="./src/img/logo-medium.png"]')
-        cy.get('arte-image caption').contains('ARTE logo')
+        cy.get('arte-image .caption').contains('ARTE logo')
         cy.get('arte-image[data-alt="Alt text for ARTE logo"]')
         cy.get('arte-image img[alt="Alt text for ARTE logo"]')
 
@@ -37,7 +37,7 @@ describe('Tests images plugin', function () {
 
         cy.get('arte-image[data-src="./src/img/logo-medium.png"]')
         cy.get('arte-image img[src="./src/img/logo-medium.png"]')
-        cy.get('arte-image caption').contains('ARTE logo UPDATED')
+        cy.get('arte-image .caption').contains('ARTE logo UPDATED')
         cy.get('arte-image[data-alt="Alt text for ARTE logo UPDATED"]')
         cy.get('arte-image img[alt="Alt text for ARTE logo UPDATED"]')
     })

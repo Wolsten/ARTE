@@ -201,7 +201,8 @@ function format( element ){
     element.appendChild(img)
     // caption?
     if ( element.dataset.caption != '' ){
-        const caption = document.createElement('caption')
+        const caption = document.createElement('span')
+        caption.classList.add('caption')
         caption.innerText = element.dataset.caption
         element.appendChild(caption)
     }
@@ -235,7 +236,6 @@ function form(edit){
             </div>
         </form>`
 }
- 
  
 /**
  * Optional method that, on first load of editor, converts the minimal custom 

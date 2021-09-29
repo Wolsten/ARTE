@@ -187,34 +187,46 @@ const rangeStartContainerInCustom = function( range ){
     return isCustom(node) ? node : false
 }
 
-/**
- * Return an array of custom blocks contained within the active range
- * @param {Range} range Active range
- * @returns {HTMLElement[]} Array of custom blocks, empty if none found
- */
-export const rangeContainsCustoms = function( range ){
-    let customs = []
-    // Loop from start container to end container checking for a non-editable block
-    let parent = getParentBlockNode(range.startContainer)
-    if ( parent === false ){
-        return []
-    }
-    const endParent = getParentBlockNode(range.endContainer)
-    if ( endParent === false ){
-        return []
-    }
-    let done = false
-    while ( !done ){
-        const custom = parent.querySelector('[contenteditable="false"]')
-        if ( custom !== null ){
-            customs.push(custom)
+// /**
+//  * Return an array of custom blocks contained within the active range
+//  * @param {Range} range Active range
+//  * @returns {HTMLElement[]} Array of custom blocks, empty if none found
+//  */
+// export const rangeContainsCustoms = function( range ){
+//     let customs = []
+//     // Loop from start container to end container checking for a non-editable block
+//     let parent = getParentBlockNode(range.startContainer)
+//     if ( parent === false ){
+//         return []
+//     }
+//     const endParent = getParentBlockNode(range.endContainer)
+//     if ( endParent === false ){
+//         return []
+//     }
+//     let done = false
+//     while ( !done ){
+//         const custom = parent.querySelector('[contenteditable="false"]')
+//         if ( custom !== null ){
+//             customs.push(custom)
+//         }
+//         if ( parent === endParent ){
+//             done = true
+//         }
+//         parent = parent.nextElementSibling
+//     }
+//     return customs
+// }
+
+export const selectionContainsCustoms = function(editorNode, selection){
+    const customs = editorNode.querySelectorAll('[contenteditable="false"]')
+    let found = false
+    for( let i=0; i<customs.length && found==false; i++ ){
+        if ( selection.containsNode(customs[i], true) ){
+            found = true
         }
-        if ( parent === endParent ){
-            done = true
-        }
-        parent = parent.nextElementSibling
     }
-    return customs
+    //console.warn({found})
+    return found
 }
 
  /**
@@ -310,6 +322,65 @@ export const getTopParentNode = function( node, stopNode ){
 }
 
 /**
+ * Insert a new node in the editor in place of the current selection
+ * @param {object} editor A unique editor instance
+ * @param {HTMLElement} node The new node to replace selection with
+ */
+export const replaceSelectionWithNode = function(editor, node){
+    const parent = editor.range.startContainer.parentNode
+    // Get any pretext or post text in the current container that is not selected
+    let preText = editor.range.startContainer.textContent.substring(0,editor.range.startOffset)
+    let postText
+    if ( editor.range.collapsed ){
+        postText = editor.range.startContainer.textContent.substring(editor.range.startOffset)
+        // Insert leading and trailing spaces if needed
+        if ( preText.charAt(preText.length+1) != ' ' ){
+            preText = preText + ' '
+        }
+        if ( postText.charAt(0) != ' ' ){
+            postText = ' ' + postText
+        }
+    } else {
+        postText = editor.range.startContainer.textContent.substring(editor.range.endOffset)
+    }
+    // Insert pretext before the current container
+    if ( preText ) {
+        parent.insertBefore(document.createTextNode(preText), editor.range.startContainer)
+    }
+    // Insert the node before the current container
+    node = parent.insertBefore(node, editor.range.startContainer)
+    console.warn(node)
+    // Insert post text before the current container
+    if ( postText ) {
+        parent.insertBefore(document.createTextNode(postText), editor.range.startContainer)
+    }
+    // Remove the pre-existing container
+    editor.range.startContainer.remove()
+    // After delay set the cursor
+    setTimeout(() => {
+        resetCursor(node)
+    }, 10)
+    // return the new node
+    return node
+}
+
+/**
+ * Reset the cursor after replacing a selection with a new node
+ * @param {HTMLElement} node 
+ */
+function resetCursor(node){
+    if ( isCustom(node) ){
+        if ( node.nextSibling !== null ){
+            setCursor(node.nextSibling,0)
+        } else if ( node.previousSibling !== null ){
+            setCursor(node.previousSibling,node.previousSibling.textContent.length)
+        }
+    } else {
+        setCursor(node,node.textContent.length)
+    }
+}
+
+/**
  * Cleans the node, removing any non-supported tags/styles
  * Invokes custom plugin cleaning if defined
  * @param {HTMLElement} node 
@@ -392,8 +463,10 @@ function cleanStyledSpan(span){
             }
         })
     }
+    // If have a new style then must have had an original style - in which case replace
     if ( newStyle ){
-        span.setAttribute('style',newStyle)
+        span.setAttribute('style',newStyle.trim())
+    // If no new style but have a style before - must all be go - remove span
     } else if ( style ) {
         const text = document.createTextNode(span.textContent.trim())
         insertBefore( text, span )
@@ -575,30 +648,30 @@ export const getRange = function( editorNode){
     return false
 }
 
-/**
- * Set the cursor in the target node
- * @param {HTMLElement} editor The editor node
- * @param {HTMLElement} target The target node for the cursor
- */
-export const setCursorToTargetNode = function(editor, target){
-    // If the target node isn't the editor make it the one before
-    if ( target != editor ){
-        target = target.previousElementSibling
-    }
-    // Look for the last child - cannot use lastElementChild because that ignores text nodes
-    while ( target.lastChild != null ){
-        target = target.lastChild
-    }
-    // If found and it is a text node set the cursor to the end
-    if ( target.nodeType === 3 ){
-        // console.log('Found target',target)
-        // console.log('Found length',target.textContent.length)
-        setCursor(target,target.textContent.length)
-    // Else set to the start
-    } else {
-        setCursor(target,0)
-    }
-}
+// /**
+//  * Set the cursor in the target node
+//  * @param {HTMLElement} editor The editor node
+//  * @param {HTMLElement} target The target node for the cursor
+//  */
+// export const setCursorToTargetNode = function(editor, target){
+//     // If the target node isn't the editor make it the one before
+//     if ( target != editor ){
+//         target = target.previousElementSibling
+//     }
+//     // Look for the last child - cannot use lastElementChild because that ignores text nodes
+//     while ( target.lastChild != null ){
+//         target = target.lastChild
+//     }
+//     // If found and it is a text node set the cursor to the end
+//     if ( target.nodeType === 3 ){
+//         // console.log('Found target',target)
+//         // console.log('Found length',target.textContent.length)
+//         setCursor(target,target.textContent.length)
+//     // Else set to the start
+//     } else {
+//         setCursor(target,0)
+//     }
+// }
 
 /**
  * Set the cursor in a text node at the specified offset and
