@@ -1,0 +1,15 @@
+<p>
+    <arte-image id="abcdpcmqdgebjtafp4o" data-src="https://wolsten.github.io/ARTE/img/arte-logo-200.jpeg" data-alt="Our logo" data-caption="Active Rich Text Editor"/></arte-image>
+</p> 
+
+<p>
+    A simple paragraph.
+</p>
+
+<p>A paragraph with a comment 
+    <arte-comment id="ksocpcmqdgebjtafp4o" data-comment="This is an example comment" data-created="23/08/2021, 09:01" data-updated="23/08/2021, 09:01" data-resolved="false"></arte-comment>
+</p>
+
+<p>An paragraph with an action
+    <arte-action id="ktvikq1z8hbmksr1wvg" data-status="0" data-todo="A test action" data-owners="Dave and Jill" data-due="15th May 2022" data-created="22/09/2021, 14:00" data-updated="22/09/2021, 14:00" data-notes="Some notes"></arte-action>
+</p>

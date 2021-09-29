@@ -1,7 +1,7 @@
 
 <p>
     <arte-image id="abcdpcmqdgebjtafp4o" data-src="https://wolsten.github.io/ARTE/img/arte-logo-200.jpeg" data-alt="Our logo" data-caption="Active Rich Text Editor"/></arte-image>
-</p>
+</p> 
 
 <h1>Welcome to ARTE</h1>
 
@@ -23,12 +23,13 @@
         <ul>
             <li>Ordered</li>
             <li>Unordered</li>
-            <li>Indented - implemented by selecting any list items apart from the first one. If you select the first list item it will change the current list type. To see how this works select this bullet and the one above and then click the ordered list button (<i class="bi bi-list-ol"></i>).</li>
+            <li>Indented - implemented by selecting any list items apart from the first one. If you select the first list item it will change the current list type. To see how this works select this bullet and the one above and then click the ordered list button.</li>
         </ul>
     <li>Inline styles such as italic, bold, underline and text colour. You can also clear all selected styling in one go using the clear button .</li>
     <li>Undo and redo buttons.</li>
+    <li>Clipboard management, including auto-detection of pasting from Miscrosoft Word (as plain text only).</li>
     <li>Passive custom elements, such as mentions.</li>
-    <li>Active custom elements, such as links, e.g. <arte-link id="ksocpdmqtgebjtafp4o" data-href="https://github.com/Wolsten/ARTE" data-label="the ARTE Repository" data-display="0"></arte-link>, comments and arbitrary custom blocks. Examples of these are provided in the toolbar above. Trying clicking the link to edit it or add a new one using the <i class="bi bi-link"></i> button.</li>
+    <li>Active custom elements, such as links, e.g. <arte-link id="ksocpdmqtgebjtafp4o" data-href="https://github.com/Wolsten/ARTE" data-label="the ARTE Repository" data-display="0"></arte-link>, images, comments and actions. Examples of these are provided in the toolbar above. Trying clicking the link to edit it or add a new one using the link button.
 </ol>
 
 <p>Additionally, ARTE supports shortcuts. To see how this works enter the <span style="font-weight:bold">@</span> character twice at any point in the text. You should see a popup window with a set of scrollable, filterable names that can be inserted in the text via pressing `Enter` or selecting with the mouse. Using `@@` means that this shortcut will be available more easily on touch devices, rather than using a control, shift or tab key for example.</p>

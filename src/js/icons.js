@@ -39,7 +39,7 @@ export const ul = '<i class="bi bi-list-ul"></i>'
 export const b = '<i class="bi bi-type-bold"></i>'
 export const i = '<i class="bi bi-type-italic"></i>'
 export const u = '<i class="bi bi-type-underline"></i>' 
-export const clear = '<i class="bi bi-folder-plus"></i>'
+export const clear = '<i class="bi bi-eraser"></i>'
 export const undo = '<i class="bi bi-reply"></i>'
 export const redo = '<span style="display:inline-block;-webkit-transform: scale(-1, 1);transform: scale(-1, 1);"><i class="bi bi-reply"></i></span>'
 export const person = '<i class="bi bi-person"></i>'
@@ -64,5 +64,9 @@ export const sidebarOpen = '<i class="bi bi-chevron-double-left"></i>'
 export const outline = '<i class="bi bi-card-heading"></i>'
 export const menu = '<i class="bi bi-list"></i>'
 export const action = '<i class="bi bi-check2-square"></i>'
+
+export const cut = '<i class="bi bi-scissors"></i>'
+export const copy = '<i class="bi bi-clipboard-plus"></i>'
+export const paste = '<i class="bi bi-box-arrow-down"></i>'
 
 

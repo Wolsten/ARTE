@@ -4,6 +4,7 @@ import Editor from './Editor.js'
 import Modal from './Modal.js'
 import * as Icons from './icons.js'
 import * as Buffer from './plugins/buffer.js'
+import * as Clipboard from './plugins/clipboard.js'
 import * as Blocks from './plugins/blocks.js'
 import * as Styles from './plugins/styles.js'
 import * as Mentions from './plugins/mentions.js'
@@ -19,6 +20,7 @@ export {
     Editor,
     Modal,
     Buffer,
+    Clipboard,
     Blocks,
     Styles,
     Mentions,

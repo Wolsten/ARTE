@@ -43,7 +43,6 @@ class Editor {
         // return
         // Set up event handling
         this.listenForMouseUpEvents()
-        this.listenForPasteEvents()
         this.listenForKeydownEvents()
         this.listenForKeyupEvents()
         // Public methods to support saving and updating the editor content
@@ -122,6 +121,7 @@ class Editor {
                 element.scrollIntoView({block:'center',behaviour:'smooth'})
             }
         }
+        setTimeout( ()=>this.buffer(), 100)
     }
 
     /**
@@ -243,19 +243,6 @@ class Editor {
     // -----------------------------------------------------------------------------
     // @section Responsiveness
     // -----------------------------------------------------------------------------
-    
-    // /**
-    //  * Handle changes in window size using debouncing
-    //  */
-    // initResponsiveness(){
-    //     this.handleResize = Helpers.debounce(this.handleResizeDelayed,500)
-    //     window.addEventListener('resize', ()=>this.handleResize(this) )
-    // }
-
-    // handleResizeDelayed(...args){
-    //     const editor = args[0]
-    //     editor.menuItems.classList.remove('show')
-    // }
 
     /**
      * Handle mobile menu clicks (invoked from listenForMouseUpEvents)
@@ -481,11 +468,9 @@ class Editor {
      * Insert empty paragraph
      */
     insertParagraph(){
-        // if ( this.buffer ) this.buffer.pause(this.id)
         let p = document.createElement('P')
         // Create a placeholder to ensure set cursor works
         p.innerText = '\n'
-        // if ( this.buffer ) this.buffer.pause(this.id)
         p = this.editorNode.appendChild(p)
         Helpers.setCursor( p, 0)
         this.updateRange()
@@ -663,8 +648,8 @@ class Editor {
                 }
             // Back spacing or deleting in a multiple selection
             } else {
-                const customs = Helpers.rangeContainsCustoms(this.range)
-                if ( customs.length > 0 ){
+                const selection = document.getSelection()
+                if ( Helpers.selectionContainsCustoms(this.editorNode, selection) ){
                     feedback.show()
                     return true
                 }
@@ -725,72 +710,12 @@ class Editor {
      * after updates to the dom
      */
     updateEventHandlers(){
-        // console.log('Updating event handlers')
         this.toolbar.forEach( button => {
             if ( 'addEventHandlers' in button ){
-                // console.log('Updating event handlers for button',button.tag)
                 button.addEventHandlers(this)
             }
-
         })
     }
-
-    // -----------------------------------------------------------------------------
-    // @section Cut, Copy and Paste events
-    // -----------------------------------------------------------------------------
-    
-    /**
-     * List for cut, copy and paste events in the editor node
-     */
-    listenForPasteEvents(){
-        const operations = ['cut', 'copy','paste']
-        operations.forEach( operation =>
-            this.editorNode.addEventListener(operation, event=>{
-                const blockEvent = this.handleCutCopyPaste(operation) 
-                if ( blockEvent ){
-                    event.preventDefault()
-                } else {
-                    setTimeout( ()=>this.buffer(), 100 )
-                }
-            })
-        )
-    }
-
-   
-
-    /**
-     * Handle cut, copy paste events. Prevent any that would involve custom elements
-     * @param {string} operation 'cut'|'copy'|'paste'
-     * @returns {boolean} true if should be blocked
-     */
-    handleCutCopyPaste(operation){
-        // console.log('Detected cut-copy-paste event')
-        this.updateRange()
-        // Ensure have a range that is not collapsed for none paste events
-        if ( this.range==false || (operation!='paste' && this.range.collapsed) ){
-            return false
-        }
-        const customs = Helpers.rangeContainsCustoms(this.range)
-        if ( customs.length > 0 ){
-            // Empty the clipboard as this prevents previous values being pasted
-            navigator.clipboard.writeText('')
-            // Display modal warning
-            const feedback = new Modal({
-                type:'overlay', 
-                severity:'info',
-                title: 'Information',
-                html: `<p>Cut, copy and paste (of or over) selections with active elements, such as comments or links, is not supported.</p>
-                        <p>Please modify your selection and try again.</p>`,
-                escape:true,
-                buttons: {cancel:{label:'Close'}}
-            })
-            feedback.show()
-            return true
-        }
-        return false
-    }
-
-
 
     // -----------------------------------------------------------------------------
     // @section Testing
@@ -959,6 +884,7 @@ class Editor {
                     this.editorNode.innerHTML = ''
                     this.filename = 'arte-download'
                     this.modal.hide()
+                    setTimeout( ()=>this.buffer(), 100 )
                 }}
             }
         })
