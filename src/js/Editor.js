@@ -43,7 +43,7 @@ class Editor {
         // return
         // Set up event handling
         this.listenForMouseUpEvents()
-        this.listenForPasteEvents()
+        // this.listenForPasteEvents()
         this.listenForKeydownEvents()
         this.listenForKeyupEvents()
         // Public methods to support saving and updating the editor content
@@ -739,56 +739,56 @@ class Editor {
     // @section Cut, Copy and Paste events
     // -----------------------------------------------------------------------------
     
-    /**
-     * List for cut, copy and paste events in the editor node
-     */
-    listenForPasteEvents(){
-        const operations = ['cut', 'copy','paste']
-        operations.forEach( operation =>
-            this.editorNode.addEventListener(operation, event=>{
-                const blockEvent = this.handleCutCopyPaste(operation) 
-                if ( blockEvent ){
-                    event.preventDefault()
-                } else {
-                    setTimeout( ()=>this.buffer(), 100 )
-                }
-            })
-        )
-    }
+    // /**
+    //  * List for cut, copy and paste events in the editor node
+    //  */
+    // listenForPasteEvents(){
+    //     const operations = ['cut', 'copy','paste']
+    //     operations.forEach( operation =>
+    //         this.editorNode.addEventListener(operation, event=>{
+    //             const blockEvent = this.handleCutCopyPaste(operation) 
+    //             if ( blockEvent ){
+    //                 event.preventDefault()
+    //             } else {
+    //                 setTimeout( ()=>this.buffer(), 100 )
+    //             }
+    //         })
+    //     )
+    // }
 
    
 
-    /**
-     * Handle cut, copy paste events. Prevent any that would involve custom elements
-     * @param {string} operation 'cut'|'copy'|'paste'
-     * @returns {boolean} true if should be blocked
-     */
-    handleCutCopyPaste(operation){
-        // console.log('Detected cut-copy-paste event')
-        this.updateRange()
-        // Ensure have a range that is not collapsed for none paste events
-        if ( this.range==false || (operation!='paste' && this.range.collapsed) ){
-            return false
-        }
-        const customs = Helpers.rangeContainsCustoms(this.range)
-        if ( customs.length > 0 ){
-            // Empty the clipboard as this prevents previous values being pasted
-            navigator.clipboard.writeText('')
-            // Display modal warning
-            const feedback = new Modal({
-                type:'overlay', 
-                severity:'info',
-                title: 'Information',
-                html: `<p>Cut, copy and paste (of or over) selections with active elements, such as comments or links, is not supported.</p>
-                        <p>Please modify your selection and try again.</p>`,
-                escape:true,
-                buttons: {cancel:{label:'Close'}}
-            })
-            feedback.show()
-            return true
-        }
-        return false
-    }
+    // /**
+    //  * Handle cut, copy paste events. Prevent any that would involve custom elements
+    //  * @param {string} operation 'cut'|'copy'|'paste'
+    //  * @returns {boolean} true if should be blocked
+    //  */
+    // handleCutCopyPaste(operation){
+    //     // console.log('Detected cut-copy-paste event')
+    //     this.updateRange()
+    //     // Ensure have a range that is not collapsed for none paste events
+    //     if ( this.range==false || (operation!='paste' && this.range.collapsed) ){
+    //         return false
+    //     }
+    //     const customs = Helpers.rangeContainsCustoms(this.range)
+    //     if ( customs.length > 0 ){
+    //         // Empty the clipboard as this prevents previous values being pasted
+    //         navigator.clipboard.writeText('')
+    //         // Display modal warning
+    //         const feedback = new Modal({
+    //             type:'overlay', 
+    //             severity:'info',
+    //             title: 'Information',
+    //             html: `<p>Cut, copy and paste (of or over) selections with active elements, such as comments or links, is not supported.</p>
+    //                     <p>Please modify your selection and try again.</p>`,
+    //             escape:true,
+    //             buttons: {cancel:{label:'Close'}}
+    //         })
+    //         feedback.show()
+    //         return true
+    //     }
+    //     return false
+    // }
 
 
 

@@ -65,4 +65,8 @@ export const outline = '<i class="bi bi-card-heading"></i>'
 export const menu = '<i class="bi bi-list"></i>'
 export const action = '<i class="bi bi-check2-square"></i>'
 
+export const cut = '<i class="bi bi-scissors"></i>'
+export const copy = '<i class="bi bi-clipboard-plus"></i>'
+export const paste = '<i class="bi bi-clipboard"></i>'
+
 

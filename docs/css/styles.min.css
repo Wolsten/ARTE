@@ -109,8 +109,8 @@ body.index-body .index-header img {
 }
 body.index-body .index-header h1 {
   margin: 0;
-  padding: 0 0.5rem;
-  font-size: 1.3rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 1.5rem;
   color: var(--colour-secondary);
 }
 body.index-body .index-header h2 {
