@@ -30,9 +30,9 @@ Try ARTE out here:
 
 ## Get involved
 
-Sign up to the ARTE Discord Server:
+We are using GitHub discussions for community interaction:
 
-[ARTE Discord Server](https://discord.gg/y322hmbxGq)
+[ARTE Discussions](https://github.com/Wolsten/ARTE/discussions)
 
 ## Acknowledgements
 
