@@ -1,5 +1,5 @@
 import * as Helpers from '../helpers.js'
-import * as Styles from './styles.js'
+import * as Styles from './Style.js'
 import * as Icons from '../icons.ts'
 import ToolbarButton from '../ToolbarButton.js'
 import Modal from '../Modal.js'

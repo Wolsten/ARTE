@@ -2,6 +2,8 @@ import * as Templates from './templates'
 import * as Helpers from './helpers'
 import Modal from './Modal.js'
 import ToolbarButton from './ToolbarButton'
+import EditRange from './EditRange'
+import Buffer from './plugins/Buffer'
 
 class Editor {
 
@@ -9,9 +11,16 @@ class Editor {
     // @section Initialisation
     // -----------------------------------------------------------------------------
 
-    updateBuffer: false | Function = false
+    id: string = ''
+    range: null | EditRange = null
+    editorNode: HTMLElement
     toolbar: ToolbarButton[]
     shortcuts = []
+    disabled: boolean = false
+    options = []
+
+    buffer: null | Buffer = null
+    updateBuffer: false | Function = false
 
     /**
      * 

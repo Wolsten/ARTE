@@ -307,39 +307,58 @@ const setStyleProps = function (button) {
  * @param {object} editor A unique editor instance
  * @param {object} button The button to act on
  */
-export const click = function (editor, button) {
-    const range = editor.range
-    // Adjust rootNode if required
-    if (Helpers.isBlock(range.rootNode) == false) {
-        const newRootNode = Helpers.getParentBlockNode(range.rootNode)
-        if (newRootNode === false) {
-            return
+export const
+
+
+class Style extends ToolbarButton {
+
+    constructor(style: string) {
+
+        style = style.toUpperCase()
+
+        switch (style) {
+            case 'B':
+                super('style', 'B', 'Bold', Icons.b, click, { setState, style: 'font-weight:bold' })
+                break
+            case 'I':
+                super('style', 'I', 'Italic', Icons.i, click, { setState, style: 'font-style:italic' })
+                break
+            case 'U':
+                super('style', 'U', 'Underline', Icons.u, click, { setState, style: 'text-decoration:underline' })
+                break
+            case 'CLEAR':
+                super('style', 'CLEAR', 'Clear', Icons.clear, click, { setState, style: 'CLEAR' })
+                break
+            default:
+                console.error(`Unrecognised style name [${style}]`)
         }
-        range.rootNode = newRootNode
     }
-    // Set newStyle, newValue and action
-    setStyleProps(button)
-    // Initialise phase detection and parse the root node
-    Phase.init(range, false)
-    const html = parseNode(range.rootNode, [], button, range)
-    // console.log('html',html)
-    const node = Helpers.replaceNode(range.rootNode, range.rootNode.tagName, html)
-    // Reset the selection
-    Helpers.resetSelection(editor.editorNode)
-    editor.updateRange()
-    button.setState(editor, button)
-    editor.buffer()
-    editor.updateEventHandlers()
+
+
+    click(editor) {
+        const range = editor.range
+        // Adjust rootNode if required
+        if (Helpers.isBlock(range.rootNode) == false) {
+            const newRootNode = Helpers.getParentBlockNode(range.rootNode)
+            if (newRootNode === false) {
+                return
+            }
+            range.rootNode = newRootNode
+        }
+        // Set newStyle, newValue and action
+        setStyleProps(button)
+        // Initialise phase detection and parse the root node
+        Phase.init(range, false)
+        const html = parseNode(range.rootNode, [], button, range)
+        // console.log('html',html)
+        const node = Helpers.replaceNode(range.rootNode, range.rootNode.tagName, html)
+        // Reset the selection
+        Helpers.resetSelection(editor.editorNode)
+        editor.updateRange()
+        button.setState(editor, button)
+        editor.buffer()
+        editor.updateEventHandlers()
+    }
 }
 
-let options = { setState, style: 'font-weight:bold' }
-export const B = new ToolbarButton('style', 'B', 'Bold', Icons.b, click, options)
-
-options = { setState, style: 'font-style:italic' }
-export const I = new ToolbarButton('style', 'I', 'Italic', Icons.i, click, options)
-
-options = { setState, style: 'text-decoration:underline' }
-export const U = new ToolbarButton('style', 'U', 'Underline', Icons.u, click, options)
-
-options = { setState, style: 'CLEAR' }
-export const CLEAR = new ToolbarButton('style', 'CLEAR', 'Clear', Icons.clear, click, options)
+export default Style
