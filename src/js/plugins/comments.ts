@@ -20,7 +20,7 @@
  */
 
 
-import * as Icons from '../icons.js'
+import * as Icons from '../icons.ts'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
 import Modal from '../Modal.js'
@@ -59,9 +59,9 @@ let dirty
   */
 let drawer = null
 
- /**
-  * @var {HTMLElement} confirm The container for the modal confirm dialogue
-  */
+/**
+ * @var {HTMLElement} confirm The container for the modal confirm dialogue
+ */
 let confirm = null
 
 // -----------------------------------------------------------------------------
@@ -74,40 +74,40 @@ let confirm = null
  * 
  * @param {HTMLElement} element The comment node to be edited
  */
-function edit( element ){
+function edit(element) {
     // If we already have an active panel - ignore edit clicks
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
     node = element
     show(true)
 }
 
-function handleConfirmCancel(){
+function handleConfirmCancel() {
     confirm.hide()
     drawer.hide()
 }
 
-function handleConfirmDelete(){
+function handleConfirmDelete() {
     confirm.hide()
     drawer.hide()
-    deleteItem() 
+    deleteItem()
 }
 
-function handleCancel(){
-    if ( dirty ){
-        confirm = Helpers.modalRequestCancel( handleConfirmCancel )
+function handleCancel() {
+    if (dirty) {
+        confirm = Helpers.modalRequestCancel(handleConfirmCancel)
     } else {
         drawer.hide()
     }
 }
 
-function handleDelete(){
-    confirm = Helpers.modalRequestDelete( 'comment', handleConfirmDelete )
+function handleDelete() {
+    confirm = Helpers.modalRequestDelete('comment', handleConfirmDelete)
 }
 
-function handleResolve(event){
-    if ( node.dataset.resolved=='false' ) {
+function handleResolve(event) {
+    if (node.dataset.resolved == 'false') {
         node.dataset.resolved = 'true'
         resolve.innerHTML = Icons.commentUnresolve + ' Unresolve'
     } else {
@@ -120,19 +120,19 @@ function handleResolve(event){
  * Show the custom dialogue.
  * @param {boolean} editFlag Whether editing existing custom element or creating new
  */
-function show( editFlag ){
+function show(editFlag) {
     let title = 'Add comment'
     let buttons = {
-        cancel:  { label:'Cancel', callback:handleCancel },
-        confirm: { label:'Save', callback:save }
+        cancel: { label: 'Cancel', callback: handleCancel },
+        confirm: { label: 'Save', callback: save }
     }
-    if ( editFlag ){
+    if (editFlag) {
         title = 'Edit comment'
-        buttons.delete = { label:'Delete', callback:handleDelete }
+        buttons.delete = { label: 'Delete', callback: handleDelete }
     } else {
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
-        node.setAttribute('contenteditable','false')
+        node.setAttribute('contenteditable', 'false')
         node.dataset.comment = ''
         node.dataset.created = ''
         node.dataset.updated = ''
@@ -140,20 +140,20 @@ function show( editFlag ){
     }
     // Create and display the modal panel
     drawer = new Modal({
-        type:'drawer',
+        type: 'drawer',
         title,
-        html: form(), 
+        html: form(),
         buttons
     })
     drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
     const comment = drawer.panel.querySelector('form textarea#comment')
-    comment.addEventListener('change', () => dirty=true)
+    comment.addEventListener('change', () => dirty = true)
     // Handle resolution toggling
     const resolve = drawer.panel.querySelector('form button#resolve')
-    if ( resolve != null ){
-        resolve.addEventListener( 'click', handleResolve)
+    if (resolve != null) {
+        resolve.addEventListener('click', handleResolve)
     }
     // Focus the comment textarea
     comment.focus()
@@ -163,13 +163,13 @@ function show( editFlag ){
 /**
  * Save the new or edited custom element
  */
-function save(){
+function save() {
     // console.log('Save changes')
     node.dataset.comment = drawer.panel.querySelector('form #comment').value.trim()
     const timestamp = new Date()
-    const localstring = timestamp.toLocaleString().slice(0,-3)
+    const localstring = timestamp.toLocaleString().slice(0, -3)
     console.log('local timestamp', localstring)
-    if ( node.dataset.created  == '' ){
+    if (node.dataset.created == '') {
         node.dataset.created = localstring
         insert()
     }
@@ -178,23 +178,23 @@ function save(){
     // Format node and add event handler
     format(node)
     // Update state
-    editor.range = Helpers.setCursor( node, 0)
+    editor.range = Helpers.setCursor(node, 0)
     setState(editor, button)
     editor.buffer()
-} 
+}
 
 /**
  * Insert a new custom element in the editor at the end of the current 
  * range's startContainer
  */
-function insert(){
+function insert() {
     node = editor.range.startContainer.parentNode.appendChild(node)
 }
 
 /**
  * Delete the custom element in the dom
  */
-function deleteItem(){
+function deleteItem() {
     //node = editor.editorNode.querySelector(`${TAG}#${data.id}`)
     node.remove()
     // Update state
@@ -208,7 +208,7 @@ function deleteItem(){
  * @param {HTMLElement} node
  * @returns HTMLElement as cleaned
  */
-function clean(node){
+function clean(node) {
     // console.log('clean custom element',node)
     node.removeAttribute('contenteditable')
     node.innerHTML = ''
@@ -219,14 +219,14 @@ function clean(node){
  * Format the given custom element and add click event handler
  * @param {HTMLElement} element
  */
-function format( element ){
+function format(element) {
     const id = element.id
     // Generate new id if required
-    if ( element.id == false ){
+    if (element.id == false) {
         element.id = Helpers.generateUid()
     }
     element.innerHTML = ''
-    element.setAttribute('contenteditable',false)
+    element.setAttribute('contenteditable', false)
     // Add edit button and listener
     const editButton = document.createElement('button')
     editButton.type = 'button'
@@ -235,12 +235,12 @@ function format( element ){
     editButton.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(element) 
+        edit(element)
     })
     element.appendChild(editButton)
     // Add set state listener
-    element.addEventListener( 'click', ()=> {
-        setState( editor, button )
+    element.addEventListener('click', () => {
+        setState(editor, button)
     })
 }
 
@@ -248,11 +248,11 @@ function format( element ){
  * Add event handlers to all custom node edit buttons
  * @param {object} edt An editor instance
  */
-function addEventHandlers(edt){
+function addEventHandlers(edt) {
     editor = edt
     button = BUTTON
     const buttons = editor.editorNode.querySelectorAll(TAG + ' button')
-    buttons.forEach( button => button.addEventListener('click', event => {
+    buttons.forEach(button => button.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
         const element = button.parentNode
@@ -264,9 +264,9 @@ function addEventHandlers(edt){
  * Generates inner html for resolve button
  * @returns {string} html label for the resolve button
  */
-function resolveLabel(){
-    return node.dataset.resolved == 'true' 
-        ? Icons.commentUnresolve + ' Unresolve' 
+function resolveLabel() {
+    return node.dataset.resolved == 'true'
+        ? Icons.commentUnresolve + ' Unresolve'
         : Icons.commentResolve + ' Resolve'
 }
 
@@ -274,16 +274,16 @@ function resolveLabel(){
  * Form template
  * @returns {string} Generated html
  */
-function form(){
+function form() {
     let timestamps = ''
-    if ( node.dataset.created != '' ){
+    if (node.dataset.created != '') {
         timestamps = `<span><label>Created</label> ${node.dataset.created}</span>`
     }
-    if ( node.dataset.updated != '' ){
+    if (node.dataset.updated != '') {
         timestamps += `<span><label>Updated</label> ${node.dataset.updated}</span>`
     }
     let resolve = ''
-    if ( timestamps != '' ){
+    if (timestamps != '') {
         timestamps = `<div class="timestamps">${timestamps}</div>`
         const title = resolveLabel()
         resolve = `<button type="button" id="resolve">${title}</button>`
@@ -304,11 +304,11 @@ function form(){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to use
  */
-const init = function( edt, btn ){
+const init = function (edt, btn) {
     editor = edt
     button = btn
-    const comments = edt.editorNode.querySelectorAll( btn.tag )
-    comments.forEach( element => format( element ) )
+    const comments = edt.editorNode.querySelectorAll(btn.tag)
+    comments.forEach(element => format(element))
 }
 
 /**
@@ -316,11 +316,11 @@ const init = function( edt, btn ){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const setState = function( edt, btn ){
+const setState = function (edt, btn) {
     //console.warn('custom setState edt.range',edt.range)
-    if ( edt.range===false || 
-         edt.range.rootNode == edt.editorNode || 
-         Helpers.isBlock(edt.range.rootNode) == false ){
+    if (edt.range === false ||
+        edt.range.rootNode == edt.editorNode ||
+        Helpers.isBlock(edt.range.rootNode) == false) {
         //console.log('Disabling button')
         btn.element.disabled = true
         btn.element.classList.remove('active')
@@ -328,7 +328,7 @@ const setState = function( edt, btn ){
         //console.log('Enabling button')
         btn.element.disabled = false
         const custom = edt.range.blockParent.querySelector(TAG)
-        if ( custom != null ){
+        if (custom != null) {
             btn.element.classList.add('active')
         } else {
             btn.element.classList.remove('active')
@@ -341,15 +341,15 @@ const setState = function( edt, btn ){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const click = function( edt, btn ){
+const click = function (edt, btn) {
     // Ignore if a modal is active
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
     editor = edt
     button = btn
     const custom = editor.range.blockParent.querySelector(TAG)
-    if ( custom != null ){
+    if (custom != null) {
         edit(custom)
     } else {
         show(false)
@@ -361,10 +361,10 @@ const click = function( edt, btn ){
  * @param {Object} edt 
  * @returns {Object} {icon,label,content}
  */
-const sidebar = function(edt){
+const sidebar = function (edt) {
     const comments = edt.editorNode.querySelectorAll(TAG)
     let content = ''
-    comments.forEach( comment => {
+    comments.forEach(comment => {
         const resolved = comment.dataset.resolved == 'true' ? 'comment-resolved' : 'comment-unresolved'
         content += `
             <article>
@@ -385,5 +385,5 @@ const sidebar = function(edt){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-const options = {setState, init, addEventHandlers, clean, sidebar}
-export const BUTTON = new ToolbarButton( 'custom', TAG, 'Custom', Icons.comment, click, options ) 
+const options = { setState, init, addEventHandlers, clean, sidebar }
+export const BUTTON = new ToolbarButton('custom', TAG, 'Custom', Icons.comment, click, options) 

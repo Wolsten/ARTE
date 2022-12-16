@@ -1,10 +1,10 @@
 import * as Helpers from '../helpers.js'
 import * as Styles from './styles.js'
-import * as Icons from '../icons.js'
+import * as Icons from '../icons.ts'
 import ToolbarButton from '../ToolbarButton.js'
 import Modal from '../Modal.js'
 
-const PALETTE = ['black','white','violet','indigo','blue','green','yellow','orange','red']
+const PALETTE = ['black', 'white', 'violet', 'indigo', 'blue', 'green', 'yellow', 'orange', 'red']
 let drawer = null
 
 /**
@@ -12,9 +12,9 @@ let drawer = null
  * @param {object} button 
  * @returns 
  */
-function form(){
+function form() {
     let colours = ''
-    for( let i=0; i<PALETTE.length; i++ ){
+    for (let i = 0; i < PALETTE.length; i++) {
         colours += `<span class="colour" data-index="${i}" style="background-color:${PALETTE[i]}">&nbsp;</span>`
     }
     return `
@@ -33,19 +33,19 @@ function form(){
  * a HTML5 colour input dialogue. 
  * Clicking on this triggers the input event.
  */
-function show(editor,button){
+function show(editor, button) {
     let title = "Select highlight colour"
-    if ( button.tag == 'ARTE-COLOR'){
+    if (button.tag == 'ARTE-COLOR') {
         title = "Select text colour"
     }
     // Display the panel
     drawer = new Modal({
-        type:'drawer',
+        type: 'drawer',
         title,
-        html:form(),
+        html: form(),
         escape: true,
         buttons: {
-            cancel: {label:'Cancel'}
+            cancel: { label: 'Cancel' }
         }
     })
     drawer.show()
@@ -57,12 +57,12 @@ function show(editor,button){
         // Synthesise a button using the colour value selected
         const synthButton = {
             setState,
-            style:`${button.style}:${colour}`, 
-            element:button.element
+            style: `${button.style}:${colour}`,
+            element: button.element
         }
         drawer.hide()
         // Apply the new style
-        Styles.click( editor, synthButton )
+        Styles.click(editor, synthButton)
     }))
 }
 
@@ -73,17 +73,17 @@ function show(editor,button){
  * @param {object} editor A unique editor instance
  * @param {object} button The button to act on
  */
-const click = function( editor, button ){
+const click = function (editor, button) {
     // Ignore if a modal is active
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
-    if ( editor.range === false || editor.range.collapsed ){
+    if (editor.range === false || editor.range.collapsed) {
         const feedback = new Modal({
-            type:'overlay',
-            severity:'info',
-            html:'The colour selection buttons require at least one character to be selected.',
-            buttons: { cancel: {label:'Close'} }
+            type: 'overlay',
+            severity: 'info',
+            html: 'The colour selection buttons require at least one character to be selected.',
+            buttons: { cancel: { label: 'Close' } }
         })
         feedback.show()
         return
@@ -96,38 +96,38 @@ const click = function( editor, button ){
  * @param {object} edt An editor instance
  * @param {object} btn The button to act on
  */
-const setState = function(edt,btn){
+const setState = function (edt, btn) {
     //console.log('setting colour state ')
-    btn.element.disabled = edt.range===false || 
-                           edt.range.collapsed ||
-                           edt.range.rootNode == edt.editorNode || 
-                           Helpers.isList(edt.range.rootNode)
+    btn.element.disabled = edt.range === false ||
+        edt.range.collapsed ||
+        edt.range.rootNode == edt.editorNode ||
+        Helpers.isList(edt.range.rootNode)
     // Get the inline styles of the selected range
     let value = ''
     let styles = []
     const inlineStyles = edt.range.startContainer.parentNode.getAttribute('style')
-    if ( inlineStyles != null ){
+    if (inlineStyles != null) {
         styles = inlineStyles.split(';')
         // console.log('styles',styles)
-        styles.forEach( item => {
+        styles.forEach(item => {
             // Ignore empty styles (split creates an empty element for last ;)
-            if ( item !== '' ){
+            if (item !== '') {
                 const parts = item.split(':')
                 // Does the inline style match the button?
                 // If so set the button styling to match
-                if ( parts[0].trim() === btn.style ){
+                if (parts[0].trim() === btn.style) {
                     value = parts[1].trim()
-                    btn.element.querySelector('span.bar').setAttribute('style',`background-color:${value};`)
+                    btn.element.querySelector('span.bar').setAttribute('style', `background-color:${value};`)
                 }
             }
         })
     }
-    if ( value == '' ){
+    if (value == '') {
         btn.element.querySelector('span.bar').removeAttribute('style')
     }
 }
 
-const init = function(editor, button){
+const init = function (editor, button) {
     // console.log('Initialising colour button',button.tag)
     const bar = document.createElement('span')
     bar.classList.add('bar')
@@ -140,8 +140,8 @@ const init = function(editor, button){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-let options = {init, setState, style:'color'}
-export const FOREGROUND = new ToolbarButton( 'inline', 'ARTE-COLOR', 'Text colour', Icons.colourForeground, click, options)
+let options = { init, setState, style: 'color' }
+export const FOREGROUND = new ToolbarButton('inline', 'ARTE-COLOR', 'Text colour', Icons.colourForeground, click, options)
 
-options = {init, setState, style:'background-color'}
-export const BACKGROUND = new ToolbarButton( 'inline', 'ARTE-BACKGROUND-COLOR', 'Highlight colour', Icons.colourBackground, click, options)
+options = { init, setState, style: 'background-color' }
+export const BACKGROUND = new ToolbarButton('inline', 'ARTE-BACKGROUND-COLOR', 'Highlight colour', Icons.colourBackground, click, options)

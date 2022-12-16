@@ -1,4 +1,4 @@
-import * as Icons from '../icons.js'
+import * as Icons from '../icons.ts'
 // import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
 import Modal from '../Modal.js'
@@ -28,12 +28,12 @@ let drawer = null
  * @param {object} editor
  * @param {boolean} headingNumbers 
  */
-function setHeadingNumbers(editor){
+function setHeadingNumbers(editor) {
     localStorage.setItem('headingNumbers', editor.options.headingNumbers)
-    if ( editor.options.headingNumbers ){
+    if (editor.options.headingNumbers) {
         editor.editorNode.classList.add('heading-numbers')
     } else {
-        editor.editorNode.classList.remove('heading-numbers')  
+        editor.editorNode.classList.remove('heading-numbers')
     }
 }
 
@@ -46,44 +46,44 @@ function setTheme(theme) {
     document.documentElement.className = theme
 }
 
-function setExplorer(editor){
+function setExplorer(editor) {
     localStorage.setItem('explorer', editor.options.explorer)
-    if ( editor.options.explorer ){
+    if (editor.options.explorer) {
         editor.showSidebar()
     } else {
         editor.hideSidebar()
     }
 }
 
-function handleCancel(){
+function handleCancel() {
     drawer.hide()
 }
 
 /**
  * Show the options dialogue.
  */
-function show(editor){
+function show(editor) {
     // Create and display the modal panel
     drawer = new Modal({
-        type:'drawer',
-        escape:true,
-        title:'Options',
-        html: 
-        form(editor.options), 
+        type: 'drawer',
+        escape: true,
+        title: 'Options',
+        html:
+            form(editor.options),
         buttons: {
-            cancel:  { label:'Close', callback:handleCancel }
+            cancel: { label: 'Close', callback: handleCancel }
         }
     })
     drawer.show()
     const inputs = drawer.panel.querySelectorAll('form input')
     inputs.forEach(input => input.addEventListener('change', event => {
-        if ( event.target.name == 'headingNumbers' ){
+        if (event.target.name == 'headingNumbers') {
             editor.options.headingNumbers = event.target.id == 'on'
             setHeadingNumbers(editor)
-        } else if ( event.target.name == 'theme' ){
+        } else if (event.target.name == 'theme') {
             editor.options.theme = event.target.id
             setTheme(editor.options.theme)
-        } else if ( event.target.name == 'explorer' ){
+        } else if (event.target.name == 'explorer') {
             editor.options.explorer = event.target.id == 'show-explorer'
             setExplorer(editor)
         }
@@ -95,13 +95,13 @@ function show(editor){
  * @param {object} options 
  * @returns {string} Generated html
  */
-function form(options){
+function form(options) {
     return `
         <form>
             <div class="form-input options">
                 <label>Heading numbers</label>
                 <label>
-                    <input name="headingNumbers" id="on" type="radio" class="form-control first" ${options.headingNumbers ? 'checked' : '' }/> On
+                    <input name="headingNumbers" id="on" type="radio" class="form-control first" ${options.headingNumbers ? 'checked' : ''}/> On
                 </label>
                 <label>
                     <input name="headingNumbers" id="off" type="radio" class="form-control" ${!options.headingNumbers ? 'checked' : ''}/> Off
@@ -110,19 +110,19 @@ function form(options){
             <div class="form-input options">
                 <label>Theme</label>
                 <label>
-                    <input name="theme" id="theme-light" type="radio" class="form-control first" ${options.theme=='theme-light' ? 'checked' : '' }/> Light
+                    <input name="theme" id="theme-light" type="radio" class="form-control first" ${options.theme == 'theme-light' ? 'checked' : ''}/> Light
                 </label>
                 <label>
-                    <input name="theme" id="theme-dark" type="radio" class="form-control" ${options.theme=='theme-dark'  ? 'checked' : ''}/> Dark
+                    <input name="theme" id="theme-dark" type="radio" class="form-control" ${options.theme == 'theme-dark' ? 'checked' : ''}/> Dark
                 </label>
             </div>
             <div class="form-input options">
                 <label>Explorer</label>
                 <label>
-                    <input name="explorer" id="show-explorer" type="radio" class="form-control first" ${options.explorer ? 'checked' : '' }/> Show
+                    <input name="explorer" id="show-explorer" type="radio" class="form-control first" ${options.explorer ? 'checked' : ''}/> Show
                 </label>
                 <label>
-                    <input name="explorer" id="hide-explorer" type="radio" class="form-control" ${options.explorer==false ? 'checked' : ''}/> Hide
+                    <input name="explorer" id="hide-explorer" type="radio" class="form-control" ${options.explorer == false ? 'checked' : ''}/> Hide
                 </label>
             </div>
         </form>`
@@ -134,7 +134,7 @@ function form(options){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const setState = function( edt, btn ){
+const setState = function (edt, btn) {
     btn.element.disabled = false
 }
 
@@ -143,9 +143,9 @@ const setState = function( edt, btn ){
  * @param {object} editor A unique editor instance
  * @param {object} button The button to act on (unused)
  */
-const click = function( editor, button ){
+const click = function (editor, button) {
     // Ignore if a modal is active
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
     show(editor)
@@ -157,14 +157,14 @@ const click = function( editor, button ){
  * @param {object} editor A unique editor instance
  * @param {object} button The button to act on (unused)
  */
-const init = function( editor, button ){
+const init = function (editor, button) {
     const theme = localStorage.getItem('theme')
-    if ( theme ){
+    if (theme) {
         editor.options.theme = theme
     }
     setTheme(editor.options.theme)
     const headingNumbers = localStorage.getItem('headingNumbers')
-    if (localStorage.getItem('headingNumbers') ) {
+    if (localStorage.getItem('headingNumbers')) {
         editor.options.headingNumbers = headingNumbers
     }
     setHeadingNumbers(editor)
@@ -174,5 +174,5 @@ const init = function( editor, button ){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-const options = {setState, init}
-export const BUTTON = new ToolbarButton( 'detached', TAG, 'Preferences', Icons.options, click, options ) 
+const options = { setState, init }
+export const BUTTON = new ToolbarButton('detached', TAG, 'Preferences', Icons.options, click, options) 

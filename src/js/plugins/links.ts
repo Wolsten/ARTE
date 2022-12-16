@@ -16,7 +16,7 @@
  */
 
 import ToolbarButton from '../ToolbarButton.js'
-import * as Icons from '../icons.js'
+import * as Icons from '../icons.ts'
 import * as Helpers from '../helpers.js'
 import Modal from '../Modal.js'
 
@@ -28,9 +28,9 @@ const TAG = 'ARTE-LINK'
  * @var {object} editor The current editor instance
  */
 let editor
- /**
-  * @var {object} button The current button
-  */
+/**
+ * @var {object} button The current button
+ */
 let button
 /**
  * @var {HTMLElement} node The actively edited node
@@ -47,20 +47,20 @@ let drawer = null
 /**
  * @var {Modal} confirm The container for the modal confirm dialogue
  */
- let confirm = null
+let confirm = null
 
 
 // -----------------------------------------------------------------------------
 // @section Private methods
 // -----------------------------------------------------------------------------
 
-function handleConfirmCancel(){
+function handleConfirmCancel() {
     confirm.hide()
     drawer.hide()
 }
 
-function handleCancel(){
-    if ( dirty ){
+function handleCancel() {
+    if (dirty) {
         confirm = Helpers.modalRequestCancel(handleConfirmCancel)
     } else {
         drawer.hide()
@@ -70,7 +70,7 @@ function handleCancel(){
 /**
  * Delete the link in the dom
  */
- function deleteItem(){
+function deleteItem() {
     node.remove()
     // Update state
     editor.range = false
@@ -78,14 +78,14 @@ function handleCancel(){
     editor.buffer()
 }
 
-function handleConfirmDelete(){
+function handleConfirmDelete() {
     confirm.hide()
     drawer.hide()
-    deleteItem() 
+    deleteItem()
 }
 
-function handleDelete(){
-    confirm = Helpers.modalRequestDelete( 'link', handleConfirmDelete )
+function handleDelete() {
+    confirm = Helpers.modalRequestDelete('link', handleConfirmDelete)
 }
 
 
@@ -94,9 +94,9 @@ function handleDelete(){
  *
  * @param {HTMLElement} element The custom node to be edited
  */
- function edit( element ){
+function edit(element) {
     // If we already have an active panel - ignore edit clicks
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
     // Save the clicked link
@@ -110,35 +110,35 @@ function handleDelete(){
  * @param {string} selectedText 
  * @param {boolean} editFlag flag indicating whether to edit or create new
  */
-function show( selectedText, editFlag ){
+function show(selectedText, editFlag) {
     let title = 'Create link'
     let buttons = {
-        cancel: { label:'Cancel', callback:handleCancel },
-        confirm: { label:'Save', callback:save }
+        cancel: { label: 'Cancel', callback: handleCancel },
+        confirm: { label: 'Save', callback: save }
     }
-    if ( editFlag ){
+    if (editFlag) {
         title = 'Edit link'
-        buttons.delete = { label:'Delete', callback:handleDelete }
+        buttons.delete = { label: 'Delete', callback: handleDelete }
     } else {
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
-        node.setAttribute('contenteditable','false')
+        node.setAttribute('contenteditable', 'false')
         node.dataset.href = ''
         node.dataset.label = selectedText
         node.dataset.display = 0
     }
     // Create and display the modal panel
     drawer = new Modal({
-        type:'drawer',
+        type: 'drawer',
         title,
-        html: form(editFlag), 
+        html: form(editFlag),
         buttons
     })
     drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
     const inputs = drawer.panel.querySelectorAll('form input')
-    inputs.forEach(input => input.addEventListener('change', () => dirty=true))
+    inputs.forEach(input => input.addEventListener('change', () => dirty = true))
     // Focus the href
     const href = drawer.panel.querySelector('form #href')
     href.focus()
@@ -148,10 +148,10 @@ function show( selectedText, editFlag ){
 /**
  * Save the changes set in the dialogue
  */
-function save(){
+function save() {
     // console.log('Save changes')
     // Replace node in editor
-    if ( node.parentNode == null ){
+    if (node.parentNode == null) {
         node = Helpers.replaceSelectionWithNode(editor, node)
     }
     // Save new properties
@@ -163,7 +163,7 @@ function save(){
     // Format link and add event handler
     format(node)
     // Update state
-    editor.range = Helpers.setCursor( node, 0)
+    editor.range = Helpers.setCursor(node, 0)
     setState(editor, button)
     editor.buffer()
 }
@@ -173,13 +173,13 @@ function save(){
  * @param {HTMLElement} link 
  * @returns {string} The string to display
  */
-function label(link){
+function label(link) {
     // Test the display option saved with the link
-    switch (parseInt(link.dataset.display)){
+    switch (parseInt(link.dataset.display)) {
         // Display as text label?
         case 0:
             // Label is an optional parameter
-            if ( link.dataset.label != '' ){
+            if (link.dataset.label != '') {
                 return link.dataset.label
             }
             break
@@ -188,7 +188,7 @@ function label(link){
             return link.dataset.href
         // Assuming they are different display as "label (href)""
         case 2:
-            if ( link.dataset.label != '' && link.dataset.label != link.dataset.href ){
+            if (link.dataset.label != '' && link.dataset.label != link.dataset.href) {
                 return `${link.dataset.label} (${link.dataset.href})`
             }
     }
@@ -201,12 +201,12 @@ function label(link){
  * 
  * @param {HTMLElement} element
  */
-function format( element ){
+function format(element) {
     // Generate new id if required
-    if ( element.id == false ){
+    if (element.id == false) {
         element.id = Helpers.generateUid()
     }
-    element.setAttribute('contenteditable',false)
+    element.setAttribute('contenteditable', false)
     element.title = 'Click to edit'
     // Initialise and add anchor tag
     element.innerHTML = ''
@@ -218,7 +218,7 @@ function format( element ){
     link.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(element) 
+        edit(element)
     })
 }
 
@@ -227,10 +227,10 @@ function format( element ){
  * @param {boolean} edit flag
  * @returns {string} HTML string
  */
-function form(edit){
+function form(edit) {
     let openBtn = ''
     let display = node.dataset.display ? node.dataset.display : 0
-    if ( edit ) {
+    if (edit) {
         openBtn = `(<a href="${node.dataset.href}" class="link" target="_blank" title="Open link in new tab or window">${Icons.openLink} Open</a>)`
     }
     return `
@@ -246,9 +246,9 @@ function form(edit){
             <div class="form-input">
                 <label for="label">Display option</label>
                 <select class="form-control" id="display">
-                    <option value="0" ${display==0 ? 'selected' : ''}>Label only</option>
-                    <option value="1" ${display==1 ? 'selected' : ''}>Link only</option>
-                    <option value="2" ${display==2 ? 'selected' : ''}>Label and link</option>
+                    <option value="0" ${display == 0 ? 'selected' : ''}>Label only</option>
+                    <option value="1" ${display == 1 ? 'selected' : ''}>Link only</option>
+                    <option value="2" ${display == 2 ? 'selected' : ''}>Label and link</option>
                 </select>
             </div>
         </form>`
@@ -261,11 +261,11 @@ function form(edit){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to use
  */
- const init = function( edt, btn ){
+const init = function (edt, btn) {
     editor = edt
     button = btn
-    const links = editor.editorNode.querySelectorAll( TAG )
-    links.forEach( link => format( link ))
+    const links = editor.editorNode.querySelectorAll(TAG)
+    links.forEach(link => format(link))
 }
 
 /**
@@ -274,38 +274,38 @@ function form(edit){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const click = function( edt, btn ){
+const click = function (edt, btn) {
     // Ignore if a modal is active
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
     editor = edt
     button = btn
-    if ( editor.range === false){
+    if (editor.range === false) {
         // console.log('No range selected')
         return
     }
     // Get default label if range not collapsed
     let selectedText = ''
-    if ( editor.range.collapsed == false && 
-         editor.range.startContainer == editor.range.endContainer ){
-        selectedText = editor.range.endContainer.textContent.substring(editor.range.startOffset, editor.range.endOffset)  
+    if (editor.range.collapsed == false &&
+        editor.range.startContainer == editor.range.endContainer) {
+        selectedText = editor.range.endContainer.textContent.substring(editor.range.startOffset, editor.range.endOffset)
     }
-    show( selectedText, false )
+    show(selectedText, false)
 }
 
 /**
  * Optional method to add event handlers to all custom links
  * @param {object} edt 
  */
-const addEventHandlers = function(edt){
+const addEventHandlers = function (edt) {
     editor = edt
     button = BUTTON
     const nodes = editor.editorNode.querySelectorAll(TAG)
-    nodes.forEach( node => node.addEventListener('click', event => {
+    nodes.forEach(node => node.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(node) 
+        edit(node)
     }))
 }
 
@@ -314,7 +314,7 @@ const addEventHandlers = function(edt){
  * @param {HTMLElement} node
  * @returns HTMLElement as cleaned
  */
-const clean = function(node){
+const clean = function (node) {
     // console.log('clean link',node)
     node.removeAttribute('contenteditable')
     node.removeAttribute('title')
@@ -327,16 +327,16 @@ const clean = function(node){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
- const setState = function( edt, btn ){
-    if ( edt.range===false || 
-         edt.range.rootNode == edt.editorNode || 
-         Helpers.isList(edt.range.rootNode) ){
+const setState = function (edt, btn) {
+    if (edt.range === false ||
+        edt.range.rootNode == edt.editorNode ||
+        Helpers.isList(edt.range.rootNode)) {
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {
         btn.element.disabled = false
         const link = edt.range.blockParent.querySelector(TAG)
-        if ( link != null ){
+        if (link != null) {
             btn.element.classList.add('active')
         } else {
             btn.element.classList.remove('active')
@@ -349,10 +349,10 @@ const clean = function(node){
  * @param {Object} edt 
  * @returns {Object} {icon,label,content}
  */
-const sidebar = function(edt){
+const sidebar = function (edt) {
     const links = edt.editorNode.querySelectorAll(TAG)
     let content = ''
-    links.forEach( link => {
+    links.forEach(link => {
         content += `
             <article>
                 <a href="#${link.id}" title="Click to view link in context">
@@ -371,5 +371,5 @@ const sidebar = function(edt){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-const options = {init, setState, addEventHandlers, clean, sidebar}
-export const BUTTON = new ToolbarButton( 'custom', TAG, 'Link', Icons.link, click, options ) 
+const options = { init, setState, addEventHandlers, clean, sidebar }
+export const BUTTON = new ToolbarButton('custom', TAG, 'Link', Icons.link, click, options) 

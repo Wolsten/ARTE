@@ -38,7 +38,7 @@ export const ol = '<i class="bi bi-list-ol"></i>'
 export const ul = '<i class="bi bi-list-ul"></i>'
 export const b = '<i class="bi bi-type-bold"></i>'
 export const i = '<i class="bi bi-type-italic"></i>'
-export const u = '<i class="bi bi-type-underline"></i>' 
+export const u = '<i class="bi bi-type-underline"></i>'
 export const clear = '<i class="bi bi-eraser"></i>'
 export const undo = '<i class="bi bi-reply"></i>'
 export const redo = '<span style="display:inline-block;-webkit-transform: scale(-1, 1);transform: scale(-1, 1);"><i class="bi bi-reply"></i></span>'
@@ -70,3 +70,12 @@ export const copy = '<i class="bi bi-clipboard-plus"></i>'
 export const paste = '<i class="bi bi-box-arrow-down"></i>'
 
 
+export const thing: string = "My string thing"
+
+export const objectThing = {
+    x: 1,
+    y: 2,
+    z: 3
+}
+
+// console.log(thing)

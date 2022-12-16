@@ -18,10 +18,10 @@
  */
 
 import ToolbarButton from '../ToolbarButton.js'
-import * as Icons from '../icons.js'
+import * as Icons from '../icons.ts'
 import * as Helpers from '../helpers.js'
 import Modal from '../Modal.js'
- 
+
 /**
  * @constant {string} TAG The HTMLElement tag as inserted in the dom for this custom node
  */
@@ -50,66 +50,66 @@ let drawer = null
  * @var {Modal} confirm The container for the modal confirm dialogue
  */
 let confirm = null
- 
- 
+
+
 // -----------------------------------------------------------------------------
 // @section Private methods
 // -----------------------------------------------------------------------------
- 
+
 /**
  * Action cancelling changes
  */
-function handleConfirmCancel(){
+function handleConfirmCancel() {
     confirm.hide()
     drawer.hide()
 }
- 
+
 /**
  * Ask to confirm cancelling changes
  */
-function handleCancel(){
-    if ( dirty ){
-        confirm = Helpers.modalRequestCancel( handleConfirmCancel )
+function handleCancel() {
+    if (dirty) {
+        confirm = Helpers.modalRequestCancel(handleConfirmCancel)
     } else {
         drawer.hide()
     }
 }
- 
+
 /**
  * Delete the link in the dom
  */
-function deleteItem(){
+function deleteItem() {
     node.remove()
     // Update state
     editor.range = false
     setState(editor, button)
     editor.buffer()
 }
- 
+
 /**
  * Action delete
  */
-function handleConfirmDelete(){
+function handleConfirmDelete() {
     confirm.hide()
     drawer.hide()
-    deleteItem() 
+    deleteItem()
 }
- 
+
 /**
  * Ask to confirm delete
  */
-function handleDelete(){
-    confirm = Helpers.modalRequestDelete( 'image', handleConfirmDelete )
+function handleDelete() {
+    confirm = Helpers.modalRequestDelete('image', handleConfirmDelete)
 }
- 
+
 /**
  * Edit an existing link
  *
  * @param {HTMLElement} element The custom node to be edited
  */
-function edit( element ){
+function edit(element) {
     // If we already have an active panel - ignore edit clicks
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
     // Save the clicked link
@@ -117,80 +117,81 @@ function edit( element ){
     // Show the dialogue
     show(true)
 }
- 
- /**
-  * Show the image edit dialogue
-  * @param {boolean} editFlag flag indicating whether to edit or create new
-  */
-function show( editFlag ){
+
+/**
+ * Show the image edit dialogue
+ * @param {boolean} editFlag flag indicating whether to edit or create new
+ */
+function show(editFlag) {
     let title = 'Insert image'
     let buttons = {
-        cancel: { label:'Cancel', callback:handleCancel },
-        confirm: { label:'Save', callback:()=>save(editFlag) }
+        cancel: { label: 'Cancel', callback: handleCancel },
+        confirm: { label: 'Save', callback: () => save(editFlag) }
     }
-    if ( editFlag ){
+    if (editFlag) {
         title = 'Edit image'
-        buttons.delete = { label:'Delete', callback:handleDelete }
+        buttons.delete = { label: 'Delete', callback: handleDelete }
     } else {
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
-        node.setAttribute('contenteditable','false')
+        node.setAttribute('contenteditable', 'false')
         node.dataset.src = ''
         node.dataset.alt = ''
         node.dataset.caption = ''
     }
     // Create and display the modal panel
     drawer = new Modal({
-        type:'drawer',
+        type: 'drawer',
         title,
-        html: form(editFlag), 
+        html: form(editFlag),
         buttons,
-    escape:true})
+        escape: true
+    })
     drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
     const inputs = drawer.panel.querySelectorAll('form input')
-    inputs.forEach(input => input.addEventListener('change', () => dirty=true))
+    inputs.forEach(input => input.addEventListener('change', () => dirty = true))
     // Focus the src
     const src = drawer.panel.querySelector('form #src')
     src.focus()
     src.setSelectionRange(src.value.length, src.value.length)
 }
- 
- /**
-  * Save the changes set in the dialogue
-  * @param {boolean} editFlag
-  */
-function save(editFlag=false){
+
+/**
+ * Save the changes set in the dialogue
+ * @param {boolean} editFlag
+ */
+function save(editFlag = false) {
     // console.log('Save changes')
     node.dataset.src = drawer.panel.querySelector('form #src').value.trim()
     node.dataset.caption = drawer.panel.querySelector('form #caption').value.trim()
     node.dataset.alt = drawer.panel.querySelector('form #alt').value.trim()
     // Check whether to insert new arte image
-    if ( editFlag == false ){
+    if (editFlag == false) {
         editor.range.blockParent.appendChild(node)
     }
     drawer.hide()
     // Format image and add event handler
     format(node)
     // Update state
-    editor.range = Helpers.setCursor( node, 0 )
+    editor.range = Helpers.setCursor(node, 0)
     setState(editor, button)
     editor.buffer()
 }
- 
- 
+
+
 /**
  * Format an image tag
  * @param {HTMLElement} element
  */
-function format( element ){
+function format(element) {
     //console.log('arte-image', element)
     // Generate new id if required
-    if ( element.id == false ){
+    if (element.id == false) {
         element.id = Helpers.generateUid()
     }
-    element.setAttribute('contenteditable',false)
+    element.setAttribute('contenteditable', false)
     element.title = 'Click to edit'
     // Initialise
     element.innerHTML = ''
@@ -200,7 +201,7 @@ function format( element ){
     img.alt = element.dataset.alt
     element.appendChild(img)
     // caption?
-    if ( element.dataset.caption != '' ){
+    if (element.dataset.caption != '') {
         const caption = document.createElement('span')
         caption.classList.add('caption')
         caption.innerText = element.dataset.caption
@@ -209,16 +210,16 @@ function format( element ){
     element.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(element) 
+        edit(element)
     })
 }
- 
+
 /**
  * Generate html for a dialogue to create/edit an image tag
  * @param {boolean} edit flag
  * @returns {string} HTML string
  */
-function form(edit){
+function form(edit) {
     return `
         <form class="arte-image">
             <p class="advice">Please enter a URL and optional caption for an image file:
@@ -236,100 +237,100 @@ function form(edit){
             </div>
         </form>`
 }
- 
+
 /**
  * Optional method that, on first load of editor, converts the minimal custom 
  * HTML into the full editable version
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to use
  */
-const init = function( edt, btn ){
+const init = function (edt, btn) {
     editor = edt
     button = btn
-    const elements = editor.editorNode.querySelectorAll( TAG )
-    elements.forEach( item => format( item ))
+    const elements = editor.editorNode.querySelectorAll(TAG)
+    elements.forEach(item => format(item))
 }
- 
+
 /**
  * Mandatory button click function which displays the colour dialogue
  * for the supplied button
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const click = function( edt, btn ){
+const click = function (edt, btn) {
     // Ignore if a modal is active
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
     editor = edt
     button = btn
-    if ( editor.range === false){
+    if (editor.range === false) {
         // console.log('No range selected')
         return
     }
-    show( false )
+    show(false)
 }
- 
+
 /**
  * Optional method to add event handlers to all custom links
  * @param {object} edt 
  */
-const addEventHandlers = function(edt){
+const addEventHandlers = function (edt) {
     editor = edt
     button = BUTTON
     const nodes = editor.editorNode.querySelectorAll(TAG)
-    nodes.forEach( node => node.addEventListener('click', event => {
+    nodes.forEach(node => node.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(node) 
+        edit(node)
     }))
 }
- 
+
 /**
  * Optional method to reformat/clean the custom element as it should be saved in a file or database
  * @param {HTMLElement} node
  * @returns HTMLElement as cleaned
  */
-const clean = function(node){
-    console.warn('clean image',node)
+const clean = function (node) {
+    console.warn('clean image', node)
     node.removeAttribute('contenteditable')
     node.removeAttribute('title')
     node.innerHTML = ''
     return node
 }
- 
+
 /**
  * Set the disabled and active states of a button
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const setState = function( edt, btn ){
-    if ( edt.range===false || 
-        edt.range.rootNode == edt.editorNode || 
-        Helpers.isList(edt.range.rootNode) ){
+const setState = function (edt, btn) {
+    if (edt.range === false ||
+        edt.range.rootNode == edt.editorNode ||
+        Helpers.isList(edt.range.rootNode)) {
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {
         btn.element.disabled = false
         const link = edt.range.blockParent.querySelector(TAG)
-        if ( link != null ){
+        if (link != null) {
             btn.element.classList.add('active')
         } else {
             btn.element.classList.remove('active')
         }
     }
 }
- 
+
 /**
  * Display custom html in the sidebar
  * @param {Object} edt 
  * @returns {Object} {icon,label,content}
  */
-const sidebar = function(edt){
+const sidebar = function (edt) {
     // console.log('Updating image sidebar')
     const elements = edt.editorNode.querySelectorAll(TAG)
     let content = ''
-    elements.forEach( element => {
+    elements.forEach(element => {
         const img = element.querySelector('img')
         content += `
             <a href="#${element.id}">
@@ -342,10 +343,10 @@ const sidebar = function(edt){
         content: `${content}`
     }
 }
- 
- // -----------------------------------------------------------------------------
- // @section Exports
- // -----------------------------------------------------------------------------
- 
- const options = {init, setState, addEventHandlers, clean, sidebar}
- export const BUTTON = new ToolbarButton( 'custom', TAG, 'Image', Icons.image, click, options ) 
+
+// -----------------------------------------------------------------------------
+// @section Exports
+// -----------------------------------------------------------------------------
+
+const options = { init, setState, addEventHandlers, clean, sidebar }
+export const BUTTON = new ToolbarButton('custom', TAG, 'Image', Icons.image, click, options) 

@@ -1,4 +1,4 @@
-import * as Icons from '../icons.js'
+import * as Icons from '../icons.ts'
 import * as Helpers from '../helpers.js'
 import ToolbarButton from '../ToolbarButton.js'
 import Modal from '../Modal.js'
@@ -37,9 +37,9 @@ let dirty
   */
 let drawer = null
 
- /**
-  * @var {HTMLElement} confirm The container for the modal confirm dialogue
-  */
+/**
+ * @var {HTMLElement} confirm The container for the modal confirm dialogue
+ */
 let confirm = null
 
 // -----------------------------------------------------------------------------
@@ -52,36 +52,36 @@ let confirm = null
  * 
  * @param {HTMLElement} element The custom node to be edited
  */
-function edit( element ){
+function edit(element) {
     // If we already have an active panel - ignore edit clicks
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
     node = element
     show(true)
 }
 
-function handleConfirmCancel(){
+function handleConfirmCancel() {
     confirm.hide()
     drawer.hide()
 }
 
-function handleConfirmDelete(){
+function handleConfirmDelete() {
     confirm.hide()
     drawer.hide()
-    deleteItem() 
+    deleteItem()
 }
 
-function handleCancel(){
-    if ( dirty ){
-        confirm = new Modal({ 
-            type:'overlay',
-            severity:'warning',
-            title:'Cancel changes', 
-            html:'Do you really want to lose these changes?',
+function handleCancel() {
+    if (dirty) {
+        confirm = new Modal({
+            type: 'overlay',
+            severity: 'warning',
+            title: 'Cancel changes',
+            html: 'Do you really want to lose these changes?',
             buttons: {
-                cancel: { label:'No - keep editing'},
-                confirm: { label:'Yes - lose changes', callback:handleConfirmCancel}
+                cancel: { label: 'No - keep editing' },
+                confirm: { label: 'Yes - lose changes', callback: handleConfirmCancel }
             }
         })
         confirm.show()
@@ -90,15 +90,15 @@ function handleCancel(){
     }
 }
 
-function handleDelete(){
-    confirm = new Modal({ 
-        type:'overlay',
-        severity:'danger',
-        title:'Delete item', 
-        html:'Do you really want to delete this item?',
+function handleDelete() {
+    confirm = new Modal({
+        type: 'overlay',
+        severity: 'danger',
+        title: 'Delete item',
+        html: 'Do you really want to delete this item?',
         buttons: {
-            cancel: { label:'No - keep editing'},
-            confirm: { label:'Yes - delete', callback:handleConfirmDelete }
+            cancel: { label: 'No - keep editing' },
+            confirm: { label: 'Yes - delete', callback: handleConfirmDelete }
         }
     })
     confirm.show()
@@ -108,20 +108,20 @@ function handleDelete(){
  * Show the custom dialogue.
  * @param {boolean} editFlag Whether editing existing custom element or creating new
  */
-function show( editFlag ){
+function show(editFlag) {
     let title = 'Create custom active element'
     let buttons = {
-        cancel:  { label:'Cancel', callback:handleCancel },
-        confirm: { label:'Save', callback:save }
+        cancel: { label: 'Cancel', callback: handleCancel },
+        confirm: { label: 'Save', callback: save }
     }
-    if ( editFlag ){
+    if (editFlag) {
         title = 'Edit custom active element'
-        buttons.delete = { label:'Delete', callback:handleDelete }
+        buttons.delete = { label: 'Delete', callback: handleDelete }
     } else {
         node = document.createElement(TAG)
         node.id = Helpers.generateUid()
-        node.setAttribute('contenteditable','false')
-        node.innerHTML = template({property1:' ', property2:' ', property3:' '})
+        node.setAttribute('contenteditable', 'false')
+        node.innerHTML = template({ property1: ' ', property2: ' ', property3: ' ' })
     }
     const data = {
         property1: node.querySelector('.property1').innerText,
@@ -129,12 +129,12 @@ function show( editFlag ){
         property3: node.querySelector('.property3').innerText,
     }
     // Create and display the modal panel
-    drawer = new Modal({type:'drawer',title,html: form(data), buttons})
+    drawer = new Modal({ type: 'drawer', title, html: form(data), buttons })
     drawer.show()
     // Initialise confirmation module and dirty data detection
     dirty = false
     const inputs = drawer.panel.querySelectorAll('form input')
-    inputs.forEach(input => input.addEventListener('change', () => dirty=true))
+    inputs.forEach(input => input.addEventListener('change', () => dirty = true))
     // Focus the first property
     const prop1 = drawer.panel.querySelector('form input#property1')
     prop1.focus()
@@ -144,35 +144,35 @@ function show( editFlag ){
 /**
  * Save the new or edited custom element
  */
-function save(){
+function save() {
     // console.log('Save changes')
     node.querySelector('.property1').innerText = drawer.panel.querySelector('form #property1').value.trim()
     node.querySelector('.property2').innerText = drawer.panel.querySelector('form #property2').value.trim()
     node.querySelector('.property3').innerText = drawer.panel.querySelector('form #property3').value.trim()
-    if ( node.parentNode == null ){
+    if (node.parentNode == null) {
         insert()
     }
     drawer.hide()
     // Format node and add event handler
     format(node)
     // Update state
-    editor.range = Helpers.setCursor( node, 0)
+    editor.range = Helpers.setCursor(node, 0)
     setState(editor, button)
     editor.buffer()
-} 
+}
 
 /**
  * Insert a new custom element in the editor at the end of the current 
  * range's startContainer
  */
-function insert(){
+function insert() {
     node = editor.range.startContainer.parentNode.appendChild(node)
 }
 
 /**
  * Delete the custom element in the dom
  */
-function deleteItem(){
+function deleteItem() {
     //node = editor.editorNode.querySelector(`${TAG}#${data.id}`)
     node.remove()
     // Update state
@@ -186,13 +186,13 @@ function deleteItem(){
  * @param {HTMLElement} node
  * @returns HTMLElement as cleaned
  */
-function clean(node){
+function clean(node) {
     // console.log('clean custom element',node)
     // Remove the content editable flag and the ornamentation
     node.removeAttribute('contenteditable')
     node.querySelector('.title').remove()
     node.querySelector('.advice').remove()
-    node.querySelectorAll('.label').forEach(label => label.remove() )
+    node.querySelectorAll('.label').forEach(label => label.remove())
     node.querySelector('button').remove()
     // console.log('cleaned custom element',node)
     return node
@@ -202,10 +202,10 @@ function clean(node){
  * Format the given custom element and add click event handler
  * @param {HTMLElement} element
  */
-function format( element ){
+function format(element) {
     const id = element.id
     // Generate new id if required
-    if ( element.id == false ){
+    if (element.id == false) {
         element.id = Helpers.generateUid()
     }
     // Element data
@@ -215,7 +215,7 @@ function format( element ){
         property3: element.querySelector('.property3').innerText,
     }
     element.innerHTML = template(data)
-    element.setAttribute('contenteditable',false)
+    element.setAttribute('contenteditable', false)
     // Add edit button and listener
     const editButton = document.createElement('button')
     editButton.type = 'button'
@@ -224,12 +224,12 @@ function format( element ){
     editButton.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
-        edit(element) 
+        edit(element)
     })
     element.appendChild(editButton)
     // Add set state listener
-    element.addEventListener( 'click', ()=> {
-        setState( editor, button )
+    element.addEventListener('click', () => {
+        setState(editor, button)
     })
 }
 
@@ -237,11 +237,11 @@ function format( element ){
  * Add event handlers to all custom node edit buttons
  * @param {object} edt An editor instance
  */
-function addEventHandlers(edt){
+function addEventHandlers(edt) {
     editor = edt
     button = BUTTON
     const buttons = editor.editorNode.querySelectorAll(TAG + ' button')
-    buttons.forEach( button => button.addEventListener('click', event => {
+    buttons.forEach(button => button.addEventListener('click', event => {
         event.preventDefault()
         event.stopPropagation()
         const element = button.parentNode
@@ -254,7 +254,7 @@ function addEventHandlers(edt){
  * @param {string, string, string} props The form properties to be edited
  * @returns {string} Generated html
  */
-function form(props){
+function form(props) {
     return `
         <form>
             <div class="form-input">
@@ -277,7 +277,7 @@ function form(props){
  * @param {string,string,string} props The properties to display
  * @returns {string} HTML text to display
  */
-function template(props){
+function template(props) {
     return `
         <span class="title">I am an active object with 3 properties:</span>
         <span class="label">Property 1:</span><span class="prop property1">${props.property1}</span>
@@ -293,11 +293,11 @@ function template(props){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to use
  */
-const init = function( edt, btn ){
+const init = function (edt, btn) {
     editor = edt
     button = btn
-    const customElements = edt.editorNode.querySelectorAll( btn.tag )
-    customElements.forEach( element => format( element ) )
+    const customElements = edt.editorNode.querySelectorAll(btn.tag)
+    customElements.forEach(element => format(element))
 }
 
 /**
@@ -305,16 +305,16 @@ const init = function( edt, btn ){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const setState = function( edt, btn ){
-    if ( edt.range===false || 
-         edt.range.rootNode == edt.editorNode || 
-         Helpers.isList(edt.range.rootNode) ){
+const setState = function (edt, btn) {
+    if (edt.range === false ||
+        edt.range.rootNode == edt.editorNode ||
+        Helpers.isList(edt.range.rootNode)) {
         btn.element.disabled = true
         btn.element.classList.remove('active')
     } else {
         btn.element.disabled = false
         const custom = edt.range.blockParent.querySelector(TAG)
-        if ( custom != null ){
+        if (custom != null) {
             btn.element.classList.add('active')
         } else {
             btn.element.classList.remove('active')
@@ -327,15 +327,15 @@ const setState = function( edt, btn ){
  * @param {object} edt A unique editor instance
  * @param {object} btn The button to act on
  */
-const click = function( edt, btn ){
+const click = function (edt, btn) {
     // Ignore if a modal is active
-    if ( drawer && drawer.active() ){
+    if (drawer && drawer.active()) {
         return
     }
     editor = edt
     button = btn
     const custom = editor.range.blockParent.querySelector(TAG)
-    if ( custom != null ){
+    if (custom != null) {
         edit(custom)
     } else {
         show(false)
@@ -346,5 +346,5 @@ const click = function( edt, btn ){
 // @section Exports
 // -----------------------------------------------------------------------------
 
-const options = {setState, init, addEventHandlers, clean}
-export const BUTTON = new ToolbarButton( 'custom', TAG, 'Custom', Icons.plugin, click, options ) 
+const options = { setState, init, addEventHandlers, clean }
+export const BUTTON = new ToolbarButton('custom', TAG, 'Custom', Icons.plugin, click, options) 
