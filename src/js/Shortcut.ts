@@ -1,16 +1,17 @@
 import ToolbarButton from "./ToolbarButton"
 
-class Shortcut {
+export default class Shortcut {
 
-    shortcut: ToolbarButton,
-    trigger: ToolbarButton],
-    button: ToolbarButton
+    shortcut: string = ''
+    trigger: string = ''
+    button!: ToolbarButton
 
-    constructor() {
-
+    constructor(button: ToolbarButton) {
+        if (button.shortcut) {
+            this.shortcut = button.shortcut[0]
+            this.trigger = button.shortcut[1]
+        }
+        this.button = button
     }
 
 }
-
-
-export default Shortcut

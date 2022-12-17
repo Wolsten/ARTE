@@ -8,20 +8,25 @@ class Modal {
     // Static variable to save the modal instance
     static self
 
-    constructor(options) {
-        // Defaults
-        this.type = 'overlay'
-        this.panel = null       // The HTMLElement representing the modal panel
-        this.container = null   // The HTMLElement representing the innerHTML of the modal
-        this.title = ''
-        this.html = ''
-        this.severity = ''
-        this.buttons = false
-        this.escape = false
+    type = 'overlay'
+    panel = null       // The HTMLElement representing the modal panel
+    container = null   // The HTMLElement representing the innerHTML of the modal
+    title = ''
+    html = ''
+    severity = ''
+    buttons = false
+    escape = false
+
+
+    constructor(options: null | object = null) {
+
         // Override defaults with any options supplied
-        for (let option in options) {
-            this[option] = options[option]
+        if (options) {
+            for (let option in options) {
+                Object.assign(this, option)
+            }
         }
+
         // Require this so can handle the modal instance from a named event handler
         Modal.self = this
     }

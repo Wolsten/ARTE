@@ -10,10 +10,19 @@ export default class ToolbarButton {
     icon = '' //  icon The icon to use
 
     element: null | HTMLElement = null
-    input = 'button'
     group = 0
+    click: null | Function = null
+
+    input = 'button'
     action = ''
     newFormat = ''
+
+
+    // Optional methods
+    init: null | Function = null
+    sidebar: null | Function = null
+    setState: null | Function = null
+    shortcut: null | ['', ''] = null
 
     constructor(editor: Editor, type: string, tag: string, label: string, icon: string) {
         this.editor = editor

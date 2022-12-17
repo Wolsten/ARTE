@@ -44,7 +44,7 @@ class Toolbar {
                         button = new Style(name)
                         break
                     case 'BUFFER':
-                        if (!editor.buffer) {
+                        if (editor.options.bufferSize > 0 && !editor.buffer) {
                             editor.buffer = new Buffer(editor)
                         }
                         button = new BufferButton(editor, name)
