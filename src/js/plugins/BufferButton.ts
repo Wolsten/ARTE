@@ -1,18 +1,20 @@
 import ToolbarButton from "../ToolbarButton";
 import * as Icons from '../icons'
-import Buffer from './Buffer'
+import Editor from '../Editor'
 
 
 
 export default class BufferButton extends ToolbarButton {
 
-    constructor(kind: string, editor: Editor) {
+    editor: Editor
+
+    constructor(editor: Editor, kind: string) {
 
         kind = kind.toUpperCase()
         if (kind === 'UNDO') {
-            super('detached', 'UNDO', 'Undo', Icons.undo, this.undo, { update, buffering, restart, pause })
+            super('detached', 'UNDO', 'Undo', Icons.undo, { update, buffering, restart, pause })
         } else {
-            super('detached', 'REDO', 'Redo', Icons.redo, this.redo)
+            super('detached', 'REDO', 'Redo', Icons.redo)
         }
         this.editor = editor
     }
@@ -30,8 +32,7 @@ export default class BufferButton extends ToolbarButton {
             console.warn(this.editor.buffer.index)
             this.editor.editorNode.innerHTML = this.editor.buffer.items[this.editor.buffer.index]
         }
-        setState('UNDO')
-        setState('REDO')
+        this.setState()
         // if ( editor.options.debug ){
         //     console.log('buffer',buffer.buffer)
         //     console.log('buffer index', buffer.index)
@@ -45,29 +46,28 @@ export default class BufferButton extends ToolbarButton {
      * entry in the buffer
      */
     redo(): void {
-        if (this.editor.buffer) pause(this.editor.id)
-        const buffer = buffers[editor.id]
-        if (buffer.index + 1 < buffer.buffer.length) {
-            buffer.index++
-            buffer.ignore = true
-            this.editor.editorNode.innerHTML = buffer.buffer[buffer.index]
+        if (this?.editor?.buffer) {
+            if (this.editor.buffer.index + 1 < this.editor.buffer.items.length) {
+                this.editor.buffer.index++
+                this.editor.buffer.ignore = true
+                this.editor.editorNode.innerHTML = this.editor.buffer.items[this.editor.buffer.index]
+            }
+            this.setState()
+            this.editor.updateEventHandlers()
         }
-        this.setState('UNDO')
-        this.setState('REDO')
         // if ( editor.options.debug ){
         //     console.log('buffer',buffer.buffer)
         //     console.log('buffer index', buffer.index)
-        // }
-        this.editor.updateEventHandlers()
+        // }   
     }
 
 
     /**
      * Set the disabled and active states of a buffer (for a specific editor)
      */
-    setState(tag: string): void {
+    setState(): void {
         if (this?.editor?.buffer) {
-            if (tag == 'UNDO') {
+            if (this.tag === 'UNDO') {
                 this.editor.disabled = this.editor.buffer.items.length <= 1 || this.editor?.buffer.index <= 0
             } else {
                 this.editor.disabled = this.editor.buffer.index >= this.editor.buffer.items.length - 1

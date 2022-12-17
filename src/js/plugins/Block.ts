@@ -18,11 +18,6 @@ let
 
 
 
-
-
-
-
-
 /**
  * 
  * @param {HTMLElement} node 
@@ -125,69 +120,72 @@ class Block extends ToolbarButton {
     previousFormats: string[] = []
     fragmentNode: null | Node = null
 
-    constructor(block: string) {
+
+    constructor(editor: Editor, block: string) {
 
         block = block.toUpperCase()
 
         switch (block) {
             case 'H1':
-                super('block', 'H1', 'Heading 1', Icons.h1, click, { clean, sidebar, setState })
+                super(editor, 'block', 'H1', 'Heading 1', Icons.h1, click, { clean, sidebar, setState })
                 break
             case 'H2':
-                super('block', 'H2', 'Heading 2', Icons.h2, click, { clean, sidebar, setState })
+                super(editor, 'block', 'H2', 'Heading 2', Icons.h2, click, { clean, sidebar, setState })
                 break
             case 'H3':
-                super('block', 'H3', 'Heading 3', Icons.h3, click, { clean, sidebar, setState })
+                super(editor, 'block', 'H3', 'Heading 3', Icons.h3, click, { clean, sidebar, setState })
                 break
             case 'P':
-                super('block', 'P', 'Paragraph', Icons.p, click, { setState })
+                super(editor, 'block', 'P', 'Paragraph', Icons.p, click, { setState })
                 break
             case 'BQ':
-                super('block', 'BLOCKQUOTE', 'Blockquote', Icons.bq, click, { setState })
+                super(editor, 'block', 'BLOCKQUOTE', 'Blockquote', Icons.bq, click, { setState })
                 break
             case 'OL':
-                super('list', 'OL', 'Ordered list', Icons.ol, click, { setState })
+                super(editor, 'list', 'OL', 'Ordered list', Icons.ol, click, { setState })
                 break
             case 'OL':
-                super('list', 'UL', 'Unordered list', Icons.ul, click, { setState })
+                super(editor, 'list', 'UL', 'Unordered list', Icons.ul, click, { setState })
                 break
             default:
                 console.error(`Unrecognised block name [${block}]`)
         }
+
+        this.editor = editor
     }
 
 
-    click(editor: Editor) {
-        editorNode = editor.editorNode
+    click() {
+
         this.previousFormats = []
         lastNodeAdded = false
         setStyleProps(this)
 
         // Ensure start from a block node
-        if (editor.range === null) return
-        const newRootNode = Helpers.getTopParentNode(editor.range.rootNode, editorNode)
-        const firstParentNode = Helpers.getTopParentNode(editor.range.startContainer, editorNode)
-        const endParentNode = Helpers.getTopParentNode(editor.range.endContainer, editorNode)
+        if (this.editor.range === null) return
+        const newRootNode = Helpers.getTopParentNode(this.editor.range.rootNode, this.editor.editorNode)
+        const firstParentNode = Helpers.getTopParentNode(this.editor.range.startContainer, this.editor.editorNode)
+        const endParentNode = Helpers.getTopParentNode(this.editor.range.endContainer, this.editor.editorNode)
         if (newRootNode === false || firstParentNode === false || endParentNode === false) {
             return
         }
-        editor.range.rootNode = newRootNode
+        this.editor.range.rootNode = newRootNode
 
         // console.warn('root node', editor.range.rootNode)
         // console.log('first parent node', firstParentNode)
         // console.log('end parent node', endParentNode)
         //
         // Mark the start and end selection points
-        Helpers.addMarkers(editor.range)
+        Helpers.addMarkers(this.editor.range)
         // Init phase for block formatting
-        Phase.init(editor.range, true)
+        Phase.init(this.editor.range, true)
         // console.warn(`reFormatBlock with new format ${button.tag}`)
         // Just parse the parent node if the start and end belong to the same parent
         if (firstParentNode == endParentNode) {
             this.fragmentNode = document.createElement('DIV')
             parseNode(firstParentNode, { oldFormats: [], newFormats: [] }, this)
             // console.log( 'fragment', fragmentNode.innerHTML)
-            if (firstParentNode == editorNode) {
+            if (firstParentNode == this.editor.editorNode) {
                 firstParentNode.innerHTML = this.fragmentNode.innerHTML
             } else {
                 firstParentNode.outerHTML = this.fragmentNode.innerHTML
@@ -196,7 +194,7 @@ class Block extends ToolbarButton {
             let startNodeFound = false
             let endNodeFound = false
             this.fragmentNode = document.createElement('DIV')
-            editor.range.rootNode.childNodes.forEach(node => {
+            this.editor.range.rootNode.childNodes.forEach(node => {
                 // If find a none-block node then terminate this cycle of the loop
                 // ie. ignore text and comments
                 if (node.nodeType !== 1) {
@@ -230,20 +228,20 @@ class Block extends ToolbarButton {
                         //console.log( 'fragment', fragmentNode.innerHTML)
                         node.outerHTML = fragmentNode.innerHTML
                     }
-                    let removeNodes = editorNode.querySelectorAll('[data-remove=true]')
+                    let removeNodes = this.editor.editorNode.querySelectorAll('[data-remove=true]')
                     removeNodes.forEach(removeNode => removeNode.remove())
                 }
             })
         }
 
         // Reset the selection
-        Helpers.resetSelection(editor.editorNode)
-        editor.updateRange()
+        Helpers.resetSelection(this.editor.editorNode)
+        this.editor.updateRange()
 
         // Reset states for all block buttons
-        editor.setStateForButtonType('block')
-        editor.buffer()
-        editor.updateEventHandlers()
+        this.editor.setStateForButtonType('block')
+        this.editor.buffer()
+        this.editor.updateEventHandlers()
     }
 
 

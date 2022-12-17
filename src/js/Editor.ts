@@ -1,9 +1,10 @@
 import * as Templates from './templates'
 import * as Helpers from './helpers'
 import Modal from './Modal.js'
-import ToolbarButton from './ToolbarButton'
 import EditRange from './EditRange'
 import Buffer from './plugins/Buffer'
+import Options from './options'
+import Toolbar from './Toolbar'
 
 class Editor {
 
@@ -13,44 +14,64 @@ class Editor {
 
     id: string = ''
     range: null | EditRange = null
-    editorNode: HTMLElement
-    toolbar: ToolbarButton[]
+    editorNode: null | HTMLElement = null
+    toolbarNode: null | HTMLElement = null
+    mainNode: null | HTMLElement = null
+    sidebarNode: null | HTMLElement = null
+    debugNode: null | HTMLElement = null
+    toolbar: Toolbar
     shortcuts = []
     disabled: boolean = false
-    options = []
-
+    options: Options
     buffer: null | Buffer = null
-    updateBuffer: false | Function = false
 
-    /**
-     * 
-     * @param {HTMLElement} target The dom node to populate with the toolbar and editor
-     * @param {string} content The initial HTML content for the editor
-     * @param {object[]} toolbar 2-d array of buttons
-     * @param {object} options Options, such as the buffer size for undo/redo operations
-     */
-    constructor(target, content = '', toolbar: ToolbarButton[][], options) {
-        // Initialise options
-        this.options = this.initOptions(options)
-        // Initialise the toolbar
-        this.toolbar = this.initToolbarArray(toolbar)
-        // Initialise the toolbar and empty editor
-        target.innerHTML = Templates.editor(this.toolbar, this.options)
+    constructor(target: HTMLElement, content = '', toolbar: string[][], options: string) {
+
+        // Generate a unique id for this editor instance
+        // @todo This may not be required
         this.id = Helpers.generateUid()
-        // Grab dom elements
+
+        // Initialise options
+        this.options = new Options(options)
+
+        // Add editor html to the dom
+        target.innerHTML = Templates.editor(this.options)
+
+        // Initialise the toolbar
         this.toolbarNode = target.querySelector('.editor-toolbar')
+        if (this.toolbarNode === null) {
+            console.error('Failed to create toolbar')
+            return
+        }
+        this.toolbar = new Toolbar(this, toolbar)
+        this.toolbarNode.innerHTML = Templates.editorToolbar(this.toolbar)
+
+
+
+
+
+        // Get the toolbar, main and body nodes
         this.mainNode = target.querySelector('.editor-main')
         this.editorNode = target.querySelector('.editor-body')
+
+
+
+
+
+
+
+        // Grab dom elements
         this.menuIcon = this.toolbarNode.querySelector('.menu-icon')
         this.menuItems = this.toolbarNode.querySelector('section')
         this.sidebarNode = null
-        // Check for debugging
-        this.debugTarget = false
+
+        // Add debugging panel?
         if (this.options.debug) {
             const div = document.createElement('div')
             div.classList.add('editor-debug')
-            this.debugTarget = Helpers.insertAfter(div, this.mainNode)
+            this.debugNode = Helpers.insertAfter(div, this.mainNode)
         }
+
         // *** TEST THE MODALS ***
         // Uncomment the next two lines for development testing
         // this.testModals('positioned')  // options are 'overlay', 'positioned', 'drawer' and 'full-screen'
@@ -70,35 +91,6 @@ class Editor {
         setTimeout(() => this.initEditor(content), 100)
     }
 
-    /**
-     * Initialise the optional editor parameters
-     * @param {object} options 
-     * @returns 
-     */
-    initOptions(options) {
-        const headingNumbers = true
-        const bufferSize = 10
-        const MAX_BUFFER_SIZE = 10
-        const debug = false
-        const defaultContent = ''
-        const explorer = true
-        if (options) {
-            options.headingNumbers = options.headingNumbers == undefined ? headingNumbers : options.headingNumbers
-            options.bufferSize = options.bufferSize == undefined ? bufferSize : Math.max(parseInt(options.bufferSize), MAX_BUFFER_SIZE)
-            options.debug = options.debug == undefined ? debug : options.debug
-            options.defaultContent = options.defaultContent == undefined ? '' : options.defaultContent
-            options.explorer = options.explorer == undefined ? explorer : options.explorer
-        } else {
-            options = {
-                headingNumbers,
-                bufferSize,
-                debug,
-                defaultContent,
-                explorer
-            }
-        }
-        return options
-    }
 
     /**
      * Initialise the editor content, either with the current content passed in or 
@@ -135,21 +127,9 @@ class Editor {
                 element.scrollIntoView({ block: 'center', behaviour: 'smooth' })
             }
         }
-        setTimeout(() => this.buffer(), 100)
+        setTimeout(() => this.updateBuffer(), 100)
     }
 
-
-    initToolbarArray(groups: ToolbarButton[][]): ToolbarButton[] {
-        let toolbar: ToolbarButton[] = []
-        groups.forEach((group, groupIndex) => {
-            group.forEach(button => {
-                button.group = groupIndex
-                Helpers.registerTag(button.type, button.tag)
-                toolbar.push(button)
-            })
-        })
-        return toolbar
-    }
 
     /**
      * Set the disabled and active states for a button. If not provided
@@ -192,60 +172,66 @@ class Editor {
     /**
      * Initialise the toolbar buttons
      */
-    initialiseButtons() {
+    initialiseButtons(): void {
 
-        // Initialise buffer callback to false - reset if UNDO button found 
-        // and a buffer length set
-        // Do any custom setup required
-        this.toolbar.forEach(button => {
-            // Add dom element to the button
-            button.element = this.toolbarNode.querySelector(`#${button.tag}`)
-            // Special handling for undo (init of other buttons done after content loaded)
-            if (button.tag === 'UNDO' && this.options.bufferSize > 0) {
-                this.updateBuffer = button.update
-                button.init(this, button)
-            }
-            // Init formatting for buttons other than undo and redo
-            if ("init" in button &&
-                button.tag !== 'UNDO' && button.tag !== 'REDO') {
-                button.init(this, button)
-            }
-            // Set initial button state
-            this.setState(button)
-            // Some button have shortcuts in which case save for use in the keydown
-            // event handler
-            if ("shortcut" in button) {
-                const shortcut = button.shortcut[0]
-                const trigger = button.shortcut[1]
-                this.shortcuts.push({
-                    shortcut: button.shortcut[0],
-                    trigger: button.shortcut[1],
-                    button: button
-                })
-            }
-            // All buttons have a click method
-            this.buttonClicked = false
-            button.element.addEventListener('click', event => {
-                if (this.buttonClicked) {
-                    return
+        if (this.toolbarNode !== null) {
+
+            // Initialise buffer callback to false - reset if UNDO button found 
+            // and a buffer length set
+            // Do any custom setup required
+            this.toolbar.buttons.forEach(button => {
+
+                // Add dom element to the button
+                button.element = this.toolbarNode ? this.toolbarNode.querySelector(`#${button.tag}`) : null
+
+                // // Special handling for undo (init of other buttons done after content loaded)
+                // if (button.tag === 'UNDO' && this.options.bufferSize > 0) {
+                //     button.init(this, button)
+                // }
+                // // Init formatting for buttons other than undo and redo
+                // if ("init" in button &&
+                //     button.tag !== 'UNDO' && button.tag !== 'REDO') {
+                //     button.init(this, button)
+                // }
+
+                // Set initial button state
+                this.setState(button)
+                // Some button have shortcuts in which case save for use in the keydown
+                // event handler
+                if ("shortcut" in button) {
+                    const shortcut = button.shortcut[0]
+                    const trigger = button.shortcut[1]
+                    this.shortcuts.push({
+                        shortcut: button.shortcut[0],
+                        trigger: button.shortcut[1],
+                        button: button
+                    })
                 }
-                this.buttonClicked = true
-                // Get latest range as debouncing means may not have the latest value when typing
-                this.updateRange()
-                // Ignore if a modal is active
-                if (this.modal.active()) {
-                    return
-                }
-                // Handle clicks for detached buttons (e.g. undo, redo) 
-                // and when have a range
-                if (button.type === 'detached' || this.range !== false) {
-                    button.click(this, button)
-                }
-                // Other prevent default action to ignore
-                event.preventDefault()
+                // All buttons have a click method
                 this.buttonClicked = false
+                button.element.addEventListener('click', event => {
+                    if (this.buttonClicked) {
+                        return
+                    }
+                    this.buttonClicked = true
+                    // Get latest range as debouncing means may not have the latest value when typing
+                    this.updateRange()
+                    // Ignore if a modal is active
+                    if (this.modal.active()) {
+                        return
+                    }
+                    // Handle clicks for detached buttons (e.g. undo, redo) 
+                    // and when have a range
+                    if (button.type === 'detached' || this.range !== false) {
+                        button.click(this, button)
+                    }
+                    // Other prevent default action to ignore
+                    event.preventDefault()
+                    this.buttonClicked = false
+                })
             })
-        })
+
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -483,7 +469,7 @@ class Editor {
         Helpers.setCursor(p, 0)
         this.updateRange()
         this.setToolbarStates()
-        this.buffer()
+        this.updateBuffer()
     }
 
 
@@ -889,11 +875,12 @@ class Editor {
             buttons: {
                 cancel: { label: 'Cancel', callback: () => this.modal.hide() },
                 confirm: {
-                    label: 'Yes', callback: () => {
+                    label: 'Yes',
+                    callback: () => {
                         this.editorNode.innerHTML = ''
                         this.filename = 'arte-download'
                         this.modal.hide()
-                        setTimeout(() => this.buffer(), 100)
+                        setTimeout(() => this.updateBuffer(), 100)
                     }
                 }
             }
@@ -945,7 +932,7 @@ class Editor {
         //console.log('modal active',this.modal.active())
         this.range = Helpers.getRange(this.editorNode)
         if (this.options.debug) {
-            Templates.debugRange(this.debugTarget, this.range)
+            Templates.debugRange(this.debugNode, this.range)
         }
         // const timestamp2 = new Date()
         // console.log(`START: ${timestamp1.getTime()}\nENDED: ${timestamp2.getTime()}`)
@@ -967,10 +954,10 @@ class Editor {
         }
     }
 
-    buffer() {
-        if (this.updateBuffer !== false) {
+    updateBuffer() {
+        if (this?.buffer?.update) {
             // console.log('Updating buffer')
-            this.updateBuffer(this)
+            this.buffer.update()
         }
         // Update the sidebar if we have one
         this.updateSidebar(false)

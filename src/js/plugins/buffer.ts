@@ -77,20 +77,15 @@ export default class Buffer {
     size: number = 0
     index: number = -1
     ignore: boolean = false
-    items: string[]
+    items: string[] = []
     editor: Editor
     buffering: boolean = false
 
-    constructor(kind: string, editor: Editor) {
+    constructor(editor: Editor) {
         this.editor = editor
-        kind = kind.toUpperCase()
-        if (kind === 'UNDO') {
-            this.buffer = new ('detached', 'UNDO', 'Undo', Icons.undo, undo, { update, buffering, restart, pause })
+        if (editor?.options.bufferSize) {
             this.size = editor.options.bufferSize
-        } else {
-            super('detached', 'REDO', 'Redo', Icons.redo, redo)
         }
-        this.editor = editor
     }
 
 
@@ -100,30 +95,26 @@ export default class Buffer {
      * when the maximum buffer size is reached
      */
     update() {
-        const buffer = buffers.get(this.editor.id)
-        if (buffer === undefined) {
-            return
-        }
         // Check that the new value is different
-        if (buffer.buffer.length > 0 &&
-            this.editor.editorNode.innerHTML == buffer.buffer[buffer.buffer.length - 1]) {
+        if (this.items.length > 0 &&
+            this.editor.editorNode.innerHTML == this.items[this.items.length - 1]) {
             return
         }
-        if (buffer.buffer.length > buffer.size) {
+        if (this.items.length > this.size) {
             // Remove first element
-            buffer.buffer.shift()
+            this.items.shift()
         }
         // Check buffer index in case need to reset buffer when the user had
         // undone and then made new changes
-        if ((buffer.index + 1) < buffer.buffer.length) {
-            const items = buffer.buffer.length - (buffer.index + 1)
+        if ((this.index + 1) < this.items.length) {
+            const items = this.items.length - (this.index + 1)
             for (let i = 0; i < items; i++) {
-                buffer.buffer.pop()
+                this.items.pop()
             }
         }
         // Add the new one
-        buffer.buffer.push(this.editor.editorNode.innerHTML)
-        buffer.index = buffer.buffer.length - 1
+        this.items.push(this.editor.editorNode.innerHTML)
+        this.index = this.items.length - 1
         // Update buttons
         this.setState()
         // Debug

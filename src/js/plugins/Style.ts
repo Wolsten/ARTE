@@ -307,10 +307,10 @@ const setStyleProps = function (button) {
  * @param {object} editor A unique editor instance
  * @param {object} button The button to act on
  */
-export const
 
 
-class Style extends ToolbarButton {
+
+export default class Style extends ToolbarButton {
 
     constructor(style: string) {
 
@@ -360,5 +360,3 @@ class Style extends ToolbarButton {
         editor.updateEventHandlers()
     }
 }
-
-export default Style

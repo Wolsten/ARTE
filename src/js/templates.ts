@@ -31,7 +31,7 @@ function editorToolBarGroup(title, html) {
  * @param {object[]} buttons 
  * @returns {string}
  */
-function editorToolbar(buttons) {
+export const editorToolbar = function (buttons) {
     let buttonsHtml = ''
     let groups = []
     // console.log('buttons.length',buttons.length)
@@ -58,7 +58,7 @@ function editorToolbar(buttons) {
  * @param {object} options 
  * @returns {string}
  */
-export const editor = function (buttons, options) {
+export const OLDeditor = function (buttons, options) {
     const toolbar = editorToolbar(buttons)
     let classes = ''
     if (options.headingNumbers) {
@@ -72,6 +72,23 @@ export const editor = function (buttons, options) {
             <div class="editor-main">
                 <!-- Sidebar can go here --> 
                 <div class="editor-body ${classes}" contenteditable="true"></div>
+            </div>
+        </div>`
+}
+
+export const editor = function (options) {
+    let classes = ''
+    if (options.headingNumbers) {
+        classes += 'heading-numbers'
+    }
+    return `
+        <div class="editor-container">
+            <div class="editor-toolbar">
+                PLACEHOLDER
+            </div>
+            <div class="editor-main">
+                <div class="editor-body ${classes}" contenteditable="true"></div>
+                <!-- Dynamic sidebar goes here --> 
             </div>
         </div>`
 }

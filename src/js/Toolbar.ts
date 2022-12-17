@@ -4,6 +4,7 @@ import * as Helpers from './helpers'
 import Block from "./plugins/Block"
 import Style from "./plugins/Style"
 import Buffer from "./plugins/Buffer"
+import BufferButton from "./plugins/BufferButton"
 
 class Toolbar {
 
@@ -19,7 +20,7 @@ class Toolbar {
 
     buttons: ToolbarButton[] = []
 
-    constructor(editor: Editor, userGroups: string[][] = []) {
+    constructor(editor: Editor, userGroups: string[][]) {
 
         if (userGroups.length === 0) {
             userGroups = this.defaults
@@ -43,7 +44,10 @@ class Toolbar {
                         button = new Style(name)
                         break
                     case 'BUFFER':
-                        button = new Buffer(name)
+                        if (!editor.buffer) {
+                            editor.buffer = new Buffer(editor)
+                        }
+                        button = new BufferButton(editor, name)
                         break
                 }
 

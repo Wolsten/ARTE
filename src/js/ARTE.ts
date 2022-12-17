@@ -38,41 +38,20 @@ const target = document.getElementById('editor')
 
 // Setup toolbar (groups)
 const toolbar = [
-    [ARTE.Blocks.H1, ARTE.Blocks.H2, ARTE.Blocks.H3, ARTE.Blocks.P, ARTE.Blocks.BQ],
-    [ARTE.Blocks.OL, ARTE.Blocks.UL],
-    [ARTE.Styles.B, ARTE.Styles.I, ARTE.Styles.U, ARTE.Colours.FOREGROUND, ARTE.Colours.BACKGROUND, ARTE.Styles.CLEAR],
-    [ARTE.Buffer.UNDO, ARTE.Buffer.REDO],
-    [ARTE.Clipboard.CUT, ARTE.Clipboard.COPY, ARTE.Clipboard.PASTE],
-    [ARTE.Mentions.BUTTON, ARTE.Links.BUTTON, ARTE.Images.BUTTON, ARTE.Comments.BUTTON, ARTE.Actions.BUTTON],
-    [ARTE.Settings.BUTTON]
+    ['BLOCK.H1', 'BLOCK.H2', 'BLOCK.H3', 'BLOCK.P', 'BLOCK.BQ'],
+    ['BLOCK.OL', 'BLOCK.UL'],
+    ['STYLE.B', 'STYLE.I', 'STYLE.U', 'STYLE.FOREGROUND', 'STYLE.BACKGROUND', 'STYLE.CLEAR'],
+    ['BUFFER.UNDO', 'BUFFER.REDO'],
+    ['CUT', 'COPY', 'PASTE'],
+    ['Mentions', 'Links', 'Images', 'Comments', 'Actions'],
+    ['Settings']
 ]
 
 // Setup Mentions plugin with list of people
 ARTE.Mentions.setup(['David', 'William', 'Jenny', 'Sally', 'Sarah', 'Susan', 'Brian'])
 
-// Define editor options
-const options = new ARTE.Options()
+const options = 'debug=true,defaultContent=sample.arte'
 
-// const options = {
-//     // Automatically number headings using outline numbering. Allowed values true or false   
-//     // If include the ARTE.Options.BUTTON in the toolbar then this value can be set by the user     
-//     headingNumbers: true,
-//     // Styling theme
-//     // If include the ARTE.Options.BUTTON in the toolbar then this value can be set by the user   
-//     theme: 'theme-light',
-//     // Number of Undo operations supported, max 10
-//     bufferSize: 10,
-//     // Show explorer sidebar? (should be true for testing)
-//     explorer: true,
-//     // debugging flag, e.g. to output selection ranges
-//     debug: true,
-//     // Add default content from separate file
-//     // The option will attempt to read in this file and 
-//     // override any value for the initial content specified 
-//     // by the second parameter when creating the editor instance
-//     // @todo Comment out default content when running test scripts
-//     defaultContent: 'sample.arte'
-// }
 
 // Create editor and add to dom in target position
 const editor = new ARTE.Editor(target, '', toolbar, options)
