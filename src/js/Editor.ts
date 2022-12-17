@@ -526,7 +526,7 @@ class Editor {
                 })
             }
             // Undo/redo events
-            if (!handled && this.bufferUpdate !== false) {
+            if (!handled && this?.buffer?.buffering) {
                 if ((event.ctrlKey || event.metaKey) && event.key == 'z') {
                     event.preventDefault()
                     // Redo
