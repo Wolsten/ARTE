@@ -17,12 +17,13 @@ export default class ToolbarButton {
     action = ''
     newFormat = ''
 
-
     // Optional methods
     init: null | Function = null
     sidebar: null | Function = null
     setState: null | Function = null
     shortcut: null | ['', ''] = null
+    addEventHandlers: null | Function = null
+    clean: null | Function = null
 
     constructor(editor: Editor, type: string, tag: string, label: string, icon: string) {
         this.editor = editor

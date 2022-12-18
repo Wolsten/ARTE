@@ -26,13 +26,14 @@ class Editor {
     mainNode: null | HTMLElement = null
     sidebarNode: null | HTMLElement = null
     debugNode: null | HTMLElement = null
-    toolbar: Toolbar
+    toolbar: null | Toolbar = null
     menuIcon: null | HTMLElement = null
     menuItems: null | HTMLElement = null
     modal = new Modal()
 
     preview: null | Function = null
     update: null | Function = null
+    handleKeyup: null | Function = null
 
     shortcuts: Shortcut[] = []
     disabled: boolean = false
@@ -63,6 +64,12 @@ class Editor {
         this.toolbarNode.innerHTML = Templates.editorToolbar(this.toolbar)
         this.menuIcon = this.toolbarNode.querySelector('.menu-icon')
         this.menuItems = this.toolbarNode.querySelector('section')
+
+        // check all dom elements correctly loaded
+        if (!this.toolbarNode || !this.mainNode || !this.editorNode || !this.menuIcon || !this.menuItems) {
+            console.log('Error: one or more editor elements could nto be loaded')
+            return
+        }
 
         // Add debugging panel?
         if (this.options.debug) {
@@ -120,7 +127,7 @@ class Editor {
         this.initialiseButtons()
 
         // Optional sidebar
-        if (this.options.explorer && this.toolbar.buttons.find(btn => btn.sidebar !== undefined)) {
+        if (this.options.explorer && this.toolbar!.buttons.find(btn => btn.sidebar !== undefined)) {
             this.showSidebar()
         }
 
@@ -170,7 +177,7 @@ class Editor {
      * Set the state for a button type (or all buttons if blank)
      */
     setStateForButtonType(type = '') {
-        this.toolbar.buttons.forEach(button => {
+        this.toolbar!.buttons.forEach(button => {
             if (type == '' || button.type == type) {
                 this.setState(button)
                 return
@@ -184,58 +191,54 @@ class Editor {
      */
     initialiseButtons(): void {
 
-        if (this.toolbarNode !== null) {
+        // Initialise buffer callback to false - reset if UNDO button found 
+        // and a buffer length set
+        // Do any custom setup required
+        this.toolbar!.buttons.forEach(button => {
 
-            // Initialise buffer callback to false - reset if UNDO button found 
-            // and a buffer length set
-            // Do any custom setup required
-            this.toolbar.buttons.forEach(button => {
+            // Add dom element to the button
+            button.element = this.toolbarNode!.querySelector(`#${button.tag}`)
+            if (button.element === null) {
+                console.error('Missing button element for button', button.tag)
+                return
+            }
 
-                // Add dom element to the button
-                button.element = this.toolbarNode ? this.toolbarNode.querySelector(`#${button.tag}`) : null
-                if (button.element === null) {
-                    console.error('Missing nutton element for button', button.tag)
+            if (button.init) {
+                button.init()
+            }
+
+            // Set initial button state
+            this.setState(button)
+
+            // Some button have shortcuts in which case save for use in the keydown event handler
+            if (button.shortcut) {
+                this.shortcuts.push(new Shortcut(button))
+            }
+
+            // Add click
+            button.element.addEventListener('click', event => {
+                if (!button.click) {
                     return
                 }
 
-                if (button.init) {
-                    button.init()
+                // Get latest range as debouncing means may not have the latest value when typing
+                this.updateRange()
+
+                // Ignore if a modal is active
+                if (this.modal.active()) {
+                    return
                 }
 
-                // Set initial button state
-                this.setState(button)
-
-                // Some button have shortcuts in which case save for use in the keydown event handler
-                if (button.shortcut) {
-                    this.shortcuts.push(new Shortcut(button))
+                // Handle clicks for detached buttons (e.g. undo, redo) 
+                // and when have a range
+                if (button.type === 'detached' || this.range) {
+                    button.click()
                 }
 
-                // Add click
-                button.element.addEventListener('click', event => {
-                    if (!button.click) {
-                        return
-                    }
-
-                    // Get latest range as debouncing means may not have the latest value when typing
-                    this.updateRange()
-
-                    // Ignore if a modal is active
-                    if (this.modal.active()) {
-                        return
-                    }
-
-                    // Handle clicks for detached buttons (e.g. undo, redo) 
-                    // and when have a range
-                    if (button.type === 'detached' || this.range) {
-                        button.click()
-                    }
-
-                    // Other prevent default action to ignore
-                    event.preventDefault()
-                })
+                // Other prevent default action to ignore
+                event.preventDefault()
             })
-
-        }
+        })
     }
 
 
@@ -247,9 +250,8 @@ class Editor {
      * Handle mobile menu clicks (invoked from listenForMouseUpEvents)
      */
     handleMenuClick() {
-        if (!this.menuItems) return
-        this.menuItems.classList.toggle('show')
-        if (this.menuItems.classList.contains('show')) {
+        this.menuItems!.classList.toggle('show')
+        if (this.menuItems!.classList.contains('show')) {
             if (!this.range) {
                 this.range = Helpers.restoreSelectedRange(this.range)
                 this.setToolbarStates()
@@ -275,7 +277,7 @@ class Editor {
             return
         }
         let tabList: SidebarContent[] = []
-        this.toolbar.buttons.forEach(button => {
+        this.toolbar!.buttons.forEach(button => {
             if (button.sidebar) {
                 //console.log('Opening sidebar for button ', button.tag)
                 tabList.push(button.sidebar(this))
@@ -315,23 +317,19 @@ class Editor {
      * Update the content of the sidebar
      */
     updateSidebar(): void {
-        if (!this.mainNode) {
-            console.error('Error: Could not find editor main node')
-            return
-        }
         if (!this.sidebarNode) {
             return
         }
         // Get latest content
         let tabList: SidebarContent[] = []
-        this.toolbar.buttons.forEach(button => {
+        this.toolbar!.buttons.forEach(button => {
             if (button.sidebar) {
                 tabList.push(button.sidebar(this))
             }
         })
         // Populate latest content if we have any
         tabList.forEach((item, index) => {
-            const content = this.sidebarNode.querySelector(`[data-tab-id="tab-${index}"]`)
+            const content = this.sidebarNode!.querySelector(`[data-tab-id="tab-${index}"]`)
             if (!content) {
                 console.error('Error: Could not find a sidebar tab', index)
                 return
@@ -419,7 +417,7 @@ class Editor {
      */
     resetRange() {
         this.range = null
-        this.toolbar.buttons.forEach(button => {
+        this.toolbar!.buttons.forEach(button => {
             this.setState(button)
         })
     }
@@ -449,7 +447,7 @@ class Editor {
      * Check if the node is within the toolbar section of the dom tree
      * Return true if the node is in the toolbar
      */
-    nodeInToolbar(node: HTMLElement) {
+    nodeInToolbar(node: HTMLElement): boolean {
         while (node.nodeType == 3 || node.tagName != 'BODY') {
             if (node == this.toolbarNode) {
                 return true
@@ -467,14 +465,14 @@ class Editor {
     /**
      * Set the states of all toolbar buttons
      */
-    setToolbarStates() {
+    setToolbarStates(): void {
         if (!this.range) {
-            this.toolbar.buttons.forEach(button => {
+            this.toolbar!.buttons.forEach(button => {
                 if (button.element) button.element.classList.remove('active')
             })
             return
         }
-        this.toolbar.buttons.forEach(button => {
+        this.toolbar!.buttons.forEach(button => {
             this.setState(button)
         })
     }
@@ -485,7 +483,7 @@ class Editor {
      * Handle the mouse up event in order to potentially insert a paragraph in
      * an empty editor, highlight a custom node if selected
      */
-    handleMouseUp() {
+    handleMouseUp(): void {
         // if ( this.options.debug ){
         //     console.log('Handle mouse up')
         //     console.log('handleMouseUp range=',this.range)
@@ -511,15 +509,11 @@ class Editor {
     /**
      * Insert empty paragraph
      */
-    insertParagraph() {
-        if (!this.editorNode) {
-            console.error('Error - editor missing')
-            return
-        }
+    insertParagraph(): void {
         let p = document.createElement('P')
         // Create a placeholder to ensure set cursor works
         p.innerText = '\n'
-        p = this.editorNode.appendChild(p)
+        p = this.editorNode!.appendChild(p)
         Helpers.setCursor(p, 0)
         this.updateRange()
         this.setToolbarStates()
@@ -535,13 +529,9 @@ class Editor {
     /**
      * List for keydown events on the editor node
      */
-    listenForKeydownEvents() {
-        if (!this.editorNode) {
-            console.error('Error - editor missing')
-            return
-        }
+    listenForKeydownEvents(): void {
         this.lastKey = ''
-        this.editorNode.addEventListener('keydown', event => {
+        this.editorNode!.addEventListener('keydown', event => {
             let handled = false
             // if ( this.options.debug ){
             //     console.warn('keydown event')
@@ -591,13 +581,12 @@ class Editor {
                     // Redo
                     let button
                     if (event.shiftKey) {
-                        button = this.toolbar.find(b => b.tag == 'REDO')
+                        button = this.toolbar!.buttons.find(b => b.tag == 'REDO')
                         // Undo
                     } else {
-                        button = this.toolbar.find(b => b.tag == 'UNDO')
+                        button = this.toolbar!.buttons.find(b => b.tag == 'UNDO')
                     }
-                    button.element.click()
-                    handled = true
+                    if (button?.click) button.click()
                 }
             }
             this.lastKey = event.key
@@ -605,58 +594,63 @@ class Editor {
     }
 
     /**
-     * Handle enter key pressed in editor node
+     * Handle enter key pressed in editor node. Return true if handled
      */
-    handleEnter() {
+    handleEnter(): void | boolean {
         // Get latest range as debouncing means may not have the latest value when typing
         this.updateRange()
         if (this.range === null) {
             return
         }
-        const endLineSelected = this.range.endContainer.textContent.trim().length == this.range.endOffset
+        const length = this.range.endContainer.textContent ? this.range.endContainer.textContent.trim().length : -1
+        const endLineSelected = length === this.range.endOffset
         let handled = false
         // console.log(`handling enter with customs`, this.range.customs)
         if (this.range?.custom || endLineSelected) {
-            const emptyTag = this.range.blockParent.innerHTML == '<br>'
-            const listTag = this.range.blockParent.tagName == 'LI'
-            const tag = emptyTag || !listTag ? 'P' : this.range.blockParent.tagName
-            let n = document.createElement(tag)
-            n.innerText = '\n'
-            n = Helpers.insertAfter(n, this.range.blockParent)
-            Helpers.setCursor(n, 0)
-            handled = true
-            // Reset the range which must be done after a delay since this
-            // method was triggered on keydown before added to dom
-            setTimeout(() => {
-                this.updateRange()
-                this.setStateForButtonType('block')
-            }, 10)
-            // Check for handling enter within a parent block element that has a custom node at the end
-            // @todo Multiple custom nodes?
+            if (this.range.blockParent) {
+                const emptyTag = this.range.blockParent.innerHTML === '<br>'
+                const listTag = this.range.blockParent.tagName === 'LI'
+                const tag = emptyTag || !listTag ? 'P' : this.range.blockParent.tagName
+                let n = document.createElement(tag)
+                n.innerText = '\n'
+                n = Helpers.insertAfter(n, this.range.blockParent)
+                Helpers.setCursor(n, 0)
+                handled = true
+                // Reset the range which must be done after a delay since this
+                // method was triggered on keydown before added to dom
+                setTimeout(() => {
+                    this.updateRange()
+                    this.setStateForButtonType('block')
+                }, 10)
+                // Check for handling enter within a parent block element that has a custom node at the end
+                // @todo Multiple custom nodes?
+            }
         }
         // If any of the immediate child of the block parent are not editable - then move these 
         // back to the original block parent since otherwise they will be transferred to the 
         // next block on Enter
-        const p = this.range.blockParent
-        p.childNodes.forEach(child => {
-            if (child.contentEditable == 'false') {
-                setTimeout(() => {
-                    p.appendChild(child)
-                }, 10)
-            }
-        })
+        const parent = this.range.blockParent
+        if (parent) {
+            parent.childNodes.forEach(child => {
+                if ((<HTMLElement>child).contentEditable === 'false') {
+                    setTimeout(() => {
+                        parent.appendChild(child)
+                    }, 10)
+                }
+            })
+        }
         if (this.range.custom) {
             this.highlightCustomNode(false)
         }
         return handled
     }
 
+
+
     /**
-     * Handle delete key
-     * @param {string} key
-     * @returns {boolean} true if need to prevent default action
+     * Handle delete key. Return true if need to prevent default action
      */
-    handleDelete(key) {
+    handleDelete(key: string): boolean {
         if (key == 'd') {
             key = 'Delete'
         }
@@ -679,24 +673,28 @@ class Editor {
                 if (key == 'Backspace' && this.range.startOffset == 0) {
                     // console.log('backspacing into custom block')
                     // Back spacing into a block containing one or more non-editable blocks?
-                    const previous = this.range.blockParent.previousElementSibling
-                    previous.childNodes.forEach(child => {
-                        // console.log('Found custom block')
-                        // Found block, move back to the previous element after a delay
-                        // to overcome the default behaviour which is to delete the block
-                        if (child.contentEditable == "false") {
-                            setTimeout(() => {
-                                previous.appendChild(child)
-                            }, 1)
-
-                        }
-                    })
+                    const previous = this.range?.blockParent?.previousElementSibling
+                    if (previous) {
+                        previous.childNodes.forEach(child => {
+                            // console.log('Found custom block')
+                            // Found block, move back to the previous element after a delay
+                            // to overcome the default behaviour which is to delete the block
+                            if ((<HTMLElement>child).contentEditable === "false") {
+                                setTimeout(() => {
+                                    previous.appendChild(child)
+                                }, 1)
+                            }
+                        })
+                    }
                     // Forward delete in a none-editable block?
-                } else if (key == 'Delete' && this.range.endContainer.textContent.trim().length == this.range.endOffset) {
-                    const next = this.range.endContainer.nextElementSibling
-                    if (next && next.getAttribute("contenteditable") == 'false') {
-                        feedback.show()
-                        return true
+                } else if (key == 'Delete') {
+                    const length = this.range.endContainer.textContent ? this.range.endContainer.textContent.trim().length : -1
+                    if (length === this.range.endOffset) {
+                        const next = (<HTMLElement>this.range.endContainer).nextElementSibling
+                        if (next && next.getAttribute("contenteditable") === 'false') {
+                            feedback.show()
+                            return true
+                        }
                     }
                 }
                 // Back spacing or deleting in a multiple selection
@@ -715,6 +713,7 @@ class Editor {
         return false
     }
 
+
     // -----------------------------------------------------------------------------
     // @section Keyup events
     // -----------------------------------------------------------------------------
@@ -725,7 +724,8 @@ class Editor {
     listenForKeyupEvents() {
         // Set the handleKeyup method to be the debounced method handleKeyupDelayed
         this.handleKeyup = Helpers.debounce(this.handleKeyupDelayed, 500)
-        this.editorNode.addEventListener('keyup', event => {
+        this.editorNode!.addEventListener('keyup', event => {
+            if (!this.handleKeyup) return
             const ignore = ['Shift', 'Meta', 'Ctrl']
             // console.log('handle key up event',event)
             if (ignore.includes(event.key) == false && this.modal.active() == false) {
@@ -734,11 +734,12 @@ class Editor {
         })
     }
 
+
+
     /**
      * Handle keyup events (after being debounced)
-     * @param  {...any} args Handle keyup events
      */
-    handleKeyupDelayed(...args) {
+    handleKeyupDelayed(...args: any) {
         // console.warn('handleKeyupDelayed')
         let key = args[0]
         //console.log('key',key)
@@ -763,9 +764,9 @@ class Editor {
      * after updates to the dom
      */
     updateEventHandlers() {
-        this.toolbar.forEach(button => {
-            if ('addEventHandlers' in button) {
-                button.addEventHandlers(this)
+        this.toolbar!.buttons.forEach(button => {
+            if (button.addEventHandlers) {
+                button.addEventHandlers()
             }
         })
     }
@@ -774,8 +775,7 @@ class Editor {
     // @section Testing
     // -----------------------------------------------------------------------------
 
-    testModals(type) {
-
+    testModals(type: string) {
         // Warning modal
         if (type == 'overlay') {
             const modal = new Modal({
@@ -810,7 +810,7 @@ class Editor {
 
             // Positioned modal
         } else if (type == 'positioned') {
-            this.editorNode.addEventListener('click', () => {
+            this.editorNode!.addEventListener('click', () => {
                 this.updateRange()
                 const modal = new Modal({
                     type: 'positioned',
@@ -839,7 +839,7 @@ class Editor {
     /**
      * Display modal dialogue requesting the filename to download as
      */
-    download() {
+    download(): void {
         if (this.modal.active()) {
             return
         }
@@ -860,10 +860,20 @@ class Editor {
      * Add a hidden download button to the dom with the encoded contents of the
      * editor, click it programmatically and then remove
      */
-    save() {
-        let filename = document.querySelector('form.save #filename').value.trim().toLowerCase()
+    save(): void {
+        const fileInput = document.querySelector('form.save #filename')
+        if (!fileInput) {
+            console.error('Could not find file input')
+            return
+        }
+        let filename = (<HTMLInputElement>fileInput).value.trim().toLowerCase()
         if (filename == '') {
-            document.querySelector('form.save .feedback').innerHTML = "You must provide a filename. Click <strong>Cancel</strong> or press the <strong>Escape</strong> key to close this dialogue without saving."
+            const feedback = document.querySelector('form.save .feedback')
+            if (!feedback) {
+                console.error('Could not find feedback placeholder')
+                return
+            }
+            feedback.innerHTML = "You must provide a filename. Click <strong>Cancel</strong> or press the <strong>Escape</strong> key to close this dialogue without saving."
             return
         }
         filename += '.arte'
@@ -877,25 +887,28 @@ class Editor {
         link.remove()
     }
 
+
     /**
      * Handle file upload from the upload button defined in the upload method
-     * @param {HTMLElement} input 
-     * @returns 
      */
-    handleFileUpload(input) {
-        const file = input.files[0]
+    handleFileUpload(input: HTMLInputElement): void {
+        const file = input.files ? input.files[0] : null
         if (!file) {
             return
         }
         const ext = file.name.slice(-4).toLowerCase()
-        if (ext != 'arte') {
+        if (ext !== 'arte') {
             return
         }
         this.filename = file.name.slice(0, -5)
         const reader = new FileReader()
         reader.onload = (event) => {
-            const content = event.target.result
-            this.initEditor(content)
+            const content = event?.target?.result
+            if (!content) {
+                console.error()
+                return
+            }
+            this.initEditor(<string>content)
         }
         reader.readAsText(file)
         // Remove the input (avoids multiple event listeners amongst other things)
@@ -907,19 +920,25 @@ class Editor {
      * programmatically
      */
     upload() {
-        let input = document.getElementById('arte-upload')
-        if (input == null) {
-            input = document.createElement('input')
-            input.id = 'arte-upload'
-            input.type = 'file'
-            input.style.display = 'none'
-            input.accept = '.arte'
-            //console.log('input', input.outerHTML)
-            input.addEventListener('change', () => this.handleFileUpload(input), false)
-            document.body.appendChild(input)
+        let input: HTMLInputElement | null = <HTMLInputElement>document.getElementById('arte-upload')
+        if (!input) {
+            input = <HTMLInputElement>document.createElement('INPUT')
+            if (!input) {
+                console.error('Could not create file input')
+                return
+            }
         }
+        input.id = 'arte-upload'
+        input.type = 'file'
+        input.style.display = 'none'
+        input.accept = '.arte'
+        //console.log('input', input.outerHTML)
+        input.addEventListener('change', () => this.handleFileUpload(<HTMLInputElement>input), false)
+        document.body.appendChild(input)
         input.click()
     }
+
+
 
     clear() {
         if (this.modal.active()) {
@@ -936,7 +955,7 @@ class Editor {
                 confirm: {
                     label: 'Yes',
                     callback: () => {
-                        this.editorNode.innerHTML = ''
+                        if (this.editorNode) this.editorNode.innerHTML = ''
                         this.filename = 'arte-download'
                         this.modal.hide()
                         setTimeout(() => this.updateBuffer(), 100)
@@ -954,29 +973,28 @@ class Editor {
 
     /**
      * Clean the editor node contents
-     * @param {boolean} pretty Whether to pretty print
-     * @returns {string} The cleaned html data
+     * Returns the cleaned html data
      */
-    getCleanData(pretty = false) {
-        let node = this.editorNode.cloneNode(true)
+    getCleanData(pretty = false): string {
+        let node = this.editorNode!.cloneNode(true)
         // Get list of buttons with clean methods
-        const cleanButtons = this.toolbar.filter(button => button.clean != undefined)
+        const cleanButtons = this.toolbar!.buttons.filter(button => button.clean)
         Helpers.cleanForSaving(node, cleanButtons)
-        return pretty ? Helpers.prettyPrint(node) : node.innerHTML
+        return pretty ? Helpers.prettyPrint(node) : (<HTMLElement>node).innerHTML
     }
 
     /**
      * UPdate the editor node with the supplied content
      * @param {string} content 
      */
-    updateEditor(content) {
-        this.editorNode.innerHTML = content
+    updateEditor(content: string): void {
+        this.editorNode!.innerHTML = content
     }
 
     /**
      * Get the new range in the editor node and when debugging display this
      */
-    updateRange() {
+    updateRange(): void {
         if (this.modal.active()) {
             return
         }
@@ -989,7 +1007,7 @@ class Editor {
         //     return
         // }
         //console.log('modal active',this.modal.active())
-        this.range = Helpers.getRange(this.editorNode)
+        this.range = Helpers.getRange(<HTMLElement>this.editorNode)
         if (this.options.debug) {
             Templates.debugRange(this.debugNode, this.range)
         }
@@ -1000,16 +1018,15 @@ class Editor {
     /**
      * Remove "custom-selected" class from all custom elements and then add to 
      * any child of the parentNode if it is a custom.
-     * @param {HTMLElement|false} node Either a custom node or false
      */
-    highlightCustomNode(node) {
+    highlightCustomNode(node: HTMLElement | boolean): void {
         //console.log('node',node)
-        const customs = this.editorNode.querySelectorAll('[contenteditable=false]')
+        const customs = this.editorNode!.querySelectorAll('[contenteditable=false]')
         customs.forEach(custom => {
             custom.classList.remove('custom-selected')
         })
         if (node) {
-            node.classList.add('custom-selected')
+            (<HTMLElement>node).classList.add('custom-selected')
         }
     }
 
@@ -1019,7 +1036,7 @@ class Editor {
             this.buffer.update()
         }
         // Update the sidebar if we have one
-        this.updateSidebar(false)
+        this.updateSidebar()
     }
 
 

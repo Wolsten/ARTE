@@ -135,9 +135,7 @@ class Block extends ToolbarButton {
             case 'H3':
                 super(editor, 'block', 'H3', 'Heading 3', Icons.h3, click, { clean, sidebar, setState })
                 break
-            case 'P':
-                super(editor, 'block', 'P', 'Paragraph', Icons.p, click, { setState })
-                break
+
             case 'BQ':
                 super(editor, 'block', 'BLOCKQUOTE', 'Blockquote', Icons.bq, click, { setState })
                 break
@@ -147,8 +145,12 @@ class Block extends ToolbarButton {
             case 'OL':
                 super(editor, 'list', 'UL', 'Unordered list', Icons.ul, click, { setState })
                 break
+            case 'P':
+                super(editor, 'block', 'P', 'Paragraph', Icons.p, click, { setState })
+                break;
             default:
-                console.error(`Unrecognised block name [${block}]`)
+                super(editor, 'block', 'P', 'Paragraph', Icons.p, click, { setState })
+                console.error(`Unrecognised block name [${block}] - set to paragraph`)
         }
 
         this.editor = editor

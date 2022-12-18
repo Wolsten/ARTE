@@ -626,14 +626,12 @@ function augmentRange(range) {
 
 /**
  * Get the document range or return false if not set
- * @param {HTMLElement} editorNode
- * @returns {Range|false}
  */
-export const getRange = function (editorNode) {
+export const getRange = function (editorNode: HTMLElement): EditRange | null {
     let sel = window.getSelection()
     // console.log('new selection',sel)
-    if (sel.rangeCount == 1) {
-        let range = sel.getRangeAt(0)
+    if (sel?.rangeCount == 1) {
+        let range = <EditRange>sel.getRangeAt(0)
         // Check if common ancestor is the editor node or contained in the editor node
         // Ignore all other selectins since they don;t belong to the editor
         if (range.commonAncestorContainer == editorNode ||
@@ -643,7 +641,7 @@ export const getRange = function (editorNode) {
             return range
         }
     }
-    return false
+    return null
 }
 
 // /**
