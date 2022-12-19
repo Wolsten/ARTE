@@ -91,50 +91,9 @@ const click = function (editor, button) {
     show(editor, button)
 }
 
-/**
- * Set the disabled and active states of a button
- * @param {object} edt An editor instance
- * @param {object} btn The button to act on
- */
-const setState = function (edt, btn) {
-    //console.log('setting colour state ')
-    btn.element.disabled = edt.range === false ||
-        edt.range.collapsed ||
-        edt.range.rootNode == edt.editorNode ||
-        Helpers.isList(edt.range.rootNode)
-    // Get the inline styles of the selected range
-    let value = ''
-    let styles = []
-    const inlineStyles = edt.range.startContainer.parentNode.getAttribute('style')
-    if (inlineStyles != null) {
-        styles = inlineStyles.split(';')
-        // console.log('styles',styles)
-        styles.forEach(item => {
-            // Ignore empty styles (split creates an empty element for last ;)
-            if (item !== '') {
-                const parts = item.split(':')
-                // Does the inline style match the button?
-                // If so set the button styling to match
-                if (parts[0].trim() === btn.style) {
-                    value = parts[1].trim()
-                    btn.element.querySelector('span.bar').setAttribute('style', `background-color:${value};`)
-                }
-            }
-        })
-    }
-    if (value == '') {
-        btn.element.querySelector('span.bar').removeAttribute('style')
-    }
-}
 
-const init = function (editor, button) {
-    // console.log('Initialising colour button',button.tag)
-    const bar = document.createElement('span')
-    bar.classList.add('bar')
-    bar.classList.add(button.tag)
-    button.element.appendChild(bar)
-    button.element.classList.add('barred')
-}
+
+
 
 // -----------------------------------------------------------------------------
 // @section Exports
@@ -145,3 +104,76 @@ export const FOREGROUND = new ToolbarButton('inline', 'ARTE-COLOR', 'Text colour
 
 options = { init, setState, style: 'background-color' }
 export const BACKGROUND = new ToolbarButton('inline', 'ARTE-BACKGROUND-COLOR', 'Highlight colour', Icons.colourBackground, click, options)
+
+
+
+export default class Colours extends ToolbarButton {
+
+
+    constructor(editor: Editor, type: string, group: number) {
+
+        type = type.toUpperCase()
+
+        switch (type) {
+            case 'ARTE-COLOR':
+                super(editor, 'inline', 'ARTE-COLOR', 'Text colour', Icons.colourForeground, group)
+                return
+            case 'ARTE-BACKGROUND-COLOR':
+                super(editor, 'inline', 'ARTE-BACKGROUND-COLOR', 'Highlight colour', Icons.colourBackground, group)
+                return
+        }
+    }
+
+
+    init() {
+        // console.log('Initialising colour button',button.tag)
+        const bar = document.createElement('span')
+        bar.classList.add('bar')
+        bar.classList.add(button.tag)
+        this.element?.appendChild(bar)
+        this.element?.classList.add('barred')
+    }
+
+
+    /**
+     * Set the disabled and active states of a button
+     */
+    setState() {
+        if (!this.element) {
+            console.error('Missing button element for button', this.tag)
+            return
+        }
+        //console.log('setting colour state ')
+        // The rootNode should not be the editor or list container - (implying 
+        // multiple blocks selected) 
+        this.enableOrDisable()
+        // Get the inline styles of the selected range
+        let value = ''
+        let styles = []
+        const parentNode = this.editor?.range?.startContainer?.parentNode
+        const inlineStyles = parentNode ? (<Element>parentNode).getAttribute('style') : null
+        const spanBar = this.element.querySelector('span.bar')
+        if (inlineStyles != null) {
+            styles = inlineStyles.split(';')
+            // console.log('styles',styles)
+            styles.forEach(item => {
+                // Ignore empty styles (split creates an empty element for last ;)
+                if (item !== '') {
+                    const parts = item.split(':')
+                    // Does the inline style match the button?
+                    // If so set the button styling to match
+                    if (parts[0].trim() === this.style) {
+                        value = parts[1].trim()
+                        if (spanBar) {
+                            spanBar.setAttribute('style', `background-color:${value};`)
+                        }
+                    }
+                }
+            })
+        }
+        if (spanBar && value == '') {
+            spanBar.removeAttribute('style')
+        }
+    }
+
+}

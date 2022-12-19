@@ -24,10 +24,11 @@ class Formats {
 export default class Block extends ToolbarButton {
 
     // Private properties
-    #previousFormats: string[] = []
-    #fragmentNode = new Element()
-    #lastNodeAdded: null | Element = null
-    #newFormat = ''
+    private previousFormats: string[] = []
+    private fragmentNode = new Element()
+    private lastNodeAdded: null | Element = null
+    private newFormat = ''
+
 
     constructor(editor: Editor, block: string, group: number) {
 
@@ -66,9 +67,9 @@ export default class Block extends ToolbarButton {
 
     click(): void {
 
-        this.#previousFormats = []
-        this.#lastNodeAdded = null
-        this.#newFormat = this.#setStyleProps()
+        this.previousFormats = []
+        this.lastNodeAdded = null
+        this.newFormat = this.setStyleProps()
 
         // Ensure start from a block node
         if (this.editor.range === null) return
@@ -93,18 +94,18 @@ export default class Block extends ToolbarButton {
         // console.warn(`reFormatBlock with new format ${button.tag}`)
         // Just parse the parent node if the start and end belong to the same parent
         if (firstParentNode == endParentNode) {
-            this.#fragmentNode = document.createElement('DIV')
-            this.#parseNode(firstParentNode, { oldFormats: [], newFormats: [] })
-            // console.log( 'fragment', this.#fragmentNode.innerHTML)
+            this.fragmentNode = document.createElement('DIV')
+            this.parseNode(firstParentNode, { oldFormats: [], newFormats: [] })
+            // console.log( 'fragment', this.fragmentNode.innerHTML)
             if (firstParentNode == this.editor.editorNode) {
-                firstParentNode.innerHTML = this.#fragmentNode.innerHTML
+                firstParentNode.innerHTML = this.fragmentNode.innerHTML
             } else {
-                firstParentNode.outerHTML = this.#fragmentNode.innerHTML
+                firstParentNode.outerHTML = this.fragmentNode.innerHTML
             }
         } else {
             let startNodeFound = false
             let endNodeFound = false
-            this.#fragmentNode = document.createElement('DIV')
+            this.fragmentNode = document.createElement('DIV')
             this.editor.range.rootNode!.childNodes.forEach(node => {
                 // If find a none-block node then terminate this cycle of the loop
                 // ie. ignore text and comments
@@ -119,16 +120,16 @@ export default class Block extends ToolbarButton {
                     // console.log( `%cparse top level node ${node.tagName}`,'background:orange;color:white;padding:0.5rem')
                     // Check for block (as opposed to list formatting) and start a new fragment
                     if (this.type === 'block') {
-                        this.#previousFormats = []
-                        this.#lastNodeAdded = null
-                        this.#fragmentNode = document.createElement('DIV')
+                        this.previousFormats = []
+                        this.lastNodeAdded = null
+                        this.fragmentNode = document.createElement('DIV')
                     }
-                    this.#parseNode(<Element>node, { oldFormats: [], newFormats: [] })
+                    this.parseNode(<Element>node, { oldFormats: [], newFormats: [] })
                     if (this.type === 'block') {
-                        // console.log( 'fragment', this.#fragmentNode.innerHTML)
-                        (<Element>node).outerHTML = this.#fragmentNode.innerHTML
+                        // console.log( 'fragment', this.fragmentNode.innerHTML)
+                        (<Element>node).outerHTML = this.fragmentNode.innerHTML
                     } else {
-                        this.#markNodeForRemoval(node)
+                        this.markNodeForRemoval(node)
                     }
                 }
                 // Stop processing when end node found. If formatting a list write out the 
@@ -136,10 +137,10 @@ export default class Block extends ToolbarButton {
                 if (node == endParentNode) {
                     endNodeFound = true
                     if (this.type === 'list') {
-                        //console.log( 'fragment', this.#fragmentNode.innerHTML)
-                        (<Element>node).outerHTML = this.#fragmentNode.innerHTML
+                        //console.log( 'fragment', this.fragmentNode.innerHTML)
+                        (<Element>node).outerHTML = this.fragmentNode.innerHTML
                     }
-                    this.#removeNodesMarkedForRemoval()
+                    this.removeNodesMarkedForRemoval()
                 }
             })
         }
@@ -228,11 +229,11 @@ export default class Block extends ToolbarButton {
     // @section Private methods
     // -----------------------------------------------------------------------------
 
-    #markNodeForRemoval(node: Node): void {
+    private markNodeForRemoval(node: Node): void {
         (<HTMLElement>node).setAttribute('data-remove', 'true')
     }
 
-    #removeNodesMarkedForRemoval(): void {
+    private removeNodesMarkedForRemoval(): void {
         if (this.editor.editorNode) {
             const nodes = this.editor.editorNode.querySelectorAll('[data-remove=true]')
             if (nodes) {
@@ -247,7 +248,7 @@ export default class Block extends ToolbarButton {
      * @param {object} formats Old and new arrays of format strings
      * @param {object} button
      */
-    #parseNode(node: Element, formats: Formats) {
+    private parseNode(node: Element, formats: Formats) {
         // console.log( `%cparseNode ${node.tagName}`,'background:green;color:white;padding:0.5rem')
         // console.log( `Inner HTML [${node.innerHTML.trim()}]`)
         // console.log( `node formats on entry`,formats.oldFormats)
@@ -256,17 +257,17 @@ export default class Block extends ToolbarButton {
         if (node != this.editor.editorNode) {
             Phase.set(node)
             // Get the old and new formats
-            nodeFormats = this.#getFormats(node, formats)
+            nodeFormats = this.getFormats(node, formats)
             // console.log( `old node formats`,nodeFormats.oldFormats)
             // console.log( `new node formats`,nodeFormats.newFormats)
             // Save content of text nodes and protected nodes against the current targetNode
-            this.#saveContent(node, nodeFormats)
+            this.saveContent(node, nodeFormats)
         }
         // Loop through all child blocks 
         node.childNodes.forEach(child => {
             if (Helpers.isBlock(child) || Helpers.isList(child)) {
                 // console.log(`Moving to child ${child.tagName}`)
-                #parseNode(child, nodeFormats)
+                this.parseNode(child, nodeFormats)
             }
         })
         // console.log(`Finished this branch - processed children`, node.childNodes)
@@ -278,7 +279,7 @@ export default class Block extends ToolbarButton {
      * Get the old and new formats for the node, depending on the phase
      * and return updated formats
      */
-    #getFormats(element: Element, formats: Formats): Formats {
+    private getFormats(element: Element, formats: Formats): Formats {
         // Always set old formats to the original
         const oldFormats = [...formats.oldFormats, element.tagName]
         let newFormats: string[] = []
@@ -295,14 +296,14 @@ export default class Block extends ToolbarButton {
         // New block formatting (not list) - apply new format
         if (this.type === 'block') {
             // console.log(`Format type = ${this.type}`)
-            // console.log(`2. new block format ${this.#newFormat}`)
-            newFormats = [this.#newFormat]
+            // console.log(`2. new block format ${this.newFormat}`)
+            newFormats = [this.newFormat]
             return { newFormats, oldFormats }
         }
         //
         // New list formatting
         if (Phase.first()) {
-            // console.log(`3. First node with new list format ${this.#newFormat}`)
+            // console.log(`3. First node with new list format ${this.newFormat}`)
             // Reformatting a list item?
             if (element.tagName == 'LI') {
                 // console.log('3.1 Processing LI')
@@ -312,7 +313,7 @@ export default class Block extends ToolbarButton {
                     // console.log( '3.1.1 First item in a list - replace existing list')
                     // Pop off the old list format and replace with the new one plus the LI
                     newFormats.pop()
-                    newFormats.push(this.#newFormat)
+                    newFormats.push(this.newFormat)
                     newFormats.push('LI')
                     // console.log('3.1.2 new list formats', formats.newFormats.join(' '))
                     // Else create a new indented list
@@ -321,14 +322,14 @@ export default class Block extends ToolbarButton {
                     // Start with the old formats
                     newFormats = formats.oldFormats.slice()
                     // Add the new list format and an LI
-                    newFormats.push(this.#newFormat)
+                    newFormats.push(this.newFormat)
                     newFormats.push('LI')
                     // console.log('3.1.4 new list formats', formats.newFormats.join(' '))
                 }
                 // This is a different block node (e.g. H1, P) or a list container node - therefore start a new list
             } else {
                 // console.log( 'Converting a block node')
-                newFormats.push(this.#newFormat)
+                newFormats.push(this.newFormat)
                 newFormats.push('LI')
                 // console.log('3.2 new list formats', formats.newFormats.join(' '))
             }
@@ -336,7 +337,7 @@ export default class Block extends ToolbarButton {
         }
         // During but not first node phase - reuse previously defined list formats
         // Slice produces a shallow copy (in this case of all elements)
-        newFormats = this.#previousFormats.slice()
+        newFormats = this.previousFormats.slice()
         // console.log(`4. Reusing initial list formatting ${formats.newFormats.join(' ')}`)
         return { newFormats, oldFormats }
     }
@@ -344,12 +345,12 @@ export default class Block extends ToolbarButton {
 
     /**
      * Save the content of text nodes and protected nodes against the current target node
-     * which defaults to be the this.#fragmentNode
+     * which defaults to be the this.fragmentNode
      */
-    #saveContent(element: Element, formats: Formats): void {
+    private saveContent(element: Element, formats: Formats): void {
         let n
-        let target = this.#fragmentNode
-        let html = this.#getBlockHTML(element)
+        let target = this.fragmentNode
+        let html = this.getBlockHTML(element)
         let currentFormats = []
         if (Phase.during()) {
             currentFormats = formats.newFormats
@@ -366,7 +367,7 @@ export default class Block extends ToolbarButton {
             return
         }
         // First time - apply all formats
-        if (this.#previousFormats.length == 0) {
+        if (this.previousFormats.length == 0) {
             // console.log('0. Original target',target.outerHTML)
             currentFormats.forEach(format => {
                 n = document.createElement(format)
@@ -375,37 +376,37 @@ export default class Block extends ToolbarButton {
             })
             // New tree larger and the previous formats are a subset?
             // Compare formatting and add to appropriate end of tree
-        } else if (currentFormats.length > this.#previousFormats.length) {
+        } else if (currentFormats.length > this.previousFormats.length) {
             // console.log('saveContent: 2. Current formats longer than previous formats')
-            if (Helpers.arraySubset(this.#previousFormats, currentFormats)) {
+            if (Helpers.arraySubset(this.previousFormats, currentFormats)) {
                 // console.log('saveContent: 2.1 Current formats are a superset of previous formats')
-                for (let i = 0; i < this.#previousFormats.length; i++) {
+                for (let i = 0; i < this.previousFormats.length; i++) {
                     if (target.lastElementChild !== null) {
                         target = target.lastElementChild
                     }
                     // console.log('saveContent: 2.2 New formats superset - moving target to',target.outerHTML)
                 }
-                for (let i = this.#previousFormats.length; i < currentFormats.length; i++) {
+                for (let i = this.previousFormats.length; i < currentFormats.length; i++) {
                     n = document.createElement(currentFormats[i])
                     target = target.appendChild(n)
                     // console.log('saveContent: 2.3 New formats superset - moving target to',target.outerHTML)
                 }
             }
             // Formatting is the same as previously
-        } else if (Helpers.arraysEqual(currentFormats, this.#previousFormats)) {
-            if (this.#lastNodeAdded && this.#lastNodeAdded != this.#fragmentNode) {
-                target = <Element>this.#lastNodeAdded.parentElement
+        } else if (Helpers.arraysEqual(currentFormats, this.previousFormats)) {
+            if (this.lastNodeAdded && this.lastNodeAdded != this.fragmentNode) {
+                target = <Element>this.lastNodeAdded.parentElement
             }
             n = document.createElement(lastFormat)
             target = target.appendChild(n)
             // console.log('saveContent: 3. Formats equal - moving target to',target.outerHTML)
         }
         // New formatting smaller or different - find where in tree to append
-        if (target == this.#fragmentNode) {
+        if (target == this.fragmentNode) {
             // console.log('saveContent: 4. New formatting smaller or different')
             let startIndex = 0
             currentFormats.forEach((format, index) => {
-                if (format == this.#previousFormats[index]) {
+                if (format == this.previousFormats[index]) {
                     // Exclude the last format if it is an LI as we need 
                     // to add the LI to the previous list parent
                     if ((index == (currentFormats.length - 1) && format == 'LI') == false) {
@@ -421,13 +422,13 @@ export default class Block extends ToolbarButton {
                 // console.log('saveContent: 4.2 Starting new formats - moving target to',target.outerHTML)
             }
         }
-        this.#lastNodeAdded = target
-        this.#previousFormats = currentFormats.slice()
+        this.lastNodeAdded = target
+        this.previousFormats = currentFormats.slice()
         // Add the content
         if (html != '') {
             target.innerHTML = html
             // console.log('saveContent: target with new content', target.outerHTML)
-            // console.log('saveContent: this.#fragmentNode',this.#fragmentNode.innerHTML)
+            // console.log('saveContent: this.fragmentNode',this.fragmentNode.innerHTML)
         }
     }
 
@@ -435,7 +436,7 @@ export default class Block extends ToolbarButton {
     /**
       * Get the new format to apply
       */
-    #setStyleProps(): string {
+    private setStyleProps(): string {
         if (this.tag == 'CLEAR' || this.isActive()) {
             // Set to paragraph (default style) if removing
             if (this.type == 'block') {
@@ -449,7 +450,7 @@ export default class Block extends ToolbarButton {
     /**
      * Returns the html content of a node including its child nodes
      */
-    #getBlockHTML(element: Element): string {
+    private getBlockHTML(element: Element): string {
         let html = ''
         // Extract all text, inline formats and protected node content from the node
         element.childNodes.forEach((child: ChildNode) => {

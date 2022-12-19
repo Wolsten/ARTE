@@ -86,7 +86,7 @@ export default class Style extends ToolbarButton {
         }
         // The rootNode should not be the editor or list container - (implying 
         // multiple blocks selected) 
-        this.disableForEditorAndLists()
+        this.enableOrDisable()
         // Check whether the computed style matches the btn
         this.setStyleProps()
         if (this.editor.range) {
@@ -126,17 +126,6 @@ export default class Style extends ToolbarButton {
     }
 
 
-    private disableForEditorAndLists(): void {
-        this.disabled = false
-        if (this.editor.range) {
-            if (this.editor.range.collapsed ||
-                this.editor.range.rootNode == this.editor.editorNode ||
-                Helpers.isList(this.editor.range.rootNode)) {
-                this.disabled = true
-            }
-        }
-        if (this.disabled) this.element?.setAttribute('disabled', 'disabled')
-    }
 
 
     /**

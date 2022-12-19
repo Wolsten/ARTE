@@ -6,17 +6,127 @@ import ToolbarButton from '../ToolbarButton.js'
 import * as Icons from '../icons.ts'
 import * as Helpers from '../helpers.js'
 import Modal from '../Modal.js'
+import Editor from '../Editor.js'
 
-let supported
-let editor
+
+
+export default class Clipboard extends ToolbarButton {
+
+
+    private supported = false
+
+
+    constructor(editor: Editor, type: string, group: number) {
+
+        type = type.toUpperCase()
+
+        switch (type) {
+            case 'CUT':
+                super(editor, 'detached', 'CUT', 'Cut (text only - use Ctr-V or Cmd-V to include formatting)', Icons.cut, group)
+                return
+            case 'COPY':
+                super(editor, 'detached', 'COPY', 'Copy (text only - use Ctr-V or Cmd-V to include formatting)', Icons.copy, group)
+                return
+            case 'PASTE':
+                super(editor, 'detached', 'PASTE', 'Paste (text only - use Ctr-V or Cmd-V to include formatting)', Icons.paste, group)
+        }
+    }
+
+    switch(type) {
+            case 'CUT':
+        super(editor, 'detached', 'CUT', 'Cut (text only - use Ctr-V or Cmd-V to include formatting)', Icons.cut, group)
+        return
+            case 'COPY':
+        super(editor, 'detached', 'COPY', 'Copy (text only - use Ctr-V or Cmd-V to include formatting)', Icons.copy, group)
+        return
+            case 'PASTE':
+        super(editor, 'detached', 'PASTE', 'Paste (text only - use Ctr-V or Cmd-V to include formatting)', Icons.paste, group)
+    }
+}
+
 
 /**
- * Prevent clipboard events which include custom nodes
- * @param {Selection} selection 
- * @returns {boolean} true if found customs in selection, else false
+ * Optional method that, on first load of editor, converts the minimal custom 
+ * HTML into the full editable version
  */
-function prevent(selection) {
-    const contains = Helpers.selectionContainsCustoms(editor.editorNode, selection)
+init() {
+    if (navigator.clipboard && this.editor.editorNode) {
+        this.supported = true
+        // Event listeners
+        this.editor.editorNode.addEventListener('cut', this.cutCopyHandler)
+        this.editor.editorNode.addEventListener('copy', this.cutCopyHandler)
+        this.editor.editorNode.addEventListener('paste', this.pasteHandler)
+    }
+}
+
+
+click() {
+    if (this.supported === false) {
+        return
+    }
+    switch (this.tag) {
+        case 'CUT':
+            this.cut()
+            break
+        case 'COPY':
+            this.copy()
+            break
+        case 'PASTE':
+            this.paste()
+            break
+    }
+}
+
+
+    /**
+     * Set the disabled and active states of the paste button
+     */
+    async setState() {
+    if (!this.editor.editorNode) return
+    // console.log('set state for button', this.tag)
+    switch (this.tag) {
+        case 'PASTE':
+            if (document.activeElement == this.editor.editorNode) {
+                const text = await navigator.clipboard.readText()
+                this.disabled = text == ''
+            } else {
+                this.disabled = true
+            }
+            break
+        case 'CUT':
+        case 'COPY':
+            if (!this.editor.range || this.editor.range.collapsed) {
+                this.disabled = true
+            } else {
+                this.disabled = false
+            }
+    }
+    // All buttons disabled (if not already) if selection contains any custom elements
+    if (this.disabled == false) {
+        const selection = document.getSelection()
+        this.disabled = Helpers.selectionContainsCustoms(this.editor.editorNode, selection)
+    }
+
+    if (this.disabled) {
+        this.element?.setAttribute('disabled', 'disabled')
+    } else {
+        this.element?.removeAttribute('disabled')
+    }
+}
+
+
+    // -----------------------------------------------------------------------------
+    // @section Private methods
+    // -----------------------------------------------------------------------------
+
+
+
+    /**
+     * Prevent clipboard events which include custom nodes. Returns  true if found customs 
+     * in selection, else false
+     */
+    private prevent(selection: Selection): boolean {
+    const contains = Helpers.selectionContainsCustoms(this.editor.editorNode, selection)
     if (contains) {
         const feedback = new Modal({
             type: 'overlay',
@@ -33,160 +143,95 @@ function prevent(selection) {
     return false
 }
 
-/**
- * Handle cut and copy events
- * @param {Event} event 
- */
-function cutCopyHandler(event) {
+
+
+    /**
+     * Handle cut and copy events
+     */
+    private cutCopyHandler(event: Event) {
     const selection = document.getSelection()
-    if (prevent(selection)) {
+    if (selection && this.prevent(selection)) {
         event.preventDefault()
     }
     if (event.type == 'cut') {
-        setTimeout(() => editor.buffer(), 100)
+        this.bufferDelayed()
     }
 }
 
-/**
- * Handle cut button clicks
- */
-function cut() {
+
+
+    /**
+     * Handle cut button clicks
+     */
+    private cut() {
     const selection = document.getSelection()
-    if (prevent(selection) == false) {
-        console.log('selection', selection.toString())
+    if (selection && this.prevent(selection) == false) {
+        // console.log('selection', selection.toString())
         navigator.clipboard.writeText(selection.toString())
         selection.deleteFromDocument()
-        setTimeout(() => editor.buffer(), 100)
+        this.bufferDelayed()
     }
 }
 
-/**
- * Handle cut button clicks
- */
-function copy() {
+
+
+    /**
+     * Handle cut button clicks
+     */
+    private copy() {
     const selection = document.getSelection()
-    if (prevent(selection) == false) {
-        console.log('selection', selection.toString())
+    if (selection && this.prevent(selection) == false) {
+        // console.log('selection', selection.toString())
         navigator.clipboard.writeText(selection.toString())
     }
 }
 
-/**
- * Handle paste button clicks
- */
-async function paste() {
+
+    /**
+     * Handle paste button clicks
+     */
+    private async paste() {
     const selection = document.getSelection()
-    if (prevent(selection) == false) {
+    if (selection && this.prevent(selection) == false) {
         const text = await navigator.clipboard.readText()
         console.log('pasted text is ', text)
         let node = document.createTextNode(text)
-        node = Helpers.replaceSelectionWithNode(editor, node)
-        setTimeout(() => editor.buffer(), 100)
+        node = Helpers.replaceSelectionWithNode(this.editor, node)
+        this.bufferDelayed()
     }
 }
 
-/**
- * Handle paste events
- * @param {Event} event 
- */
-function pasteHandler(event) {
+
+    /**
+     * Handle paste events
+     */
+    private pasteHandler(event: ClipboardEvent) {
     const selection = document.getSelection()
-    if (prevent(selection) == false) {
-        const paste = (event.clipboardData || window.clipboardData).getData('text/html');
+    if (selection && this.prevent(selection) == false && event.clipboardData) {
+        // window.clipboardData not recognised by typescript - ignore older browsers
+        // const paste = (event.clipboardData || window.clipboardData).getData('text/html');
+        const paste = event.clipboardData.getData('text/html');
         // Detect pasting from Microsoft Office and paste as plain text
-        if (supported && paste.includes('urn:schemas-microsoft-com:office')) {
+        if (this.supported && paste.includes('urn:schemas-microsoft-com:office')) {
             console.log('Found word data')
             // Get plain text
-            const text = (event.clipboardData || window.clipboardData).getData('text/plain');
+            const text = event.clipboardData.getData('text/plain');
             console.log('text\n', text)
             event.preventDefault()
             // Special handling of paste
             let node = document.createTextNode(text)
-            node = Helpers.replaceSelectionWithNode(editor, node)
+            node = Helpers.replaceSelectionWithNode(this.editor, node)
         }
-        setTimeout(() => editor.buffer(), 100)
+        this.bufferDelayed()
     }
 }
 
 
-/**
- * Optional method that, on first load of editor, converts the minimal custom 
- * HTML into the full editable version
- * @param {object} edt A unique editor instance
- * @param {object} button The button to use (ignored)
- */
-const init = function (edt, button) {
-    editor = edt
-    if (navigator.clipboard) {
-        supported = true
-        // Event listeners
-        editor.editorNode.addEventListener('cut', cutCopyHandler)
-        editor.editorNode.addEventListener('copy', cutCopyHandler)
-        editor.editorNode.addEventListener('paste', pasteHandler)
-    }
+    private bufferDelayed() {
+    setTimeout(() => {
+        if (this.editor.buffer) {
+            this.editor.buffer.update()
+        }
+    }, 100)
 }
-
-
-/**
- * Mandatory button click function
- * @param {object} editor A unique editor instance
- * @param {object} button The button to act on
- */
-const click = function (editor, button) {
-    if (supported === false) {
-        return
-    }
-    switch (button.tag) {
-        case 'CUT':
-            cut()
-            break
-        case 'COPY':
-            copy()
-            break
-        case 'PASTE':
-            paste()
-            break
-    }
 }
-
-
-/**
- * Set the disabled and active states of the paste button
- * @param {object} edt A unique editor instance
- * @param {object} btn The button to act on
- */
-const setState = async function (edt, btn) {
-    console.log('set state for button', btn.tag)
-    switch (btn.tag) {
-        case 'PASTE':
-            if (document.activeElement == edt.editorNode) {
-                const text = await navigator.clipboard.readText()
-                btn.element.disabled = text == ''
-            } else {
-                btn.element.disabled = true
-            }
-            break
-        case 'CUT':
-        case 'COPY':
-            if (edt.range == false || edt.range.collapsed) {
-                btn.element.disabled = true
-            } else {
-                btn.element.disabled = false
-            }
-    }
-    // All buttons disabled (if not already) if selection contains any custom elements
-    if (btn.element.disabled == false) {
-        const selection = document.getSelection()
-        btn.element.disabled = Helpers.selectionContainsCustoms(editor.editorNode, selection)
-    }
-}
-
-
-
-// -----------------------------------------------------------------------------
-// @section Exports
-// -----------------------------------------------------------------------------
-
-export const CUT = new ToolbarButton('detached', 'CUT', 'Cut (text only - use Ctr-V or Cmd-V to include formatting)', Icons.cut, click, { init, setState })
-export const COPY = new ToolbarButton('detached', 'COPY', 'Copy (text only - use Ctr-V or Cmd-V to include formatting)', Icons.copy, click, { setState })
-export const PASTE = new ToolbarButton('detached', 'PASTE', 'Paste (text only - use Ctr-V or Cmd-V to include formatting)', Icons.paste, click, { setState })

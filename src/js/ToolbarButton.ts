@@ -19,6 +19,7 @@ interface ToolbarButton {
 
     // Mandatory methods
     click(): void
+    enableOrDisable(): void
 
     // Optional methods
     init?(): void
@@ -26,6 +27,7 @@ interface ToolbarButton {
     addEventHandlers?(): void
     clean?(element: HTMLElement): HTMLElement
     setState?(): void
+
 }
 
 
@@ -39,6 +41,23 @@ class ToolbarButton {
         this.icon = icon
         this.group = group
         this.disabled = false
+    }
+
+
+    enableOrDisable(): void {
+        this.disabled = false
+        if (this.editor.range) {
+            if (this.editor.range.collapsed ||
+                this.editor.range.rootNode == this.editor.editorNode ||
+                Helpers.isList(this.editor.range.rootNode)) {
+                this.disabled = true
+            }
+        }
+        if (this.disabled) {
+            this.element?.setAttribute('disabled', 'disabled')
+        } else {
+            this.element?.removeAttribute('disabled')
+        }
     }
 }
 

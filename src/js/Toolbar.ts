@@ -26,8 +26,6 @@ export default class Toolbar {
     menuItems!: null | HTMLElement
     menuIcon!: null | HTMLElement
 
-
-
     constructor(editor: Editor, target: HTMLElement, userGroups: string[][]) {
 
         this.editor = editor
