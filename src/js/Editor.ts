@@ -5,32 +5,29 @@ import EditRange from './EditRange'
 import Buffer from './plugins/Buffer'
 import Options from './options'
 import Toolbar from './Toolbar'
-import ToolbarButton from './ToolbarButton'
-import SidebarContent from './SidebarContent'
+import Sidebar from './Sidebar'
 import Shortcut from './Shortcut'
 
 
 
 class Editor {
 
-    // -----------------------------------------------------------------------------
-    // @section Initialisation
-    // -----------------------------------------------------------------------------
-
-    id: string = ''
+    id: string = '' // @todo This may not be required
     filename = ''
     lastKey = ''
+
     range: null | EditRange = null
     editorNode: null | HTMLElement = null
-    toolbarNode: null | HTMLElement = null
-    mainNode: null | HTMLElement = null
+    toolbarNode!: HTMLElement
+    mainNode!: null | HTMLElement
     sidebarNode: null | HTMLElement = null
     debugNode: null | HTMLElement = null
-    toolbar: null | Toolbar = null
-    menuIcon: null | HTMLElement = null
-    menuItems: null | HTMLElement = null
-    modal = new Modal()
 
+
+    toolbar!: Toolbar
+    sidebar!: null | Sidebar
+
+    modal = new Modal()
     preview: null | Function = null
     update: null | Function = null
     handleKeyup: null | Function = null
@@ -40,7 +37,7 @@ class Editor {
     options: Options
     buffer: null | Buffer = null
 
-    constructor(target: HTMLElement, content = '', toolbar: string[][], options: string) {
+    constructor(target: HTMLElement, content = '', toolbarItems: string[][], options: string) {
 
         // Generate a unique id for this editor instance
         // @todo This may not be required
@@ -51,25 +48,11 @@ class Editor {
 
         // Add editor html to the dom and get the main nodes
         target.innerHTML = Templates.editor(this.options)
-        this.toolbarNode = target.querySelector('.editor-toolbar')
         this.mainNode = target.querySelector('.editor-main')
         this.editorNode = target.querySelector('.editor-body')
 
-        // Initialise the toolbar
-        if (this.toolbarNode === null) {
-            console.error('Failed to create toolbar')
-            return
-        }
-        this.toolbar = new Toolbar(this, toolbar)
-        this.toolbarNode.innerHTML = Templates.editorToolbar(this.toolbar)
-        this.menuIcon = this.toolbarNode.querySelector('.menu-icon')
-        this.menuItems = this.toolbarNode.querySelector('section')
-
-        // check all dom elements correctly loaded
-        if (!this.toolbarNode || !this.mainNode || !this.editorNode || !this.menuIcon || !this.menuItems) {
-            console.log('Error: one or more editor elements could nto be loaded')
-            return
-        }
+        // Create a toolbar (adding to the dom)
+        this.toolbar = new Toolbar(this, target, toolbarItems)
 
         // Add debugging panel?
         if (this.options.debug) {
@@ -124,11 +107,11 @@ class Editor {
         this.range = null
 
         // Initialise buttons (some of which require the editor content to have been loaded)
-        this.initialiseButtons()
+        this.toolbar.initialise()
 
         // Optional sidebar
         if (this.options.explorer && this.toolbar!.buttons.find(btn => btn.sidebar !== undefined)) {
-            this.showSidebar()
+            this.sidebar = new Sidebar(this)
         }
 
         // Try to ensure that the referenced content is scrolled to a visible area in the middle of the editor. 
@@ -147,233 +130,6 @@ class Editor {
     }
 
 
-    /**
-     * Set the disabled and active states for a button. If not provided
-     * just check if we have a range and it isn't a custom element
-     */
-    setState(button: ToolbarButton) {
-        let handled = false
-        // If not a detached button all buttons are disabled and 
-        // inactive if there is no range or the range is in a custom element
-        if (button.type !== 'detached') {
-            if (!this.range || this.range.custom) {
-                handled = true
-                if (button.element) {
-                    // @todo Check this works correctly
-                    button.element.setAttribute('disabled', 'disabled')
-                    button.element.classList.remove('active')
-                }
-            }
-        }
-        if (handled == false) {
-            if (button.setState) {
-                button.setState()
-            }
-        }
-    }
-
-
-    /**
-     * Set the state for a button type (or all buttons if blank)
-     */
-    setStateForButtonType(type = '') {
-        this.toolbar!.buttons.forEach(button => {
-            if (type == '' || button.type == type) {
-                this.setState(button)
-                return
-            }
-        })
-    }
-
-
-    /**
-     * Initialise the toolbar buttons
-     */
-    initialiseButtons(): void {
-
-        // Initialise buffer callback to false - reset if UNDO button found 
-        // and a buffer length set
-        // Do any custom setup required
-        this.toolbar!.buttons.forEach(button => {
-
-            // Add dom element to the button
-            button.element = this.toolbarNode!.querySelector(`#${button.tag}`)
-            if (button.element === null) {
-                console.error('Missing button element for button', button.tag)
-                return
-            }
-
-            if (button.init) {
-                button.init()
-            }
-
-            // Set initial button state
-            this.setState(button)
-
-            // Some button have shortcuts in which case save for use in the keydown event handler
-            if (button.shortcut) {
-                this.shortcuts.push(new Shortcut(button))
-            }
-
-            // Add click
-            button.element.addEventListener('click', event => {
-                if (!button.click) {
-                    return
-                }
-
-                // Get latest range as debouncing means may not have the latest value when typing
-                this.updateRange()
-
-                // Ignore if a modal is active
-                if (this.modal.active()) {
-                    return
-                }
-
-                // Handle clicks for detached buttons (e.g. undo, redo) 
-                // and when have a range
-                if (button.type === 'detached' || this.range) {
-                    button.click()
-                }
-
-                // Other prevent default action to ignore
-                event.preventDefault()
-            })
-        })
-    }
-
-
-    // -----------------------------------------------------------------------------
-    // @section Responsiveness
-    // -----------------------------------------------------------------------------
-
-    /**
-     * Handle mobile menu clicks (invoked from listenForMouseUpEvents)
-     */
-    handleMenuClick() {
-        this.menuItems!.classList.toggle('show')
-        if (this.menuItems!.classList.contains('show')) {
-            if (!this.range) {
-                this.range = Helpers.restoreSelectedRange(this.range)
-                this.setToolbarStates()
-            }
-        }
-    }
-
-
-    // -----------------------------------------------------------------------------
-    // @section Sidebar
-    // -----------------------------------------------------------------------------
-
-    /**
-     * Insert the sidebar in the dom
-     */
-    showSidebar() {
-        if (!this.mainNode) {
-            console.error('Error: Could not find editor main node')
-            return
-        }
-        if (this.mainNode.querySelector('.editor-sidebar') !== null) {
-            this.updateSidebar()
-            return
-        }
-        let tabList: SidebarContent[] = []
-        this.toolbar!.buttons.forEach(button => {
-            if (button.sidebar) {
-                //console.log('Opening sidebar for button ', button.tag)
-                tabList.push(button.sidebar(this))
-            }
-        })
-        // Populate the sidebar
-        this.sidebarNode = document.createElement('DIV')
-        this.sidebarNode.classList.add('editor-sidebar')
-        this.sidebarNode.classList.add('dont-break-out')
-        this.sidebarNode.innerHTML = Templates.sidebarContent(tabList)
-        // Tab menu clicks
-        const tabMenu = this.sidebarNode.querySelector('.tab-menu')
-        if (!tabMenu) {
-            console.error('Error: Could not find tab menu for sidebar')
-            return
-        }
-        const tabMenuItems = tabMenu.querySelectorAll('a')
-        tabMenuItems.forEach(
-            item => item.addEventListener('click', event => this.handleTabMenuClicks(event, tabMenuItems))
-        )
-        const closeButton = this.sidebarNode.querySelector('button.close')
-        if (!closeButton) {
-            console.error('Error: Could not find close button for sidebar')
-            return
-        }
-        closeButton.addEventListener('click', () => this.hideSidebar())
-        // Append to the editor
-        this.mainNode.appendChild(this.sidebarNode)
-    }
-
-    hideSidebar() {
-        if (this.sidebarNode) this.sidebarNode.remove()
-        this.options.explorer = false
-    }
-
-    /**
-     * Update the content of the sidebar
-     */
-    updateSidebar(): void {
-        if (!this.sidebarNode) {
-            return
-        }
-        // Get latest content
-        let tabList: SidebarContent[] = []
-        this.toolbar!.buttons.forEach(button => {
-            if (button.sidebar) {
-                tabList.push(button.sidebar(this))
-            }
-        })
-        // Populate latest content if we have any
-        tabList.forEach((item, index) => {
-            const content = this.sidebarNode!.querySelector(`[data-tab-id="tab-${index}"]`)
-            if (!content) {
-                console.error('Error: Could not find a sidebar tab', index)
-                return
-            }
-            if (item.content === '') {
-                item.content = `You have no ${item.label} in your document.`
-            }
-            content.innerHTML = item.content
-        })
-    }
-
-    /**
-     * Handle clicking on a tab menu item (the current target)
-     */
-    handleTabMenuClicks(event: Event, tabMenuItems: HTMLElement[]): void {
-        event.preventDefault()
-        event.stopPropagation()
-        // Find the clicked tab, i.e. the element with the data-tab-target attribute
-        let tab: any = event.currentTarget
-        if (tab) {
-            let tabTarget = tab.dataset.tabTarget
-            while (!tabTarget) {
-                tab = tab.parentNode
-                tabTarget = tab.dataset.tabTarget
-            }
-            // Remove existing active and show classes
-            tabMenuItems.forEach(item => item.classList.remove('active'))
-            let tabItemTarget = null
-            if (this.sidebarNode) {
-                const tabItems = this.sidebarNode.querySelectorAll('.tab-item')
-                if (tabItems) {
-                    tabItems.forEach(item => item.classList.remove('show'))
-                }
-                tabItemTarget = this.sidebarNode.querySelector(`[data-tab-id="${tabTarget}"]`)
-            }
-            // Add new classes
-            tab.classList.add('active')
-            if (tabItemTarget) {
-                tabItemTarget.classList.add('show')
-            }
-        }
-    }
-
-
 
     // -----------------------------------------------------------------------------
     // @section Mouse up events
@@ -384,9 +140,6 @@ class Editor {
      */
     listenForMouseUpEvents() {
         document.addEventListener('mouseup', event => {
-            // Get the active element in the document
-            const active = document.activeElement
-            const target = event.target
             // console.log( 'mouseup on', event.target )
             // console.log( 'active element', document.activeElement )
             // Clicked a modal button?
@@ -394,13 +147,13 @@ class Editor {
                 return
                 // Clicked in the editor (but not a custom element which returns a
                 // different active element)
-            } else if (active == this.editorNode) {
+            } else if (document.activeElement == this.editorNode) {
                 this.handleMouseUp()
                 // Clicked menu icon?
-            } else if (target == this.menuIcon) {
-                this.handleMenuClick()
-                // Clicked in toolbar?
-            } else if (this.nodeInToolbar(target)) {
+            } else if (event.target == this.toolbar.menuIcon) {
+                this.toolbar.handleMenuClick()
+                // Clicked in toolbar - if so ignore
+            } else if (this.toolbar.contains(event.target)) {
                 return
                 // Must have clicked outside the editor or clicked on
                 // a custom element, in either case reset the range and button states
@@ -417,9 +170,7 @@ class Editor {
      */
     resetRange() {
         this.range = null
-        this.toolbar!.buttons.forEach(button => {
-            this.setState(button)
-        })
+        this.toolbar.reset()
     }
 
 
@@ -439,42 +190,6 @@ class Editor {
             node = <HTMLElement>node.parentNode
         }
         return false
-    }
-
-
-
-    /**
-     * Check if the node is within the toolbar section of the dom tree
-     * Return true if the node is in the toolbar
-     */
-    nodeInToolbar(node: HTMLElement): boolean {
-        while (node.nodeType == 3 || node.tagName != 'BODY') {
-            if (node == this.toolbarNode) {
-                return true
-            }
-            if (node.parentNode == null) {
-                return false
-            }
-            node = <HTMLElement>node.parentNode
-        }
-        return false
-    }
-
-
-
-    /**
-     * Set the states of all toolbar buttons
-     */
-    setToolbarStates(): void {
-        if (!this.range) {
-            this.toolbar!.buttons.forEach(button => {
-                if (button.element) button.element.classList.remove('active')
-            })
-            return
-        }
-        this.toolbar!.buttons.forEach(button => {
-            this.setState(button)
-        })
     }
 
 
@@ -501,7 +216,7 @@ class Editor {
         // Unselect custom blocks and highlight this one if custom 
         if (this.range) this.highlightCustomNode(this.range.custom)
 
-        this.setToolbarStates()
+        this.toolbar.setStates()
     }
 
 
@@ -516,7 +231,7 @@ class Editor {
         p = this.editorNode!.appendChild(p)
         Helpers.setCursor(p, 0)
         this.updateRange()
-        this.setToolbarStates()
+        this.toolbar.setStates()
         this.updateBuffer()
     }
 
@@ -620,7 +335,7 @@ class Editor {
                 // method was triggered on keydown before added to dom
                 setTimeout(() => {
                     this.updateRange()
-                    this.setStateForButtonType('block')
+                    this.toolbar.setStateForButtonType('block')
                 }, 10)
                 // Check for handling enter within a parent block element that has a custom node at the end
                 // @todo Multiple custom nodes?
@@ -718,6 +433,7 @@ class Editor {
     // @section Keyup events
     // -----------------------------------------------------------------------------
 
+
     /**
      * Listen for key up events on the editor node
      */
@@ -733,8 +449,6 @@ class Editor {
             }
         })
     }
-
-
 
     /**
      * Handle keyup events (after being debounced)
@@ -764,12 +478,13 @@ class Editor {
      * after updates to the dom
      */
     updateEventHandlers() {
-        this.toolbar!.buttons.forEach(button => {
+        this.toolbar.buttons.forEach(button => {
             if (button.addEventHandlers) {
                 button.addEventHandlers()
             }
         })
     }
+
 
     // -----------------------------------------------------------------------------
     // @section Testing
@@ -978,8 +693,8 @@ class Editor {
     getCleanData(pretty = false): string {
         let node = this.editorNode!.cloneNode(true)
         // Get list of buttons with clean methods
-        const cleanButtons = this.toolbar!.buttons.filter(button => button.clean)
-        Helpers.cleanForSaving(node, cleanButtons)
+        const cleanButtons = this.toolbar.buttons.filter(button => button.clean)
+        Helpers.cleanForSaving(<Element>node, cleanButtons)
         return pretty ? Helpers.prettyPrint(node) : (<HTMLElement>node).innerHTML
     }
 
@@ -1031,12 +746,11 @@ class Editor {
     }
 
     updateBuffer() {
-        if (this?.buffer?.update) {
+        if (this.buffer?.update) {
             // console.log('Updating buffer')
             this.buffer.update()
         }
-        // Update the sidebar if we have one
-        this.updateSidebar()
+        this.sidebar?.update()
     }
 
 

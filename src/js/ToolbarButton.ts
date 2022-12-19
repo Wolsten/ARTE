@@ -1,36 +1,46 @@
 import Editor from "./Editor"
+import SidebarButton from "./SidebarButton"
 
 
-export default class ToolbarButton {
+interface ToolbarButton {
 
+    // Mandatory properties
     editor: Editor
-    type = '' // block|list|style|buffer|custom
-    tag = '' // As inserted in the dom. e.g. H1, CUSTOM
-    label = ''  // Generally used as the title of the button but could also be displayed
-    icon = '' //  icon The icon to use
+    type: string     // block|list|style|buffer|custom
+    tag: string      // As inserted in the dom. e.g. H1, CUSTOM
+    label: string    // Generally used as the title of the button but could also be displayed
+    icon: string     //  The icon to use
+    group: number     // The group index
+    element: null | HTMLElement // The dom element which the button is attached to
+    disabled: boolean
 
-    element: null | HTMLElement = null
-    group = 0
-    click: null | Function = null
+    // Optional properties
+    shortcut?: []
 
-    input = 'button'
-    action = ''
-    newFormat = ''
+    // Mandatory methods
+    click(): void
 
     // Optional methods
-    init: null | Function = null
-    sidebar: null | Function = null
-    setState: null | Function = null
-    shortcut: null | ['', ''] = null
-    addEventHandlers: null | Function = null
-    clean: null | Function = null
+    init?(): void
+    sidebar?(): SidebarButton
+    addEventHandlers?(): void
+    clean?(element: HTMLElement): HTMLElement
+    setState?(): void
+}
 
-    constructor(editor: Editor, type: string, tag: string, label: string, icon: string) {
+
+class ToolbarButton {
+
+    constructor(editor: Editor, type: string, tag: string, label: string, icon: string, group: number) {
         this.editor = editor
         this.type = type
         this.tag = tag
         this.label = label
         this.icon = icon
+        this.group = group
+        this.disabled = false
     }
-
 }
+
+
+export default ToolbarButton

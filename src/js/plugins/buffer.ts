@@ -95,6 +95,7 @@ export default class Buffer {
      * when the maximum buffer size is reached
      */
     update() {
+        if (!this.editor.editorNode) return
         // Check that the new value is different
         if (this.items.length > 0 &&
             this.editor.editorNode.innerHTML == this.items[this.items.length - 1]) {

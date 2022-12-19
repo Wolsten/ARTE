@@ -7,11 +7,9 @@ import EditRange from './EditRange.js'
 
 /**
  * Tests whether two arrays are equal - neither can be empty
- * @param {*[]} a 
- * @param {*[]} b 
- * @returns {boolean} true if niether mepty and all values equal
+ * Returns true if neither empty and all values equal
  */
-export const arraysEqual = function (a, b) {
+export const arraysEqual = function (a: [], b: []): boolean {
     if (a.length != 0 && b.length != 0 && a.length != b.length) {
         return false
     }
@@ -20,11 +18,8 @@ export const arraysEqual = function (a, b) {
 
 /**
  * Check whether array item in a is also a member of b
- * @param {*[]} a 
- * @param {*[]} b 
- * @returns 
  */
-export const arraySubset = function (a, b) {
+export const arraySubset = function (a: [], b: []): boolean {
     return a.every((item, index) => b[index] == item)
 }
 
@@ -33,22 +28,35 @@ export const arraySubset = function (a, b) {
 // @section Dom manipulation
 // -----------------------------------------------------------------------------
 
-// Comon tags to be supported
-//let tags = { block: ['DIV','H1','H2','H3','P','LI','BLOCKQUOTE'], list: ['LI'], custom:[]}
-let tags = { block: ['DIV', 'LI'], list: ['LI'], custom: [] }
-
+// Common tags to be supported
+// let tags = {
+//     block: ['DIV', 'H1', 'H2', 'H3', 'P', 'LI', 'BLOCKQUOTE'],
+//     list: ['LI'],
+//     custom: <string[]>[]
+// }
+let tags = {
+    block: ['DIV', 'LI'],
+    list: ['LI'],
+    custom: <string[]>[]
+}
 
 
 /**
  * Register a new button type with tag to allow future checking/cleaning
- * @param {string} type 
- * @param {string} tag 
  */
-export const registerTag = function (type, tag) {
-    if (tags[type] != undefined && tags[type].includes(tag) == false && tag != 'CLEAR') {
-        tags[type].push(tag)
-        //console.log('registered tag', tag, 'in type', type)
+export const registerTag = function (type: string, tag: string): void {
+    if (tag === 'CLEAR') return
+    switch (type) {
+        case 'block':
+            if (!tags.block.includes(tag)) tags.block.push(tag)
+            return
+        case 'list':
+            if (!tags.list.includes(tag)) tags.list.push(tag)
+            return
+        case 'custom':
+            if (!tags.custom.includes(tag)) tags.custom.push(tag)
     }
+    return
 }
 
 /**
@@ -133,14 +141,12 @@ export const isList = function (node) {
 
 /**
  * Check whether the node is a block container
- * @param {HTMLElement} node 
- * @returns {boolean}
  */
-export const isBlock = function (node) {
-    if (node.nodeType != 1) {
+export const isBlock = function (node: Node | null) {
+    if (!node || node.nodeType != 1) {
         return false
     }
-    const result = tags.block.includes(node.tagName)
+    const result = tags.block.includes(node.nodeName)
     return result
 }
 
@@ -185,35 +191,6 @@ const rangeStartContainerInCustom = function (range: EditRange): HTMLElement | f
     return isCustom(node) ? <HTMLElement>node : false
 }
 
-// /**
-//  * Return an array of custom blocks contained within the active range
-//  * @param {Range} range Active range
-//  * @returns {HTMLElement[]} Array of custom blocks, empty if none found
-//  */
-// export const rangeContainsCustoms = function( range ){
-//     let customs = []
-//     // Loop from start container to end container checking for a non-editable block
-//     let parent = getParentBlockNode(range.startContainer)
-//     if ( parent === false ){
-//         return []
-//     }
-//     const endParent = getParentBlockNode(range.endContainer)
-//     if ( endParent === false ){
-//         return []
-//     }
-//     let done = false
-//     while ( !done ){
-//         const custom = parent.querySelector('[contenteditable="false"]')
-//         if ( custom !== null ){
-//             customs.push(custom)
-//         }
-//         if ( parent === endParent ){
-//             done = true
-//         }
-//         parent = parent.nextElementSibling
-//     }
-//     return customs
-// }
 
 export const selectionContainsCustoms = function (editorNode, selection) {
     const customs = editorNode.querySelectorAll('[contenteditable="false"]')
@@ -226,6 +203,7 @@ export const selectionContainsCustoms = function (editorNode, selection) {
     //console.warn({found})
     return found
 }
+
 
 /**
 * Get the inline styles for all nodes in the tree from the lowest to the highest that
@@ -253,12 +231,12 @@ export const getInlineStyles = function (node) {
     return styles
 }
 
+
 /**
  * Get the parent block node or return the block if the node itself is a block
- * @param {HTMLElement} node 
- * @returns {HTMLElement|false} parent block node or false if error occurs
+ * Returns  parent block node or false if error occurs
  */
-export const getParentBlockNode = function (node) {
+export const getParentBlockNode = function (node: Node | null): Node | false {
     if (node == null) {
         console.warn('Error. Passed null node to getParentBlockNode')
         return false
@@ -362,6 +340,7 @@ export const replaceSelectionWithNode = function (editor, node) {
     return node
 }
 
+
 /**
  * Reset the cursor after replacing a selection with a new node
  * @param {HTMLElement} node 
@@ -378,17 +357,17 @@ function resetCursor(node) {
     }
 }
 
+
 /**
  * Cleans the node, removing any non-supported tags/styles
  * Invokes custom plugin cleaning if defined
- * @param {HTMLElement} node 
  * @param {object[]} buttons array of button objects which have clean methods
  */
-export const cleanForSaving = function (node, buttons) {
+export const cleanForSaving = function (node: Element, buttons: any[]): void {
 
     // Trim text nodes with CR's
     if (node.nodeType === 3) {
-        if (node.textContent.includes('\n')) {
+        if (node.textContent?.includes('\n')) {
             node.textContent = node.textContent.trim()
         }
         return
@@ -407,6 +386,7 @@ export const cleanForSaving = function (node, buttons) {
         isList(node) === false &&
         isStyle(node) === false &&
         custom === false) {
+
         console.warn('Removing node', node.tagName)
         node.remove()
         return
@@ -421,12 +401,16 @@ export const cleanForSaving = function (node, buttons) {
     if (buttons.length > 0) {
         // Does it require cleaning?
         const match = buttons.find(
-            button => button.tag.toUpperCase() === node.tagName
+            button => button.tagName.toUpperCase() === node.tagName
         )
         if (match) {
+
+            if (!match.clean) return
+
             const newNode = match.clean(node)
             if (node.parentNode == null) {
-                console.warn('Error.  Found missing parent node when cleaning for saving')
+                console.error('Found missing parent node when cleaning for saving')
+                return
             }
             node.parentNode.replaceChild(newNode, node)
         }
@@ -437,9 +421,9 @@ export const cleanForSaving = function (node, buttons) {
         return
     }
 
-    // Handle child nodes
+    // Handle child nodes recursively
     node.childNodes.forEach(child => {
-        cleanForSaving(child, buttons)
+        cleanForSaving(<Element>child, buttons)
     })
 }
 
@@ -549,6 +533,7 @@ export const prettyPrint = function (node) {
 
 
 
+
 // -----------------------------------------------------------------------------
 // @section Selection and keyboard methods
 // -----------------------------------------------------------------------------
@@ -644,30 +629,6 @@ export const getRange = function (editorNode: HTMLElement): EditRange | null {
     return null
 }
 
-// /**
-//  * Set the cursor in the target node
-//  * @param {HTMLElement} editor The editor node
-//  * @param {HTMLElement} target The target node for the cursor
-//  */
-// export const setCursorToTargetNode = function(editor, target){
-//     // If the target node isn't the editor make it the one before
-//     if ( target != editor ){
-//         target = target.previousElementSibling
-//     }
-//     // Look for the last child - cannot use lastElementChild because that ignores text nodes
-//     while ( target.lastChild != null ){
-//         target = target.lastChild
-//     }
-//     // If found and it is a text node set the cursor to the end
-//     if ( target.nodeType === 3 ){
-//         // console.log('Found target',target)
-//         // console.log('Found length',target.textContent.length)
-//         setCursor(target,target.textContent.length)
-//     // Else set to the start
-//     } else {
-//         setCursor(target,0)
-//     }
-// }
 
 /**
  * Set the cursor in a text node at the specified offset and
