@@ -9,8 +9,8 @@ class Modal {
     static self
 
     type = 'overlay'
-    panel = null       // The HTMLElement representing the modal panel
-    container = null   // The HTMLElement representing the innerHTML of the modal
+    panel: null | HTMLElement = null       // The HTMLElement representing the modal panel
+    container: null | HTMLElement = null   // The HTMLElement representing the innerHTML of the modal
     title = ''
     html = ''
     severity = ''
@@ -30,6 +30,36 @@ class Modal {
         // Require this so can handle the modal instance from a named event handler
         Modal.self = this
     }
+
+
+    selectAll(query: string): NodeList {
+        if (!this.panel) {
+            console.error('Modal element is missing')
+            return new NodeList()
+        }
+        return this.panel.querySelectorAll(query)
+    }
+
+    selectOne(query: string): null | Node {
+        if (!this.panel) {
+            console.error('Modal element is missing')
+            return null
+        }
+        return this.panel.querySelector(query)
+    }
+
+    getInputValue(query: string): string {
+        if (!this.panel) {
+            console.error('Modal element is missing')
+            return ''
+        }
+        const input = this.panel.querySelector(query)
+        if (input) {
+            return (<HTMLInputElement>input).value.trim()
+        }
+        return ''
+    }
+
 
     /**
      * Set the position for the input dialogue based on current range

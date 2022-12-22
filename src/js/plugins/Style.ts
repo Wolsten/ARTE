@@ -15,8 +15,9 @@ interface TextParts {
 
 export default class Style extends ToolbarButton {
 
+    style = ''
+
     // Private properties
-    private style = ''
     private newStyle = ''
     private newValue = ''
     private action = ''
@@ -29,18 +30,27 @@ export default class Style extends ToolbarButton {
         switch (style) {
             case 'B':
                 super(editor, 'style', 'B', 'Bold', Icons.b, group)
+                this.style = 'font-weight:bold'
                 break
             case 'I':
                 super(editor, 'style', 'I', 'Italic', Icons.i, group)
+                this.style = 'font-style:italic'
                 break
             case 'U':
                 super(editor, 'style', 'U', 'Underline', Icons.u, group)
+                this.style = 'text-decoration:underline'
                 break
             case 'CLEAR':
                 super(editor, 'style', 'CLEAR', 'Clear', Icons.clear, group)
+                this.style = 'CLEAR'
+                break
+            case 'COLOUR':
+                super(editor, 'style', '', '', '', group)
+                this.style = 'COLOUR'
                 break
             default:
                 super(editor, 'style', 'CLEAR', 'Clear', Icons.clear, group)
+                this.style = 'CLEAR'
                 console.error(`Unrecognised style name [${style}]`)
         }
     }
@@ -80,13 +90,16 @@ export default class Style extends ToolbarButton {
             console.error('Missing button element for button', this.tag)
             return
         }
+
         // console.log('setting style state')
         if (this.tag == 'CLEAR') {
             this.element.classList.remove('active')
         }
+
         // The rootNode should not be the editor or list container - (implying 
         // multiple blocks selected) 
         this.enableOrDisable()
+
         // Check whether the computed style matches the btn
         this.setStyleProps()
         if (this.editor.range) {
@@ -101,21 +114,13 @@ export default class Style extends ToolbarButton {
 
 
 
+
+
+
     // -----------------------------------------------------------------------------
     // @section Private methods
     // -----------------------------------------------------------------------------
 
-    private getStyle(): string {
-        switch (this.tag) {
-            case 'B': return 'font-weight:bold'
-            case 'I': return 'font-style:italic'
-            case 'U': return 'text-decoration:underline'
-            case 'CLEAR': return 'CLEAR'
-            default:
-                console.error(`Unrecognised style tag [${this.tag}]`)
-                return 'CLEAR'
-        }
-    }
 
     private isActive(): boolean {
         if (this.element) {
@@ -132,7 +137,6 @@ export default class Style extends ToolbarButton {
      * Split the style stype property into newStyle:newValue parts and set the action
      */
     private setStyleProps() {
-        this.style = this.getStyle()
         const styleParts = this.style.split(':')
         this.newStyle = styleParts[0]
         this.newValue = styleParts[1] !== undefined ? styleParts[1] : ''

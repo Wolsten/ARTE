@@ -64,18 +64,12 @@ export const sidebarOpen = '<i class="bi bi-chevron-double-left"></i>'
 export const outline = '<i class="bi bi-card-heading"></i>'
 export const menu = '<i class="bi bi-list"></i>'
 export const action = '<i class="bi bi-check2-square"></i>'
+export const edit = '<i class="bi bi-pencil"></i>'
 
 export const cut = '<i class="bi bi-scissors"></i>'
 export const copy = '<i class="bi bi-clipboard-plus"></i>'
 export const paste = '<i class="bi bi-box-arrow-down"></i>'
 
 
-export const thing: string = "My string thing"
-
-export const objectThing = {
-    x: 1,
-    y: 2,
-    z: 3
-}
 
 // console.log(thing)

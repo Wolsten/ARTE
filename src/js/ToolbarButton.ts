@@ -1,5 +1,6 @@
 import Editor from "./Editor"
 import SidebarButton from "./SidebarButton"
+import * as Helpers from '../helpers'
 
 
 interface ToolbarButton {
@@ -19,15 +20,13 @@ interface ToolbarButton {
 
     // Mandatory methods
     click(): void
-    enableOrDisable(): void
 
-    // Optional methods
+    // Optional methods that may need to be invoked from Editor
     init?(): void
     sidebar?(): SidebarButton
     addEventHandlers?(): void
-    clean?(element: HTMLElement): HTMLElement
+    clean?(element: Element): Element
     setState?(): void
-
 }
 
 
@@ -41,10 +40,17 @@ class ToolbarButton {
         this.icon = icon
         this.group = group
         this.disabled = false
+        this.shortcut = []
     }
 
+    // -----------------------------------------------------------------------------
+    // @section Protected methods
+    // -----------------------------------------------------------------------------
 
-    enableOrDisable(): void {
+    /**
+     * Whether to enable or disable an inline styling button
+     */
+    protected enableOrDisable(): void {
         this.disabled = false
         if (this.editor.range) {
             if (this.editor.range.collapsed ||
@@ -59,6 +65,9 @@ class ToolbarButton {
             this.element?.removeAttribute('disabled')
         }
     }
+
+
+
 }
 
 

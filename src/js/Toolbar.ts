@@ -7,6 +7,7 @@ import Buffer from './plugins/Buffer'
 import BufferButton from './plugins/BufferButton'
 import Shortcut from './Shortcut'
 import { editorToolbar } from './templates'
+import Actions from './plugins/actions-OLD'
 
 
 export default class Toolbar {
@@ -17,7 +18,7 @@ export default class Toolbar {
         ['STYLE.B', 'STYLE.I', 'STYLE.U', 'STYLE.FOREGROUND', 'STYLE.BACKGROUND', 'STYLE.CLEAR'],
         ['BUFFER.UNDO', 'BUFFER.REDO'],
         ['CUT', 'COPY', 'PASTE'],
-        ['Mentions', 'Links', 'Images', 'Comments', 'Actions'],
+        ['Mentions', 'Links', 'Images', 'CUSTOM.COMMENT', 'CUSTOME.ACTIONS'],
         ['Settings']
     ]
     buttons: ToolbarButton[] = []
@@ -62,6 +63,12 @@ export default class Toolbar {
                         }
                         button = new BufferButton(editor, name, index)
                         break
+                    case 'CUSTOM':
+                        if (name === 'ACTION') {
+                            button = new Actions(editor, index)
+                        }
+                        break
+
                 }
 
                 if (button) {

@@ -9,9 +9,9 @@ import * as Styles from './plugins/Style'
 import * as Mentions from './plugins/mentions'
 import * as Links from './plugins/links'
 import * as Images from './plugins/images'
-import * as Colours from './plugins/colours'
-import * as Actions from './plugins/actions'
-import * as Comments from './plugins/comments'
+import * as Colours from './plugins/Colours'
+import * as Actions from './plugins/actions-OLD'
+import * as Comments from './plugins/Comments'
 import * as Settings from './plugins/settings'
 
 

@@ -633,53 +633,48 @@ export const getRange = function (editorNode: HTMLElement): EditRange | null {
 /**
  * Set the cursor in a text node at the specified offset and
  * return the new range
- * @param {HTMLElement} node 
- * @param {number} offset 
- * @returns {Range}
  */
-export const setCursor = function (node, offset) {
-    let range = document.createRange()
+export const setCursor = function (node: Element, offset: number): EditRange {
+    let range = <EditRange>document.createRange()
     const selection = window.getSelection()
     // Check the offset is in range
-    if (offset > node.textContent.length) {
+    if (node.textContent && offset > node.textContent.length) {
         offset = 0
     }
     range.setStart(node, offset)
     range.collapse(true)
-    selection.removeAllRanges()
-    selection.addRange(range)
+    if (selection) {
+        selection.removeAllRanges()
+        selection.addRange(range)
+    }
     range = augmentRange(range)
     return range
 }
 
 /**
  * Restore a previously selected range
- * @param {Range} range 
- * @returns {Range}
  */
-export const restoreSelectedRange = function (range) {
+export const restoreSelectedRange = function (range: EditRange): EditRange {
     const selection = window.getSelection()
-    selection.removeAllRanges()
-    selection.addRange(range)
+    if (selection) {
+        selection.removeAllRanges()
+        selection.addRange(range)
+    }
     range = augmentRange(range)
     return range
 }
 
 /**
  * Find the node containing the start marker
- * @param {HTMLElement} parent 
- * @returns {HTMLElement}
  */
-const getStartNode = function (parent) {
+const getStartNode = function (parent: Element): Element {
     return findMarkerNode(parent, START_MARKER)
 }
 
 /**
  * Find the node containing the end marker
- * @param {HTMLElement} parent 
- * @returns {HTMLElement}
  */
-const getEndNode = function (parent) {
+const getEndNode = function (parent: Element): Element {
     return findMarkerNode(parent, END_MARKER)
 }
 
@@ -690,7 +685,7 @@ const getEndNode = function (parent) {
  * @param {HTMLElement} marker The marker text to locate
  * @returns {boolean} true if finds marker node, false otherwise
  */
-function findMarkerNode(parent, marker) {
+function findMarkerNode(parent: Element, marker: Element): boolean {
     for (let i = 0; i < parent.childNodes.length; i++) {
         const child = parent.childNodes[i]
         if (child.nodeType === 1) {
@@ -744,11 +739,9 @@ export const resetSelection = function (editorNode) {
 // -----------------------------------------------------------------------------
 
 /**
- * Display confirmation dialogue for cancel any edits
- * @param {Function} callback Function to invoke on formation of cancel
- * @returns {Object}
+ * Display confirmation dialogue for cancel any edits. Returns as a new modal
  */
-export const modalRequestCancel = function (callback) {
+export const modalRequestCancel = function (callback: Function): Modal {
     const confirm = new Modal({
         type: 'overlay',
         severity: 'warning',
@@ -765,11 +758,8 @@ export const modalRequestCancel = function (callback) {
 
 /**
  * Display confirmation dialogue for deleting an item
- * @param {string} label The name of the item
- * @param {Function} callback Function to invoke on formation of delete
- * @returns {Object}
  */
-export const modalRequestDelete = function (label, callback) {
+export const modalRequestDelete = function (label: string, callback: Function): Modal {
     const confirm = new Modal({
         type: 'overlay',
         severity: 'warning',
