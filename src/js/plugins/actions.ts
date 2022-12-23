@@ -80,7 +80,7 @@ export default class Actions extends CustomBlock {
             // Initialise an action as saved to file
             this.node = document.createElement(this.tag)
             if (!this.node) {
-                console.error('Failed to create new action')
+                console.error(`Failed to create new ${this.label}`)
                 return
             }
             this.node.id = Helpers.generateUid()
@@ -125,7 +125,7 @@ export default class Actions extends CustomBlock {
         const due = this.getAttribute('data-due')
         const notes = this.getAttribute('data-notes')
         return `
-           <form class="comment">
+           <form class="${this.tag}">
                <div class="form-input">
                    <label for="todo">What needs to be done</label>
                    <textarea id="todo" class="form-control" required>${todo}</textarea>

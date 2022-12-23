@@ -18,7 +18,7 @@ export default class Toolbar {
         ['STYLE.B', 'STYLE.I', 'STYLE.U', 'STYLE.FOREGROUND', 'STYLE.BACKGROUND', 'STYLE.CLEAR'],
         ['BUFFER.UNDO', 'BUFFER.REDO'],
         ['CUT', 'COPY', 'PASTE'],
-        ['Mentions', 'Links', 'Images', 'CUSTOM.COMMENT', 'CUSTOME.ACTIONS'],
+        ['Mentions', 'Links', 'Images', 'CUSTOM.COMMENT', 'CUSTOM.ACTIONS'],
         ['Settings']
     ]
     buttons: ToolbarButton[] = []
