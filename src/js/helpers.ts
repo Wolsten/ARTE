@@ -1,4 +1,4 @@
-import Modal from './Modal.js'
+// import Modal from './Modal.js'
 import EditRange from './EditRange.js'
 
 // -----------------------------------------------------------------------------
@@ -738,41 +738,41 @@ export const resetSelection = function (editorNode) {
 // @section Modals confirmation dialogues
 // -----------------------------------------------------------------------------
 
-/**
- * Display confirmation dialogue for cancel any edits. Returns as a new modal
- */
-export const modalRequestCancel = function (callback: Function): Modal {
-    const confirm = new Modal({
-        type: 'overlay',
-        severity: 'warning',
-        title: 'Cancel changes?',
-        html: 'Do you really want to lose changes?',
-        buttons: {
-            cancel: { label: 'No - keep editing' },
-            confirm: { label: 'Yes - lose changes', callback }
-        }
-    })
-    confirm.show()
-    return confirm
-}
+// /**
+//  * Display confirmation dialogue for cancel any edits. Returns as a new modal
+//  */
+// export const modalRequestCancel = function (callback: Function): Modal {
+//     const confirm = new Modal({
+//         type: 'overlay',
+//         severity: 'warning',
+//         title: 'Cancel changes?',
+//         html: 'Do you really want to lose changes?',
+//         buttons: {
+//             cancel: { label: 'No - keep editing' },
+//             confirm: { label: 'Yes - lose changes', callback }
+//         }
+//     })
+//     confirm.show()
+//     return confirm
+// }
 
-/**
- * Display confirmation dialogue for deleting an item
- */
-export const modalRequestDelete = function (label: string, callback: Function): Modal {
-    const confirm = new Modal({
-        type: 'overlay',
-        severity: 'warning',
-        title: `Delete ${label}?`,
-        html: `Do you really want to delete this ${label}?`,
-        buttons: {
-            cancel: { label: 'No - keep editing' },
-            confirm: { label: 'Yes - delete', callback }
-        }
-    })
-    confirm.show()
-    return confirm
-}
+// /**
+//  * Display confirmation dialogue for deleting an item
+//  */
+// export const modalRequestDelete = function (label: string, callback: Function): Modal {
+//     const confirm = new Modal({
+//         type: 'overlay',
+//         severity: 'warning',
+//         title: `Delete ${label}?`,
+//         html: `Do you really want to delete this ${label}?`,
+//         buttons: {
+//             cancel: { label: 'No - keep editing' },
+//             confirm: { label: 'Yes - delete', callback }
+//         }
+//     })
+//     confirm.show()
+//     return confirm
+// }
 
 
 // -----------------------------------------------------------------------------

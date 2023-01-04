@@ -38,7 +38,7 @@
 
 import * as Helpers from '../helpers'
 import ToolbarButton from '../ToolbarButton'
-import Modal from '../Modal'
+import { Modal } from '../Modal'
 import SidebarButton from '../SidebarButton'
 import Editor from '../Editor'
 
@@ -49,6 +49,7 @@ interface CustomBlock extends ToolbarButton {
     form(): string
     save(): void
     clean(element: Element): Element
+    template(): string
 
     // Optional
     sidebar?(): SidebarButton
@@ -76,7 +77,10 @@ class CustomBlock extends ToolbarButton {
     init(): void {
         const customs = this.editor.editorNode?.querySelectorAll(this.tag)
         if (customs) {
-            customs.forEach(custom => this.format(custom))
+            customs.forEach((custom: Element) => {
+                this.node = custom
+                this.format(this.template)
+            })
         }
     }
 
@@ -86,7 +90,7 @@ class CustomBlock extends ToolbarButton {
      */
     click() {
         // Ignore if a modal is active
-        if (this.drawer && this.drawer.active()) {
+        if (this?.drawer?.active) {
             return
         }
         const custom = this.editor?.range?.blockParent?.querySelector(this.tag)
@@ -393,6 +397,8 @@ class CustomBlock extends ToolbarButton {
         } else {
             element = this.node
         }
+        // Prefix custom attributes with 'data-' 
+        if (attribute != 'contenteditable') attribute = 'data-' + attribute
         const value = element.getAttribute(attribute)
         if (value) return value.trim()
         return ''
@@ -414,8 +420,17 @@ class CustomBlock extends ToolbarButton {
         } else {
             element = this.node
         }
+        // Prefix custom attributes with 'data-' 
+        if (attribute != 'contenteditable') attribute = 'data-' + attribute
         element.setAttribute(attribute, value.trim())
         return true
+    }
+
+
+    protected setAttributes(attributes: string[], modal: Modal) {
+        attributes.forEach((attribute: string) => {
+            this.setAttribute(attribute, modal.getInputValue('#' + attribute))
+        })
     }
 
 

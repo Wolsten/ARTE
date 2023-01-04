@@ -1,5 +1,5 @@
 import Editor from './Editor'
-import Modal from './Modal'
+import { Modal } from './Modal'
 import Options from './options'
 import * as Icons from './icons'
 import * as Buffer from './plugins/Buffer'

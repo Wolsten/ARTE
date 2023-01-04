@@ -1,7 +1,7 @@
-import ToolbarButton from '../ToolbarButton.js'
+import ToolbarButton from '../ToolbarButton'
 import * as Icons from '../icons.ts'
-import { setCursor } from '../helpers.js'
-import Modal from '../Modal.js'
+import { setCursor } from '../helpers'
+import { Modal } from '../Modal'
 
 let editor
 let people = []

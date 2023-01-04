@@ -1,80 +1,236 @@
-import * as Icons from './icons.ts'
-import * as Helpers from './helpers.js'
-
-const BUTTON_ORDER = ['cancel', 'delete', 'confirm']
-
-class Modal {
-
-    // Static variable to save the modal instance
-    static self
-
-    type = 'overlay'
-    panel: null | HTMLElement = null       // The HTMLElement representing the modal panel
-    container: null | HTMLElement = null   // The HTMLElement representing the innerHTML of the modal
-    title = ''
-    html = ''
-    severity = ''
-    buttons = false
-    escape = false
+import * as Icons from './icons'
+import * as Helpers from './helpers'
+import EditRange from './EditRange'
 
 
-    constructor(options: null | object = null) {
+export enum ModalType {
+    Drawer = 'drawer',
+    Overlay = 'overlay',
+    Positioned = 'positioned'
+}
 
+
+export enum ModalSeverity {
+    Info,
+    Warning,
+    Danger
+}
+
+export enum ModalButtonAction {
+    Cancel,
+    Delete,
+    Confirm,
+    Custom
+}
+
+export type ModalOptionsType = {
+    type?: ModalType
+    severity?: ModalSeverity
+    escapeToCancel?: boolean
+    backgroundColour?: string
+    borderRadius?: string
+    showOnNew?: boolean
+    focusId?: string
+}
+
+
+export class ModalButton {
+
+    action: ModalButtonAction
+    label: string
+    callback?: Function
+    deleteObject?: string      // If present and not blank then this is the category of thing to delete
+
+    constructor(action: ModalButtonAction, label: string, callback?: Function, deleteObject?: string) {
+        this.action = action
+        this.label = label
+        if (callback) this.callback = callback
+        if (deleteObject) this.deleteObject = deleteObject
+    }
+}
+
+
+
+
+export class Modal {
+
+    static self: null | Modal     // The original modal instance
+    static confirm: null | Modal  // A confirm action modal
+
+    defaultButton: ModalButton = {
+        action: ModalButtonAction.Cancel,
+        label: 'Cancel'
+    }
+
+    // Mandatory props
+    title: string
+    html: string
+    buttons: ModalButton[] = []
+
+    active = false
+
+    // Options
+    options: ModalOptionsType = {
+        type: ModalType.Drawer,
+        severity: ModalSeverity.Info,
+        escapeToCancel: false,
+        backgroundColour: '',
+        borderRadius: '',
+        showOnNew: true,
+        focusId: '',
+    }
+
+    // Private props
+    private dirty = false                   // Track changes to any form in the html provided
+    private modalElement!: HTMLElement      // The HTMLElement representing the modal panel
+
+
+
+    constructor(title: string, html: string, buttons: ModalButton[], options?: ModalOptionsType) {
+        this.title = title
+        this.html = html
+        this.buttons = buttons
         // Override defaults with any options supplied
         if (options) {
-            for (let option in options) {
-                Object.assign(this, option)
-            }
+            this.options = { ...this.options, ...options }
         }
-
         // Require this so can handle the modal instance from a named event handler
         Modal.self = this
+        // Show immediately?
+        if (this.options.showOnNew) {
+            this.show()
+            // Focus on a particular field
+            if (this.options.focusId) {
+                const input = this.getInputElement('#' + this.options.focusId)
+                if (input) {
+                    input.focus()
+                    if (input.type == 'text') {
+                        input.setSelectionRange(input.value.length, input.value.length)
+                    }
+                }
+            }
+        }
     }
 
 
-    selectAll(query: string): NodeList {
-        if (!this.panel) {
-            console.error('Modal element is missing')
-            return new NodeList()
-        }
-        return this.panel.querySelectorAll(query)
+    /**
+     * Create the modal panel, show and scroll into view
+     */
+    show(): void {
+        // Create the modal placeholder 
+        this.modalElement = this.panel()
+        // Add modal to the document
+        document.body.appendChild(this.modalElement)
+        // Add event listeners
+        this.addEventListeners()
+        // Flag that is active
+        this.active = true
+        // Add the show class and scroll into view
+        setTimeout(() => {
+            this.modalElement.classList.add('show')
+            this.modalElement.scrollIntoView()
+        }, 10)
     }
 
-    selectOne(query: string): null | Node {
-        if (!this.panel) {
-            console.error('Modal element is missing')
-            return null
-        }
-        return this.panel.querySelector(query)
-    }
 
-    getInputValue(query: string): string {
-        if (!this.panel) {
-            console.error('Modal element is missing')
-            return ''
-        }
-        const input = this.panel.querySelector(query)
-        if (input) {
-            return (<HTMLInputElement>input).value.trim()
+    icon(): string {
+        switch (this.options.severity) {
+            case ModalSeverity.Info:
+                return Icons.info
+            case ModalSeverity.Warning:
+                return Icons.warning
+            case ModalSeverity.Danger:
+                return Icons.danger
         }
         return ''
     }
 
 
+    styles(): string {
+        const styles = []
+        if (this.options.backgroundColour != '') {
+            styles.push(`background-color:${this.options.backgroundColour}`)
+        }
+        if (this.options.borderRadius != '') {
+            styles.push(`border-radius:${this.options.borderRadius}`)
+        }
+        return styles.length == 0 ? '' : `style="${styles.join(';')}"`
+    }
+
+
+    panel(): HTMLElement {
+        const p = document.createElement('DIV')
+        p.id = Helpers.generateUid()
+        p.classList.add('modal-panel')
+        p.classList.add(`modal-panel-${this.options.type}`)
+        p.classList.add(this.options.escapeToCancel ? 'escape' : 'no-escape')
+        p.innerHTML = this.template()
+        return p
+    }
+
+
+    template(): string {
+        const style = this.styles()
+        const icon = this.icon()
+        const withTextClass = this.title ? 'with-text' : ''
+        const centredClass = this.buttons.length === 1 ? 'centred' : ''
+        let buttonsHTML = ''
+        this.buttons.forEach((button: ModalButton) => {
+            // For confirm "submit" the form to support html5 validation of 'required' attribute
+            const type = button.action == ModalButtonAction.Confirm ? 'submit' : button
+            buttonsHTML += `<button type="${type}" class="${button.action}">${button.label}</button>`
+        })
+        return `<form class="modal-panel-container" ${style}>
+
+                    <header class="modal-panel-header">
+                        <h3 class="modal-panel-title ${withTextClass}">${icon}${this.title}</h3>
+                    </header>
+
+                    <div class="modal-panel-body">
+                        ${this.html}
+                    </div>
+
+                    ${buttonsHTML == '' ? '' : `<div class="modal-panel-buttons ${centredClass}">${buttonsHTML}</div>`}
+
+                </form>`
+    }
+
+
+
+    getInputElement(query: string): null | HTMLInputElement {
+        if (!this.modalElement) {
+            console.error('Modal element is missing')
+            return null
+        }
+        const element = this.modalElement.querySelector(query)
+        if (element) return <HTMLInputElement>element
+        return null
+    }
+
+
+    getInputValue(query: string): string {
+        const input = this.getInputElement(query)
+        if (!input) return ''
+        return input.value.trim()
+    }
+
+
     /**
      * Set the position for the input dialogue based on current range
-     * @param {Range} range - The current editor selection
-     * @param {HTMLElement} editorNode - The editor node
      */
-    setPosition(range, editorNode) {
-        this.container = this.panel.querySelector('.modal-panel-container')
+    setPosition(range: EditRange, editorNode: HTMLElement) {
+        const container = this.modalElement.querySelector('.modal-panel-container')
+        if (!container) {
+            console.error('Could nt find modal panel container')
+            return
+        }
         let pos
         // If this is not a text node then get the first text node
         // Can happen at the start of a line when backspace to the start
         if (range.startContainer.nodeType !== 3) {
             if (range.startContainer.childNodes.length > 0) {
-                let node = range.startContainer.childNodes[0]
-                pos = node.getBoundingClientRect()
+                const node = range.startContainer.childNodes[0]
+                pos = (<Element>node).getBoundingClientRect()
             } else {
                 pos = { x: editorNode.offsetLeft, y: editorNode.offsetTop }
             }
@@ -84,133 +240,81 @@ class Modal {
             //console.log('text node const ',pos)
         }
         // Ensure does not go off-screen
-        if ((pos.x + this.container.offsetWidth) > window.innerWidth) {
-            pos.x = window.innerWidth - this.container.offsetWidth - 20;
+        const box = <HTMLElement>container
+        if ((pos.x + box.offsetWidth) > window.innerWidth) {
+            pos.x = window.innerWidth - box.offsetWidth - 20;
         }
-        if ((pos.y + this.container.offsetHeight) > window.innerHeight) {
-            pos.y = window.innerHeight - this.container.offsetHeight - 40;
+        if ((pos.y + box.offsetHeight) > window.innerHeight) {
+            pos.y = window.innerHeight - box.offsetHeight - 40;
         }
-        this.container.style.top = `${pos.y}px`
-        this.container.style.left = `${pos.x}px`
+        box.style.top = `${pos.y}px`
+        box.style.left = `${pos.x}px`
     }
 
-    /**
-     * Generate the innerHTML for the modal panel
-     * @returns {string}
-     */
-    template() {
-        let styles = []
-        if (this.backgroundColour != undefined) {
-            styles.push(`background-color:${this.backgroundColour}`)
-        }
-        if (this.borderRadius != undefined) {
-            styles.push(`border-radius:${this.borderRadius}`)
-        }
-        const style = styles.length == 0 ? '' : `style="${styles.join(';')}"`
-        let html = `<div class="modal-panel-container" ${style}>`
-        let icon = ''
-        switch (this.severity) {
-            case 'info':
-                icon = Icons.info
-                break
-            case 'warning':
-                icon = Icons.warning
-                break
-            case 'danger':
-                icon = Icons.danger
-                break
-        }
-        // Title
-        if (this.title || icon) {
-            const withText = this.title ? 'with-text' : ''
-            html += `
-                <header class="modal-panel-header">
-                    <h3 class="modal-panel-title ${withText}">${icon}${this.title}</h3>
-                </header>`
-        }
-
-        html += `<div class="modal-panel-body">${this.html}</div>`
-
-        // Buttons - need inserting in body at the end of any form 
-        // or just appending in their own form if no form exists yet
-        if (this.buttons) {
-            let buttonHTML = ''
-            let buttonCount = 0
-            BUTTON_ORDER.forEach(type => {
-                if (this.buttons[type]) {
-                    buttonCount++
-                    const bType = type == 'confirm' ? 'submit' : 'button'
-                    buttonHTML += `<button type="${bType}" class="${type}">${this.buttons[type].label}</button>`
-                }
-            })
-            const centred = buttonCount == 1 ? 'centred' : ''
-            const buttonsHTML = `<div class="modal-panel-buttons ${centred}">${buttonHTML}</div>`
-            if (html.includes('</form')) {
-                html = html.replace('</form>', buttonsHTML + '</form>')
-            } else {
-                html += `<form>${buttonsHTML}</form>`
-            }
-        }
-        // Close modal-panel-container div
-        html += `</div>`
-        return html
-    }
 
     /**
      * Hide current panel by removing transition class "show" and then removing from
-     * the dom.
+     * the dom but first check for any data changes
      */
-    hide() {
+    hide(): void {
+        if (this.dirty) {
+            this.requestCancel()
+            return
+        }
         // Check whether the panel still exists and warn the developer if not
-        // since this means they are calling this method too mane times
+        // since this means they are calling this method too many times
         // The console message is removed in the bundled javascript so the 
         // this call will fail gracefully.
-        if (this.panel == null) {
+        if (this.modalElement == null) {
             console.warn('Attempt to hide panel that is already hidden')
             return
         }
-        this.panel.classList.remove('show')
+        this.modalElement.classList.remove('show')
         // Remove the event listener so don't keep responding to Escape key
         document.body.removeEventListener('keydown', this.handleKeydown)
         setTimeout(() => {
-            if (this.panel != null) {
-                this.panel.remove()
-                this.panel = null
+            if (this.modalElement) {
+                (<HTMLElement>this.modalElement).remove()
+                this.active = false
             }
         }, 500)
     }
 
-    /**
-     * Return true if a modal panel is already displayed
-     * @returns {boolean}
-     */
-    active() {
-        if (document.querySelector(`.modal-panel`)) {
-            return true
+
+    requestCancel() {
+        const buttons = [
+            new ModalButton(ModalButtonAction.Cancel, 'No - keep editing', this.rejectCancel),
+            new ModalButton(ModalButtonAction.Confirm, 'Yes - lose changes', this.confirmCancel)
+        ]
+        const options: ModalOptionsType = {
+            type: ModalType.Overlay,
+            severity: ModalSeverity.Warning
         }
-        return false
+        Modal.confirm = new Modal('Cancel changes?', 'Do you really want to lose your changes?', buttons, options)
     }
 
-    /**
-     * Run the escape callback if supplied, otherwise just hide immediately
-     */
-    escapeOrHide() {
-        // Invoke cancel callback if available
-        if (this.escape instanceof Function) {
-            this.escape()
-        } else {
-            this.hide()
-        }
+    confirmCancel() {
+        Modal.confirm?.hide()
+        Modal.self?.hide()
     }
+
+    rejectCancel() {
+        Modal.confirm?.hide()
+    }
+
 
     /**
      * Handle keydown events on the document body
-     * @param {Event} event 
+     * Cancel confirms first in preference to original modals
      */
-    handleKeydown(event) {
+    handleKeydown(event: KeyboardEvent): void {
         if (event.key == 'Escape') {
             event.stopPropagation()
-            Modal.self.escapeOrHide()
+            if (Modal.confirm) {
+                Modal.confirm.hide()
+            } else if (Modal.self) {
+                Modal.self.hide()
+            }
         }
     }
 
@@ -219,76 +323,94 @@ class Modal {
      * Also optionally check for Escape key to close the modal
      */
     addEventListeners() {
-        // Button callbacks
-        if (this.buttons) {
-            BUTTON_ORDER.forEach(type => {
-                //console.warn({type})
-                if (this.buttons[type]) {
-                    // For confirm submit the form to support html5 validation of 'required' attribute
-                    const button = this.buttons[type]
-                    const element = this.panel.querySelector(`button.${type}`)
-                    if (element) {
-                        let method = 'click'
-                        let object = element
-                        if (type == 'confirm') {
-                            method = 'submit'
-                            object = this.panel.querySelector(`form`)
-                        }
-                        object.addEventListener(method, event => {
-                            event.preventDefault()
-                            event.stopPropagation()
-                            if (button.callback) {
-                                button.callback()
-                            } else {
-                                this.hide()
-                            }
-                        })
+        // Add event listeners to buttons
+        if (this.buttons.length == 0) return
+        const form = this.modalElement.querySelector(`form`)
+        if (!form) {
+            console.error(`Modal form is missing`)
+            return
+        }
+        this.buttons.forEach((button: ModalButton) => {
+            let element = this.modalElement.querySelector(`button.${button.action}`)
+            if (!element) {
+                console.error(`button.${button.action} is missing`)
+                return
+            }
+            let method = 'click'
+            if (button.action == ModalButtonAction.Confirm) {
+                method = 'submit'
+                element = form
+            }
+            element.addEventListener(method, event => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (button.callback) {
+                    if (button.action == ModalButtonAction.Delete) {
+                        const thing = button.deleteObject || 'object'
+                        Modal.confirm = new ModalDelete(thing, button.callback)
+                    } else {
+                        button.callback()
                     }
+                } else {
+                    this.hide()
                 }
             })
-        }
+        })
         // Support escape key and background clicks?
-        if (this.escape) {
+        if (this.options.escapeToCancel) {
             // Watch for escape key being pressed
             // Cannot use an arrow function as otherwise multiple event listeners
             // would be added. Using a named listener like this just replaces
             // the existing event handler
             document.body.addEventListener('keydown', this.handleKeydown)
             // Listen for background clicks
-            this.panel.addEventListener('click', event => {
-                if (event.target == this.panel) {
+            this.modalElement.addEventListener('click', event => {
+                if (event.target == this.modalElement) {
                     event.stopPropagation()
-                    this.escapeOrHide()
+                    this.hide()
                 }
+            })
+        }
+        // Look for changes in the main form to set the dirty flag
+        const inputs = form.querySelectorAll('input, textarea, select')
+        if (inputs) {
+            inputs.forEach((input: Element) => {
+                input.addEventListener('change', () => this.dirty = true)
             })
         }
     }
 
-    show() {
-        // Create the modal
-        this.panel = document.createElement('DIV')
-        this.panel.id = Helpers.generateUid()
-        this.panel.classList.add('modal-panel')
-        this.panel.classList.add(`modal-panel-${this.type}`)
-        // Flag whether can select the modal panel to close the modal
-        // (as well as use the escape key)
-        this.panel.classList.add(this.escape ? 'escape' : 'no-escape')
-        this.panel.innerHTML = this.template()
-        // Add modal to the document
-        document.querySelector('body').appendChild(this.panel)
-        // Add event listeners
-        this.addEventListeners()
-        // Add the show class
-        setTimeout(() => {
-            this.panel.classList.add('show')
-            this.panel.scrollIntoView()
-        }, 10)
-    }
-
 }
 
-// -----------------------------------------------------------------------------
-// @section Exports
-// -----------------------------------------------------------------------------
 
-export default Modal
+export class ModalWarning extends Modal {
+
+    constructor(title: string, html: string) {
+        const buttons = [
+            new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
+        ]
+        const options = {
+            type: ModalType.Overlay,
+            escapeToCancel: true,
+            severity: ModalSeverity.Warning
+        }
+        super(title, html, buttons, options)
+    }
+}
+
+
+export class ModalDelete extends Modal {
+
+    constructor(thing: string, callback: Function) {
+        const buttons = [
+            new ModalButton(ModalButtonAction.Cancel, 'No - keep editing'),
+            new ModalButton(ModalButtonAction.Confirm, 'Yes - delete', callback),
+        ]
+        const options = {
+            type: ModalType.Overlay,
+            escapeToCancel: true,
+            severity: ModalSeverity.Danger
+        }
+        super(`Delete ${thing}?`, `Are you sure you want to delete this ${thing}?`, buttons, options)
+    }
+}

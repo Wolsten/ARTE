@@ -2,11 +2,11 @@
  * Handle cut, copy and paste
  */
 
-import ToolbarButton from '../ToolbarButton.js'
-import * as Icons from '../icons.ts'
-import * as Helpers from '../helpers.js'
-import Modal from '../Modal.js'
-import Editor from '../Editor.js'
+import ToolbarButton from '../ToolbarButton'
+import * as Icons from '../icons'
+import * as Helpers from '../helpers'
+import { ModalWarning } from '../Modal'
+import Editor from '../Editor'
 
 
 
@@ -31,18 +31,6 @@ export default class Clipboard extends ToolbarButton {
                 super(editor, 'detached', 'PASTE', 'Paste (text only - use Ctr-V or Cmd-V to include formatting)', Icons.paste, group)
         }
     }
-
-    // switch(type) {
-    //         case 'CUT':
-    //     super(editor, 'detached', 'CUT', 'Cut (text only - use Ctr-V or Cmd-V to include formatting)', Icons.cut, group)
-    //     return
-    //         case 'COPY':
-    //     super(editor, 'detached', 'COPY', 'Copy (text only - use Ctr-V or Cmd-V to include formatting)', Icons.copy, group)
-    //     return
-    //         case 'PASTE':
-    //     super(editor, 'detached', 'PASTE', 'Paste (text only - use Ctr-V or Cmd-V to include formatting)', Icons.paste, group)
-    // }
-
 
 
     /**
@@ -127,16 +115,9 @@ export default class Clipboard extends ToolbarButton {
     private prevent(selection: Selection): boolean {
         const contains = Helpers.selectionContainsCustoms(this.editor.editorNode, selection)
         if (contains) {
-            const feedback = new Modal({
-                type: 'overlay',
-                severity: 'info',
-                title: 'Information',
-                html: `<p>Cut, copy and paste (of or over) selections with active elements, such as comments or links, is not supported.</p>
-                   <p>Please modify your selection and try again.</p>`,
-                escape: true,
-                buttons: { cancel: { label: 'Close' } }
-            })
-            feedback.show()
+            const html = `<p>Cut, copy and paste (of or over) selections with active elements, such as comments or links, is not supported.</p>
+                          <p>Please modify your selection and try again.</p>`
+            new ModalWarning('Information', html)
             return true
         }
         return false

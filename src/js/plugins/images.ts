@@ -80,10 +80,6 @@ class Images extends CustomBlock {
             escape: true
         })
         this.drawer.show()
-        // Initialise confirmation module and dirty data detection
-        this.dirty = false
-        const inputs = this.drawer.selectAll('form input')
-        inputs.forEach(input => input.addEventListener('change', () => this.dirty = true))
         // Focus the src
         const src = this.drawer.selectOne('form #src')
         if (!src) {
@@ -176,44 +172,44 @@ class Images extends CustomBlock {
             })
         }
         return new SidebarButton(this.icon, 'images', `${content}`)
-    }
-
-
-
-    /**
-        * Mandatory button click function */
-    click(): string | undefined {
-        // Ignore if a modal is active
-        if (this.drawer && this.drawer.active()) {
-            return
         }
-        const custom = this.editor?.range?.blockParent?.querySelector(this.tag)
-        if (custom) {
+            
+        
+            
+            
+                ndatory button click function */
+            k(): string | undefined {
+            // Ignore if a modal is active
+            if (this.drawer && this.drawer.active()) {
+                return
+        }
+                t custom = this.editor?.range?.blockParent?.querySelector(this.tag)
+            if (custom) {
             this.edit(custom)
 
             this.show(false)
         }
             
-                
-    
                     
-                isabled and active states of a button
+            
+                        
+                    isabled and active states of a button
             * /
         setState() {
-            this.setCustomBlockState()
-        }
-
-
-        /**
+                this.setCustomBlockState()
+                
+             
+            
+                
             dd event handlers to all custom node edit buttons in a custom block
-         */
-        addEventHandlers(): void {
-            const buttons = this.editor.editorNode?.querySelectorAll(this.tag + ' button')
-                ns) {
-            buttons.forEach(button => button.addEventListener('click', event => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (!button.parentNode) {
+                
+                    Handlers(): void {
+                    t buttons = this.editor.editorNode?.querySelectorAll(this.tag + ' button')
+                    ns) {
+                        forEach(button => button.addEventListener('click', event => {
+                    event.preventDefault()
+                        t.stopPropagation()
+                    if (!button.parentNode) {
                     console.error(`Could not find ${this.label} node`)
                 } else {
                     this.edit(<Element>button.parentNode)
@@ -221,24 +217,24 @@ class Images extends CustomBlock {
                             
                                 
                             
+                                    
                                 
-                            
-        
-    emplate for method to reformat / clean the custom element as it should be saved in a file or database
-                    * returns HTMLElement as cleaned.Usually this will mean simply removing the inner HTML
-                        * and relying on the data attribute values
+                                
+                    method to reformat / clean the custom element as it should be saved in a file or database
+                        * returns HTMLElement as cleaned.Usually this will mean simply removing the inner HTML
+                            * and relying on the data attribute values
                             * /
                 clean(element: Element): Element {
                     element.removeAttribute('contenteditable')
                     element.innerHTML = ''
-                                    rn element
-
-
-
-                    /**
-                     * Example template for optional sidebar for displaying custom html in the sidebar
-                     */
-                    // sidebar(): SidebarButton {
+                                        rn element
+                         
+                         
+                        
+                        /**
+                         * Example template for optional sidebar for displaying custom html in the sidebar
+                         */
+                            idebar(): SidebarButton {
                     //     const customElements = this.editor.editorNode?.querySelectorAll(this.tag)
                     //     let content = ''
                     f(customElements) {
@@ -263,14 +259,14 @@ class Images extends CustomBlock {
                                 /**
                                  * Example template for mandatory show method
                                  */
-                                // show(editFlag: boolean) {
-                                //     // @todo
-                                    //     // Define buttons, if need others extend the interface as required
+                                    // show(editFlag: boolean) {
+                                    //     // @todo
+                                        //     // Define buttons, if need others extend the interface as required
                                      et buttons: EditButtons = {
                                 l: 'Cancel', callback: this.handleCancel
                             },
-                                confirm: { label: 'Save', callback: this.save },
-                                    
+                                    confirm: { label: 'Save', callback: this.save },
+                                        
                                     tom element'
 
                                 = 'Edit custom element'
@@ -280,116 +276,116 @@ class Images extends CustomBlock {
                     //         this.node.id = Helpers.generateUid()
                 //         this.node.setAttribute('contenteditable', 'false')
                 //         // @todo
-                //         // initialise any custom attributes
-                //         // e.g. this.node.setAttribute('data-custom', '')
-                                
-                                 and display the modal panel
-                            r = new Modal({
-                                //         type: 'drawer',
-                                //         title,
-                                //         html: this.form(),
-                                //         buttons
-                                //     })
-                                //     this.drawer.show()
-                                //     // @todo
-                                //     // Optionally initialise confirmation module and dirty data detection
-                                //     this.dirty = false
-                                //     const customInput = this.drawer.selectOne('form textarea#custom')
-                                //     if (!this.drawer.panel || !customInput) {
-                                //         console.error('Could not find custom input data element')
-                                //         return
-                                //     }
-                                //     const input = <HTMLInputElement>customInput
-                                //     input.addEventListener('change', () => this.dirty = true)
-                                //     // @todo
-                                //     // Optional custom button handling
-                                //     const customButton = this.drawer.selectOne('form button#customButton')
-                                //     if (customButton != null) {
-                                //         customButton.addEventListener('click', this.handleCustomButton)
-                                //     }
-                                //     // @todo
+                                / initialise any custom attributes
+                                    g. this.node.setAttribute('data-custom', '')
+                                    
+                                     and display the modal panel
+                                    new Modal({
+                                    //         type: 'drawer',
+                                    //         title,
+                                    //         html: this.form(),
+                                    //         buttons
+                                    //     })
+                                    //     this.drawer.show()
+                                    //     // @todo
+                                    //     // Optionally initialise confirmation module and dirty data detection
+                                    //     this.dirty = false
+                                    //     const customInput = this.drawer.selectOne('form textarea#custom')
+                                    //     if (!this.drawer.panel || !customInput) {
+                                    //         console.error('Could not find custom input data element')
+                                    //         return
+                                    //     }
+                                    //     const input = <HTMLInputElement>customInput
+                                    //     input.addEventListener('change', () => this.dirty = true)
+                                    //     // @todo
+                                    //     // Optional custom button handling
+                                    //     const customButton = this.drawer.selectOne('form button#customButton')
+                                    //     if (customButton != null) {
+                                    //         customButton.addEventListener('click', this.handleCustomButton)
+                                    //     }
+                                    //     // @todo
                                 //     // Optionally set initial focus
                                 //     input.focus()
-                                //     input.setSelectionRange(input.value.length, input.value.length)
-                                // }
-
-
-                                /**
-                                 * Example template for mandatory form method
-                                 */
+                                    //     input.setSelectionRange(input.value.length, input.value.length)
+                                     / }
+                                     
+                                    
+                                    /**
+                                     * Example template for mandatory form method
+                                     */
                                 // form(): string {
-                                //     if (!this.node) {
-                                //         console.error('Error: custom node is missing')
-                                eturn 'Error: custom node is missing'
+                                           if (!this.node) {
+                                               console.error('Error: custom node is missing')
+                                                : custom node is missing'
                             /     }
                                     / @todo get custom attributes, for example:
-                                        tomAttribute = this.getAttribute('data-customAttribute')
-                                            / @todo Process the custom attributes for display, for example
-                        mattedCustomAttribute = '...' + customAttribute
-                            te optional custom buttons
-                                //     const customButtonText = `<button type="button" id="custom-button">Custom</button>`
-                                //     return `
-                                //             <form class="comment">
-                                //                 <div class="form-input">
-                                //                     <textarea id="custom" class="form-control" placeholder="Enter your custom data" required>${formattedCustomAttribute}</textarea>
+                                            tomAttribute = this.getAttribute('data-customAttribute')
+                                                / @todo Process the custom attributes for display, for example
+                                    stomAttribute = '...' + customAttribute
+                                    ptional custom buttons
+                                    //     const customButtonText = `<button type="button" id="custom-button">Custom</button>`
+                                    //     return `
+                                    //             <form class="comment">
+                                    //                 <div class="form-input">
+                                    //                     <textarea id="custom" class="form-control" placeholder="Enter your custom data" required>${formattedCustomAttribute}</textarea>
                                 //                 </div>
                                 //                 ${customButtonText}
                                 //             </form>`
-                                // }
-
-
-
-                                * Example template for a custom button handling method
-                                    * /
+                                    // }
+                                        
+                                
+                                
+                                    * Example template for a custom button handling method
+                                        * /
                             // handleCustomButton(event: Event): void {
-                            //     if (!this.node || !event.target) {
+                                       if (!this.node || !event.target) {
                             //         console.error('Trying to handle a missing custom button')
                             rn
 
                                 // @todo modify attributes, content and/or button label
-
-
-
-
-                                * Example template for saving a new or edited custom element
-                                    * /
+                                    
+                                        
+                                        
+                                        
+                                        ample template for saving a new or edited custom element
+                                        * /
                                     // save(): void {
                                     //     // console.log('Save changes')
-                                    //     if (!this.node || !this?.drawer?.panel) {
+                                        //     if (!this.node || !this?.drawer?.panel) {
                                     / console.error('Could not find custom element to save')
-
-
-                            wer.panel) {
-                             data from the form
-                            this.drawer.panel.querySelector('form #data')
-                                /         if (!data) {
-                                    //             console.error('Could not find custom data in the form')
-                                    //             return
-                                    //         }
-                                    //         this.node.setAttribute('data-data', (<HTMLInputElement>data).value.trim())
-                                    //         // @optional handle timestamps
-                                    //         const timestamp = new Date()
-                                    //         const localString = timestamp.toLocaleString().slice(0, -3)
-                                    //         // console.log('local timestamp', localString)
-                                    //         if (this.getAttribute('data-created') == '') {
-                                    //             this.setAttribute('data-created', localString)
-                                    //             this.insert()
-                                    //         }
-                                    //         this.node.setAttribute('data-updated', localString)
-                                    //     }
-                                    //     this.drawer.hide()
-                                    //     // Format this.node and add event handler
-                                    //     this.format(this.node, 'custom title')
-                                    //     // Update state
+                                
+                                    
+                                        l) {
+                                        om the form
+                                        wer.panel.querySelector('form #data')
+                                              if (!data) {
+                                        //             console.error('Could not find custom data in the form')
+                                        //             return
+                                        //         }
+                                        //         this.node.setAttribute('data-data', (<HTMLInputElement>data).value.trim())
+                                        //         // @optional handle timestamps
+                                        //         const timestamp = new Date()
+                                        //         const localString = timestamp.toLocaleString().slice(0, -3)
+                                        //         // console.log('local timestamp', localString)
+                                        //         if (this.getAttribute('data-created') == '') {
+                                        //             this.setAttribute('data-created', localString)
+                                        //             this.insert()
+                                        //         }
+                                        //         this.node.setAttribute('data-updated', localString)
+                                        //     }
+                                        //     this.drawer.hide()
+                                        //     // Format this.node and add event handler
+                                        //     this.format(this.node, 'custom title')
+                                        //     // Update state
                                     //     this.editor.range = Helpers.setCursor(this.node, 0)
                                     //     this.setState()
-                                    //     this.editor?.buffer?.update()
-                                    // }
-
-
-                                    /**
-                                     * Example template for a template defining how custom element content is displayed
-                                     * Passed into the format method as a callback
+                                        //     this.editor?.buffer?.update()
+                                         / }
+                                         
+                                     
+                                        /**
+                                         * Example template for a template defining how custom element content is displayed
+                                         * Passed into the format method as a callback
                                  */
                                     // template(custom: Element): string {
                                     //     const attribute = this.getAttribute('data-attribute',custom)
@@ -477,41 +473,41 @@ class Images extends CustomBlock {
         this.confirm = Helpers.modalRequestDelete(this.label, this.handleConfirmDelete)
     }
 
-    /**
-     * Get the attribute specified for the current node OR the specified element if provided
-     */
-    protected getAttribute(attribute: string, element ?: null | Element): string {
-                if(element !== undefined) {
-                if(!element) {
-                    console.error(`Cannot get attribute for missing element`)
+                    
+                    ttribute specified for the current node OR the specified element if provided
+                        
+                        ribute(attribute: string, element ?: null | Element): string {
+                    if(element !== undefined) {
+                    if(!element) {
+                        console.error(`Cannot get attribute for missing element`)
+                        return ''
+                    }
+                    se if (!this.node) {
+                    console.error(`Cannot get attribute for missing custom node ${this.label}`)
                     return ''
+                } else {
+                    element = this.node
                 }
-            } else if (!this.node) {
-                console.error(`Cannot get attribute for missing custom node ${this.label}`)
-                return ''
-            } else {
-                element = this.node
-            }
             const value = element.getAttribute(attribute)
             if (value) return value.trim()
             return ''
         }
 
 
-    /**
-     * Set the attribute specified for the current node OR the specified element if provided
-     */
-     rotected setAttribute(attribute: string, value: string, element ?: null | Element): boolean {
-            if (element !== undefined) {
-                if (!element) {
-                    console.error(`Cannot set attribute for missing element`)
+                
+                    ttribute specified for the current node OR the specified element if provided
+                        
+                        ribute(attribute: string, value: string, element ?: null | Element): boolean {
+                    element !== undefined) {
+                    if (!element) {
+                        console.error(`Cannot set attribute for missing element`)
+                        return false
+                    }
+                    se if (!this.node) {
+                    console.error(`Cannot set attribute for missing custom node ${this.label}`)
                     return false
-                }
-            } else if (!this.node) {
-                console.error(`Cannot set attribute for missing custom node ${this.label}`)
-                return false
-            } else {
-                element = this.node
+                } else {
+                    element = this.node
             }
             element.setAttribute(attribute, value.trim())
             return true
@@ -519,34 +515,34 @@ class Images extends CustomBlock {
 
 
     /**
-     * Insert a new custom element in the editor at the end of the current 
-     * range's startContainer
-     */
+                t a new custom element in the editor at the end of the current 
+                's startContainer
+            
      rotected insert(): void {
             if(this.editor?.range?.startContainer.parentNode) {
             this.node = this.editor.range.startContainer.parentNode.appendChild(<Element>this.node)
         }
+            
+                
+                
 
-
-
-
-        ----------------------------------------------------------------------------
-            // @section Private methods
-            // -----------------------------------------------------------------------------
-
-            /**
-             * Edit an existing comment node by extracting the data from the node and displaying
-             * the edit form. Sets the comment node to be edited
-             */
+                ------------------------------------------------------------------------
+                 / @section Private methods
+                 / -----------------------------------------------------------------------------
+                 
+                /**
+                    dit an existing comment node by extracting the data from the node and displaying
+                    he edit form. Sets the comment node to be edited
+                 */
             private edit(element: Element): void {
-                // If we already have an active panel - ignore edit clicks
-                if(this.drawer && this.drawer.active()) {
+                    // If we already have an active panel - ignore edit clicks
+                        his.drawer && this.drawer.active()) {
             turn
 
                 .node = element
-                    .show(true)
+                        .show(true)
             
-    
+                
 ate handleConfirmCancel(): void {
                 this.confirm?.hide()
 this.drawer?.hide()

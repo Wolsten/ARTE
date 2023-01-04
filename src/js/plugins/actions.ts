@@ -12,6 +12,7 @@
  *      data-notes="Some notes">
  * </ARTE-ACTION>
  * 
+ * 
  * Editor format (optional due date):
  * <ARTE-ACTION 
  *      id="id" 
@@ -33,6 +34,7 @@
  *    </button>
  * </ARTE-ACTION>
  * 
+ * 
  * Sidebar format (optional due date):
  * <article class="action">
  *      <a href="#id">todo</a>
@@ -42,10 +44,10 @@
 
 import * as Icons from '../icons'
 import * as Helpers from '../helpers'
-import Modal from '../Modal'
+import { Modal, ModalButton, ModalButtonAction, ModalOptionsType } from '../Modal'
 import SidebarButton from '../SidebarButton'
 import Editor from '../Editor'
-import { EditButtons } from './interfaces'
+// import { EditButtons } from './interfaces'
 import CustomBlock from './CustomBlock'
 
 
@@ -68,14 +70,11 @@ export default class Actions extends CustomBlock {
      * Show the custom dialogue for new creation or editing
      */
     show(editFlag: boolean): void {
-        let buttons: EditButtons = {
-            cancel: { label: 'Cancel', callback: this.handleCancel },
-            confirm: { label: 'Save', callback: this.save },
-        }
-        let title = 'Add action'
+        const buttons = [
+            new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
+        ]
         if (editFlag) {
-            title = 'Edit action'
-            buttons.delete = { label: 'Delete', callback: this.handleDelete }
+            buttons.push(new ModalButton(ModalButtonAction.Delete, 'Delete', this.handleDelete, 'action'))
         } else {
             // Initialise an action as saved to file
             this.node = document.createElement(this.tag)
@@ -85,107 +84,115 @@ export default class Actions extends CustomBlock {
             }
             this.node.id = Helpers.generateUid()
             this.setAttribute('contenteditable', 'false')
-            this.setAttribute('data-status', '0')
-            this.setAttribute('data-todo', '')
-            this.setAttribute('data-owners', '')
-            this.setAttribute('data-due', '')
-            this.setAttribute('data-created', '')
-            this.setAttribute('data-updated', '')
-            this.setAttribute('data-notes', '')
+            this.setAttribute('status', '0')
+            this.setAttribute('todo', '')
+            this.setAttribute('owners', '')
+            this.setAttribute('due', '')
+            this.setAttribute('created', '')
+            this.setAttribute('updated', '')
+            this.setAttribute('notes', '')
         }
+        buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', this.save))
+
+        // Options
+        const options: ModalOptionsType = {
+            focusId: 'todo'
+        }
+
         // Create and display the modal panel
-        this.drawer = new Modal({
-            type: 'drawer',
-            title,
-            html: this.form(),
-            buttons
-        })
-        this.drawer.show()
-        // Initialise confirmation module and dirty data detection
-        this.dirty = false
-        const inputs = this.drawer.selectAll('form input, form textarea, form select')
-        inputs.forEach(input => input.addEventListener('change', () => this.dirty = true))
-        // Focus the todo
-        const todo = this.drawer.selectOne('#todo')
-        if (todo) {
-            const input = <HTMLInputElement>todo
-            input.focus()
-            input.setSelectionRange(input.value.length, input.value.length)
-        }
+        this.drawer = new Modal(`${editFlag ? 'Edit' : 'Action'} action`, this.form(), buttons, options)
     }
 
 
     /**
      * Form template - returns generated html
-     */
+    */
     form(): string {
-        const todo = this.getAttribute('data-todo')
-        const owners = this.getAttribute('data-owners')
-        const status = this.getAttribute('data-status')
-        const due = this.getAttribute('data-due')
-        const notes = this.getAttribute('data-notes')
-        return `
-           <form class="${this.tag}">
-               <div class="form-input">
-                   <label for="todo">What needs to be done</label>
-                   <textarea id="todo" class="form-control" required>${todo}</textarea>
-               </div>
-               <div class="form-input">
-                   <label for="owners">Owners</label>
-                   <input type="text" id="owners" class="form-control" value="${owners}" required />
-               </div>
-               <div class="form-input">
-                   <label for="due">Due by</label>
-                   <input type="text" id="due" class="form-control" value="${due}"/>
-               </div>
-               <div class="form-input">
-                   <label for="status">Status</label>
-                   <select id="status" class="form-control">
-                       <option value="0" ${status == '0' ? 'selected' : ''}>Open</option>
-                       <option value="1" ${status == '1' ? 'selected' : ''}>Closed - Incomplete</option>
-                       <option value="2" ${status == '2' ? 'selected' : ''}>Closed - Complete</option>
-                   </select>
-               </div>
-               <div class="form-input">
-                   <label for="notes">Notes</label>
-                   <textarea id="notes" class="form-control">${notes}</textarea>
-               </div>
-           </form>`
+        const todo = this.getAttribute('todo')
+        const owners = this.getAttribute('owners')
+        const status = this.getAttribute('status')
+        const due = this.getAttribute('due')
+        const notes = this.getAttribute('notes')
+        return `<div class="form-input">
+                    <label for="todo">What needs to be done</label>
+                    <textarea id="todo" class="form-control" required>${todo}</textarea>
+                </div>
+                <div class="form-input">
+                    <label for="owners">Owners</label>
+                    <input type="text" id="owners" class="form-control" value="${owners}" required />
+                </div>
+                <div class="form-input">
+                    <label for="due">Due by</label>
+                    <input type="text" id="due" class="form-control" value="${due}"/>
+                </div>
+                <div class="form-input">
+                    <label for="status">Status</label>
+                    <select id="status" class="form-control">
+                        <option value="0" ${status == '0' ? 'selected' : ''}>Open</option>
+                        <option value="1" ${status == '1' ? 'selected' : ''}>Closed - Incomplete</option>
+                        <option value="2" ${status == '2' ? 'selected' : ''}>Closed - Complete</option>
+                    </select>
+                </div>
+                <div class="form-input">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" class="form-control">${notes}</textarea>
+                </div>`
     }
 
 
     /**
-     * Save the new or edited custom element
-     */
+    * Save the new or edited custom element
+    */
     save(): void {
         if (!this.drawer) {
             console.error('No drawer is displayed')
             return
         }
-        // console.log('Save changes')
-        this.setAttribute('data-todo', this.drawer.getInputValue('#todo'))
-        this.setAttribute('data-owners', this.drawer.getInputValue('#owners'))
-        this.setAttribute('data-due', this.drawer.getInputValue('#due'))
-        this.setAttribute('data-status', this.drawer.getInputValue('#status'))
-        this.setAttribute('data-notes', this.drawer.getInputValue('#notes'))
+        // console.log('Save changes')'
+        this.setAttributes(['todo', 'owners', 'due', 'status', 'notes'], this.drawer)
         // Timestamp
         const timestamp = new Date()
-        const localstring = timestamp.toLocaleString().slice(0, -3)
-        //console.log('local timestamp', localstring)
+        const localTimestamp = timestamp.toLocaleString().slice(0, -3)
         if (this.getAttribute('created') == '') {
-            this.setAttribute('created', localstring)
+            this.setAttribute('created', localTimestamp)
             this.insert()
+        } else {
+            this.setAttribute('updated', localTimestamp)
         }
-        this.setAttribute('updated', localstring)
+        // Close the modal
         this.drawer.hide()
-        // Format node and add event handler
+        // Format the saved action
         this.format(this.template)
-        // Update state
-        if (this.node) {
-            this.editor.range = Helpers.setCursor(this.node, 0)
-            this.setState()
-            this.editor?.buffer?.update()
+    }
+
+
+    /**
+     * late for how the action is presented in the editor
+     */
+    template(): string {
+        const todo = this.getAttribute('todo')
+        const owners = this.getAttribute('owners')
+        const status = this.getAttribute('status')
+        const statusClass = this.getStatusClass(status)
+        let due = this.getAttribute('due')
+        if (due) due = `<label>Due:</label><span class="due">${due}</span>`
+        return `<button type="button" title="Edit this action">
+                    <label class="${statusClass}">${Icons.action}</label>
+                    <span class="todo">${todo}</span>     
+                    <label>Owners:</label>  
+                    <span  class="owners"> ${owners} </span>
+                    ${due}
+                </button>`
+    }
+
+
+    getStatusClass(status: string) {
+        switch (parseInt(status)) {
+            case 0: return 'status-open'
+            case 1: return 'status-closed-incomplete'
+            case 2: return 'status-closed-complete'
         }
+        return 'status-unknown'
     }
 
 
@@ -193,70 +200,25 @@ export default class Actions extends CustomBlock {
      * Display custom html in the sidebar
      */
     sidebar(): SidebarButton {
-        const actions = this.editor?.editorNode?.querySelectorAll(this.tag)
+        const actions = this.editor?.editorNode?.querySelectorAll(Actions.TAG)
         let content = ''
         if (actions) {
-            actions.forEach((action: Element) => {
-                const todo = action.getAttribute('data-todo')
-                if (!todo) {
-                    console.error('Action is missing a todo field')
-                    return
-                }
-                const owners = action.getAttribute('data-owners')
-                if (!owners) {
-                    console.error('Action is missing an owners field')
-                    return
-                }
-                const optionalDue = action.getAttribute('data-due')
-                let due = ''
-                if (optionalDue) {
-                    due = `,<br/>Due: ${optionalDue.trim()}`
+            actions.forEach(action => {
+                const todo = this.getAttribute('todo', action)
+                const owners = this.getAttribute('owners', action)
+                const due = this.getAttribute('due', action)
+                let dueDate = ''
+                if (due) {
+                    dueDate += `,<br/>Due: ${due}`
                 }
                 content += `
                     <article class="action">
-                        <a href="#${action.id}">${todo.trim()}</a>
-                        <p>Owned by: ${owners.trim()}${due}</p>
+                        <a href="#${action.id}">${todo}</a>
+                        <p>Owned by: ${owners}${dueDate}</p>
                     </article>`
             })
         }
-        return new SidebarButton(this.icon, 'actions', `${content}`)
-    }
-
-
-    /**
-     * Create a template for how the action is presented in the editor
-     */
-    template(element: Element): string {
-        const todo = this.getAttribute('data-todo', element)
-        const owners = this.getAttribute('data-owners', element)
-        const status = this.getAttribute('data-status', element)
-        const statusClass = this.getStatusClass(status)
-        let due = this.getAttribute('data-due', element)
-        if (due) {
-            due = `<label>Due:</label>
-                   <span class="due">${due}</span>`
-        }
-        return `
-            <button type="button" title="Edit this action">
-                <label class="${statusClass}">${Icons.action}</label>
-                <span class="todo">${todo}</span>
-                <label>Owners:</label>
-                <span class="owners">${owners}</span>
-                ${due}
-            </button>`
-    }
-
-
-    /**
-     * Return the status class for the current action status
-     */
-    private getStatusClass(status: string): string {
-        switch (parseInt(status)) {
-            case 0: return 'status-open'
-            case 1: return 'status-closed-incomplete'
-            case 2: return 'status-closed-complete'
-        }
-        return 'status-unknown'
+        return new SidebarButton(Icons.action, 'actions', content)
     }
 
 }

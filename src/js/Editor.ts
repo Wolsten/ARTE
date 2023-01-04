@@ -1,6 +1,6 @@
 import * as Templates from './templates'
 import * as Helpers from './helpers'
-import Modal from './Modal.js'
+import { Modal, ModalButton, ModalButtonAction, ModalSeverity, ModalType, ModalWarning } from './Modal.js'
 import EditRange from './EditRange'
 import Buffer from './plugins/Buffer'
 import Options from './options'
@@ -10,7 +10,7 @@ import Shortcut from './Shortcut'
 
 
 
-class Editor {
+export default class Editor {
 
     id: string = '' // @todo This may not be required
     filename = ''
@@ -27,7 +27,7 @@ class Editor {
     toolbar!: Toolbar
     sidebar!: null | Sidebar
 
-    modal = new Modal()
+    modal: null | Modal = null
     preview: null | Function = null
     update: null | Function = null
     handleKeyup: null | Function = null
@@ -36,6 +36,7 @@ class Editor {
     disabled: boolean = false
     options: Options
     buffer: null | Buffer = null
+
 
     constructor(target: HTMLElement, content = '', toolbarItems: string[][], options: string) {
 
@@ -143,7 +144,7 @@ class Editor {
             // console.log( 'mouseup on', event.target )
             // console.log( 'active element', document.activeElement )
             // Clicked a modal button?
-            if (this.modal.active()) {
+            if (this?.modal?.active) {
                 return
                 // Clicked in the editor (but not a custom element which returns a
                 // different active element)
@@ -256,7 +257,7 @@ class Editor {
             //     console.log('key',event.key)
             // }
             // Check if a modal dialogue is shown - ignore key entry?
-            if (this.modal.active()) {
+            if (this?.modal?.active) {
                 event.preventDefault()
                 handled = true
             }
@@ -284,7 +285,7 @@ class Editor {
                         // Stop propagation to prevent other event handlers responding
                         event.stopPropagation()
                         // Trigger the dialogue with the then current range
-                        if (item?.button?.click) item.button.click(this, item.button)
+                        if (item?.button?.click) item.button.click()
                         handled = true
                     }
                 })
@@ -371,17 +372,11 @@ class Editor {
         }
         //this.updateRange()
         if (this.range) {
-            const feedback = new Modal({
-                type: 'overlay',
-                severity: 'info',
-                title: 'Information',
-                html: `
-                    <p>You are attempting to delete one or more active elements, such as comments or links.</p>
-                    <p>To delete active elements you need to edit them individually and choose Delete.</p>
-                    `,
-                escape: true,
-                buttons: { cancel: { label: 'Close' } }
-            })
+
+            const html = `<p>You are attempting to delete one or more active elements, such as comments or links.</p>
+                          <p>To delete active elements you need to edit them individually and choose Delete.</p>`
+            const feedback = new ModalWarning('Information', html)
+
             // Single selection
             if (this.range.collapsed) {
                 // Check for back spacing from a single selection point 
@@ -493,59 +488,50 @@ class Editor {
     testModals(type: string) {
         // Warning modal
         if (type == 'overlay') {
-            const modal = new Modal({
-                type: 'overlay',
-                title: 'Example feedback modal',
-                html: `
-                    <p>This is an example of an overlay modal.</p>
-                    <p>It can be dismissed by selecting the "escape" option and/or by adding a "cancel" button.</p>
-                    <p>It also demonstrates the display of a graphic icon which is configured by setting the severity option.</p>`,
-                severity: 'warning',
-                escape: true,
-                buttons: { cancel: { label: 'OK' } }
-            })
-            modal.show()
+            const html =
+                `<p>This is an example of an overlay modal.</p>
+                <p>It can be dismissed by selecting the "escape" option and/or by adding a "cancel" button.</p>
+                <p>It also demonstrates the display of a graphic icon which is configured by setting the severity option.</p>`
+            new ModalWarning('Example feedback modal', html)
 
             // Edit modal with buttons and callbacks
         } else if (type == 'drawer') {
-            const modal = new Modal({
-                type: 'drawer',
-                title: 'Example of an edit modal',
-                html: `
-                    <p>This modal type provides a placeholder for custom content, such as a form with values that can be edited.</p>
-                    <p>It is typically used by specifying a number of standard buttons, such as "cancel", "delete" or "confirm".</p>
-                    <p>Each button may have an associated callback function assigned. If none is assigned the default action is to close the modal.</p>`,
-                buttons: {
-                    cancel: { label: 'Cancel' },
-                    delete: { label: 'Delete', callback: () => alert('delete') },
-                    confirm: { label: 'Confirm', callback: () => alert('confirm') }
-                }
-            })
-            modal.show()
+
+            const html = `
+                <p>This modal type provides a placeholder for custom content, such as a form with values that can be edited.</p>
+                <p>It is typically used by specifying a number of standard buttons, such as "cancel", "delete" or "confirm".</p>
+                <p>Each button may have an associated callback function assigned. If none is assigned the default action is to close the modal.</p>`
+            const buttons = [
+                new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
+                new ModalButton(ModalButtonAction.Delete, 'Delete', () => alert('delete')),
+                new ModalButton(ModalButtonAction.Confirm, 'Confirm', () => alert('confirm')),
+            ]
+            new Modal('Example of an edit modal', html, buttons)
 
             // Positioned modal
         } else if (type == 'positioned') {
             this.editorNode!.addEventListener('click', () => {
                 this.updateRange()
-                const modal = new Modal({
-                    type: 'positioned',
-                    escape: true,
+                const html = `
+                    <div style="width:400px;padding:1rem;">
+                        <p>This is an example of a positional modal which is positioned with its top-left-hand corner adjacent to the mouse selection point.</p>
+                        <p>The contents can be added as required.</p>
+                        <p>Like all other modals it could be defined with standard buttons but typically would be used for in-place popups like "@mentions".</p>
+                        <p>Optionally you can specify whether it can be dismissed with the Escape key as is required here since no "cancel" button is provided.</p>
+                        <p>You can also set a background colour and border radius to override the defaults as done here.</p>
+                    </div>`
+                const options = {
+                    type: ModalType.Positioned,
+                    escapeToCancel: true,
                     backgroundColour: 'palegreen',
-                    borderRadius: '10px',
-                    html: `
-                        <div style="width:400px;padding:1rem;">
-                            <p>This is an example of a positional modal which is positioned with its top-left-hand corner adjacent to the mouse selection point.</p>
-                            <p>The contents can be added as required.</p>
-                            <p>Like all other modals it could be defined with standard buttons but typically would be used for in-place popups like "@mentions".</p>
-                            <p>Optionally you can specify whether it can be dismissed with the Escape key as is required here since no "cancel" button is provided.</p>
-                            <p>You can also set a background colour and border radius to override the defaults as done here.</p>
-                        </div>`
-                })
-                modal.show()
-                modal.setPosition(this.range, this.editorNode)
+                    borderRadius: '10px'
+                }
+                const modal = new Modal('', html, [], options)
+                if (this.range && this.editorNode) modal.setPosition(this.range, this.editorNode)
             })
         }
     }
+
 
     // -----------------------------------------------------------------------------
     // @section File handling
@@ -555,20 +541,17 @@ class Editor {
      * Display modal dialogue requesting the filename to download as
      */
     download(): void {
-        if (this.modal.active()) {
+        if (this?.modal?.active) {
             return
         }
-        this.modal = new Modal({
-            type: 'drawer',
-            title: 'Save file',
-            html: Templates.save(this.filename),
-            escape: true,
-            buttons: {
-                cancel: { label: 'Cancel', callback: () => this.modal.hide() },
-                confirm: { label: 'Save', callback: () => this.save() }
-            }
-        })
-        this.modal.show()
+        const buttons = [
+            new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
+            new ModalButton(ModalButtonAction.Confirm, 'Save', this.save),
+        ]
+        const options = {
+            escapeToCancel: true
+        }
+        this.modal = new Modal('Save file', Templates.save(this.filename), buttons, options)
     }
 
     /**
@@ -654,32 +637,33 @@ class Editor {
     }
 
 
+    confirmClear() {
+        if (this.editorNode) this.editorNode.innerHTML = ''
+        // this.filename = 'arte-download'
+        this.modal.hide()
+        setTimeout(() => this.updateBuffer(), 100)
+    }
+
 
     clear() {
-        if (this.modal.active()) {
+        if (this?.modal?.active) {
             return
         }
-        this.modal = new Modal({
-            type: 'overlay',
-            severity: 'warning',
-            title: 'Start new document?',
-            html: '<p>Are you sure you want to clear the editor and start a new document? Any changes will be lost.</p>',
-            escape: true,
-            buttons: {
-                cancel: { label: 'Cancel', callback: () => this.modal.hide() },
-                confirm: {
-                    label: 'Yes',
-                    callback: () => {
-                        if (this.editorNode) this.editorNode.innerHTML = ''
-                        this.filename = 'arte-download'
-                        this.modal.hide()
-                        setTimeout(() => this.updateBuffer(), 100)
-                    }
-                }
-            }
-        })
-        this.modal.show()
+        const html = '<p>Are you sure you want to clear the editor and start a new document? Any changes will be lost.</p>'
+        const options = {
+            escapeToCancel: true,
+            type: ModalType.Overlay,
+            severity: ModalSeverity.Warning
+        }
+        const buttons = [
+            new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
+            new ModalButton(ModalButtonAction.Confirm, 'Yes', this.confirmClear)
+        ]
+        this.modal = new Modal('Start new document?', html, buttons, options)
     }
+
+
+
 
 
     // -----------------------------------------------------------------------------
@@ -756,8 +740,3 @@ class Editor {
 
 } // End of class definition
 
-// -----------------------------------------------------------------------------
-// @section Exports
-// -----------------------------------------------------------------------------
-
-export default Editor

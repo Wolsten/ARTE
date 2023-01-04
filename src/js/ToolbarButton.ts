@@ -1,6 +1,6 @@
 import Editor from "./Editor"
 import SidebarButton from "./SidebarButton"
-import * as Helpers from '../helpers'
+import * as Helpers from './helpers'
 
 
 interface ToolbarButton {

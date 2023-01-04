@@ -1,5 +1,5 @@
 import Editor from '../Editor'
-import EditRange from '../EditRange'
+// import EditRange from '../EditRange'
 import * as Helpers from '../helpers'
 import * as Phase from '../phase'
 import * as Icons from '../icons'
@@ -28,7 +28,6 @@ export default class Block extends ToolbarButton {
     private fragmentNode = new Element()
     private lastNodeAdded: null | Element = null
     private newFormat = ''
-
 
     constructor(editor: Editor, block: string, group: number) {
 
