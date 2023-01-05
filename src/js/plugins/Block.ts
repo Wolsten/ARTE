@@ -19,46 +19,44 @@ class Formats {
 }
 
 
-
-
 export default class Block extends ToolbarButton {
 
     // Private properties
     private previousFormats: string[] = []
-    private fragmentNode = new Element()
+    private fragmentNode = document.createElement('DIV')
     private lastNodeAdded: null | Element = null
     private newFormat = ''
 
-    constructor(editor: Editor, block: string, group: number) {
+    // constructor(editor: Editor, block: string, group: number) {
+    constructor(editor: Editor, tag: string, group: number) {
 
-        block = block.toUpperCase()
+        tag = tag.toUpperCase()
 
-        switch (block) {
+        switch (tag) {
             case 'H1':
-                super(editor, 'block', 'H1', 'Heading 1', Icons.h1, group)
+                super(editor, 'block', tag, 'Heading 1', Icons.h1, group)
                 break
             case 'H2':
-                super(editor, 'block', 'H2', 'Heading 2', Icons.h2, group)
+                super(editor, 'block', tag, 'Heading 2', Icons.h2, group)
                 break
             case 'H3':
-                super(editor, 'block', 'H3', 'Heading 3', Icons.h3, group)
+                super(editor, 'block', tag, 'Heading 3', Icons.h3, group)
                 break
-
             case 'BQ':
-                super(editor, 'block', 'BLOCKQUOTE', 'Blockquote', Icons.bq, group)
+                super(editor, 'block', tag, 'Blockquote', Icons.bq, group)
                 break
             case 'OL':
-                super(editor, 'list', 'OL', 'Ordered list', Icons.ol, group)
+                super(editor, 'list', tag, 'Ordered list', Icons.ol, group)
                 break
-            case 'OL':
-                super(editor, 'list', 'UL', 'Unordered list', Icons.ul, group)
+            case 'UL':
+                super(editor, 'list', tag, 'Unordered list', Icons.ul, group)
                 break
             case 'P':
-                super(editor, 'block', 'P', 'Paragraph', Icons.p, group)
+                super(editor, 'block', tag, 'Paragraph', Icons.p, group)
                 break;
             default:
                 super(editor, 'block', 'P', 'Paragraph', Icons.p, group)
-                console.error(`Unrecognised block name [${block}] - set to paragraph`)
+                console.error(`Unrecognised block name [${tag}] - set to paragraph`)
         }
     }
 

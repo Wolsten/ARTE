@@ -44,9 +44,11 @@ export default class Style extends ToolbarButton {
                 super(editor, 'style', 'CLEAR', 'Clear', Icons.clear, group)
                 this.style = 'CLEAR'
                 break
-            case 'COLOUR':
-                super(editor, 'style', '', '', '', group)
-                this.style = 'COLOUR'
+            case 'COLOR':
+                super(editor, 'style', 'COLOR', '', '', group)
+                break
+            case 'BACKGROUND-COLOR':
+                super(editor, 'style', 'BACKGROUND-COLOR', '', '', group)
                 break
             default:
                 super(editor, 'style', 'CLEAR', 'Clear', Icons.clear, group)

@@ -3,7 +3,7 @@ import * as Helpers from './helpers'
 import { Modal, ModalButton, ModalButtonAction, ModalSeverity, ModalType, ModalWarning } from './Modal.js'
 import EditRange from './EditRange'
 import Buffer from './plugins/Buffer'
-import Options from './options'
+import { Options, OptionsType } from './options'
 import Toolbar from './Toolbar'
 import Sidebar from './Sidebar'
 import Shortcut from './Shortcut'
@@ -23,13 +23,12 @@ export default class Editor {
     sidebarNode: null | HTMLElement = null
     debugNode: null | HTMLElement = null
 
-
     toolbar!: Toolbar
     sidebar!: null | Sidebar
 
     modal: null | Modal = null
-    preview: null | Function = null
-    update: null | Function = null
+    preview: Function
+    update: Function
     handleKeyup: null | Function = null
 
     shortcuts: Shortcut[] = []
@@ -37,8 +36,7 @@ export default class Editor {
     options: Options
     buffer: null | Buffer = null
 
-
-    constructor(target: HTMLElement, content = '', toolbarItems: string[][], options: string) {
+    constructor(target: HTMLElement, content = '', toolbarItems: string[][], options: OptionsType) {
 
         // Generate a unique id for this editor instance
         // @todo This may not be required
@@ -82,6 +80,9 @@ export default class Editor {
         // Initialise the editor content and buffering
         setTimeout(() => this.initEditor(content), 100)
     }
+
+
+
 
 
     /**

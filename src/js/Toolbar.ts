@@ -3,11 +3,14 @@ import ToolbarButton from './ToolbarButton'
 import * as Helpers from './helpers'
 import Block from './plugins/Block'
 import Style from './plugins/Style'
+import Colour from './plugins/Colour'
 import Buffer from './plugins/Buffer'
 import BufferButton from './plugins/BufferButton'
+import Clipboard from './plugins/Clipboard'
 import Shortcut from './Shortcut'
 import { editorToolbar } from './templates'
-import Actions from './plugins/actions-OLD'
+import Actions from './plugins/Actions'
+import Mentions from './plugins/Mentions'
 
 
 export default class Toolbar {
@@ -46,7 +49,7 @@ export default class Toolbar {
 
                 const parts = entry.split('.')
                 const type = parts[0]
-                const name = parts[1]
+                const name = parts.length == 2 ? parts[1] : ''
 
                 let button: null | ToolbarButton = null
 
@@ -57,24 +60,39 @@ export default class Toolbar {
                     case 'STYLE':
                         button = new Style(editor, name, index)
                         break
+                    case 'COLOUR':
+                        button = new Colour(editor, name, index)
+                        break
                     case 'BUFFER':
                         if (editor.options.bufferSize > 0 && !editor.buffer) {
                             editor.buffer = new Buffer(editor)
                         }
                         button = new BufferButton(editor, name, index)
                         break
+                    case 'CLIPBOARD':
+                        button = new Clipboard(editor, name, index)
+                        break
+                    case 'MENTIONS':
+                        button = new Mentions(editor, index)
+                        break
                     case 'CUSTOM':
-                        if (name === 'ACTION') {
-                            button = new Actions(editor, index)
+                        switch (name) {
+                            case 'ACTIONS':
+                                button = new Actions(editor, index)
+                                break
                         }
                         break
 
                 }
 
-                if (button) {
-                    this.buttons.push(button)
-                    Helpers.registerTag(button.type, button.tag)
+                if (!button) {
+                    console.error('Found missing button type ' + entry)
+                    return
                 }
+
+                this.buttons.push(button)
+                Helpers.registerTag(button.type, button.tag)
+
             })
         })
 
@@ -100,11 +118,12 @@ export default class Toolbar {
         this.buttons.forEach(button => {
 
             // Add dom element to the button
-            button.element = this.editor.toolbarNode!.querySelector(`#${button.tag}`)
-            if (button.element === null) {
+            const buttonElement = this.editor.toolbarNode!.querySelector(`#${button.tag}`)
+            if (!buttonElement) {
                 console.error('Missing button element for button', button.tag)
                 return
             }
+            button.element = buttonElement
 
             if (button.init) {
                 button.init()
@@ -128,7 +147,7 @@ export default class Toolbar {
                 this.editor.updateRange()
 
                 // Ignore if a modal is active
-                if (this.editor.modal.active()) {
+                if (this.editor?.modal?.active) {
                     return
                 }
 

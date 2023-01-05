@@ -7,16 +7,16 @@ interface ToolbarButton {
 
     // Mandatory properties
     editor: Editor
-    type: string     // block|list|style|buffer|custom
+    type: string     // block|list|style|buffer|custom @todo enum
     tag: string      // As inserted in the dom. e.g. H1, CUSTOM
     label: string    // Generally used as the title of the button but could also be displayed
     icon: string     //  The icon to use
     group: number     // The group index
-    element: null | HTMLElement // The dom element which the button is attached to
+    element: Element // The dom element which the button is attached to
     disabled: boolean
 
     // Optional properties
-    shortcut?: []
+    shortcut?: string[]
 
     // Mandatory methods
     click(): void

@@ -1,10 +1,15 @@
 import * as Helpers from '../helpers'
 import * as Icons from '../icons'
-import Modal from '../Modal'
+import { Modal, ModalButton, ModalButtonAction, ModalWarning } from '../Modal'
 import Editor from '../Editor'
 import Style from './Style'
 import ToolbarButton from '../ToolbarButton'
 
+
+enum ColourName {
+    Foreground = 'FOREGROUND',
+    Background = 'BACKGROUND'
+}
 
 
 export default class Colours extends ToolbarButton {
@@ -12,19 +17,18 @@ export default class Colours extends ToolbarButton {
     static readonly PALETTE = ['black', 'white', 'violet', 'indigo', 'blue', 'green', 'yellow', 'orange', 'red']
 
     drawer: null | Modal = null
-    style = ''
+    style = 'color'
 
-    constructor(editor: Editor, type: string, group: number) {
 
-        type = type.toUpperCase()
+    constructor(editor: Editor, name: string, group: number) {
 
-        // 'ARTE-COLOR'
-        if (type === 'ARTE-COLOR') {
-            super(editor, 'inline', 'ARTE-COLOR', 'Text colour', Icons.colourForeground, group)
+        name = name.toUpperCase()
+
+        if (name === ColourName.Foreground) {
+            super(editor, 'style', 'colour', 'Text colour', Icons.colourForeground, group)
             this.style = 'color'
-            // 'ARTE-BACKGROUND-COLOR'
         } else {
-            super(editor, 'inline', 'ARTE-BACKGROUND-COLOR', 'Highlight colour', Icons.colourBackground, group)
+            super(editor, 'style', 'background-colour', 'Background colour', Icons.colourBackground, group)
             this.style = 'background-color'
         }
     }
@@ -91,17 +95,14 @@ export default class Colours extends ToolbarButton {
      */
     click(): void {
         // Ignore if a modal is active
-        if (this.drawer && this.drawer.active()) {
+        if (this.drawer && this.drawer.active) {
             return
         }
         if (!this.editor.range || this.editor.range.collapsed) {
-            const feedback = new Modal({
-                type: 'overlay',
-                severity: 'info',
-                html: 'The colour selection buttons require at least one character to be selected.',
-                buttons: { cancel: { label: 'Close' } }
-            })
-            feedback.show()
+            new ModalWarning(
+                'Warning',
+                'The colour selection buttons require at least one character to be selected.'
+            )
             return
         }
         this.show()
@@ -116,26 +117,19 @@ export default class Colours extends ToolbarButton {
      * Clicking on this triggers the input event.
      */
     private show() {
-
-        let title = "Select highlight colour"
-        if (this.tag == 'ARTE-COLOR') {
+        // Display the modal panel
+        let title = "Select background colour"
+        if (this.style == 'color') {
             title = "Select text colour"
         }
-        // Display the panel
-        this.drawer = new Modal({
-            type: 'drawer',
-            title,
-            html: this.form(),
-            escape: true,
-            buttons: {
-                cancel: { label: 'Cancel' }
-            }
-        })
-        this.drawer.show()
+        const buttons = [new ModalButton(ModalButtonAction.Cancel, 'Cancel')]
+        const options = {
+            escapeToCancel: true
+        }
+        this.drawer = new Modal(title, this.form(), buttons, options)
 
         // Add custom click handlers
-        const colours = this.drawer.panel?.querySelectorAll('span.colour')
-
+        const colours = this.drawer.getElements('span.colour')
         if (!colours) {
             console.error('Could not find any colour spans')
             return
@@ -157,12 +151,6 @@ export default class Colours extends ToolbarButton {
             synthButton.setState = this.setState
             synthButton.element = this.element
             synthButton.style = `${this.style}:${colour}`
-
-            // const synthButton = {
-            //     setState: this.setState,
-            //     style: `${this.style}:${colour}`,
-            //     element: this.element
-            // }
 
             this.drawer?.hide()
 

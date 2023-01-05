@@ -92,14 +92,12 @@ export default class Actions extends CustomBlock {
             this.setAttribute('updated', '')
             this.setAttribute('notes', '')
         }
-        buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', this.save))
 
-        // Options
+        // Create and display the modal panel
+        buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', this.save))
         const options: ModalOptionsType = {
             focusId: 'todo'
         }
-
-        // Create and display the modal panel
         this.drawer = new Modal(`${editFlag ? 'Edit' : 'Action'} action`, this.form(), buttons, options)
     }
 

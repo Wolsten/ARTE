@@ -154,6 +154,7 @@ body.index-body #index-buttons {
 
 .editor-toolbar {
   padding: 0.5rem;
+  position: -webkit-sticky;
   position: sticky;
   top: 0rem;
   background: var(--colour-background);
@@ -186,7 +187,6 @@ body.index-body #index-buttons {
     opacity: 1;
     border-top: 1px var(--colour-border-faint) solid;
   }
-
   .editor-toolbar-group {
     display: flex;
     flex-direction: column;
@@ -202,7 +202,6 @@ body.index-body #index-buttons {
     margin-left: 0.3rem;
     font-size: 0.7rem;
   }
-
   .editor-toolbar-group-separator {
     display: none;
   }
@@ -221,6 +220,7 @@ body.index-body #index-buttons {
 }
 
 .editor-toolbar {
+  position: -webkit-sticky;
   position: sticky;
   z-index: 100;
 }

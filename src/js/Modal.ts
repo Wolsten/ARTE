@@ -6,7 +6,8 @@ import EditRange from './EditRange'
 export enum ModalType {
     Drawer = 'drawer',
     Overlay = 'overlay',
-    Positioned = 'positioned'
+    Positioned = 'positioned',
+    FullScreen = 'full-screen'
 }
 
 
@@ -174,27 +175,47 @@ export class Modal {
         const icon = this.icon()
         const withTextClass = this.title ? 'with-text' : ''
         const centredClass = this.buttons.length === 1 ? 'centred' : ''
+        let titleHTML = ''
+        if (this.title) titleHTML =
+            `<header class="modal-panel-header">
+             <h3 class="modal-panel-title ${withTextClass}">${icon}${this.title}</h3>
+             </header>`
         let buttonsHTML = ''
         this.buttons.forEach((button: ModalButton) => {
             // For confirm "submit" the form to support html5 validation of 'required' attribute
             const type = button.action == ModalButtonAction.Confirm ? 'submit' : button
             buttonsHTML += `<button type="${type}" class="${button.action}">${button.label}</button>`
         })
+        if (buttonsHTML != '') buttonsHTML = `<div class="modal-panel-buttons ${centredClass}">${buttonsHTML}</div>`
         return `<form class="modal-panel-container" ${style}>
-
-                    <header class="modal-panel-header">
-                        <h3 class="modal-panel-title ${withTextClass}">${icon}${this.title}</h3>
-                    </header>
-
+                    ${titleHTML}
                     <div class="modal-panel-body">
                         ${this.html}
                     </div>
-
-                    ${buttonsHTML == '' ? '' : `<div class="modal-panel-buttons ${centredClass}">${buttonsHTML}</div>`}
-
+                    ${buttonsHTML}
                 </form>`
     }
 
+
+    getElement(query: string): null | HTMLElement {
+        if (!this.modalElement) {
+            console.error('Modal element is missing')
+            return null
+        }
+        const element = this.modalElement.querySelector(query)
+        if (element) return <HTMLElement>element
+        return null
+    }
+
+    getElements(query: string): null | NodeListOf<Element> {
+        if (!this.modalElement) {
+            console.error('Modal element is missing')
+            return null
+        }
+        const elements = this.modalElement.querySelectorAll(query)
+        if (elements) return elements
+        return null
+    }
 
 
     getInputElement(query: string): null | HTMLInputElement {
