@@ -168,7 +168,10 @@ export default class Block extends ToolbarButton {
             this.element!.classList.remove('active')
         } else {
             // Use the first parent node to set disabled state
-            let firstParentNode = Helpers.getParentBlockNode(this.editor!.range!.startContainer)
+            let firstParentNode: Node | null = null
+            if (this.editor.range) {
+                firstParentNode = Helpers.getParentBlockNode(this.editor.range.startContainer)
+            }
             if (!firstParentNode) {
                 return
             }
@@ -240,10 +243,7 @@ export default class Block extends ToolbarButton {
     }
 
     /**
-     * 
-     * @param {HTMLElement} node 
-     * @param {object} formats Old and new arrays of format strings
-     * @param {object} button
+     * Recursively parse a node
      */
     private parseNode(node: Element, formats: Formats) {
         // console.log( `%cparseNode ${node.tagName}`,'background:green;color:white;padding:0.5rem')

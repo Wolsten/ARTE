@@ -1,6 +1,7 @@
 import Editor from './Editor'
 import ToolbarButton from './ToolbarButton'
 import * as Helpers from './helpers'
+import * as Icons from './Icons'
 import Block from './plugins/Block'
 import Style from './plugins/Style'
 import Colour from './plugins/Colour'
@@ -8,9 +9,12 @@ import Buffer from './plugins/Buffer'
 import BufferButton from './plugins/BufferButton'
 import Clipboard from './plugins/Clipboard'
 import Shortcut from './Shortcut'
-import { editorToolbar } from './templates'
-import Actions from './plugins/Actions'
 import Mentions from './plugins/Mentions'
+import Settings from './plugins/Settings'
+import CustomAction from './plugins/CustomAction'
+import CustomLink from './plugins/Link'
+import CustomImage from './plugins/CustomImage'
+import CustomComment from './plugins/CustomComment'
 
 
 export default class Toolbar {
@@ -75,14 +79,24 @@ export default class Toolbar {
                     case 'MENTIONS':
                         button = new Mentions(editor, index)
                         break
-                    case 'CUSTOM':
+                    case 'SETTINGS':
+                        button = new Settings(editor, index)
+                        break
+                    case 'CUSTOM-BLOCK':
                         switch (name) {
-                            case 'ACTIONS':
-                                button = new Actions(editor, index)
+                            case 'ACTION':
+                                button = new CustomAction(editor, index)
+                                break
+                            case 'LINK':
+                                button = new CustomLink(editor, index)
+                                break
+                            case 'IMAGE':
+                                button = new CustomImage(editor, index)
+                                break
+                            case 'COMMENT':
+                                button = new CustomComment(editor, index)
                                 break
                         }
-                        break
-
                 }
 
                 if (!button) {
@@ -96,7 +110,7 @@ export default class Toolbar {
             })
         })
 
-        this.domNode.innerHTML = editorToolbar(this)
+        this.domNode.innerHTML = this.template()
         this.menuIcon = this.domNode.querySelector('.menu-icon')
         this.menuItems = this.domNode.querySelector('section')
 
@@ -118,7 +132,7 @@ export default class Toolbar {
         this.buttons.forEach(button => {
 
             // Add dom element to the button
-            const buttonElement = this.editor.toolbarNode!.querySelector(`#${button.tag}`)
+            const buttonElement = this.domNode!.querySelector(`#${button.tag}`)
             if (!buttonElement) {
                 console.error('Missing button element for button', button.tag)
                 return
@@ -251,6 +265,36 @@ export default class Toolbar {
                 this.setStates()
             }
         }
+    }
+
+
+
+
+
+    /**
+     * Return HTML for the toolbar
+     */
+    template(): string {
+        let buttonsHtml = ''
+        let groups: string[] = []
+        // console.log('buttons.length',buttons.length)
+        this.buttons.forEach((button, index) => {
+            const { type, tag, label, icon } = button
+            buttonsHtml +=
+                `<button id="${tag}" type="button" class="btn btn-light ${type}" title="${label}">
+                    ${icon} <span class="mobile">${label}</span>
+                </button>`
+            const nextGroup = index == this.buttons.length - 1 ? '' : this.buttons[index + 1].group
+            // Found end of a group?
+            if (button.group != nextGroup) {
+                // console.log('found new group at button',button.tag)
+                const title = `${button.group} buttons`
+                groups.push(`<div class="editor-toolbar-group block" role="group" title="${title}">${buttonsHtml}</div>`)
+                buttonsHtml = ''
+            }
+        })
+        const groupsHTML = groups.join('<span class="editor-toolbar-group-separator"></span>')
+        return `<span class="menu-icon mobile" title="Click to toggle toolbar menu">${Icons.menu} Menu</span><section>${groupsHTML}</section></details>`
     }
 
 

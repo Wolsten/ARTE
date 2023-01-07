@@ -1,4 +1,4 @@
-// import Modal from './Modal.js'
+
 import EditRange from './EditRange.js'
 
 // -----------------------------------------------------------------------------
@@ -234,12 +234,12 @@ export const getInlineStyles = function (node) {
 
 /**
  * Get the parent block node or return the block if the node itself is a block
- * Returns  parent block node or false if error occurs
+ * Returns parent block node or false if error occurs
  */
-export const getParentBlockNode = function (node: Node | null): Node | false {
-    if (node == null) {
+export const getParentBlockNode = function (node: Node | null): Node | null {
+    if (!node) {
         console.warn('Error. Passed null node to getParentBlockNode')
-        return false
+        return null
     }
     // console.log('getParentBlockNode',node)
     // Keep going up the tree while the node is not a block node
@@ -247,7 +247,7 @@ export const getParentBlockNode = function (node: Node | null): Node | false {
     while (isBlock(node) == false) {
         if (node.parentNode == null) {
             console.warn('Error. Found missing parent node when getting parent block node')
-            return false
+            return null
         }
         node = node.parentNode
         // console.log('node',node)

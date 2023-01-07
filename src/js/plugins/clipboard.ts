@@ -208,10 +208,6 @@ export default class Clipboard extends ToolbarButton {
 
 
     private bufferDelayed() {
-        setTimeout(() => {
-            if (this.editor.buffer) {
-                this.editor.buffer.update()
-            }
-        }, 100)
+        setTimeout(() => this.editor.updateBuffer, 100)
     }
 }

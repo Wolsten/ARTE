@@ -45,7 +45,7 @@ import Editor from '../Editor'
 
 interface CustomBlock extends ToolbarButton {
 
-    show(editFlag: boolean): void
+    show(): void
     form(): string
     save(): void
     clean(element: Element): Element
@@ -61,8 +61,11 @@ class CustomBlock extends ToolbarButton {
 
     protected drawer: null | Modal = null         // The modal container for the edit dialogue
     protected node: null | Element = null         // The actively edited node
-    protected dirty: boolean = false              // Flag whether input data changed
+    protected editFlag = false
+    // @todo Moved into modal
+    // protected dirty: boolean = false           // Flag whether input data changed 
     private confirm: null | Modal = null          // The modal container for the modal confirm dialogue
+
 
 
     constructor(editor: Editor, tag: string, label: string, icon: string, group: number) {
@@ -97,7 +100,8 @@ class CustomBlock extends ToolbarButton {
         if (custom) {
             this.edit(custom)
         } else {
-            this.show(false)
+            this.editFlag = false
+            this.show()
         }
     }
 
@@ -362,7 +366,7 @@ class CustomBlock extends ToolbarButton {
             this.element.removeAttribute('disabled')
             // If we have a range containing a custom element then make the button active
             const custom = this.editor.range?.blockParent?.querySelector(this.tag)
-            if (custom != null) {
+            if (custom) {
                 this.element.classList.add('active')
             } else {
                 this.element.classList.remove('active')
@@ -439,6 +443,7 @@ class CustomBlock extends ToolbarButton {
      * range's startContainer
      */
     protected insert(): void {
+        this.editFlag = false
         if (this.editor?.range?.startContainer.parentNode) {
             this.node = this.editor.range.startContainer.parentNode.appendChild(<Element>this.node)
         }
@@ -456,11 +461,12 @@ class CustomBlock extends ToolbarButton {
      */
     private edit(element: Element): void {
         // If we already have an active panel - ignore edit clicks
-        if (this.drawer && this.drawer.active()) {
+        if (this.drawer?.active) {
             return
         }
         this.node = element
-        this.show(true)
+        this.editFlag = true
+        this.show()
     }
 
     private handleConfirmCancel(): void {
@@ -482,7 +488,7 @@ class CustomBlock extends ToolbarButton {
         // Update state
         this.editor.range = null
         this.setState()
-        this.editor.buffer?.update()
+        this.editor.updateBuffer()
     }
 
 

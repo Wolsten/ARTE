@@ -1,75 +1,4 @@
-import { supported } from 'browser-fs-access'
 import Editor from '../Editor'
-import * as Icons from '../icons.ts'
-import ToolbarButton from '../ToolbarButton.js'
-
-// -----------------------------------------------------------------------------
-// @section Buffer class and instances - allows for multiple buffers if have 
-// multiple editors on one page
-// -----------------------------------------------------------------------------
-
-// class Buffer {
-//     constructor(size) {
-//         this.size = size
-//         this.index = -1
-//         this.buffer = []
-//         // this.buffering = true
-//     }
-// }
-// let buffers: Buffer[] = []
-
-// let buffers: Map<string, Buffer> = new Map()
-
-// -----------------------------------------------------------------------------
-// @section Click functions
-// -----------------------------------------------------------------------------
-
-
-
-
-
-// -----------------------------------------------------------------------------
-// @section "Optional" functions" including update and ignore which are 
-// none-standard methods with special handling in the editor. These should NOT
-// be implemented in other plugins.
-// -----------------------------------------------------------------------------
-
-
-
-
-// /**
-//  * Initialise the buffering for this editor by creating a dedicated buffer instance
-//  * @param {object} editor 
-//  */
-// const init = function (editor) {
-//     if (editor.buffer && editor.options.bufferSize > 0) {
-//         buffers[editor.id] = new Buffer(editor.options.bufferSize)
-//     }
-// }
-
-
-
-/**
- * Set buffering on
- * @param {number} id The editor instance id
- */
-const restart = function (id) {
-    if (buffers[id] !== undefined) {
-        buffers[id].buffering = true
-    }
-}
-
-
-
-
-
-
-
-
-
-// -----------------------------------------------------------------------------
-// @section Exports
-// -----------------------------------------------------------------------------
 
 
 export default class Buffer {
@@ -80,6 +9,7 @@ export default class Buffer {
     items: string[] = []
     editor: Editor
     buffering: boolean = false
+
 
     constructor(editor: Editor) {
         this.editor = editor

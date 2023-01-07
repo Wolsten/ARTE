@@ -1,4 +1,3 @@
-import * as Templates from './templates'
 import * as Helpers from './helpers'
 import { Modal, ModalButton, ModalButtonAction, ModalSeverity, ModalType, ModalWarning } from './Modal.js'
 import EditRange from './EditRange'
@@ -7,6 +6,7 @@ import { Options, OptionsType } from './options'
 import Toolbar from './Toolbar'
 import Sidebar from './Sidebar'
 import Shortcut from './Shortcut'
+import { commentResolve } from './icons'
 
 
 
@@ -17,10 +17,10 @@ export default class Editor {
     lastKey = ''
 
     range: null | EditRange = null
-    editorNode: null | HTMLElement = null
-    toolbarNode!: HTMLElement
-    mainNode!: null | HTMLElement
-    sidebarNode: null | HTMLElement = null
+    editorNode!: Element
+    toolbarNode!: Element
+    mainNode!: Element
+    sidebarNode: null | Element = null
     debugNode: null | HTMLElement = null
 
     toolbar!: Toolbar
@@ -34,9 +34,15 @@ export default class Editor {
     shortcuts: Shortcut[] = []
     disabled: boolean = false
     options: Options
-    buffer: null | Buffer = null
+
+    private buffer: null | Buffer = null
+
 
     constructor(target: HTMLElement, content = '', toolbarItems: string[][], options: OptionsType) {
+
+        // Public methods to support saving and updating the editor content
+        this.preview = () => this.getCleanData(true)
+        this.update = this.updateEditor
 
         // Generate a unique id for this editor instance
         // @todo This may not be required
@@ -46,9 +52,15 @@ export default class Editor {
         this.options = new Options(options)
 
         // Add editor html to the dom and get the main nodes
-        target.innerHTML = Templates.editor(this.options)
-        this.mainNode = target.querySelector('.editor-main')
-        this.editorNode = target.querySelector('.editor-body')
+        target.innerHTML = this.editorTemplate()
+        const mainNode = target.querySelector('.editor-main')
+        const editorNode = target.querySelector('.editor-body')
+        if (!mainNode || !editorNode) {
+            alert('Failed to find editor main or body nodes')
+            return
+        }
+        this.mainNode = mainNode
+        this.editorNode = editorNode
 
         // Create a toolbar (adding to the dom)
         this.toolbar = new Toolbar(this, target, toolbarItems)
@@ -70,9 +82,6 @@ export default class Editor {
         this.listenForKeydownEvents()
         this.listenForKeyupEvents()
 
-        // Public methods to support saving and updating the editor content
-        this.preview = () => this.getCleanData(true)
-        this.update = this.updateEditor
 
         // Reset currently edited filename
         this.filename = 'arte-download'
@@ -552,7 +561,7 @@ export default class Editor {
         const options = {
             escapeToCancel: true
         }
-        this.modal = new Modal('Save file', Templates.save(this.filename), buttons, options)
+        this.modal = new Modal('Save file', this.saveTemplate(this.filename), buttons, options)
     }
 
     /**
@@ -709,7 +718,7 @@ export default class Editor {
         //console.log('modal active',this.modal.active())
         this.range = Helpers.getRange(<HTMLElement>this.editorNode)
         if (this.options.debug) {
-            Templates.debugRange(this.debugNode, this.range)
+            this.debugTemplate(this.debugNode, this.range)
         }
         // const timestamp2 = new Date()
         // console.log(`START: ${timestamp1.getTime()}\nENDED: ${timestamp2.getTime()}`)
@@ -730,13 +739,77 @@ export default class Editor {
         }
     }
 
-    updateBuffer() {
+    public updateBuffer() {
         if (this.buffer?.update) {
             // console.log('Updating buffer')
             this.buffer.update()
         }
         this.sidebar?.update()
     }
+
+
+    // -----------------------------------------------------------------------------
+    // @section Templates
+    // -----------------------------------------------------------------------------
+
+
+    private debugTemplate(target: HTMLElement | null, range: EditRange | null) {
+        if (!target) {
+            return
+        }
+        // console.warn('debugRange',range)
+        if (!range) {
+            target.innerHTML = '<p>No range selected</p>'
+        } else {
+            target.innerHTML = `
+                    <h5>Selection info:</h5>
+                    <div class="col">
+                        <label>Block parent</label><span>${range.blockParent.tagName}</span>
+                        <label>commonAncestorC</label><span>${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</span>
+                        <label>rootNode</label><span>${range.rootNode.tagName}</span>
+                        <label>collapsed</label><span>${range.collapsed}</span>
+                        <label>custom</label><span>${range.custom ? range.custom.tagName : 'false'}</span>
+                    </div>
+                    <div class="col">
+                        <label>startC</label><span>${range.startContainer.tagName ? range.startContainer.tagName : range.startContainer.textContent}</span>
+                        <label>startOffset</label><span>${range.startOffset}</span>
+                        <label>endC</label><span>${range.endContainer.tagName ? range.endContainer.tagName : range.endContainer.textContent}</span>
+                        <label>endOffset</label><span>${range.endOffset}</span>
+                    </div>`
+        }
+    }
+
+
+    private editorTemplate(): string {
+        let classes = ''
+        if (this.options.headingNumbers) {
+            classes += 'heading-numbers'
+        }
+        return `
+            <div class="editor-container">
+                <div class="editor-toolbar">
+                    PLACEHOLDER
+                </div>
+                <div class="editor-main">
+                    <div class="editor-body ${classes}" contenteditable="true"></div>
+                    <!-- Dynamic sidebar goes here --> 
+                </div>
+            </div>`
+    }
+
+    private saveTemplate(filename = 'arte-download') {
+        //console.log('filename is',filename)
+        return `
+            <form class="save">
+                <p class="advice">Enter the filename without extension. The file will be saved in your <strong>Downloads</strong> folder with the extension <strong>arte</strong>.</>
+                <div class="form-input">
+                    <input type="text" id="filename" title="filename" class="form-control" placeholder="Filename" required value="${filename}"/>
+                </div>
+                <p class="feedback"></p>
+            </form>`
+    }
+
+
 
 
 } // End of class definition

@@ -51,29 +51,24 @@ import Editor from '../Editor'
 import CustomBlock from './CustomBlock'
 
 
-export default class Actions extends CustomBlock {
+export default class CustomAction extends CustomBlock {
 
     static readonly TAG = 'ARTE-ACTION'        // The HTMLElement tag as inserted in the dom for this custom node
 
 
     constructor(editor: Editor, group: number) {
-        super(editor, 'custom', Actions.TAG, Icons.action, group)
+        super(editor, 'custom', CustomAction.TAG, Icons.action, group)
     }
-
-
-    // -----------------------------------------------------------------------------
-    // @section Action specific methods
-    // -----------------------------------------------------------------------------
 
 
     /**
      * Show the custom dialogue for new creation or editing
      */
-    show(editFlag: boolean): void {
+    show(): void {
         const buttons = [
             new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
         ]
-        if (editFlag) {
+        if (this.editFlag) {
             buttons.push(new ModalButton(ModalButtonAction.Delete, 'Delete', this.handleDelete, 'action'))
         } else {
             // Initialise an action as saved to file
@@ -98,7 +93,7 @@ export default class Actions extends CustomBlock {
         const options: ModalOptionsType = {
             focusId: 'todo'
         }
-        this.drawer = new Modal(`${editFlag ? 'Edit' : 'Action'} action`, this.form(), buttons, options)
+        this.drawer = new Modal(`${this.editFlag ? 'Edit' : 'Create'} action`, this.form(), buttons, options)
     }
 
 
@@ -148,24 +143,26 @@ export default class Actions extends CustomBlock {
         }
         // console.log('Save changes')'
         this.setAttributes(['todo', 'owners', 'due', 'status', 'notes'], this.drawer)
-        // Timestamp
+        // Timestamps
         const timestamp = new Date()
         const localTimestamp = timestamp.toLocaleString().slice(0, -3)
-        if (this.getAttribute('created') == '') {
+        if (this.editFlag) {
+            this.setAttribute('updated', localTimestamp)
+        } else {
             this.setAttribute('created', localTimestamp)
             this.insert()
-        } else {
-            this.setAttribute('updated', localTimestamp)
         }
         // Close the modal
         this.drawer.hide()
         // Format the saved action
         this.format(this.template)
+        // Update the buffer
+        this.editor.updateBuffer()
     }
 
 
     /**
-     * late for how the action is presented in the editor
+     * Template for how the action is presented in the editor
      */
     template(): string {
         const todo = this.getAttribute('todo')
@@ -198,7 +195,7 @@ export default class Actions extends CustomBlock {
      * Display custom html in the sidebar
      */
     sidebar(): SidebarButton {
-        const actions = this.editor?.editorNode?.querySelectorAll(Actions.TAG)
+        const actions = this.editor?.editorNode?.querySelectorAll(this.tag)
         let content = ''
         if (actions) {
             actions.forEach(action => {

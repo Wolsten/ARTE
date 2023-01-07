@@ -1,6 +1,6 @@
 import Editor from './Editor'
 import SidebarButton from './SidebarButton'
-import { sidebarContent } from './templates'
+
 
 export default class Sidebar {
 
@@ -39,7 +39,7 @@ export default class Sidebar {
         this.sidebarNode = document.createElement('DIV')
         this.sidebarNode.classList.add('editor-sidebar')
         this.sidebarNode.classList.add('dont-break-out')
-        this.sidebarNode.innerHTML = sidebarContent(tabList)
+        this.sidebarNode.innerHTML = this.template(tabList)
 
         // Tab menu clicks
         const tabMenu = this.sidebarNode.querySelector('.tab-menu')
@@ -62,7 +62,7 @@ export default class Sidebar {
     }
 
 
-    hideSidebar(): void {
+    hide(): void {
         if (this.sidebarNode) this.sidebarNode.remove()
         this.editor.options.explorer = false
     }
@@ -128,4 +128,31 @@ export default class Sidebar {
             }
         }
     }
+
+
+    private template(tabList: SidebarButton[]) {
+        let menu = ''
+        let content = ''
+        tabList.forEach((button, index) => {
+            const active = index == 0 ? 'active' : ''
+            const show = index == 0 ? 'show' : ''
+            const tabClass = button.label.replaceAll(' ', '-')
+            const itemContent = button.content ? button.content : `You have no ${button.label} in your document.`
+            menu += `<li><a href="#" class="tab-menu ${active}" data-tab-target="tab-${index}" title="${button.label}">${button.icon}</a></li>`
+            content += `
+                <div class="tab-item ${tabClass} ${show}" data-tab-id="tab-${index}">
+                    <header><h2>${button.label}</h2></header>
+                    ${itemContent}
+                </div>`
+        })
+        const html =
+            `<div class="editor-sidebar-content">
+                <header><h1>Explorer</h1></header>
+                <ul class="tab-menu">${menu}</ul>
+                <div class="tab-content">${content}</div>
+                <button class="close">Close explorer</button>
+            </div>`
+        return html
+    }
+
 }

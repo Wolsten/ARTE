@@ -19,8 +19,8 @@ if (!target) {
         ['STYLE.B', 'STYLE.I', 'STYLE.U', 'COLOUR.FOREGROUND', 'COLOUR.BACKGROUND', 'STYLE.CLEAR'],
         ['BUFFER.UNDO', 'BUFFER.REDO'],
         ['CLIPBOARD.CUT', 'CLIPBOARD.COPY', 'CLIPBOARD.PASTE'],
-        ['MENTIONS', 'Links', 'Images', 'Comments', 'CUSTOM.ACTIONS'],
-        ['Settings']
+        ['MENTIONS', 'CUSTOM-BLOCK.LINK', 'CUSTOM-BLOCK.IMAGE', 'CUSTOM-BLOCK.COMMENT', 'CUSTOM-BLOCK.ACTION'],
+        ['SETTINGS']
     ]
 
     // Define options

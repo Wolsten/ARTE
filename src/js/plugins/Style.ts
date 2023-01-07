@@ -6,7 +6,7 @@ import EditRange from '../EditRange'
 import Editor from '../Editor.js'
 
 
-interface TextParts {
+type TextParts = {
     preText: string
     text: string
     postText: string
