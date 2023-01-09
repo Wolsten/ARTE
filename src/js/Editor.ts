@@ -6,7 +6,7 @@ import { Options, OptionsType } from './options'
 import Toolbar from './Toolbar'
 import Sidebar from './Sidebar'
 import Shortcut from './Shortcut'
-import { commentResolve } from './icons'
+import ToolbarButton, { ToolbarButtonType } from './ToolbarButton'
 
 
 
@@ -17,10 +17,10 @@ export default class Editor {
     lastKey = ''
 
     range: null | EditRange = null
-    editorNode!: Element
-    toolbarNode!: Element
-    mainNode!: Element
-    sidebarNode: null | Element = null
+    editorNode!: HTMLElement
+    toolbarNode!: HTMLElement
+    mainNode!: HTMLElement
+    sidebarNode: null | HTMLElement = null
     debugNode: null | HTMLElement = null
 
     toolbar!: Toolbar
@@ -35,7 +35,7 @@ export default class Editor {
     disabled: boolean = false
     options: Options
 
-    private buffer: null | Buffer = null
+    buffer: null | Buffer = null
 
 
     constructor(target: HTMLElement, content = '', toolbarItems: string[][], options: OptionsType) {
@@ -59,8 +59,8 @@ export default class Editor {
             alert('Failed to find editor main or body nodes')
             return
         }
-        this.mainNode = mainNode
-        this.editorNode = editorNode
+        this.mainNode = <HTMLElement>mainNode
+        this.editorNode = <HTMLElement>editorNode
 
         // Create a toolbar (adding to the dom)
         this.toolbar = new Toolbar(this, target, toolbarItems)
@@ -81,7 +81,6 @@ export default class Editor {
         this.listenForMouseUpEvents()
         this.listenForKeydownEvents()
         this.listenForKeyupEvents()
-
 
         // Reset currently edited filename
         this.filename = 'arte-download'
@@ -346,7 +345,7 @@ export default class Editor {
                 // method was triggered on keydown before added to dom
                 setTimeout(() => {
                     this.updateRange()
-                    this.toolbar.setStateForButtonType('block')
+                    this.toolbar.setStateForButtonType(ToolbarButtonType.BLOCK)
                 }, 10)
                 // Check for handling enter within a parent block element that has a custom node at the end
                 // @todo Multiple custom nodes?
@@ -445,15 +444,19 @@ export default class Editor {
     listenForKeyupEvents() {
         // Set the handleKeyup method to be the debounced method handleKeyupDelayed
         this.handleKeyup = Helpers.debounce(this.handleKeyupDelayed, 500)
-        this.editorNode!.addEventListener('keyup', event => {
+
+        this.editorNode.addEventListener('keyup', (event: KeyboardEvent) => {
+
             if (!this.handleKeyup) return
+
             const ignore = ['Shift', 'Meta', 'Ctrl']
             // console.log('handle key up event',event)
-            if (ignore.includes(event.key) == false && this.modal.active() == false) {
+            if (ignore.includes(event.key) == false && this.modal?.active == false) {
                 this.handleKeyup(event.key, this)
             }
         })
     }
+
 
     /**
      * Handle keyup events (after being debounced)
@@ -471,7 +474,7 @@ export default class Editor {
             editor.setToolbarStates()
         }
         // console.log('Explicitly updating buffer')
-        editor.buffer()
+        editor.updateBuffer()
     }
 
     // -----------------------------------------------------------------------------
@@ -650,13 +653,13 @@ export default class Editor {
     confirmClear() {
         if (this.editorNode) this.editorNode.innerHTML = ''
         // this.filename = 'arte-download'
-        this.modal.hide()
+        this.modal?.hide()
         setTimeout(() => this.updateBuffer(), 100)
     }
 
 
     clear() {
-        if (this?.modal?.active) {
+        if (this.modal?.active) {
             return
         }
         const html = '<p>Are you sure you want to clear the editor and start a new document? Any changes will be lost.</p>'
@@ -704,7 +707,7 @@ export default class Editor {
      * Get the new range in the editor node and when debugging display this
      */
     updateRange(): void {
-        if (this.modal.active()) {
+        if (this.modal?.active) {
             return
         }
         // const timestamp1 = new Date()
@@ -716,7 +719,7 @@ export default class Editor {
         //     return
         // }
         //console.log('modal active',this.modal.active())
-        this.range = Helpers.getRange(<HTMLElement>this.editorNode)
+        this.range = Helpers.getRange(this.editorNode)
         if (this.options.debug) {
             this.debugTemplate(this.debugNode, this.range)
         }
@@ -739,10 +742,24 @@ export default class Editor {
         }
     }
 
+
+    // -----------------------------------------------------------------------------
+    // @section Buffering
+    // -----------------------------------------------------------------------------
+
+
+    public initBuffer(undo: ToolbarButton, redo: ToolbarButton, size: number) {
+        this.buffer = new Buffer(this, undo, redo, size)
+    }
+
+    public gotBuffer(): boolean {
+        return this.buffer ? true : false
+    }
+
     public updateBuffer() {
-        if (this.buffer?.update) {
+        if (this.buffer) {
             // console.log('Updating buffer')
-            this.buffer.update()
+            this.buffer?.update()
         }
         this.sidebar?.update()
     }
@@ -761,10 +778,11 @@ export default class Editor {
         if (!range) {
             target.innerHTML = '<p>No range selected</p>'
         } else {
+            const blockParent = range.blockParent?.tagName || 'Missing'
             target.innerHTML = `
                     <h5>Selection info:</h5>
                     <div class="col">
-                        <label>Block parent</label><span>${range.blockParent.tagName}</span>
+                        <label>Block parent</label><span>${blockParent}</span>
                         <label>commonAncestorC</label><span>${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</span>
                         <label>rootNode</label><span>${range.rootNode.tagName}</span>
                         <label>collapsed</label><span>${range.collapsed}</span>

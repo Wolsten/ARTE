@@ -1,4 +1,4 @@
-import ToolbarButton from '../ToolbarButton'
+import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import * as Helpers from '../helpers'
 import * as Icons from '../icons'
 import * as Phase from '../phase'
@@ -13,6 +13,14 @@ type TextParts = {
 }
 
 
+enum StyleAction {
+    NONE,
+    APPLY,  // Apply selected style
+    REMOVE, // Remove selected style
+    CLEAR   // Clear all styles
+}
+
+
 export default class Style extends ToolbarButton {
 
     style = ''
@@ -20,7 +28,7 @@ export default class Style extends ToolbarButton {
     // Private properties
     private newStyle = ''
     private newValue = ''
-    private action = ''
+    private action: StyleAciotn = StyleAction.NONE
 
 
     constructor(editor: Editor, style: string, group: number) {
@@ -29,29 +37,29 @@ export default class Style extends ToolbarButton {
 
         switch (style) {
             case 'B':
-                super(editor, 'style', 'B', 'Bold', Icons.b, group)
+                super(editor, ToolbarButtonType.STYLE, 'B', 'Bold', Icons.b, group)
                 this.style = 'font-weight:bold'
                 break
             case 'I':
-                super(editor, 'style', 'I', 'Italic', Icons.i, group)
+                super(editor, ToolbarButtonType.STYLE, 'I', 'Italic', Icons.i, group)
                 this.style = 'font-style:italic'
                 break
             case 'U':
-                super(editor, 'style', 'U', 'Underline', Icons.u, group)
+                super(editor, ToolbarButtonType.STYLE, 'U', 'Underline', Icons.u, group)
                 this.style = 'text-decoration:underline'
                 break
             case 'CLEAR':
-                super(editor, 'style', 'CLEAR', 'Clear', Icons.clear, group)
+                super(editor, ToolbarButtonType.STYLE, 'CLEAR', 'Clear', Icons.clear, group)
                 this.style = 'CLEAR'
                 break
             case 'COLOR':
-                super(editor, 'style', 'COLOR', '', '', group)
+                super(editor, ToolbarButtonType.STYLE, 'COLOR', '', '', group)
                 break
             case 'BACKGROUND-COLOR':
-                super(editor, 'style', 'BACKGROUND-COLOR', '', '', group)
+                super(editor, ToolbarButtonType.STYLE, 'BACKGROUND-COLOR', '', '', group)
                 break
             default:
-                super(editor, 'style', 'CLEAR', 'Clear', Icons.clear, group)
+                super(editor, ToolbarButtonType.STYLE, 'CLEAR', 'Clear', Icons.clear, group)
                 this.style = 'CLEAR'
                 console.error(`Unrecognised style name [${style}]`)
         }
@@ -116,9 +124,6 @@ export default class Style extends ToolbarButton {
 
 
 
-
-
-
     // -----------------------------------------------------------------------------
     // @section Private methods
     // -----------------------------------------------------------------------------
@@ -136,18 +141,18 @@ export default class Style extends ToolbarButton {
 
 
     /**
-     * Split the style stype property into newStyle:newValue parts and set the action
+     * Split the style sype property into newStyle:newValue parts and set the action
      */
     private setStyleProps() {
         const styleParts = this.style.split(':')
         this.newStyle = styleParts[0]
         this.newValue = styleParts[1] !== undefined ? styleParts[1] : ''
         // Determine the action
-        this.action = 'apply'
+        this.action = StyleAction.APPLY
         if (this.isActive() && this.style != 'CLEAR') {
-            this.action = 'remove'
+            this.action = StyleAction.REMOVE
         } else if (this.style == 'CLEAR') {
-            this.action = 'clear'
+            this.action = StyleAction.CLEAR
         }
     }
 
@@ -236,7 +241,7 @@ export default class Style extends ToolbarButton {
                     // Defaults to true for cases of 'remove' and 'clear'
                     closedSpans = true
 
-                    if (this.action == 'apply') {
+                    if (this.action == StyleAction.APPLY) {
 
                         // Don't close if new style is in styles list or if there is post text 
                         // which needs the same styling as the pre text
@@ -253,7 +258,7 @@ export default class Style extends ToolbarButton {
             if (text) {
 
                 // Apply new style?
-                if (this.action == 'apply') {
+                if (this.action == StyleAction.APPLY) {
 
                     // If style already applied and the pretext spans are open 
                     // just add the text
@@ -273,7 +278,7 @@ export default class Style extends ToolbarButton {
                     }
 
                     // Remove existing style?
-                } else if (this.action == 'remove' || this.action == 'clear') {
+                } else if (this.action == StyleAction.REMOVE || this.action == StyleAction.CLEAR) {
 
                     html += text
                 }

@@ -3,20 +3,29 @@ import SidebarButton from "./SidebarButton"
 import * as Helpers from './helpers'
 
 
+export enum ToolbarButtonType {
+    BLOCK,
+    LIST,
+    STYLE,
+    CUSTOM,
+    DETACHED,
+}
+
+
 interface ToolbarButton {
 
     // Mandatory properties
     editor: Editor
-    type: string     // block|list|style|buffer|custom @todo enum
-    tag: string      // As inserted in the dom. e.g. H1, CUSTOM
-    label: string    // Generally used as the title of the button but could also be displayed
-    icon: string     //  The icon to use
-    group: number     // The group index
-    element: Element // The dom element which the button is attached to
+    type: ToolbarButtonType
+    tag: string             // As inserted in the dom. e.g. H1, CUSTOM
+    label: string           // Generally used as the title of the button but could also be displayed
+    icon: string            //  The icon to use
+    group: number           // The group index
+    element: HTMLElement    // The dom element which the button is attached to
     disabled: boolean
 
     // Optional properties
-    shortcut?: string[]
+    shortcut?: string[] | null
 
     // Mandatory methods
     click(): void
@@ -32,15 +41,15 @@ interface ToolbarButton {
 
 class ToolbarButton {
 
-    constructor(editor: Editor, type: string, tag: string, label: string, icon: string, group: number) {
+    disabled = false
+
+    constructor(editor: Editor, type: ToolbarButtonType, tag: string, label: string, icon: string, group: number) {
         this.editor = editor
         this.type = type
         this.tag = tag
         this.label = label
         this.icon = icon
         this.group = group
-        this.disabled = false
-        this.shortcut = []
     }
 
     // -----------------------------------------------------------------------------
@@ -67,7 +76,9 @@ class ToolbarButton {
     }
 
 
-
+    protected isActive() {
+        return this.element.classList.contains('active')
+    }
 }
 
 

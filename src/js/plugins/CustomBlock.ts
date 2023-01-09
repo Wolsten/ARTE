@@ -37,7 +37,7 @@
 
 
 import * as Helpers from '../helpers'
-import ToolbarButton from '../ToolbarButton'
+import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import { Modal } from '../Modal'
 import SidebarButton from '../SidebarButton'
 import Editor from '../Editor'
@@ -62,14 +62,12 @@ class CustomBlock extends ToolbarButton {
     protected drawer: null | Modal = null         // The modal container for the edit dialogue
     protected node: null | Element = null         // The actively edited node
     protected editFlag = false
-    // @todo Moved into modal
-    // protected dirty: boolean = false           // Flag whether input data changed 
+
     private confirm: null | Modal = null          // The modal container for the modal confirm dialogue
 
 
-
     constructor(editor: Editor, tag: string, label: string, icon: string, group: number) {
-        super(editor, 'custom', tag, label, icon, group)
+        super(editor, ToolbarButtonType.CUSTOM, tag, label, icon, group)
     }
 
 
@@ -82,7 +80,7 @@ class CustomBlock extends ToolbarButton {
         if (customs) {
             customs.forEach((custom: Element) => {
                 this.node = custom
-                this.format(this.template)
+                this.format()
             })
         }
     }
@@ -145,172 +143,6 @@ class CustomBlock extends ToolbarButton {
     }
 
 
-    /**
-     * Example template for optional sidebar for displaying custom html in the sidebar
-     */
-    // sidebar(): SidebarButton {
-    //     const customElements = this.editor.editorNode?.querySelectorAll(this.tag)
-    //     let content = ''
-    //     if (customElements) {
-    //         customElements.forEach(customElement => {
-    //             const customAttribute = this.getAttribute('data-custom-attribute',customElement)
-    //             content += `
-    //                 <article>
-    //                     <a href="#${customElement.id}" title="Click to view custom element in context">
-    //                         <!@-- example custom content-->
-    //                         ${customAttribute}
-    //                     </a>
-    //                 </article>`
-    //         })
-    //     }
-    //     return new SidebarButton(this.icon, 'comments', content)
-    // }
-
-
-
-
-
-    /**
-     * Example template for mandatory show method
-     */
-    // show(editFlag: boolean) {
-    //     // @todo
-    //     // Define buttons, if need others extend the interface as required
-    //     let buttons: EditButtons = {
-    //         cancel: { label: 'Cancel', callback: this.handleCancel },
-    //         confirm: { label: 'Save', callback: this.save },
-    //     }
-    //     let title = 'Add custom element'
-    //     if (editFlag) {
-    //         title = 'Edit custom element'
-    //         buttons.delete = { label: 'Delete', callback: this.handleDelete }
-    //     } else {
-    //         this.node = document.createElement(this.tag)
-    //         this.node.id = Helpers.generateUid()
-    //         this.node.setAttribute('contenteditable', 'false')
-    //         // @todo
-    //         // initialise any custom attributes
-    //         // e.g. this.node.setAttribute('data-custom', '')
-    //     }
-    //     // Create and display the modal panel
-    //     this.drawer = new Modal({
-    //         type: 'drawer',
-    //         title,
-    //         html: this.form(),
-    //         buttons
-    //     })
-    //     this.drawer.show()
-    //     // @todo
-    //     // Optionally initialise confirmation module and dirty data detection
-    //     this.dirty = false
-    //     const customInput = this.drawer.selectOne('form textarea#custom')
-    //     if (!this.drawer.panel || !customInput) {
-    //         console.error('Could not find custom input data element')
-    //         return
-    //     }
-    //     const input = <HTMLInputElement>customInput
-    //     input.addEventListener('change', () => this.dirty = true)
-    //     // @todo
-    //     // Optional custom button handling
-    //     const customButton = this.drawer.selectOne('form button#customButton')
-    //     if (customButton != null) {
-    //         customButton.addEventListener('click', this.handleCustomButton)
-    //     }
-    //     // @todo
-    //     // Optionally set initial focus
-    //     input.focus()
-    //     input.setSelectionRange(input.value.length, input.value.length)
-    // }
-
-
-    /**
-     * Example template for mandatory form method
-     */
-    // form(): string {
-    //     if (!this.node) {
-    //         console.error('Error: custom node is missing')
-    //         return 'Error: custom node is missing'
-    //     }
-    //     // @todo get custom attributes, for example:
-    //     const customAttribute = this.getAttribute('data-customAttribute')
-    //     // @todo Process the custom attributes for display, for example
-    //     const formattedCustomAttribute = '...' + customAttribute
-    //     // @todo Create optional custom buttons
-    //     const customButtonText = `<button type="button" id="custom-button">Custom</button>`
-    //     return `
-    //             <form class="comment">
-    //                 <div class="form-input">
-    //                     <textarea id="custom" class="form-control" placeholder="Enter your custom data" required>${formattedCustomAttribute}</textarea>
-    //                 </div>
-    //                 ${customButtonText}
-    //             </form>`
-    // }
-
-
-    /**
-     * Example template for a custom button handling method
-     */
-    // handleCustomButton(event: Event): void {
-    //     if (!this.node || !event.target) {
-    //         console.error('Trying to handle a missing custom button')
-    //         return
-    //     }
-    //     // @todo modify attributes, content and/or button label
-    // }
-
-
-    /**
-     * Example template for saving a new or edited custom element
-     */
-    // save(): void {
-    //     // console.log('Save changes')
-    //     if (!this.node || !this?.drawer?.panel) {
-    //         console.error('Could not find custom element to save')
-    //         return
-    //     }
-    //     if (this.drawer.panel) {
-    //         // @todo get data from the form
-    //         const data = this.drawer.panel.querySelector('form #data')
-    //         if (!data) {
-    //             console.error('Could not find custom data in the form')
-    //             return
-    //         }
-    //         this.node.setAttribute('data-data', (<HTMLInputElement>data).value.trim())
-    //         // @optional handle timestamps
-    //         const timestamp = new Date()
-    //         const localString = timestamp.toLocaleString().slice(0, -3)
-    //         // console.log('local timestamp', localString)
-    //         if (this.getAttribute('data-created') == '') {
-    //             this.setAttribute('data-created', localString)
-    //             this.insert()
-    //         }
-    //         this.node.setAttribute('data-updated', localString)
-    //     }
-    //     this.drawer.hide()
-    //     // Format this.node and add event handler
-    //     this.format(this.node, 'custom title')
-    //     // Update state
-    //     this.editor.range = Helpers.setCursor(this.node, 0)
-    //     this.setState()
-    //     this.editor?.buffer?.update()
-    // }
-
-
-    /**
-     * Example template for a template defining how custom element content is displayed
-     * Passed into the format method as a callback
-     */
-    // template(custom: Element): string {
-    //     const attribute = this.getAttribute('data-attribute',custom)
-    //     return `
-    //         <button type="button" title="Edit this ${this.label}">
-    //             <label class="attribute-class">Attribute</label>
-    //             <span class="attribute-value">${attribute}</span>
-    //         </button>`
-    // }
-
-
-
 
     // -----------------------------------------------------------------------------
     // @section Protected methods
@@ -320,7 +152,7 @@ class CustomBlock extends ToolbarButton {
     /**
      * Mandatory format method which may be overridden
      */
-    protected format(template: Function): void {
+    protected format(): void {
         if (!this.node) {
             console.error(`Cannot find the ${this.label} to format`)
             return
@@ -331,7 +163,7 @@ class CustomBlock extends ToolbarButton {
             element.id = Helpers.generateUid()
         }
         element.setAttribute('contenteditable', 'false')
-        element.innerHTML = template(element)
+        element.innerHTML = this.template()
         // Add event listener to edit button if it exists
         element.querySelector('button')?.addEventListener('click', event => {
             event.preventDefault()
@@ -374,16 +206,21 @@ class CustomBlock extends ToolbarButton {
         }
     }
 
-    protected handleCancel(): void {
-        if (this.dirty) {
-            this.confirm = Helpers.modalRequestCancel(this.handleConfirmCancel)
-        } else {
-            this.drawer?.hide()
-        }
-    }
+    // protected handleCancel(): void {
+    //     if (this.drawer?.dirty) {
+    //         this.confirm = Helpers.modalRequestCancel(this.handleConfirmCancel)
+    //     } else {
+    //         this.drawer?.hide()
+    //     }
+    // }
 
     protected handleDelete(): void {
-        this.confirm = Helpers.modalRequestDelete(this.label, this.handleConfirmDelete)
+        this.confirm?.hide()
+        this.drawer?.hide()
+        this.node?.remove()
+        this.editor.range = null
+        this.setState()
+        this.editor.updateBuffer()
     }
 
     /**
@@ -469,27 +306,27 @@ class CustomBlock extends ToolbarButton {
         this.show()
     }
 
-    private handleConfirmCancel(): void {
-        this.confirm?.hide()
-        this.drawer?.hide()
-    }
+    // private handleConfirmCancel(): void {
+    //     this.confirm?.hide()
+    //     this.drawer?.hide()
+    // }
 
-    private handleConfirmDelete(): void {
-        this.confirm?.hide()
-        this.drawer?.hide()
-        this.deleteItem()
-    }
+    // private handleConfirmDelete(): void {
+    //     this.confirm?.hide()
+    //     this.drawer?.hide()
+    //     this.deleteItem()
+    // }
 
-    /**
-     * Delete the custom element in the dom
-     */
-    private deleteItem(): void {
-        this.node?.remove()
-        // Update state
-        this.editor.range = null
-        this.setState()
-        this.editor.updateBuffer()
-    }
+    // /**
+    //  * Delete the custom element in the dom
+    //  */
+    // private deleteItem(): void {
+    //     this.node?.remove()
+    //     // Update state
+    //     this.editor.range = null
+    //     this.setState()
+    //     this.editor.updateBuffer()
+    // }
 
 
 }

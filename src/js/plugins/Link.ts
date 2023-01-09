@@ -25,11 +25,8 @@ import SidebarButton from '../SidebarButton'
 
 export default class CustomLink extends CustomBlock {
 
-    static readonly TAG = 'ARTE-LINK' // The HTMLElement tag as inserted in the dom for this custom node
-
-
     constructor(editor: Editor, group: number) {
-        super(editor, 'custom', CustomLink.TAG, Icons.link, group)
+        super(editor, 'ARTE-LINK', 'Link', Icons.link, group)
     }
 
 
@@ -141,7 +138,7 @@ export default class CustomLink extends CustomBlock {
      * Display custom html in the sidebar
      */
     sidebar(): SidebarButton {
-        const links = this.editor?.editorNode?.querySelectorAll(Link.TAG)
+        const links = this.editor?.editorNode?.querySelectorAll(this.tag)
         let content = ''
         if (links) {
             links.forEach(link => {

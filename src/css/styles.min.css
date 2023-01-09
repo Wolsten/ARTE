@@ -1,32 +1,32 @@
 .theme-light {
-  --colour-text: rgb(90,90,90);
-  --colour-primary: rgb(70,115,200);
-  --colour-secondary: rgb(170,210,140);
+  --colour-text: rgb(90, 90, 90);
+  --colour-primary: rgb(70, 115, 200);
+  --colour-secondary: rgb(170, 210, 140);
   --colour-success: rgb(35, 190, 55);
   --colour-warning: rgb(250, 120, 30);
   --colour-danger: rgb(250, 30, 30);
-  --colour-disabled: rgb(180,180,180);
+  --colour-disabled: rgb(180, 180, 180);
   --colour-link: var(--colour-primary);
   --colour-debug: green;
   --colour-background-hover: hsl(0, 0%, 93%);
   --colour-background: hsl(0, 0%, 100%);
   --colour-background-modal: hsl(0, 0%, 99%);
-  --colour-border: rgb(90,90,90);
-  --colour-border-faint: rgb(180,180,180);
+  --colour-border: rgb(90, 90, 90);
+  --colour-border-faint: rgb(180, 180, 180);
   --colour-blockquote-background: #f9f9f9;
-  --colour-background-active:rgb(230, 230, 230);
-  --colour-modal-panel-background: rgba(100,100,100,0.2);
+  --colour-background-active: rgb(230, 230, 230);
+  --colour-modal-panel-background: rgba(100, 100, 100, 0.2);
   --custom-selected-border: var(--colour-secondary);
 }
 
 .theme-dark {
   --colour-text: #ffffff;
-  --colour-primary: rgb(70,115,200);
-  --colour-secondary: rgb(170,210,140);
+  --colour-primary: rgb(70, 115, 200);
+  --colour-secondary: rgb(170, 210, 140);
   --colour-success: rgb(30, 250, 60);
   --colour-warning: rgb(250, 120, 30);
   --colour-danger: rgb(250, 30, 30);
-  --colour-disabled: rgb(120,120,120);
+  --colour-disabled: rgb(120, 120, 120);
   --colour-link: var(--colour-primary);
   --colour-debug: rgb(104, 207, 104);
   --colour-background-hover: hsl(0, 0%, 35%);
@@ -35,8 +35,8 @@
   --colour-border: hsl(0, 0%, 60%);
   --colour-border-faint: rgb(100, 100, 100);
   --colour-blockquote-background: rgb(60, 60, 60);
-  --colour-background-active:rgb(160,160,160);
-  --colour-modal-panel-background: rgba(100,100,100,0.2);
+  --colour-background-active: rgb(160, 160, 160);
+  --colour-modal-panel-background: rgba(100, 100, 100, 0.2);
   --custom-selected-border: rgb(250, 150, 90);
 }
 
@@ -147,7 +147,11 @@ body.index-body #index-buttons {
 .editor-container a:visited {
   color: var(--colour-link);
 }
-.editor-container h1, .editor-container h2, .editor-container h3, .editor-container h4, .editor-container h5 {
+.editor-container h1,
+.editor-container h2,
+.editor-container h3,
+.editor-container h4,
+.editor-container h5 {
   color: var(--colour-primary);
   padding: 0 0 0.5rem 0;
 }
@@ -285,7 +289,8 @@ body.index-body #index-buttons {
   display: block;
   padding: 0 0.5rem;
 }
-.editor-sidebar .editor-sidebar-content header h1, .editor-sidebar .editor-sidebar-content header h2 {
+.editor-sidebar .editor-sidebar-content header h1,
+.editor-sidebar .editor-sidebar-content header h2 {
   text-transform: capitalize;
   color: var(--colour-secondary);
   padding: 0;
@@ -302,7 +307,9 @@ body.index-body #index-buttons {
   font-size: 0.9rem;
   padding-left: 1rem;
 }
-.editor-sidebar .editor-sidebar-content h1 a, .editor-sidebar .editor-sidebar-content h2 a, .editor-sidebar .editor-sidebar-content h3 a {
+.editor-sidebar .editor-sidebar-content h1 a,
+.editor-sidebar .editor-sidebar-content h2 a,
+.editor-sidebar .editor-sidebar-content h3 a {
   font-size: inherit;
 }
 .editor-sidebar ul.tab-menu {
@@ -389,7 +396,12 @@ body.index-body #index-buttons {
   max-width: 21.7cm;
   overflow-y: scroll;
 }
-.editor-body h1, .editor-body h2, .editor-body h3, .editor-body p, .editor-body li, .editor-body blockquote {
+.editor-body h1,
+.editor-body h2,
+.editor-body h3,
+.editor-body p,
+.editor-body li,
+.editor-body blockquote {
   position: relative;
 }
 .editor-body p {
@@ -408,7 +420,11 @@ body.index-body #index-buttons {
 .editor-body li {
   margin: 0.4rem 0;
 }
-.editor-body p, .editor-body label, .editor-body input, .editor-body select, .editor-body button {
+.editor-body p,
+.editor-body label,
+.editor-body input,
+.editor-body select,
+.editor-body button {
   color: var(--colour-text);
 }
 .editor-body.heading-numbers {
@@ -744,7 +760,7 @@ arte-comment[data-resolved=true] button i {
 }
 
 form.comment textarea {
-  min-height: 140px;
+  min-height: 200px;
 }
 form.comment .timestamps {
   display: flex;

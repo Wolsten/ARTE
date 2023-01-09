@@ -3,7 +3,7 @@ import Editor from '../Editor'
 import * as Helpers from '../helpers'
 import * as Phase from '../phase'
 import * as Icons from '../icons'
-import ToolbarButton from '../ToolbarButton'
+import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import SidebarButton from '../SidebarButton'
 
 
@@ -34,28 +34,28 @@ export default class Block extends ToolbarButton {
 
         switch (tag) {
             case 'H1':
-                super(editor, 'block', tag, 'Heading 1', Icons.h1, group)
+                super(editor, ToolbarButtonType.BLOCK, tag, 'Heading 1', Icons.h1, group)
                 break
             case 'H2':
-                super(editor, 'block', tag, 'Heading 2', Icons.h2, group)
+                super(editor, ToolbarButtonType.BLOCK, tag, 'Heading 2', Icons.h2, group)
                 break
             case 'H3':
-                super(editor, 'block', tag, 'Heading 3', Icons.h3, group)
+                super(editor, ToolbarButtonType.BLOCK, tag, 'Heading 3', Icons.h3, group)
                 break
             case 'BQ':
-                super(editor, 'block', tag, 'Blockquote', Icons.bq, group)
+                super(editor, ToolbarButtonType.BLOCK, tag, 'Blockquote', Icons.bq, group)
                 break
             case 'OL':
-                super(editor, 'list', tag, 'Ordered list', Icons.ol, group)
+                super(editor, ToolbarButtonType.LIST, tag, 'Ordered list', Icons.ol, group)
                 break
             case 'UL':
-                super(editor, 'list', tag, 'Unordered list', Icons.ul, group)
+                super(editor, ToolbarButtonType.LIST, tag, 'Unordered list', Icons.ul, group)
                 break
             case 'P':
-                super(editor, 'block', tag, 'Paragraph', Icons.p, group)
+                super(editor, ToolbarButtonType.BLOCK, tag, 'Paragraph', Icons.p, group)
                 break;
             default:
-                super(editor, 'block', 'P', 'Paragraph', Icons.p, group)
+                super(editor, ToolbarButtonType.BLOCK, 'P', 'Paragraph', Icons.p, group)
                 console.error(`Unrecognised block name [${tag}] - set to paragraph`)
         }
     }
@@ -116,13 +116,13 @@ export default class Block extends ToolbarButton {
                 if (startNodeFound && endNodeFound == false) {
                     // console.log( `%cparse top level node ${node.tagName}`,'background:orange;color:white;padding:0.5rem')
                     // Check for block (as opposed to list formatting) and start a new fragment
-                    if (this.type === 'block') {
+                    if (this.type === ToolbarButtonType.BLOCK) {
                         this.previousFormats = []
                         this.lastNodeAdded = null
                         this.fragmentNode = document.createElement('DIV')
                     }
                     this.parseNode(<Element>node, { oldFormats: [], newFormats: [] })
-                    if (this.type === 'block') {
+                    if (this.type === ToolbarButtonType.BLOCK) {
                         // console.log( 'fragment', this.fragmentNode.innerHTML)
                         (<Element>node).outerHTML = this.fragmentNode.innerHTML
                     } else {
@@ -133,7 +133,7 @@ export default class Block extends ToolbarButton {
                 // fragment
                 if (node == endParentNode) {
                     endNodeFound = true
-                    if (this.type === 'list') {
+                    if (this.type === ToolbarButtonType.LIST) {
                         //console.log( 'fragment', this.fragmentNode.innerHTML)
                         (<Element>node).outerHTML = this.fragmentNode.innerHTML
                     }
@@ -147,7 +147,7 @@ export default class Block extends ToolbarButton {
         this.editor.updateRange()
 
         // Reset states for all block buttons
-        this.editor.toolbar.setStateForButtonType('block')
+        this.editor.toolbar.setStateForButtonType(ToolbarButtonType.BLOCK)
 
         // Update the buffer
         this.editor.updateBuffer()
@@ -182,7 +182,7 @@ export default class Block extends ToolbarButton {
                 firstParentNode.nodeName == this.tag
             //console.log('disabled',btn.element.disabled)
             // If this is a list type get the list parent
-            if (this.type === 'list' && (<Element>firstParentNode).tagName === 'LI') {
+            if (this.type === ToolbarButtonType.LIST && (<Element>firstParentNode).tagName === 'LI') {
                 firstParentNode = <Node>firstParentNode.parentNode
             }
             // Do the tag names match?
@@ -291,7 +291,7 @@ export default class Block extends ToolbarButton {
         // During phase
         //
         // New block formatting (not list) - apply new format
-        if (this.type === 'block') {
+        if (this.type === ToolbarButtonType.BLOCK) {
             // console.log(`Format type = ${this.type}`)
             // console.log(`2. new block format ${this.newFormat}`)
             newFormats = [this.newFormat]
@@ -436,7 +436,7 @@ export default class Block extends ToolbarButton {
     private setStyleProps(): string {
         if (this.tag == 'CLEAR' || this.isActive()) {
             // Set to paragraph (default style) if removing
-            if (this.type == 'block') {
+            if (this.type == ToolbarButtonType.BLOCK) {
                 return 'P'
             }
         }

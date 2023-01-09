@@ -18,10 +18,10 @@ export enum ModalSeverity {
 }
 
 export enum ModalButtonAction {
-    Cancel,
-    Delete,
-    Confirm,
-    Custom
+    Cancel = 'cancel',
+    Delete = 'delete',
+    Confirm = 'confirm',
+    Custom = 'custom'
 }
 
 export type ModalOptionsType = {
@@ -32,6 +32,8 @@ export type ModalOptionsType = {
     borderRadius?: string
     showOnNew?: boolean
     focusId?: string
+    confirmIfDirty?: boolean
+    formClass?: string
 }
 
 
@@ -79,6 +81,8 @@ export class Modal {
         borderRadius: '',
         showOnNew: true,
         focusId: '',
+        confirmIfDirty: true,
+        formClass: ''
     }
 
     // Private props
@@ -95,8 +99,12 @@ export class Modal {
         if (options) {
             this.options = { ...this.options, ...options }
         }
-        // Require this so can handle the modal instance from a named event handler
-        Modal.self = this
+        // Save the instance as a static property
+        if (!Modal.self) {
+            Modal.self = this
+        } else if (!Modal.confirm) {
+            Modal.confirm = this
+        }
         // Show immediately?
         if (this.options.showOnNew) {
             this.show()
@@ -111,6 +119,9 @@ export class Modal {
                 }
             }
         }
+
+        console.log('Modal.self', Modal.self)
+        console.log('Modal.confirm', Modal.confirm)
     }
 
 
@@ -169,7 +180,6 @@ export class Modal {
         return p
     }
 
-
     template(): string {
         const style = this.styles()
         const icon = this.icon()
@@ -187,7 +197,7 @@ export class Modal {
             buttonsHTML += `<button type="${type}" class="${button.action}">${button.label}</button>`
         })
         if (buttonsHTML != '') buttonsHTML = `<div class="modal-panel-buttons ${centredClass}">${buttonsHTML}</div>`
-        return `<form class="modal-panel-container" ${style}>
+        return `<form class="modal-panel-container ${this.options.formClass}" ${style}>
                     ${titleHTML}
                     <div class="modal-panel-body">
                         ${this.html}
@@ -195,7 +205,6 @@ export class Modal {
                     ${buttonsHTML}
                 </form>`
     }
-
 
     getElement(query: string): null | HTMLElement {
         if (!this.modalElement) {
@@ -242,7 +251,7 @@ export class Modal {
     setPosition(range: EditRange, editorNode: HTMLElement) {
         const container = this.modalElement.querySelector('.modal-panel-container')
         if (!container) {
-            console.error('Could nt find modal panel container')
+            console.error('Could not find modal panel container')
             return
         }
         let pos
@@ -278,7 +287,7 @@ export class Modal {
      * the dom but first check for any data changes
      */
     hide(): void {
-        if (this.dirty) {
+        if (this.options.confirmIfDirty && this.dirty) {
             this.requestCancel()
             return
         }
@@ -297,10 +306,12 @@ export class Modal {
             if (this.modalElement) {
                 (<HTMLElement>this.modalElement).remove()
                 this.active = false
+                if (this === Modal.self) Modal.self = null
+                if (this === Modal.confirm) Modal.confirm = null
             }
         }, 500)
-    }
 
+    }
 
     requestCancel() {
         const buttons = [
@@ -362,7 +373,7 @@ export class Modal {
                 method = 'submit'
                 element = form
             }
-            element.addEventListener(method, event => {
+            element.addEventListener(method, (event: Event) => {
                 event.preventDefault()
                 event.stopPropagation()
                 if (button.callback) {
@@ -370,6 +381,17 @@ export class Modal {
                         const thing = button.deleteObject || 'object'
                         Modal.confirm = new ModalDelete(thing, button.callback)
                     } else {
+                        if (button.action == ModalButtonAction.Confirm) {
+                            // If confirming a confirm then close BOTH modals
+                            if (this == Modal.confirm) {
+                                Modal.confirm.dirty = false
+                                Modal.confirm.hide()
+                            }
+                            if (Modal.self) {
+                                Modal.self.dirty = false
+                                Modal.self.hide()
+                            }
+                        }
                         button.callback()
                     }
                 } else {

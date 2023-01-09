@@ -1,7 +1,11 @@
 import Editor from '../Editor'
+import BufferButton from './BufferButton'
 
 
 export default class Buffer {
+
+    // Max possible (overrides user option)
+    readonly MAX_BUFFER_SIZE = 10
 
     size: number = 0
     index: number = -1
@@ -10,12 +14,16 @@ export default class Buffer {
     editor: Editor
     buffering: boolean = false
 
+    undoButton: BufferButton
+    redoButton: BufferButton
 
-    constructor(editor: Editor) {
+
+
+    constructor(editor: Editor, undoButton: BufferButton, redoButton: BufferButton, size: number) {
         this.editor = editor
-        if (editor?.options.bufferSize) {
-            this.size = editor.options.bufferSize
-        }
+        this.undoButton = undoButton
+        this.redoButton = redoButton
+        this.size = size > 0 && size <= this.MAX_BUFFER_SIZE ? size : this.MAX_BUFFER_SIZE
     }
 
 
@@ -25,7 +33,6 @@ export default class Buffer {
      * when the maximum buffer size is reached
      */
     update() {
-        if (!this.editor.editorNode) return
         // Check that the new value is different
         if (this.items.length > 0 &&
             this.editor.editorNode.innerHTML == this.items[this.items.length - 1]) {
@@ -43,11 +50,13 @@ export default class Buffer {
                 this.items.pop()
             }
         }
+
         // Add the new one
         this.items.push(this.editor.editorNode.innerHTML)
         this.index = this.items.length - 1
         // Update buttons
-        this.setState()
+        this.undoButton.setState()
+        this.redoButton.setState()
         // Debug
         // if ( editor.options.debug ){
         //     console.log('buffer',buffer.buffer)

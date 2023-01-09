@@ -5,6 +5,7 @@ import * as Icons from './icons'
 
 // Define where the editor will appear and buttons will appear
 const target = document.getElementById('editor')
+let editor: Editor
 
 if (!target) {
 
@@ -17,7 +18,7 @@ if (!target) {
         ['BLOCK.H1', 'BLOCK.H2', 'BLOCK.H3', 'BLOCK.P', 'BLOCK.BQ'],
         ['BLOCK.OL', 'BLOCK.UL'],
         ['STYLE.B', 'STYLE.I', 'STYLE.U', 'COLOUR.FOREGROUND', 'COLOUR.BACKGROUND', 'STYLE.CLEAR'],
-        ['BUFFER.UNDO', 'BUFFER.REDO'],
+        ['BUFFER.10'],
         ['CLIPBOARD.CUT', 'CLIPBOARD.COPY', 'CLIPBOARD.PASTE'],
         ['MENTIONS', 'CUSTOM-BLOCK.LINK', 'CUSTOM-BLOCK.IMAGE', 'CUSTOM-BLOCK.COMMENT', 'CUSTOM-BLOCK.ACTION'],
         ['SETTINGS']
@@ -31,7 +32,7 @@ if (!target) {
     }
 
     // Create editor, adding to dom in target position
-    new Editor(target, '', toolbar, options)
+    editor = new Editor(target, '', toolbar, options)
 
     // Application specific buttons for demo
     addDemoButtons()

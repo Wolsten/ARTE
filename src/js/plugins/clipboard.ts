@@ -2,7 +2,7 @@
  * Handle cut, copy and paste
  */
 
-import ToolbarButton from '../ToolbarButton'
+import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import * as Icons from '../icons'
 import * as Helpers from '../helpers'
 import { ModalWarning } from '../Modal'
@@ -15,21 +15,19 @@ export default class Clipboard extends ToolbarButton {
 
     private supported = false
 
+    constructor(editor: Editor, tag: string, group: number) {
 
-    constructor(editor: Editor, type: string, group: number) {
+        tag = tag.toUpperCase()
 
-        type = type.toUpperCase()
-
-        switch (type) {
+        switch (tag) {
             case 'CUT':
-                super(editor, 'detached', 'CUT', 'Cut (text only - use Ctr-V or Cmd-V to include formatting)', Icons.cut, group)
+                super(editor, ToolbarButtonType.DETACHED, tag, 'Cut (text only - use Ctr-V or Cmd-V to include formatting)', Icons.cut, group)
                 return
             case 'COPY':
-                super(editor, 'detached', 'COPY', 'Copy (text only - use Ctr-V or Cmd-V to include formatting)', Icons.copy, group)
+                super(editor, ToolbarButtonType.DETACHED, tag, 'Copy (text only - use Ctr-V or Cmd-V to include formatting)', Icons.copy, group)
                 return
-            case 'PASTE':
-                super(editor, 'detached', 'PASTE', 'Paste (text only - use Ctr-V or Cmd-V to include formatting)', Icons.paste, group)
         }
+        super(editor, ToolbarButtonType.DETACHED, tag, 'Paste (text only - use Ctr-V or Cmd-V to include formatting)', Icons.paste, group)
     }
 
 
@@ -61,7 +59,6 @@ export default class Clipboard extends ToolbarButton {
                 break
             case 'PASTE':
                 this.paste()
-                break
         }
     }
 

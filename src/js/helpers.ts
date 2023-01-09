@@ -1,4 +1,5 @@
 
+import Editor from './Editor.js'
 import EditRange from './EditRange.js'
 
 // -----------------------------------------------------------------------------
@@ -256,28 +257,25 @@ export const getParentBlockNode = function (node: Node | null): Node | null {
 }
 
 /**
- * Get the parent editor node of a node
- * @param {HTMLElement} node 
- * @returns {HTMLElement} 
+ * Get the parent editor node (first one with content editable set to true) of a node
  */
-export const getEditorNode = function (node) {
+export const getEditorNode = function (node: HTMLElement): HTMLElement {
     while (node.getAttribute('contenteditable') !== "true") {
         if (node.parentNode == null) {
             console.warn('Error.  Found missing parent node when getting editor node')
+        } else {
+            node = <HTMLElement>node.parentNode
         }
-        node = node.parentNode
     }
     return node
 }
 
 /**
  * Get the top parent node for a child node 
- * @param {HTMLElement} node A child node
- * @param {HTMLElement} stopNode A parent node defining when to stop going back up the dom tree
- * @returns {HTMLElement|false} first node below the stop node (if there is one) 
+ * Returns first node below the stop node (if there is one) 
  * otherwise the stopNode or false if error
  */
-export const getTopParentNode = function (node, stopNode) {
+export const getTopParentNode = function (node: HTMLElement, stopNode: HTMLElement): HTMLElement | false {
     if (node == null || stopNode == null) {
         console.warn('Error. Passed null node or stopNode to getTopParentNode')
     }
@@ -292,23 +290,34 @@ export const getTopParentNode = function (node, stopNode) {
             console.warn('Error.  Found missing parent node when getting top parent node')
             return false
         }
-        node = node.parentNode
+        node = <HTMLElement>node.parentNode
     }
     return saved
 }
 
+
 /**
  * Insert a new node in the editor in place of the current selection
- * @param {object} editor A unique editor instance
- * @param {HTMLElement} node The new node to replace selection with
  */
-export const replaceSelectionWithNode = function (editor, node) {
+export const replaceSelectionWithNode = function (editor: Editor, node: HTMLElement) {
+    if (!editor.range) {
+        console.error('No selection is available to replace with element')
+        return
+    }
     const parent = editor.range.startContainer.parentNode
+    if (!parent) {
+        console.error('Missing parent node')
+        return
+    }
     // Get any pretext or post text in the current container that is not selected
-    let preText = editor.range.startContainer.textContent.substring(0, editor.range.startOffset)
+    let preText = editor.range.startContainer.textContent
+        ? editor.range.startContainer.textContent.substring(0, editor.range.startOffset)
+        : ''
     let postText
     if (editor.range.collapsed) {
-        postText = editor.range.startContainer.textContent.substring(editor.range.startOffset)
+        postText = editor.range.startContainer.textContent
+            ? editor.range.startContainer.textContent.substring(editor.range.startOffset)
+            : ''
         // Insert leading and trailing spaces if needed
         if (preText.charAt(preText.length + 1) != ' ') {
             preText = preText + ' '
@@ -317,7 +326,9 @@ export const replaceSelectionWithNode = function (editor, node) {
             postText = ' ' + postText
         }
     } else {
-        postText = editor.range.startContainer.textContent.substring(editor.range.endOffset)
+        postText = editor.range.startContainer.textContent
+            ? editor.range.startContainer.textContent.substring(editor.range.endOffset)
+            : ''
     }
     // Insert pretext before the current container
     if (preText) {
@@ -331,7 +342,7 @@ export const replaceSelectionWithNode = function (editor, node) {
         parent.insertBefore(document.createTextNode(postText), editor.range.startContainer)
     }
     // Remove the pre-existing container
-    editor.range.startContainer.remove()
+    (<HTMLElement>editor.range.startContainer).remove()
     // After delay set the cursor
     setTimeout(() => {
         resetCursor(node)
@@ -343,9 +354,8 @@ export const replaceSelectionWithNode = function (editor, node) {
 
 /**
  * Reset the cursor after replacing a selection with a new node
- * @param {HTMLElement} node 
  */
-function resetCursor(node) {
+function resetCursor(node: HTMLElement) {
     if (isCustom(node)) {
         if (node.nextSibling !== null) {
             setCursor(node.nextSibling, 0)
@@ -583,23 +593,24 @@ export const addMarkers = function (range) {
  * @param {Range} range 
  * @returns {object|false} The original range object with additional props or false on error
  */
-function augmentRange(range) {
-    if (range === false) {
-        console.warn('Found missing range when augmenting range')
+function augmentRange(range: EditRange): EditRange | null {
+    if (!range) {
+        console.error('Found missing range when augmenting range')
+        return null
     }
     // console.log('augmentRange',range)
     // First parent node that is a block tag
     const blockParent = getParentBlockNode(range.commonAncestorContainer)
-    if (blockParent === false) {
-        return false
+    if (!blockParent) {
+        return null
     }
-    range.blockParent = blockParent
+    range.blockParent = <HTMLElement>blockParent
     // First parent node
     range.rootNode = range.commonAncestorContainer
     if (range.commonAncestorContainer.nodeType === 3) {
         if (range.commonAncestorContainer.parentNode == null) {
             console.warn('Error.  Found missing parent node when augmenting range')
-            return false
+            return null
         }
         range.rootNode = range.commonAncestorContainer.parentNode
     }
@@ -634,7 +645,7 @@ export const getRange = function (editorNode: HTMLElement): EditRange | null {
  * Set the cursor in a text node at the specified offset and
  * return the new range
  */
-export const setCursor = function (node: Element, offset: number): EditRange {
+export const setCursor = function (node: HTMLElement, offset: number): EditRange {
     let range = <EditRange>document.createRange()
     const selection = window.getSelection()
     // Check the offset is in range
@@ -647,7 +658,8 @@ export const setCursor = function (node: Element, offset: number): EditRange {
         selection.removeAllRanges()
         selection.addRange(range)
     }
-    range = augmentRange(range)
+    const newRange = augmentRange(range)
+    if (newRange) return newRange
     return range
 }
 
@@ -667,44 +679,44 @@ export const restoreSelectedRange = function (range: EditRange): EditRange {
 /**
  * Find the node containing the start marker
  */
-const getStartNode = function (parent: Element): Element {
+const getStartNode = function (parent: Element): boolean {
     return findMarkerNode(parent, START_MARKER)
 }
 
 /**
  * Find the node containing the end marker
  */
-const getEndNode = function (parent: Element): Element {
+const getEndNode = function (parent: HTMLElement): boolean {
     return findMarkerNode(parent, END_MARKER)
 }
 
 /**
  * Find a text node containing the given marker text. As a side effect, sets 
  * the value of startNode, endNode, startOffset and endOffset
- * @param {HTMLElement} parent The node to end searching from
- * @param {HTMLElement} marker The marker text to locate
- * @returns {boolean} true if finds marker node, false otherwise
+ * returns true if finds marker node, false otherwise
  */
-function findMarkerNode(parent: Element, marker: Element): boolean {
+function findMarkerNode(parent: HTMLElement, marker: string): boolean {
     for (let i = 0; i < parent.childNodes.length; i++) {
         const child = parent.childNodes[i]
         if (child.nodeType === 1) {
-            if (findMarkerNode(child, marker)) {
+            if (findMarkerNode(<HTMLElement>child, marker)) {
                 return true
             }
         } else if (child.nodeType === 3) {
-            const index = child.textContent.indexOf(marker)
-            if (index != -1) {
-                // console.log('Found node with marker', marker)
-                child.textContent = child.textContent.replace(marker, '')
-                if (marker == START_MARKER) {
-                    startNode = child
-                    startOffset = index
-                } else {
-                    endNode = child
-                    endOffset = index
+            if (child.textContent) {
+                const index = child.textContent?.indexOf(marker)
+                if (index != -1) {
+                    // console.log('Found node with marker', marker)
+                    child.textContent = child.textContent.replace(marker, '')
+                    if (marker == START_MARKER) {
+                        startNode = child
+                        startOffset = index
+                    } else {
+                        endNode = child
+                        endOffset = index
+                    }
+                    return true
                 }
-                return true
             }
         }
     }

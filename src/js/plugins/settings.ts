@@ -1,6 +1,7 @@
 import * as Icons from '../Icons'
-import ToolbarButton from '../ToolbarButton'
+import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import { Modal, ModalButton, ModalButtonAction, ModalOptionsType } from '../Modal'
+import Editor from '../Editor'
 
 
 
@@ -11,9 +12,11 @@ export default class Settings extends ToolbarButton {
 
     private drawer: Modal | null = null
 
+
     constructor(editor: Editor, group: number) {
-        super(editor, 'custom', Settings.TAG, 'Settings', Icons.options, group)
+        super(editor, ToolbarButtonType.DETACHED, Settings.TAG, 'Settings', Icons.options, group)
     }
+
 
     /**
      * On first load of editor see if have options in local storage, in which case use
@@ -58,10 +61,11 @@ export default class Settings extends ToolbarButton {
      */
     private show() {
         const buttons = [
-            new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
+            new ModalButton(ModalButtonAction.Cancel, 'Close'),
         ]
         const options: ModalOptionsType = {
-            escapeToCancel: true
+            escapeToCancel: true,
+            confirmIfDirty: false
         }
         this.drawer = new Modal('Options', this.form(), buttons, options)
         // Set custom event handles to update immediately
@@ -106,7 +110,7 @@ export default class Settings extends ToolbarButton {
             <div class="form-input options">
                 <label>Theme</label>
                 <label>
-                    <input name="theme" value="theme-light" type="radio" class="form-control first" ${options.theme == 'theme-light' ? 'checked' : ''}/> Light
+                    <input name="theme" value="theme-light" type="radio" class="form-control first" ${theme == 'theme-light' ? 'checked' : ''}/> Light
                 </label>
                 <label>
                     <input name="theme" value="theme-dark" type="radio" class="form-control" ${theme == 'theme-dark' ? 'checked' : ''}/> Dark

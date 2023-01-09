@@ -1,11 +1,10 @@
 import Editor from './Editor'
-import ToolbarButton from './ToolbarButton'
+import ToolbarButton, { ToolbarButtonType } from './ToolbarButton'
 import * as Helpers from './helpers'
 import * as Icons from './Icons'
 import Block from './plugins/Block'
 import Style from './plugins/Style'
 import Colour from './plugins/Colour'
-import Buffer from './plugins/Buffer'
 import BufferButton from './plugins/BufferButton'
 import Clipboard from './plugins/Clipboard'
 import Shortcut from './Shortcut'
@@ -22,11 +21,11 @@ export default class Toolbar {
     defaults: string[][] = [
         ['BLOCK.H1', 'BLOCK.H2', 'BLOCK.H3', 'BLOCK.P', 'BLOCK.BQ'],
         ['BLOCK.OL', 'BLOCK.UL'],
-        ['STYLE.B', 'STYLE.I', 'STYLE.U', 'STYLE.FOREGROUND', 'STYLE.BACKGROUND', 'STYLE.CLEAR'],
-        ['BUFFER.UNDO', 'BUFFER.REDO'],
-        ['CUT', 'COPY', 'PASTE'],
-        ['Mentions', 'Links', 'Images', 'CUSTOM.COMMENT', 'CUSTOM.ACTIONS'],
-        ['Settings']
+        ['STYLE.B', 'STYLE.I', 'STYLE.U', 'COLOUR.FOREGROUND', 'COLOUR.BACKGROUND', 'STYLE.CLEAR'],
+        ['BUFFER.10'],
+        ['CLIPBOARD.CUT', 'CLIPBOARD.COPY', 'CLIPBOARD.PASTE'],
+        ['MENTIONS', 'CUSTOM-BLOCK.LINK', 'CUSTOM-BLOCK.IMAGE', 'CUSTOM-BLOCK.COMMENT', 'CUSTOM-BLOCK.ACTION'],
+        ['SETTINGS']
     ]
     buttons: ToolbarButton[] = []
     editor: Editor
@@ -56,6 +55,7 @@ export default class Toolbar {
                 const name = parts.length == 2 ? parts[1] : ''
 
                 let button: null | ToolbarButton = null
+                let button2: null | ToolbarButton = null
 
                 switch (type.toUpperCase()) {
                     case 'BLOCK':
@@ -68,10 +68,10 @@ export default class Toolbar {
                         button = new Colour(editor, name, index)
                         break
                     case 'BUFFER':
-                        if (editor.options.bufferSize > 0 && !editor.buffer) {
-                            editor.buffer = new Buffer(editor)
-                        }
-                        button = new BufferButton(editor, name, index)
+                        button = new BufferButton(editor, 'UNDO', index)
+                        button2 = new BufferButton(editor, 'REDO', index)
+                        const size: number = name ? parseInt(name) : 0
+                        editor.initBuffer(button, button2, size)
                         break
                     case 'CLIPBOARD':
                         button = new Clipboard(editor, name, index)
@@ -106,7 +106,10 @@ export default class Toolbar {
 
                 this.buttons.push(button)
                 Helpers.registerTag(button.type, button.tag)
-
+                if (button2) {
+                    this.buttons.push(button2)
+                    Helpers.registerTag(button2.type, button2.tag)
+                }
             })
         })
 
@@ -137,7 +140,7 @@ export default class Toolbar {
                 console.error('Missing button element for button', button.tag)
                 return
             }
-            button.element = buttonElement
+            button.element = <HTMLElement>buttonElement
 
             if (button.init) {
                 button.init()
@@ -151,8 +154,13 @@ export default class Toolbar {
                 this.editor.shortcuts.push(new Shortcut(button))
             }
 
+            // if (button.label == "Settings") {
+            //     debugger
+            // }
+
             // Add click
-            button.element.addEventListener('click', event => {
+            button.element.addEventListener('click', (event: Event) => {
+
                 if (!button.click) {
                     return
                 }
@@ -161,13 +169,13 @@ export default class Toolbar {
                 this.editor.updateRange()
 
                 // Ignore if a modal is active
-                if (this.editor?.modal?.active) {
+                if (this.editor.modal?.active) {
                     return
                 }
 
                 // Handle clicks for detached buttons (e.g. undo, redo) 
                 // and when have a range
-                if (button.type === 'detached' || this.editor.range) {
+                if (button.type === ToolbarButtonType.DETACHED || this.editor.range) {
                     button.click()
                 }
 
@@ -228,7 +236,7 @@ export default class Toolbar {
         let handled = false
         // If not a detached button all buttons are disabled and 
         // inactive if there is no range or the range is in a custom element
-        if (button.type !== 'detached') {
+        if (button.type !== ToolbarButtonType.DETACHED) {
             if (!this.editor.range || this.editor.range.custom) {
                 handled = true
                 if (button.element) {
@@ -246,9 +254,9 @@ export default class Toolbar {
     }
 
 
-    setStateForButtonType(type = ''): void {
+    setStateForButtonType(type: ToolbarButtonType): void {
         this.buttons.forEach(button => {
-            if (type == '' || button.type == type) {
+            if (button.type === type) {
                 this.setState(button)
                 return
             }

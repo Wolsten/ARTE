@@ -57,7 +57,7 @@ export default class CustomAction extends CustomBlock {
 
 
     constructor(editor: Editor, group: number) {
-        super(editor, 'custom', CustomAction.TAG, Icons.action, group)
+        super(editor, CustomAction.TAG, 'Action', Icons.action, group)
     }
 
 

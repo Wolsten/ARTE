@@ -39,7 +39,7 @@ export default class CustomImage extends CustomBlock {
     static readonly TAG = 'ARTE-IMAGE'   // The HTMLElement tag as inserted in the dom for this custom node
 
     constructor(editor: Editor, group: number) {
-        super(editor, 'custom', CustomImage.TAG, Icons.image, group)
+        super(editor, CustomImage.TAG, 'Image', Icons.image, group)
     }
 
 

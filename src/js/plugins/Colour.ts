@@ -1,9 +1,9 @@
-import * as Helpers from '../helpers'
+
 import * as Icons from '../icons'
 import { Modal, ModalButton, ModalButtonAction, ModalWarning } from '../Modal'
 import Editor from '../Editor'
 import Style from './Style'
-import ToolbarButton from '../ToolbarButton'
+import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 
 
 enum ColourName {
@@ -25,10 +25,10 @@ export default class Colours extends ToolbarButton {
         name = name.toUpperCase()
 
         if (name === ColourName.Foreground) {
-            super(editor, 'style', 'colour', 'Text colour', Icons.colourForeground, group)
+            super(editor, ToolbarButtonType.STYLE, 'colour', 'Text colour', Icons.colourForeground, group)
             this.style = 'color'
         } else {
-            super(editor, 'style', 'background-colour', 'Background colour', Icons.colourBackground, group)
+            super(editor, ToolbarButtonType.STYLE, 'background-colour', 'Background colour', Icons.colourBackground, group)
             this.style = 'background-color'
         }
     }

@@ -24,8 +24,8 @@ export class Options {
     // Number of Undo operations supported, max 10
     bufferSize = 10
 
-    // Max possible (overrides user option)
-    readonly MAX_BUFFER_SIZE = 10
+    // // Max possible (overrides user option)
+    // readonly MAX_BUFFER_SIZE = 10
 
     // Show explorer sidebar? (should be true for testing)
     explorer = true
@@ -48,7 +48,6 @@ export class Options {
 
         if (options) {
             if (options.headingNumbers) this.headingNumbers = options.headingNumbers
-            if (options.bufferSize) this.bufferSize = options.bufferSize
             if (options.debug) this.debug = options.debug
             if (options.defaultContent) this.defaultContent = options.defaultContent
             if (options.explorer) this.explorer = options.explorer

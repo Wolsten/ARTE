@@ -1,4 +1,4 @@
-import ToolbarButton from '../ToolbarButton'
+import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import * as Icons from '../Icons'
 import { setCursor } from '../helpers'
 import { Modal, ModalType } from '../Modal'
@@ -18,7 +18,7 @@ export default class Mentions extends ToolbarButton {
 
 
     constructor(editor: Editor, group: number) {
-        super(editor, 'custom', 'MENTION', 'Mention', Icons.person, group)
+        super(editor, ToolbarButtonType.CUSTOM, 'MENTION', 'Mention', Icons.person, group)
 
         if (this.editor.options.people) this.people = this.editor.options.people.sort()
 

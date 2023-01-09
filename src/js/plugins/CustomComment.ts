@@ -30,13 +30,9 @@ import CustomBlock from './CustomBlock'
 
 export default class CustomComment extends CustomBlock {
 
-    static readonly TAG = 'ARTE-COMMENT'        // The HTMLElement tag as inserted in the dom for this custom node
-
-
     constructor(editor: Editor, group: number) {
-        super(editor, 'custom', CustomComment.TAG, Icons.comment, group)
+        super(editor, 'ARTE-COMMENT', 'Comment', Icons.comment, group)
     }
-
 
 
     /**
@@ -47,7 +43,7 @@ export default class CustomComment extends CustomBlock {
             new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
         ]
         if (this.editFlag) {
-            buttons.push(new ModalButton(ModalButtonAction.Delete, 'Delete', this.handleDelete, 'link'))
+            buttons.push(new ModalButton(ModalButtonAction.Delete, 'Delete', () => this.handleDelete(), 'comment'))
         } else {
             // Initialise an action as saved to file
             this.node = document.createElement(this.tag)
@@ -63,9 +59,10 @@ export default class CustomComment extends CustomBlock {
             this.setAttribute('resolved', 'false')
         }
         // Create and display the modal panel
-        buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', this.save))
+        buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', () => this.save()))
         const options: ModalOptionsType = {
-            focusId: 'comment'
+            focusId: 'comment',
+            formClass: 'comment'
         }
         this.drawer = new Modal(`${this.editFlag ? 'Edit' : 'Create'} ` + this.label, this.form(), buttons, options)
     }
@@ -100,6 +97,13 @@ export default class CustomComment extends CustomBlock {
     }
 
 
+    private resolveLabel() {
+        return this.getAttribute('resolved') == 'true'
+            ? Icons.commentUnresolve + ' Unresolve'
+            : Icons.commentResolve + ' Resolve'
+    }
+
+
     /**
     * Save the new or edited custom element
     */
@@ -122,7 +126,7 @@ export default class CustomComment extends CustomBlock {
         // Close the modal
         this.drawer.hide()
         // Format the saved action
-        this.format(this.template)
+        this.format()
         // Update the buffer
         this.editor.updateBuffer()
     }
@@ -133,7 +137,7 @@ export default class CustomComment extends CustomBlock {
      */
     template(): string {
         return `<button type="button" title="edit this comment">
-                    <i>icon</i>
+                    <i>${Icons.comment}</i>
                 </button>`
     }
 
