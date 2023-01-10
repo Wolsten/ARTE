@@ -11,7 +11,7 @@ import Shortcut from './Shortcut'
 import Mentions from './plugins/Mentions'
 import Settings from './plugins/Settings'
 import CustomAction from './plugins/CustomAction'
-import CustomLink from './plugins/Link'
+import CustomLink from './plugins/CustomLink'
 import CustomImage from './plugins/CustomImage'
 import CustomComment from './plugins/CustomComment'
 
@@ -82,6 +82,7 @@ export default class Toolbar {
                     case 'SETTINGS':
                         button = new Settings(editor, index)
                         break
+
                     case 'CUSTOM-BLOCK':
                         switch (name) {
                             case 'ACTION':

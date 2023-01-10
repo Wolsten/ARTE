@@ -71,22 +71,27 @@ export default class Settings extends ToolbarButton {
         // Set custom event handles to update immediately
         const inputs = this.drawer.getElements('form input')
         if (inputs) {
-            inputs.forEach((input) => input.addEventListener('change', () => this.addCustomEventListener(input)))
+
+            inputs.forEach((input) => {
+                input.addEventListener('click', () => this.addCustomEventListener(input))
+                console.log('Adding event listener to', input)
+            })
         }
     }
 
 
     private addCustomEventListener(input: Element) {
         const name = input.getAttribute('name')
+        const value = input.getAttribute('value')
         switch (name) {
             case 'headingNumbers':
-                this.setHeadingNumbers()
+                this.setHeadingNumbers(value)
                 break
             case 'theme':
-                this.setTheme()
+                this.setTheme(value)
                 break
             case 'explorer':
-                this.setExplorer()
+                this.setExplorer(value)
         }
     }
 
@@ -119,42 +124,46 @@ export default class Settings extends ToolbarButton {
             <div class="form-input options">
                 <label>Explorer</label>
                 <label>
-                    <input name="explorer" value="show-explorer" type="radio" class="form-control first" ${explorer ? 'checked' : ''}/> Show
+                    <input name="explorer" value="true" type="radio" class="form-control first" ${explorer ? 'checked' : ''}/> Show
                 </label>
                 <label>
-                    <input name="explorer" value="hide-explorer" type="radio" class="form-control" ${!explorer ? 'checked' : ''}/> Hide
+                    <input name="explorer" value="false" type="radio" class="form-control" ${!explorer ? 'checked' : ''}/> Hide
                 </label>
             </div>`
     }
 
 
-    private setHeadingNumbers() {
-        this.editor.options.headingNumbers = this.drawer?.getInputValue('[name=headingNumbers]') == 'true' ? true : false
+    private setHeadingNumbers(numbers?: string | null) {
+        if (numbers) {
+            this.editor.options.headingNumbers = numbers === 'true'
+            localStorage.setItem('headingNumbers', numbers)
+        }
         if (this.editor.options.headingNumbers) {
             this.editor.editorNode.classList.add('heading-numbers')
-            localStorage.setItem('headingNumbers', 'true')
         } else {
             this.editor.editorNode.classList.remove('heading-numbers')
-            localStorage.setItem('headingNumbers', 'false')
         }
     }
 
 
-    private setTheme() {
-        this.editor.options.theme = this.drawer?.getInputValue('[name=theme]') == 'theme-light' ? 'theme-light' : 'theme-dark'
-        localStorage.setItem('theme', this.editor.options.theme)
+    private setTheme(theme?: string | null) {
+        if (theme) {
+            this.editor.options.theme = theme
+            localStorage.setItem('theme', theme)
+        }
         document.documentElement.className = this.editor.options.theme
     }
 
 
-    private setExplorer() {
-        this.editor.options.explorer = this.drawer?.getInputValue('[name=explorer]') == 'show-explorer' ? true : false
+    private setExplorer(explorer?: string | null) {
+        if (explorer) {
+            this.editor.options.explorer = explorer === 'true'
+            localStorage.setItem('explorer', explorer)
+        }
         if (this.editor.options.explorer) {
-            localStorage.setItem('headingNumbers', 'true')
-            this.editor.sidebar?.show()
+            this.editor.showSidebar()
         } else {
-            localStorage.setItem('headingNumbers', 'false')
-            this.editor.sidebar?.hide()
+            this.editor.hideSidebar()
         }
     }
 

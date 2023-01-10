@@ -1,6 +1,7 @@
 
 import Editor from './Editor.js'
 import EditRange from './EditRange.js'
+import { ToolbarButtonType } from './ToolbarButton.js'
 
 // -----------------------------------------------------------------------------
 // @section Arrays
@@ -45,16 +46,16 @@ let tags = {
 /**
  * Register a new button type with tag to allow future checking/cleaning
  */
-export const registerTag = function (type: string, tag: string): void {
+export const registerTag = function (type: ToolbarButtonType, tag: string): void {
     if (tag === 'CLEAR') return
     switch (type) {
-        case 'block':
+        case ToolbarButtonType.BLOCK:
             if (!tags.block.includes(tag)) tags.block.push(tag)
             return
-        case 'list':
+        case ToolbarButtonType.LIST:
             if (!tags.list.includes(tag)) tags.list.push(tag)
             return
-        case 'custom':
+        case ToolbarButtonType.CUSTOM:
             if (!tags.custom.includes(tag)) tags.custom.push(tag)
     }
     return

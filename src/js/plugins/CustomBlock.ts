@@ -215,8 +215,6 @@ class CustomBlock extends ToolbarButton {
     // }
 
     protected handleDelete(): void {
-        this.confirm?.hide()
-        this.drawer?.hide()
         this.node?.remove()
         this.editor.range = null
         this.setState()

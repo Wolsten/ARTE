@@ -20,7 +20,6 @@ export default class Editor {
     editorNode!: HTMLElement
     toolbarNode!: HTMLElement
     mainNode!: HTMLElement
-    sidebarNode: null | HTMLElement = null
     debugNode: null | HTMLElement = null
 
     toolbar!: Toolbar
@@ -120,8 +119,8 @@ export default class Editor {
         this.toolbar.initialise()
 
         // Optional sidebar
-        if (this.options.explorer && this.toolbar!.buttons.find(btn => btn.sidebar !== undefined)) {
-            this.sidebar = new Sidebar(this)
+        if (this.options.explorer && this.toolbar.buttons.find(btn => btn.sidebar !== undefined)) {
+            this.showSidebar()
         }
 
         // Try to ensure that the referenced content is scrolled to a visible area in the middle of the editor. 
@@ -139,6 +138,16 @@ export default class Editor {
         setTimeout(() => this.updateBuffer(), 100)
     }
 
+
+    showSidebar() {
+        if (!this.sidebar) {
+            this.sidebar = new Sidebar(this)
+        }
+    }
+
+    hideSidebar() {
+        this.sidebar?.hide()
+    }
 
 
     // -----------------------------------------------------------------------------

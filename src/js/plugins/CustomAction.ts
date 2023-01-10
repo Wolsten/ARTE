@@ -47,17 +47,14 @@ import * as Helpers from '../helpers'
 import { Modal, ModalButton, ModalButtonAction, ModalOptionsType } from '../Modal'
 import SidebarButton from '../SidebarButton'
 import Editor from '../Editor'
-// import { EditButtons } from './interfaces'
 import CustomBlock from './CustomBlock'
 
 
 export default class CustomAction extends CustomBlock {
 
-    static readonly TAG = 'ARTE-ACTION'        // The HTMLElement tag as inserted in the dom for this custom node
-
 
     constructor(editor: Editor, group: number) {
-        super(editor, CustomAction.TAG, 'Action', Icons.action, group)
+        super(editor, 'ARTE-ACTION', 'Action', Icons.action, group)
     }
 
 
@@ -69,7 +66,7 @@ export default class CustomAction extends CustomBlock {
             new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
         ]
         if (this.editFlag) {
-            buttons.push(new ModalButton(ModalButtonAction.Delete, 'Delete', this.handleDelete, 'action'))
+            buttons.push(new ModalButton(ModalButtonAction.Delete, 'Delete', () => this.handleDelete(), 'action'))
         } else {
             // Initialise an action as saved to file
             this.node = document.createElement(this.tag)
@@ -89,9 +86,10 @@ export default class CustomAction extends CustomBlock {
         }
 
         // Create and display the modal panel
-        buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', this.save))
+        buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', () => this.save()))
         const options: ModalOptionsType = {
-            focusId: 'todo'
+            focusId: 'todo',
+            formClass: 'action'
         }
         this.drawer = new Modal(`${this.editFlag ? 'Edit' : 'Create'} action`, this.form(), buttons, options)
     }
@@ -155,7 +153,7 @@ export default class CustomAction extends CustomBlock {
         // Close the modal
         this.drawer.hide()
         // Format the saved action
-        this.format(this.template)
+        this.format()
         // Update the buffer
         this.editor.updateBuffer()
     }

@@ -28,7 +28,7 @@ export default class Style extends ToolbarButton {
     // Private properties
     private newStyle = ''
     private newValue = ''
-    private action: StyleAciotn = StyleAction.NONE
+    private action: StyleAction = StyleAction.NONE
 
 
     constructor(editor: Editor, style: string, group: number) {
@@ -129,13 +129,13 @@ export default class Style extends ToolbarButton {
     // -----------------------------------------------------------------------------
 
 
-    private isActive(): boolean {
-        if (this.element) {
-            const dataActive = this.element.classList.contains('active')
-            if (dataActive) return true
-        }
-        return false
-    }
+    // private isActive(): boolean {
+    //     if (this.element) {
+    //         const dataActive = this.element.classList.contains('active')
+    //         if (dataActive) return true
+    //     }
+    //     return false
+    // }
 
 
 

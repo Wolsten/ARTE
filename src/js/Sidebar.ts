@@ -56,7 +56,7 @@ export default class Sidebar {
             console.error('Error: Could not find close button for sidebar')
             return
         }
-        closeButton.addEventListener('click', () => this.hideSidebar())
+        closeButton.addEventListener('click', () => this.hide())
         // Append to the editor
         this.editor.mainNode.appendChild(this.sidebarNode)
     }
@@ -65,6 +65,7 @@ export default class Sidebar {
     hide(): void {
         if (this.sidebarNode) this.sidebarNode.remove()
         this.editor.options.explorer = false
+        this.editor.sidebar = null
     }
 
 
