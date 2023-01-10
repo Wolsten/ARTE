@@ -9,9 +9,10 @@
     --colour-success: rgb(35, 190, 55);
     --colour-warning: rgb(250, 120, 30);
     --colour-danger: rgb(250, 30, 30);
-    --colour-disabled: rgb(180, 180, 180);
+    --colour-disabled: hsl(0, 0%, 80%);
     --colour-link: var(--colour-primary);
     --colour-debug: green;
+    --colour-toolbar-active: var(--colour-primary);
     --colour-background-hover: hsl(0, 0%, 93%);
     --colour-background: hsl(0, 0%, 100%);
     --colour-background-modal: hsl(0, 0%, 99%);
@@ -33,6 +34,7 @@
     --colour-disabled: rgb(120, 120, 120);
     --colour-link: var(--colour-primary);
     --colour-debug: rgb(104, 207, 104);
+    --colour-toolbar-active: white;
     --colour-background-hover: hsl(0, 0%, 35%);
     --colour-background: hsl(0, 5%, 20%);
     --colour-background-modal: hsl(0, 5%, 20%);
@@ -298,8 +300,8 @@ body.index-body {
     }
 
     button.active {
-        color: var(--colour-text);
-        background: var(--colour-background-active);
+        color: var(--colour-toolbar-active);
+        background: var(--colour-background);
     }
 
     button.barred {
@@ -516,6 +518,26 @@ body.index-body {
     li,
     blockquote {
         position: relative;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+        line-height: 2.2rem;
+        color: var(--colour-secondary);
+        padding: 2rem 0 0 0;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+        line-height: 2rem;
+        padding: 1rem 0 0 0;
+    }
+
+    h3 {
+        font-size: 1rem;
+        line-height: 1.6rem;
+        padding: 1rem 0 0 0;
+        text-transform: uppercase;
     }
 
     p {

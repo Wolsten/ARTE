@@ -43,6 +43,10 @@ export default class Settings extends ToolbarButton {
         this.setExplorer()
     }
 
+    setState(): void {
+        this.element.classList.add('active')
+    }
+
 
     /**
      * Mandatory button click function

@@ -63,8 +63,6 @@ class CustomBlock extends ToolbarButton {
     protected node: null | Element = null         // The actively edited node
     protected editFlag = false
 
-    private confirm: null | Modal = null          // The modal container for the modal confirm dialogue
-
 
     constructor(editor: Editor, tag: string, label: string, icon: string, group: number) {
         super(editor, ToolbarButtonType.CUSTOM, tag, label, icon, group)
@@ -196,13 +194,15 @@ class CustomBlock extends ToolbarButton {
             this.element.classList.remove('active')
         } else {
             this.element.removeAttribute('disabled')
-            // If we have a range containing a custom element then make the button active
-            const custom = this.editor.range?.blockParent?.querySelector(this.tag)
-            if (custom) {
-                this.element.classList.add('active')
-            } else {
-                this.element.classList.remove('active')
-            }
+            this.element.classList.add('active')
+
+            // // If we have a range containing a custom element then make the button active
+            // const custom = this.editor.range?.blockParent?.querySelector(this.tag)
+            // if (custom) {
+            //     this.element.classList.add('active')
+            // } else {
+            //     this.element.classList.remove('active')
+            // }
         }
     }
 
@@ -216,7 +216,7 @@ class CustomBlock extends ToolbarButton {
 
     protected handleDelete(): void {
         this.node?.remove()
-        this.editor.range = null
+        if (this.editor.range) this.editor.range = null
         this.setState()
         this.editor.updateBuffer()
     }

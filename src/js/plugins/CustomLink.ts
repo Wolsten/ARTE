@@ -38,7 +38,7 @@ export default class CustomLink extends CustomBlock {
             new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
         ]
         if (this.editFlag) {
-            buttons.push(new ModalButton(ModalButtonAction.Delete, 'Delete', this.handleDelete, 'link'))
+            buttons.push(new ModalButton(ModalButtonAction.Delete, 'Delete', () => this.handleDelete(), 'link'))
         } else {
             // Initialise an action as saved to file
             this.node = document.createElement(this.tag)

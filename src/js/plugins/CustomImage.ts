@@ -111,7 +111,7 @@ export default class CustomImage extends CustomBlock {
         if (!this.editFlag) this.insert()
         this.drawer.hide()
         // Format image and add event handler
-        this.format(this.template)
+        this.format()
         // Update state
         if (this.node) {
             this.editor.range = Helpers.setCursor(this.node, 0)

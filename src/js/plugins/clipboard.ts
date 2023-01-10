@@ -88,8 +88,9 @@ export default class Clipboard extends ToolbarButton {
         }
         // All buttons disabled (if not already) if selection contains any custom elements
         if (this.disabled == false) {
-            const selection = document.getSelection()
-            this.disabled = Helpers.selectionContainsCustoms(this.editor.editorNode, selection)
+            this.disabled = this.editor.range?.containsCustoms() || false
+            // const selection = document.getSelection()
+            // this.disabled = Helpers.selectionContainsCustoms(this.editor.editorNode, selection)
         }
 
         if (this.disabled) {

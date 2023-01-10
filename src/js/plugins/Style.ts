@@ -112,7 +112,7 @@ export default class Style extends ToolbarButton {
 
         // Check whether the computed style matches the btn
         this.setStyleProps()
-        if (this.editor.range) {
+        if (this.editor.range?.startContainer) {
             const inlineStyles = Helpers.getInlineStyles(this.editor.range.startContainer)
             if (inlineStyles.includes(this.style)) {
                 this.element.classList.add('active')

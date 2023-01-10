@@ -29,9 +29,11 @@ export default class Sidebar {
         let tabList: SidebarButton[] = []
         this.editor.toolbar!.buttons.forEach(button => {
             if (button.sidebar) {
-                //console.log('Opening sidebar for button ', button.tag)
-
-                tabList.push(button.sidebar())
+                const sidebarTab = button.sidebar()
+                if (sidebarTab) {
+                    // console.log('Adding sidebar for button', button.tag)
+                    tabList.push(sidebarTab)
+                }
             }
         })
 
@@ -64,6 +66,7 @@ export default class Sidebar {
 
     hide(): void {
         if (this.sidebarNode) this.sidebarNode.remove()
+        this.sidebarNode = null
         this.editor.options.explorer = false
         this.editor.sidebar = null
     }
@@ -80,7 +83,11 @@ export default class Sidebar {
         let tabList: SidebarButton[] = []
         this.editor.toolbar!.buttons.forEach(button => {
             if (button.sidebar) {
-                tabList.push(button.sidebar())
+                const sidebarTab = button.sidebar()
+                if (sidebarTab) {
+                    // console.log('Adding sidebar for button', button.tag)
+                    tabList.push(sidebarTab)
+                }
             }
         })
         // Populate latest content if we have any

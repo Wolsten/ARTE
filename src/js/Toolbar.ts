@@ -141,7 +141,7 @@ export default class Toolbar {
                 console.error('Missing button element for button', button.tag)
                 return
             }
-            button.element = <HTMLElement>buttonElement
+            button.element = <HTMLInputElement>buttonElement
 
             if (button.init) {
                 button.init()
@@ -155,12 +155,16 @@ export default class Toolbar {
                 this.editor.shortcuts.push(new Shortcut(button))
             }
 
-            // if (button.label == "Settings") {
-            //     debugger
-            // }
+            if (button.tag == "H2") {
+                console.warn(button)
+            }
 
             // Add click
             button.element.addEventListener('click', (event: Event) => {
+
+                if (button.tag == "H2") {
+                    debugger
+                }
 
                 if (!button.click) {
                     return
@@ -180,7 +184,7 @@ export default class Toolbar {
                     button.click()
                 }
 
-                // Other prevent default action to ignore
+                // Prevent default action to ignore
                 event.preventDefault()
             })
         })
@@ -194,8 +198,8 @@ export default class Toolbar {
     contains(node: null | EventTarget): boolean {
         if (!node) return false
         let target = <Node>node
-        while (target.nodeType === 3 || target.nodeName !== 'BODY') {
-            if (node == this.domNode) {
+        while (target.nodeType === Node.TEXT_NODE || target.nodeName !== 'BODY') {
+            if (target == this.domNode) {
                 return true
             }
             if (!target.parentNode) {
@@ -211,7 +215,7 @@ export default class Toolbar {
      * Set the states of all toolbar buttons
      */
     setStates(): void {
-        if (!this.editor.range) {
+        if (!this.editor.range?.base) {
             this.buttons.forEach(button => {
                 if (button.element) button.element.classList.remove('active')
             })
@@ -241,6 +245,7 @@ export default class Toolbar {
             if (!this.editor.range || this.editor.range.custom) {
                 handled = true
                 if (button.element) {
+                    console.log('Setting state for button', button.tag)
                     // @todo Check this works correctly
                     button.element.setAttribute('disabled', 'disabled')
                     button.element.classList.remove('active')

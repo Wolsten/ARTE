@@ -36,7 +36,7 @@ export const arraySubset = function (a: [], b: []): boolean {
 //     list: ['LI'],
 //     custom: <string[]>[]
 // }
-let tags = {
+export let tags = {
     block: ['DIV', 'LI'],
     list: ['LI'],
     custom: <string[]>[]
@@ -123,7 +123,7 @@ export const replaceNode = function (existingNode, tag, html) {
  * @returns {boolean}
  */
 export const isStyle = function (node) {
-    if (node.nodeType != 1) {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
         return false
     }
     return node.tagName === 'SPAN' || node.tagName === 'I'
@@ -135,7 +135,7 @@ export const isStyle = function (node) {
  * @returns {boolean}
  */
 export const isList = function (node) {
-    if (node.nodeType != 1) {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
         return false
     }
     return node.tagName === 'OL' || node.tagName === 'UL'
@@ -145,7 +145,7 @@ export const isList = function (node) {
  * Check whether the node is a block container
  */
 export const isBlock = function (node: Node | null) {
-    if (!node || node.nodeType != 1) {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
         return false
     }
     const result = tags.block.includes(node.nodeName)
@@ -168,11 +168,8 @@ export const isCustom = function (node) {
 
 /**
  * Return true if child is not the parent but contains the parent
- * @param {HTMLElement} parent 
- * @param {HTMLElement} child 
- * @returns {boolean}
  */
-function contains(parent, child) {
+export function contains(parent: HTMLElement, child: Node): boolean {
     return parent !== child && parent.contains(child)
 }
 
@@ -182,44 +179,49 @@ function contains(parent, child) {
  * so do not need to check the end range. Returns the custom element containing 
  * the range or false if not.
  */
-const rangeStartContainerInCustom = function (range: EditRange): HTMLElement | false {
-    if (!range) {
-        console.warn('Error. Passed missing range when looking for a custom node')
-    }
-    let node = range.startContainer
-    while (isCustom(node) === false && node.parentNode !== null && node.parentNode.nodeName !== 'DIV') {
-        node = node.parentNode
-    }
-    return isCustom(node) ? <HTMLElement>node : false
-}
+// const rangeStartContainerInCustom = function (range: EditRange): HTMLElement | false {
+//     if (!range) {
+//         console.warn('Error. Passed missing range when looking for a custom node')
+//         return false
+//     }
+//     let element = range.startContainer
+//     if (!element) {
+//         console.warn('Error. Passed missing range when looking for a custom node')
+//         return false
+//     }
+//     while (element && isCustom(element) === false && element.parentNode !== null && element.parentNode.nodeName !== 'DIV') {
+//         element = element.parentElement
+//     }
+//     if (!element) return false
+//     return isCustom(element) ? element : false
+// }
 
 
-export const selectionContainsCustoms = function (editorNode, selection) {
-    const customs = editorNode.querySelectorAll('[contenteditable="false"]')
-    let found = false
-    for (let i = 0; i < customs.length && found == false; i++) {
-        if (selection.containsNode(customs[i], true)) {
-            found = true
-        }
-    }
-    //console.warn({found})
-    return found
-}
+// export const selectionContainsCustoms = function (editorNode, selection) {
+//     const customs = editorNode.querySelectorAll('[contenteditable="false"]')
+//     let found = false
+//     for (let i = 0; i < customs.length && found == false; i++) {
+//         if (selection.containsNode(customs[i], true)) {
+//             found = true
+//         }
+//     }
+//     //console.warn({found})
+//     return found
+// }
 
 
 /**
 * Get the inline styles for all nodes in the tree from the lowest to the highest that
-* isn;t a block node. In practice these are attached only to SPANs
-* @param {HTMLElement} node 
-* @returns {string} of styles separated by semi-colons
+* isn't a block node. In practice these are attached only to SPANs
+* Returns styles separated by semi-colons
 */
-export const getInlineStyles = function (node) {
+export const getInlineStyles = function (node: HTMLElement): string {
     if (node == null) {
         console.warn('Found null node when getting inline styles')
     }
     let styles = ''
     while (isBlock(node) == false) {
-        if (node.nodeType === 1) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
             const inlineStyles = node.getAttribute('style')
             if (inlineStyles != null && inlineStyles != '') {
                 styles += ';' + inlineStyles
@@ -228,7 +230,7 @@ export const getInlineStyles = function (node) {
         if (node.parentNode == null) {
             console.warn('Error.  Found missing parent node when getting inline styles')
         }
-        node = node.parentNode
+        node = <HTMLElement>node.parentNode
     }
     return styles
 }
@@ -276,25 +278,25 @@ export const getEditorNode = function (node: HTMLElement): HTMLElement {
  * Returns first node below the stop node (if there is one) 
  * otherwise the stopNode or false if error
  */
-export const getTopParentNode = function (node: HTMLElement, stopNode: HTMLElement): HTMLElement | false {
-    if (node == null || stopNode == null) {
-        console.warn('Error. Passed null node or stopNode to getTopParentNode')
-    }
-    let saved = node
-    while (node != stopNode) {
-        saved = node
-        if (node == null) {
-            console.warn('Error.  Found missing node traversing tree in getTopParentNode')
-            return false
-        }
-        if (node.parentNode == null) {
-            console.warn('Error.  Found missing parent node when getting top parent node')
-            return false
-        }
-        node = <HTMLElement>node.parentNode
-    }
-    return saved
-}
+// export const getTopParentNode = function (node: HTMLElement, stopNode: HTMLElement): HTMLElement | false {
+//     if (node == null || stopNode == null) {
+//         console.warn('Error. Passed null node or stopNode to getTopParentNode')
+//     }
+//     let saved = node
+//     while (node != stopNode) {
+//         saved = node
+//         if (node == null) {
+//             console.warn('Error.  Found missing node traversing tree in getParentBlockNode')
+//             return false
+//         }
+//         if (node.parentNode == null) {
+//             console.warn('Error.  Found missing parent node when getting top parent node')
+//             return false
+//         }
+//         node = <HTMLElement>node.parentNode
+//     }
+//     return saved
+// }
 
 
 /**

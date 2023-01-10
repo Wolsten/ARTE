@@ -1,5 +1,4 @@
 import Editor from '../Editor'
-// import EditRange from '../EditRange'
 import * as Helpers from '../helpers'
 import * as Phase from '../phase'
 import * as Icons from '../icons'
@@ -64,6 +63,8 @@ export default class Block extends ToolbarButton {
 
     click(): void {
 
+        console.log('Clicked', this.tag)
+
         this.previousFormats = []
         this.lastNodeAdded = null
         this.newFormat = this.setStyleProps()
@@ -71,17 +72,21 @@ export default class Block extends ToolbarButton {
         // Ensure start from a block node
         if (this.editor.range === null) return
 
-        const newRootNode = Helpers.getTopParentNode(this.editor.range.rootNode, this.editor.editorNode)
-        const firstParentNode = Helpers.getTopParentNode(this.editor.range.startContainer, this.editor.editorNode)
-        const endParentNode = Helpers.getTopParentNode(this.editor.range.endContainer, this.editor.editorNode)
-        if (newRootNode === false || firstParentNode === false || endParentNode === false) {
+        const newRootNode = this.editor.range.topParentNode('root')
+        const firstParentNode = this.editor.range.topParentNode('start')
+        const endParentNode = this.editor.range.topParentNode('end')
+
+        // const newRootNode = Helpers.getTopParentNode(this.editor.range.rootNode, this.editor.editorNode)
+        // const firstParentNode = Helpers.getTopParentNode(this.editor.range.startContainer, this.editor.editorNode)
+        // const endParentNode = Helpers.getTopParentNode(this.editor.range.endContainer, this.editor.editorNode)
+        if (!newRootNode || !firstParentNode || !endParentNode) {
             return
         }
         this.editor.range.rootNode = newRootNode
 
-        // console.warn('root node', editor.range.rootNode)
-        // console.log('first parent node', firstParentNode)
-        // console.log('end parent node', endParentNode)
+        console.warn('new root node', newRootNode)
+        console.log('first parent node', firstParentNode)
+        console.log('end parent node', endParentNode)
         //
         // Mark the start and end selection points
         Helpers.addMarkers(this.editor.range)
@@ -161,35 +166,39 @@ export default class Block extends ToolbarButton {
      * Set the disabled and active states of a button
      */
     setState(): void {
-        const element = <HTMLInputElement>this.element
-        // console.log('setting block state')
+        // if (this.tag == 'H1') {
+        //     console.log('setting block state for', this.tag)
+        // }
         if (this.tag == 'CLEAR') {
-            element.disabled = false
-            this.element!.classList.remove('active')
+            this.element.disabled = false
+            this.element.classList.remove('active')
         } else {
             // Use the first parent node to set disabled state
-            let firstParentNode: Node | null = null
+            let firstParentNode: HTMLElement | false = false
             if (this.editor.range) {
-                firstParentNode = Helpers.getParentBlockNode(this.editor.range.startContainer)
+                // firstParentNode = Helpers.getParentBlockNode(this.editor.range.startContainer)
+                firstParentNode = this.editor.range.topParentNode('start')
             }
             if (!firstParentNode) {
                 return
             }
-            //console.log('firstParentNode',firstParentNode)
+            // if (this.tag == 'H1') {
+            //     console.log('firstParentNode', firstParentNode)
+            // }
             // The firstParentNode should not be a DIV (the editor) or a custom element
-            element.disabled = firstParentNode.nodeName === 'DIV' ||
+            this.element.disabled = firstParentNode.nodeName === 'DIV' ||
                 Helpers.isCustom(firstParentNode) ||
                 firstParentNode.nodeName == this.tag
             //console.log('disabled',btn.element.disabled)
             // If this is a list type get the list parent
-            if (this.type === ToolbarButtonType.LIST && (<Element>firstParentNode).tagName === 'LI') {
-                firstParentNode = <Node>firstParentNode.parentNode
+            if (this.type === ToolbarButtonType.LIST && firstParentNode.tagName === 'LI') {
+                firstParentNode = <HTMLElement>firstParentNode.parentNode
             }
             // Do the tag names match?
             if (firstParentNode.nodeName === this.tag) {
-                element.classList.add('active')
+                this.element.classList.add('active')
             } else {
-                element.classList.remove('active')
+                this.element.classList.remove('active')
             }
         }
     }
@@ -198,7 +207,8 @@ export default class Block extends ToolbarButton {
     /**
      * Display custom html in the sidebar
      */
-    sidebar(): SidebarButton {
+    sidebar(): SidebarButton | false {
+        if (this.tag !== 'H1') return false
         const headings = this.editor?.editorNode?.querySelectorAll('H1,H2,H3')
         //console.log('Headings',headings)
         let content = ''

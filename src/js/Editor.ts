@@ -159,14 +159,15 @@ export default class Editor {
      */
     listenForMouseUpEvents() {
         document.addEventListener('mouseup', event => {
-            // console.log( 'mouseup on', event.target )
-            // console.log( 'active element', document.activeElement )
+            // console.log('mouseup on', event.target)
+            // console.log('active element', document.activeElement)
             // Clicked a modal button?
             if (this?.modal?.active) {
                 return
                 // Clicked in the editor (but not a custom element which returns a
                 // different active element)
             } else if (document.activeElement == this.editorNode) {
+                // console.log('Active element is editor node')
                 this.handleMouseUp()
                 // Clicked menu icon?
             } else if (event.target == this.toolbar.menuIcon) {
@@ -224,17 +225,18 @@ export default class Editor {
         // }
         this.updateRange()
 
-        if (!this.range) {
+        if (!this.range?.base) {
             // If enter cursor in an empty editor then make this a paragraph
             // rather than raw text
-            if (this.editorNode && this.editorNode.innerText == '') {
+            if (this.editorNode.innerText == '') {
                 //console.log('handleMouseUp: Inserting paragraph in empty editor')
                 this.insertParagraph()
             }
         }
         // Unselect custom blocks and highlight this one if custom 
-        if (this.range) this.highlightCustomNode(this.range.custom)
+        if (this.range?.base) this.highlightCustomNode(this.range.custom)
 
+        console.log('Setting state for all buttons')
         this.toolbar.setStates()
     }
 
@@ -416,7 +418,7 @@ export default class Editor {
                     }
                     // Forward delete in a none-editable block?
                 } else if (key == 'Delete') {
-                    const length = this.range.endContainer.textContent ? this.range.endContainer.textContent.trim().length : -1
+                    const length = this.range.endContainer?.textContent ? this.range.endContainer.textContent.trim().length : -1
                     if (length === this.range.endOffset) {
                         const next = (<HTMLElement>this.range.endContainer).nextElementSibling
                         if (next && next.getAttribute("contenteditable") === 'false') {
@@ -427,11 +429,15 @@ export default class Editor {
                 }
                 // Back spacing or deleting in a multiple selection
             } else {
-                const selection = document.getSelection()
-                if (Helpers.selectionContainsCustoms(this.editorNode, selection)) {
+                if (this.range.containsCustoms()) {
                     feedback.show()
                     return true
                 }
+                // const selection = document.getSelection()
+                // if (Helpers.selectionContainsCustoms(this.editorNode, selection)) {
+                //     feedback.show()
+                //     return true
+                // }
             }
         }
         // Reset the range which must be done after a delay since this
@@ -715,7 +721,29 @@ export default class Editor {
     /**
      * Get the new range in the editor node and when debugging display this
      */
+    // updateRangeOLD(): void {
+    //     if (this.modal?.active) {
+    //         return
+    //     }
+    //     // const timestamp1 = new Date()
+    //     // Check for empty editor - in which case insert a new paragraph
+    //     // if ( this.editorNode.innerHTML.trim() == '' ){
+    //     //     console.log('1. inserting paragraph in empty editor')
+    //     //     this.insertParagraph()
+    //     //     // Return as insertParagraph reinvokes this method
+    //     //     return
+    //     // }
+    //     //console.log('modal active',this.modal.active())
+    //     this.range = Helpers.getRange(this.editorNode)
+    //     if (this.options.debug) {
+    //         this.debugTemplate(this.debugNode, this.range)
+    //     }
+    //     // const timestamp2 = new Date()
+    //     // console.log(`START: ${timestamp1.getTime()}\nENDED: ${timestamp2.getTime()}`)
+    // }
+
     updateRange(): void {
+        console.log('Updating range')
         if (this.modal?.active) {
             return
         }
@@ -728,13 +756,15 @@ export default class Editor {
         //     return
         // }
         //console.log('modal active',this.modal.active())
-        this.range = Helpers.getRange(this.editorNode)
-        if (this.options.debug) {
-            this.debugTemplate(this.debugNode, this.range)
+        this.range = new EditRange(this.editorNode)
+        if (this.options.debug && this.debugNode) {
+            this.debugNode.innerHTML = this.debugTemplate()
         }
         // const timestamp2 = new Date()
         // console.log(`START: ${timestamp1.getTime()}\nENDED: ${timestamp2.getTime()}`)
     }
+
+
 
     /**
      * Remove "custom-selected" class from all custom elements and then add to 
@@ -779,31 +809,39 @@ export default class Editor {
     // -----------------------------------------------------------------------------
 
 
-    private debugTemplate(target: HTMLElement | null, range: EditRange | null) {
-        if (!target) {
-            return
-        }
+    private debugTemplate(): string {
         // console.warn('debugRange',range)
-        if (!range) {
-            target.innerHTML = '<p>No range selected</p>'
-        } else {
-            const blockParent = range.blockParent?.tagName || 'Missing'
-            target.innerHTML = `
-                    <h5>Selection info:</h5>
-                    <div class="col">
-                        <label>Block parent</label><span>${blockParent}</span>
-                        <label>commonAncestorC</label><span>${range.commonAncestorContainer.tagName ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.textContent}</span>
-                        <label>rootNode</label><span>${range.rootNode.tagName}</span>
-                        <label>collapsed</label><span>${range.collapsed}</span>
-                        <label>custom</label><span>${range.custom ? range.custom.tagName : 'false'}</span>
-                    </div>
-                    <div class="col">
-                        <label>startC</label><span>${range.startContainer.tagName ? range.startContainer.tagName : range.startContainer.textContent}</span>
-                        <label>startOffset</label><span>${range.startOffset}</span>
-                        <label>endC</label><span>${range.endContainer.tagName ? range.endContainer.tagName : range.endContainer.textContent}</span>
-                        <label>endOffset</label><span>${range.endOffset}</span>
-                    </div>`
+        if (!this.range || !this.range?.base) {
+            return '<p>No range selected</p>'
         }
+        const rootNode = this.range.rootNode?.nodeName || 'Missing'
+        const blockParent = this.range.blockParent?.tagName || 'Missing'
+        const commonAncestor = this.range.base.commonAncestorContainer.nodeName
+            ? this.range.base.commonAncestorContainer.nodeName
+            : this.range.base.commonAncestorContainer.textContent
+        const startContainer = this.range.base.startContainer.nodeName
+            ? this.range.base.startContainer.nodeName
+            : this.range.base.startContainer.textContent
+        const endContainer = this.range.base.endContainer.nodeName
+            ? this.range.base.endContainer.nodeName
+            : this.range.base.endContainer.textContent
+        const custom = this.range.custom
+            ? this.range.custom.tagName
+            : 'false'
+        return `<h5>Selection info:</h5>
+                <div class="col">
+                    <label>Block parent</label><span>${blockParent}</span>
+                    <label>commonAncestorC</label><span>${commonAncestor}</span>
+                    <label>rootNode</label><span>${rootNode}</span>
+                    <label>collapsed</label><span>${this.range.base.collapsed}</span>
+                    <label>custom</label><span>${custom}</span>
+                </div>
+                <div class="col">
+                    <label>startC</label><span>${startContainer}</span>
+                    <label>startOffset</label><span>${this.range.base.startOffset}</span>
+                    <label>endC</label><span>${endContainer}</span>
+                    <label>endOffset</label><span>${this.range.base.endOffset}</span>
+                </div>`
     }
 
 

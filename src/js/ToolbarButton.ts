@@ -21,7 +21,7 @@ interface ToolbarButton {
     label: string           // Generally used as the title of the button but could also be displayed
     icon: string            //  The icon to use
     group: number           // The group index
-    element: HTMLElement    // The dom element which the button is attached to
+    element: HTMLInputElement    // The dom element which the button is attached to
     disabled: boolean
 
     // Optional properties
@@ -32,7 +32,7 @@ interface ToolbarButton {
 
     // Optional methods that may need to be invoked from Editor
     init?(): void
-    sidebar?(): SidebarButton
+    sidebar?(): SidebarButton | false
     addEventHandlers?(): void
     clean?(element: Element): Element
     setState?(): void
