@@ -415,13 +415,14 @@ body.index-body #index-buttons {
 .editor-body h2 {
   font-size: 1.4rem;
   line-height: 2rem;
-  padding: 1rem 0 0 0;
+  padding: 1.2rem 0 0 0;
 }
 .editor-body h3 {
   font-size: 1rem;
   line-height: 1.6rem;
   padding: 1rem 0 0 0;
   text-transform: uppercase;
+  font-weight: normal;
 }
 .editor-body p {
   line-height: 1.4rem;
