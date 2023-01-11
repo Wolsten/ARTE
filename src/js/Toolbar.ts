@@ -18,6 +18,7 @@ import CustomComment from './plugins/CustomComment'
 
 export default class Toolbar {
 
+
     defaults: string[][] = [
         ['BLOCK.H1', 'BLOCK.H2', 'BLOCK.H3', 'BLOCK.P', 'BLOCK.BLOCKQUOTE'],
         ['BLOCK.OL', 'BLOCK.UL'],
@@ -123,6 +124,7 @@ export default class Toolbar {
             return
         }
     }
+
 
 
     /**

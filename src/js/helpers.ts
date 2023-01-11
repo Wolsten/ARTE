@@ -31,11 +31,6 @@ export const arraySubset = function (a: [], b: []): boolean {
 // -----------------------------------------------------------------------------
 
 // Common tags to be supported
-// let tags = {
-//     block: ['DIV', 'H1', 'H2', 'H3', 'P', 'LI', 'BLOCKQUOTE'],
-//     list: ['LI'],
-//     custom: <string[]>[]
-// }
 export let tags = {
     block: ['DIV', 'LI'],
     list: ['LI'],
@@ -67,7 +62,6 @@ export const registerTag = function (type: ToolbarButtonType, tag: string): void
 export const debugTags = function () {
     console.log('blocks', tags.block.join(', '))
     console.log('lists', tags.list.join(', '))
-    console.log('inline', tags.inline.join(', '))
     console.log('customs', tags.custom.join(', '))
 }
 
@@ -98,20 +92,16 @@ export const insertBefore = function (newNode, existingNode) {
 }
 
 /**
- * 
- * @param {HTMLElement} existingNode 
- * @param {string} tag The html tag of the new node
- * @param {string} html The new innerHTML string to use for the replacement node
- * @returns 
+ * Replace an existing node with the returned new node and html
+ * If fails returns null
  */
-export const replaceNode = function (existingNode, tag, html) {
-    if (existingNode == null || existingNode.parentNode == null) {
-        console.warn('Error.  Found when replacing an existing node with a new node')
-        console.warn({ existingNode })
-        console.warn(existingNode.parentNode)
+export const replaceNode = function (existingNode: Node, newNodeTag: string, newNodeHtml: string): Node | null {
+    if (!existingNode?.parentNode) {
+        console.warn('Error.  Found when replacing an existing node with a new node', existingNode)
+        return null
     }
-    const replacementNode = document.createElement(tag)
-    replacementNode.innerHTML = html
+    const replacementNode = document.createElement(newNodeTag)
+    replacementNode.innerHTML = newNodeHtml
     const node = existingNode.parentNode.insertBefore(replacementNode, existingNode)
     existingNode.parentNode.removeChild(existingNode)
     return node
@@ -144,12 +134,11 @@ export const isList = function (node) {
 /**
  * Check whether the node is a block container
  */
-export const isBlock = function (node: Node | null) {
+export const isBlock = function (node: Node | null): boolean {
     if (!node || node.nodeType !== Node.ELEMENT_NODE) {
         return false
     }
-    const result = tags.block.includes(node.nodeName)
-    return result
+    return tags.block.includes(node.nodeName)
 }
 
 /**
@@ -215,30 +204,30 @@ export function contains(parent: HTMLElement, child: Node): boolean {
 * isn't a block node. In practice these are attached only to SPANs
 * Returns styles separated by semi-colons
 */
-export const getInlineStyles = function (node: HTMLElement): string {
-    if (node == null) {
-        console.warn('Found null node when getting inline styles')
-    }
-    let styles = ''
-    while (isBlock(node) == false) {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-            const inlineStyles = node.getAttribute('style')
-            if (inlineStyles != null && inlineStyles != '') {
-                styles += ';' + inlineStyles
-            }
-        }
-        if (node.parentNode == null) {
-            console.warn('Error.  Found missing parent node when getting inline styles')
-        }
-        node = <HTMLElement>node.parentNode
-    }
-    return styles
-}
+// export const getInlineStyles = function (node: HTMLElement): string {
+//     if (node == null) {
+//         console.warn('Found null node when getting inline styles')
+//     }
+//     let styles = ''
+//     while (isBlock(node) == false) {
+//         if (node.nodeType === Node.ELEMENT_NODE) {
+//             const inlineStyles = node.getAttribute('style')
+//             if (inlineStyles != null && inlineStyles != '') {
+//                 styles += ';' + inlineStyles
+//             }
+//         }
+//         if (node.parentNode == null) {
+//             console.warn('Error.  Found missing parent node when getting inline styles')
+//         }
+//         node = <HTMLElement>node.parentNode
+//     }
+//     return styles
+// }
 
 
 /**
  * Get the parent block node or return the block if the node itself is a block
- * Returns parent block node or false if error occurs
+ * Returns parent block node or null if error occurs
  */
 export const getParentBlockNode = function (node: Node | null): Node | null {
     if (!node) {
@@ -480,9 +469,8 @@ function tabs(level) {
 }
 
 function indentTag(node) {
-    let inline = false
     if (isCustom(node)) {
-        if (node.nextElementSibling != null && node.nextElementSibling.nodeType === 3) {
+        if (node.nextElementSibling != null && node.nextElementSibling.nodeType === Node.TEXT_NODE) {
             return false
         }
         return true

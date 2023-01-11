@@ -1,6 +1,6 @@
 import Editor from '../Editor'
 import * as Helpers from '../helpers'
-import * as Phase from '../phase'
+import Phase from '../phase'
 import * as Icons from '../icons'
 import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import SidebarButton from '../SidebarButton'
@@ -25,6 +25,8 @@ export default class Block extends ToolbarButton {
     private fragmentNode = document.createElement('DIV')
     private lastNodeAdded: null | Element = null
     private newFormat = ''
+
+    private phase!: Phase
 
     // constructor(editor: Editor, block: string, group: number) {
     constructor(editor: Editor, tag: string, group: number) {
@@ -92,7 +94,8 @@ export default class Block extends ToolbarButton {
         Helpers.addMarkers(this.editor.range)
 
         // Init phase for block formatting
-        Phase.init(this.editor.range, true)
+        this.phase = new Phase(this.editor.range, true)
+
         // console.warn(`reFormatBlock with new format ${button.tag}`)
         // Just parse the parent node if the start and end belong to the same parent
         if (firstParentNode == endParentNode) {
@@ -262,7 +265,7 @@ export default class Block extends ToolbarButton {
         // Define the formats for this node only
         let nodeFormats = new Formats()
         if (node != this.editor.editorNode) {
-            Phase.set(node)
+            this.phase.set(node)
             // Get the old and new formats
             nodeFormats = this.getFormats(node, formats)
             // console.log( `old node formats`,nodeFormats.oldFormats)
@@ -293,7 +296,7 @@ export default class Block extends ToolbarButton {
 
         // Pre and post phases set the new format to be the 
         // same as the old format
-        if (Phase.pre() || Phase.post()) {
+        if (this.phase.pre() || this.phase.post()) {
             // console.log(`1. Pushing ${node.tagName} to formats`)
             newFormats = [...oldFormats]
             return { newFormats, oldFormats }
@@ -309,7 +312,7 @@ export default class Block extends ToolbarButton {
         }
         //
         // New list formatting
-        if (Phase.first()) {
+        if (this.phase.first()) {
             // console.log(`3. First node with new list format ${this.newFormat}`)
             // Reformatting a list item?
             if (element.tagName == 'LI') {
@@ -359,7 +362,7 @@ export default class Block extends ToolbarButton {
         let target = this.fragmentNode
         let html = this.getBlockHTML(element)
         let currentFormats = []
-        if (Phase.during()) {
+        if (this.phase.during()) {
             currentFormats = formats.newFormats
         } else {
             currentFormats = formats.oldFormats

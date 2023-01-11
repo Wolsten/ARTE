@@ -236,7 +236,7 @@ export default class Editor {
         // Unselect custom blocks and highlight this one if custom 
         if (this.range?.base) this.highlightCustomNode(this.range.custom)
 
-        console.log('Setting state for all buttons')
+        // console.log('Setting state for all buttons')
         this.toolbar.setStates()
     }
 
@@ -743,7 +743,7 @@ export default class Editor {
     // }
 
     updateRange(): void {
-        console.log('Updating range')
+        // console.log('Updating range')
         if (this.modal?.active) {
             return
         }

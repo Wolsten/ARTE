@@ -1,7 +1,7 @@
 import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import * as Helpers from '../helpers'
 import * as Icons from '../icons'
-import * as Phase from '../phase'
+import Phase from '../phase'
 import EditRange from '../EditRange'
 import Editor from '../Editor.js'
 
@@ -29,6 +29,8 @@ export default class Style extends ToolbarButton {
     private newStyle = ''
     private newValue = ''
     private action: StyleAction = StyleAction.NONE
+
+    private phase!: Phase
 
 
     constructor(editor: Editor, style: string, group: number) {
@@ -67,8 +69,7 @@ export default class Style extends ToolbarButton {
 
 
     click(): void {
-        if (!this.editor.range) return
-        if (!this.editor.range.rootNode) return
+        if (!this.editor.range?.rootNode) return
         // Adjust rootNode if required
         if (Helpers.isBlock(this.editor.range.rootNode) == false) {
             const newRootNode = Helpers.getParentBlockNode(this.editor.range.rootNode)
@@ -79,10 +80,14 @@ export default class Style extends ToolbarButton {
         // Set newStyle, newValue and action
         this.setStyleProps()
         // Initialise phase detection and parse the root node
-        Phase.init(this.editor.range, false)
+        this.phase = new Phase(this.editor.range, false)
+        if (!this.phase.status) {
+            console.error('Something went wrong starting to apply the styling')
+            return
+        }
         const html = this.parseNode(this.editor.range.rootNode, [], this.editor.range)
         // console.log('html',html)
-        Helpers.replaceNode(this.editor.range.rootNode, (<Element>this.editor.range.rootNode).tagName, html)
+        Helpers.replaceNode(this.editor.range.rootNode, this.editor.range.rootNode.nodeName, html)
         // Reset the selection
         Helpers.resetSelection(this.editor.editorNode)
         this.editor.updateRange()
@@ -113,12 +118,38 @@ export default class Style extends ToolbarButton {
         // Check whether the computed style matches the btn
         this.setStyleProps()
         if (this.editor.range?.startContainer) {
-            const inlineStyles = Helpers.getInlineStyles(this.editor.range.startContainer)
+            const inlineStyles = this.getInlineStyles(this.editor.range.startContainer)
             if (inlineStyles.includes(this.style)) {
                 this.element.classList.add('active')
             } else {
                 this.element.classList.remove('active')
             }
+        }
+    }
+
+
+
+    // -----------------------------------------------------------------------------
+    // @section Protected methods
+    // -----------------------------------------------------------------------------
+
+
+    /**
+     * Whether to enable or disable an inline styling button
+     */
+    protected enableOrDisable(): void {
+        this.disabled = false
+        if (this.editor.range) {
+            if (this.editor.range.collapsed ||
+                this.editor.range.rootNode == this.editor.editorNode ||
+                Helpers.isList(this.editor.range.rootNode)) {
+                this.disabled = true
+            }
+        }
+        if (this.disabled) {
+            this.element?.setAttribute('disabled', 'disabled')
+        } else {
+            this.element?.removeAttribute('disabled')
         }
     }
 
@@ -136,6 +167,24 @@ export default class Style extends ToolbarButton {
     //     }
     //     return false
     // }
+
+
+    private getInlineStyles = function (node: HTMLElement): string {
+        let styles = ''
+        while (Helpers.isBlock(node) == false) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                const inlineStyles = node.getAttribute('style')
+                if (inlineStyles != null && inlineStyles != '') {
+                    styles += ';' + inlineStyles
+                }
+            }
+            if (node.parentNode == null) {
+                console.warn('Error.  Found missing parent node when getting inline styles')
+            }
+            node = <HTMLElement>node.parentNode
+        }
+        return styles
+    }
 
 
 
@@ -212,13 +261,13 @@ export default class Style extends ToolbarButton {
      * Parse a text node and return parsed content
      */
     private parseTextNode(node: Node, styles: string[], range: EditRange) {
-        Phase.set(node)
+        this.phase.set(node)
         const textParts = this.getTextParts(node, range)
         if (!textParts) return ''
         const { preText, text, postText } = textParts
         let html = ''
         // In pre and post phases return text with current styling
-        if (Phase.pre() || Phase.post()) {
+        if (this.phase.pre() || this.phase.post()) {
             html += this.generateText(styles, text, true)
             // During phase 
         } else {
@@ -321,14 +370,14 @@ export default class Style extends ToolbarButton {
         let text = ''
         let preText = ''
         let postText = ''
-        if (Phase.both()) {
+        if (this.phase.both()) {
             preText = node.textContent.substring(0, range.startOffset)
             text = Helpers.START_MARKER + node.textContent.substring(range.startOffset, range.endOffset) + Helpers.END_MARKER
             postText = node.textContent.substring(range.endOffset)
-        } else if (Phase.first()) {
+        } else if (this.phase.first()) {
             preText = node.textContent.substring(0, range.startOffset)
             text = Helpers.START_MARKER + node.textContent.substring(range.startOffset)
-        } else if (Phase.last()) {
+        } else if (this.phase.last()) {
             text = node.textContent.substring(0, range.endOffset) + Helpers.END_MARKER
             postText = node.textContent.substring(range.endOffset)
         } else {

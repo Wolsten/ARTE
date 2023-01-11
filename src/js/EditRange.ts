@@ -43,24 +43,23 @@ export default class EditRange {
 
     augment() {
         if (!this.base) return
-        // console.log('augmentRange',range)
+        console.log('augmentRange', this)
         // First parent node that is a block tag
         const blockParent = Helpers.getParentBlockNode(this.base.commonAncestorContainer)
         this.blockParent = blockParent ? <HTMLElement>blockParent : null
+
         // First parent node
         this.rootNode = this.base.commonAncestorContainer
         if (this.base.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
-            // if (this.base.commonAncestorContainer.parentNode == null) {
-            //     console.warn('Error.  Found missing parent node when augmenting range')
-            //     return null
-            // }
-            this.startContainer = <HTMLElement>this.base.startContainer
-            this.endContainer = <HTMLElement>this.base.endContainer
             this.rootNode = this.base.commonAncestorContainer.parentNode
-            this.collapsed = this.base.collapsed
-            this.startOffset = this.base.startOffset
-            this.endOffset = this.base.endOffset
         }
+
+        this.startContainer = <HTMLElement>this.base.startContainer
+        this.endContainer = <HTMLElement>this.base.endContainer
+        this.collapsed = this.base.collapsed
+        this.startOffset = this.base.startOffset
+        this.endOffset = this.base.endOffset
+
         // Set flag to indicate whether the range is in a custom node
         this.custom = this.startsInCustom()
     }
