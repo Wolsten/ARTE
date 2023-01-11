@@ -141,6 +141,12 @@ export default class Mentions extends ToolbarButton {
             return
         }
 
+        if (key == 'Escape') {
+            console.log('escape!')
+            this.insert('')
+            return
+        }
+
         if (this.listItemElements.length == 0) {
             this.selectedIndex = -1
             // Move down list
@@ -166,6 +172,7 @@ export default class Mentions extends ToolbarButton {
         }
         // Not navigated - therefore check if pressed enter or not
         if (navigated == false) {
+
             const value = this?.inputElement?.value || ''
             // Filter list if not pressed enter
             if (key != 'Enter') {
@@ -243,13 +250,6 @@ export default class Mentions extends ToolbarButton {
         // UPdate the buffer if supporting buffering
         this.editor.updateBuffer()
     }
-
-
-    // @todo - nolonger specified as a callback - add custom handling
-    private escape() {
-        this.insert('')
-    }
-
 
 
 

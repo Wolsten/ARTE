@@ -65,7 +65,7 @@ export default class Block extends ToolbarButton {
 
     click(): void {
 
-        console.log('Clicked', this.tag)
+        // console.log('Clicked', this.tag)
 
         this.previousFormats = []
         this.lastNodeAdded = null

@@ -151,11 +151,12 @@ export default class CustomAction extends CustomBlock {
             this.insert()
         }
         // Close the modal
-        this.drawer.hide()
-        // Format the saved action
-        this.format()
-        // Update the buffer
-        this.editor.updateBuffer()
+        // this.drawer.hide()
+        // // Format the saved action
+        // this.format()
+        // // Update the buffer
+        // this.editor.updateBuffer()
+        this.tidyUp()
     }
 
 

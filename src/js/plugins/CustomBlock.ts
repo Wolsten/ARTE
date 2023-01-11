@@ -41,6 +41,7 @@ import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import { Modal } from '../Modal'
 import SidebarButton from '../SidebarButton'
 import Editor from '../Editor'
+import EditRange from '../EditRange'
 
 
 interface CustomBlock extends ToolbarButton {
@@ -60,7 +61,7 @@ interface CustomBlock extends ToolbarButton {
 class CustomBlock extends ToolbarButton {
 
     protected drawer: null | Modal = null         // The modal container for the edit dialogue
-    protected node: null | Element = null         // The actively edited node
+    protected node: null | HTMLElement = null         // The actively edited node
     protected editFlag = false
 
 
@@ -147,6 +148,16 @@ class CustomBlock extends ToolbarButton {
     // -----------------------------------------------------------------------------
 
 
+    protected tidyUp() {
+        this.drawer?.hide()
+        this.format()
+        if (this.node) {
+            EditRange.setCursorInNode(this.node, 0)
+        }
+        this.editor.updateBuffer()
+    }
+
+
     /**
      * Mandatory format method which may be overridden
      */
@@ -185,7 +196,6 @@ class CustomBlock extends ToolbarButton {
         if (!this.editor.range ||
             this.editor.range.rootNode == this.editor.editorNode ||
             Helpers.isBlock(this.editor.range.rootNode) == false) {
-
             this.disabled = true
         }
 
@@ -279,8 +289,8 @@ class CustomBlock extends ToolbarButton {
      */
     protected insert(): void {
         this.editFlag = false
-        if (this.editor?.range?.startContainer.parentNode) {
-            this.node = this.editor.range.startContainer.parentNode.appendChild(<Element>this.node)
+        if (this.editor?.range?.startContainer?.parentNode) {
+            this.node = <HTMLElement>this.editor.range.startContainer.parentNode.appendChild(<Node>this.node)
         }
     }
 
@@ -294,7 +304,7 @@ class CustomBlock extends ToolbarButton {
      * Edit an existing comment node by extracting the data from the node and displaying
      * the edit form. Sets the comment node to be edited
      */
-    private edit(element: Element): void {
+    private edit(element: HTMLElement): void {
         // If we already have an active panel - ignore edit clicks
         if (Modal.active()) {
             return

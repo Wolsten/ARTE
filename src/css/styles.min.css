@@ -682,6 +682,13 @@ body.index-body #index-buttons {
   margin: 0;
 }
 
+arte-link button.arte-link,
+arte-link button.arte-link:hover {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
 form.arte-link a.link {
   position: relative;
   text-decoration: none;

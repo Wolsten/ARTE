@@ -46,15 +46,18 @@ export default class CustomLink extends CustomBlock {
                 console.error(`Failed to create new ${this.label}`)
                 return
             }
+            const selectedText = this.editor.range?.getSelectedText() || ''
+            const href = selectedText.includes('http') ? selectedText : ''
+            const label = href ? '' : selectedText
             this.node.id = Helpers.generateUid()
             this.setAttribute('contenteditable', 'false')
-            this.setAttribute('href', '')
-            this.setAttribute('label', '')
+            this.setAttribute('href', href)
+            this.setAttribute('label', label)
             this.setAttribute('display', '0')
         }
 
         // Create and display the modal panel
-        buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', this.save))
+        buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', () => this.save()))
         const options: ModalOptionsType = {
             focusId: 'href'
         }
@@ -71,6 +74,7 @@ export default class CustomLink extends CustomBlock {
         const display = this.getAttribute('display')
         const href = this.getAttribute('href')
         const label = this.getAttribute('label')
+        // console.log(this.editor.range?.getSelectedText())
         // If editing allow user to open the link in a new tab
         if (this.editFlag) {
             openBtn = ` (<a href="${href}" class="link" target="_blank" title="Open link in new tab or window">${Icons.openLink} Open</a>)`
@@ -107,11 +111,12 @@ export default class CustomLink extends CustomBlock {
         // Check for inserting new
         if (!this.editFlag) this.insert()
         // Close the modal
-        this.drawer.hide()
-        // Format the saved action
-        this.format(this.template)
-        // Update the buffer
-        this.editor.updateBuffer()
+        // this.drawer.hide()
+        // // Format the saved action
+        // this.format()
+        // // Update the buffer
+        // this.editor.updateBuffer()
+        this.tidyUp()
     }
 
 
@@ -128,7 +133,7 @@ export default class CustomLink extends CustomBlock {
             case '1': htmlLabel = href; break
             default: htmlLabel = `${label} (${href})`
         }
-        return `<button type="button" title="Edit this link">
+        return `<button type="button" title="Edit this link" class="arte-link">
                     <a href="${href}">${htmlLabel}</a>
                 </button>`
     }

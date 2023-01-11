@@ -131,6 +131,24 @@ export default class EditRange {
 
 
     setCursor(node: HTMLElement, offset: number): EditRange {
+        // let range = document.createRange()
+        // const selection = window.getSelection()
+        // // Check the offset is in range
+        // if (node.textContent && offset > node.textContent.length) {
+        //     offset = 0
+        // }
+        // range.setStart(node, offset)
+        // range.collapse(true)
+        // if (selection) {
+        //     selection.removeAllRanges()
+        //     selection.addRange(range)
+        // }
+        EditRange.setCursorInNode(node, offset)
+        return new EditRange(this.editorNode)
+    }
+
+
+    static setCursorInNode(node: HTMLElement, offset: number): EditRange {
         let range = document.createRange()
         const selection = window.getSelection()
         // Check the offset is in range
@@ -143,8 +161,16 @@ export default class EditRange {
             selection.removeAllRanges()
             selection.addRange(range)
         }
-        return new EditRange(this.editorNode)
     }
 
+
+    getSelectedText(): string {
+        if (this.base?.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
+            const node = this.base?.commonAncestorContainer
+            const text = node.textContent?.substring(this.startOffset, this.endOffset)
+            return text ? text : ''
+        }
+        return ''
+    }
 }
 

@@ -1,6 +1,7 @@
 
 import Editor from './Editor.js'
 import EditRange from './EditRange.js'
+// import EditRange from './EditRange.js'
 import { ToolbarButtonType } from './ToolbarButton.js'
 
 // -----------------------------------------------------------------------------
@@ -37,7 +38,6 @@ export let tags = {
     custom: <string[]>[]
 }
 
-
 /**
  * Register a new button type with tag to allow future checking/cleaning
  */
@@ -67,28 +67,42 @@ export const debugTags = function () {
 
 /**
  * Insert newNode after existingNode
- * @param {HTMLElement} newNode 
- * @param {HTMLElement} existingNode 
- * @returns {HTMLElement} the new node inserted
+ * Returns the new node inserted or null if fails
  */
-export const insertAfter = function (newNode, existingNode) {
-    if (newNode == null || existingNode == null) {
-        console.warn('Error.  Found when inserting a new node after an existing node')
+export const insertAfter = function (newNode: HTMLElement | null, existingNode: HTMLElement | null): HTMLElement | null {
+    if (!newNode) {
+        console.error('Error in insertAfter.  New node is null')
+        return null
     }
-    return existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+    if (!existingNode) {
+        console.error('Error in insertAfter.  Existing node is null')
+        return null
+    }
+    const parentNode = existingNode.parentNode
+    if (parentNode) {
+        return parentNode.insertBefore(newNode, existingNode.nextSibling);
+    }
+    return null
 }
 
 /**
  * Insert newNode before existingNode
- * @param {HTMLElement} newNode 
- * @param {HTMLElement} existingNode 
- * @returns {HTMLElement} the new node inserted
+ * Returns the new node inserted or null if fails
  */
-export const insertBefore = function (newNode, existingNode) {
-    if (newNode == null || existingNode == null) {
-        console.warn('Error.  Found when inserting a new node before an existing node')
+export const insertBefore = function (newNode: HTMLElement | null, existingNode: HTMLElement | null): HTMLElement | null {
+    if (!newNode) {
+        console.error('Error in insertAfter.  New node is null')
+        return null
     }
-    return existingNode.parentNode.insertBefore(newNode, existingNode);
+    if (!existingNode) {
+        console.error('Error in insertAfter.  Existing node is null')
+        return null
+    }
+    const parentNode = existingNode.parentNode
+    if (parentNode) {
+        return parentNode.insertBefore(newNode, existingNode);
+    }
+    return null
 }
 
 /**
@@ -109,10 +123,8 @@ export const replaceNode = function (existingNode: Node, newNodeTag: string, new
 
 /**
  * Check whether the node is an inline style span
- * @param {HTMLElement} node 
- * @returns {boolean}
  */
-export const isStyle = function (node) {
+export const isStyle = function (node: HTMLElement): boolean {
     if (node.nodeType !== Node.ELEMENT_NODE) {
         return false
     }
@@ -121,10 +133,8 @@ export const isStyle = function (node) {
 
 /**
  * Check whether the node is a list container
- * @param {HTMLElement} node 
- * @returns {boolean}
  */
-export const isList = function (node) {
+export const isList = function (node: HTMLElement): boolean {
     if (node.nodeType !== Node.ELEMENT_NODE) {
         return false
     }
@@ -143,10 +153,8 @@ export const isBlock = function (node: Node | null): boolean {
 
 /**
  * Checks whether the element is a custom element
- * @param {HTMLElement} node 
- * @returns {boolean}
  */
-export const isCustom = function (node) {
+export const isCustom = function (node: HTMLElement): boolean {
     if (node.tagName == undefined) {
         return false
     }
@@ -296,19 +304,20 @@ export const replaceSelectionWithNode = function (editor: Editor, node: HTMLElem
         console.error('No selection is available to replace with element')
         return
     }
-    const parent = editor.range.startContainer.parentNode
+    const parent = editor.range?.startContainer?.parentNode
     if (!parent) {
         console.error('Missing parent node')
         return
     }
     // Get any pretext or post text in the current container that is not selected
-    let preText = editor.range.startContainer.textContent
-        ? editor.range.startContainer.textContent.substring(0, editor.range.startOffset)
+    const textContent = editor.range?.startContainer?.textContent
+    let preText = textContent
+        ? textContent.substring(0, editor.range.startOffset)
         : ''
     let postText
     if (editor.range.collapsed) {
-        postText = editor.range.startContainer.textContent
-            ? editor.range.startContainer.textContent.substring(editor.range.startOffset)
+        postText = textContent
+            ? textContent.substring(editor.range.startOffset)
             : ''
         // Insert leading and trailing spaces if needed
         if (preText.charAt(preText.length + 1) != ' ') {
@@ -318,8 +327,8 @@ export const replaceSelectionWithNode = function (editor: Editor, node: HTMLElem
             postText = ' ' + postText
         }
     } else {
-        postText = editor.range.startContainer.textContent
-            ? editor.range.startContainer.textContent.substring(editor.range.endOffset)
+        postText = textContent
+            ? textContent.substring(editor.range.endOffset)
             : ''
     }
     // Insert pretext before the current container
@@ -350,12 +359,12 @@ export const replaceSelectionWithNode = function (editor: Editor, node: HTMLElem
 function resetCursor(node: HTMLElement) {
     if (isCustom(node)) {
         if (node.nextSibling !== null) {
-            setCursor(node.nextSibling, 0)
+            EditRange.setCursorInNode(node.nextSibling, 0)
         } else if (node.previousSibling !== null) {
-            setCursor(node.previousSibling, node.previousSibling.textContent.length)
+            EditRange.setCursorInNode(node.previousSibling, node.previousSibling.textContent.length)
         }
     } else {
-        setCursor(node, node.textContent.length)
+        EditRange.setCursorInNode(node, node.textContent.length)
     }
 }
 
@@ -579,80 +588,84 @@ export const addMarkers = function (range) {
     }
 }
 
-/**
- * Add additional properties to the range
- * @param {Range} range 
- * @returns {object|false} The original range object with additional props or false on error
- */
-function augmentRange(range: EditRange): EditRange | null {
-    if (!range) {
-        console.error('Found missing range when augmenting range')
-        return null
-    }
-    // console.log('augmentRange',range)
-    // First parent node that is a block tag
-    const blockParent = getParentBlockNode(range.commonAncestorContainer)
-    if (!blockParent) {
-        return null
-    }
-    range.blockParent = <HTMLElement>blockParent
-    // First parent node
-    range.rootNode = range.commonAncestorContainer
-    if (range.commonAncestorContainer.nodeType === 3) {
-        if (range.commonAncestorContainer.parentNode == null) {
-            console.warn('Error.  Found missing parent node when augmenting range')
-            return null
-        }
-        range.rootNode = range.commonAncestorContainer.parentNode
-    }
-    // Set flag to indicate whether the range is in a custom node
-    range.custom = rangeStartContainerInCustom(range)
-    return range
-}
+// /**
+//  * Add additional properties to the range
+//  * @param {Range} range 
+//  * @returns {object|false} The original range object with additional props or false on error
+//  */
+// function augmentRange(range: EditRange): EditRange | null {
+//     if (!range) {
+//         console.error('Found missing range when augmenting range')
+//         return null
+//     }
+//     // console.log('augmentRange',range)
+//     // First parent node that is a block tag
+//     const blockParent = getParentBlockNode(range.commonAncestorContainer)
+//     if (!blockParent) {
+//         return null
+//     }
+//     range.blockParent = <HTMLElement>blockParent
+//     // First parent node
+//     range.rootNode = range.commonAncestorContainer
+//     if (range.commonAncestorContainer.nodeType === 3) {
+//         if (range.commonAncestorContainer.parentNode == null) {
+//             console.warn('Error.  Found missing parent node when augmenting range')
+//             return null
+//         }
+//         range.rootNode = range.commonAncestorContainer.parentNode
+//     }
+//     // Set flag to indicate whether the range is in a custom node
+//     range.custom = rangeStartContainerInCustom(range)
+//     return range
+// }
 
 
 /**
- * Get the document range or return false if not set
+ * Get the document range or return null if not set
  */
-export const getRange = function (editorNode: HTMLElement): EditRange | null {
-    let sel = window.getSelection()
-    // console.log('new selection',sel)
-    if (sel?.rangeCount == 1) {
-        let range = <EditRange>sel.getRangeAt(0)
-        // Check if common ancestor is the editor node or contained in the editor node
-        // Ignore all other selectins since they don;t belong to the editor
-        if (range.commonAncestorContainer == editorNode ||
-            contains(editorNode, range.commonAncestorContainer)) {
-            // console.log('New range found')
-            range = augmentRange(range)
-            return range
-        }
-    }
-    return null
-}
+// export const getRange = function (editorNode: HTMLElement): EditRange | null {
+//     // let sel = window.getSelection()
+//     // // console.log('new selection',sel)
+//     // if (sel?.rangeCount == 1) {
+//     //     let range = <EditRange>sel.getRangeAt(0)
+//     //     // Check if common ancestor is the editor node or contained in the editor node
+//     //     // Ignore all other selectins since they don;t belong to the editor
+//     //     if (range.commonAncestorContainer == editorNode ||
+//     //         contains(editorNode, range.commonAncestorContainer)) {
+//     //         // console.log('New range found')
+//     //         range = augmentRange(range)
+//     //         return range
+//     //     }
+//     // }
+//     const range = new EditRange(editorNode)
+//     return range.base ? range : null
+// }
 
 
-/**
- * Set the cursor in a text node at the specified offset and
- * return the new range
- */
-export const setCursor = function (node: HTMLElement, offset: number): EditRange {
-    let range = <EditRange>document.createRange()
-    const selection = window.getSelection()
-    // Check the offset is in range
-    if (node.textContent && offset > node.textContent.length) {
-        offset = 0
-    }
-    range.setStart(node, offset)
-    range.collapse(true)
-    if (selection) {
-        selection.removeAllRanges()
-        selection.addRange(range)
-    }
-    const newRange = augmentRange(range)
-    if (newRange) return newRange
-    return range
-}
+// /**
+//  * Set the cursor in a text node at the specified offset and
+//  * return the new range
+//  */
+// private const setCursor = function (node: HTMLElement, offset: number): EditRange {
+
+//     let range = new EditRange()
+
+//     let range = <EditRange>document.createRange()
+//     const selection = window.getSelection()
+//     // Check the offset is in rangea
+//     if (node.textContent && offset > node.textContent.length) {
+//         offset = 0
+//     }
+//     range.setStart(node, offset)
+//     range.collapse(true)
+//     if (selection) {
+//         selection.removeAllRanges()
+//         selection.addRange(range)
+//     }
+//     const newRange = augmentRange(range)
+//     if (newRange) return newRange
+//     return range
+// }
 
 /**
  * Restore a previously selected range

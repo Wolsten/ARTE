@@ -191,11 +191,11 @@ export default class Style extends ToolbarButton {
     private parseNode(node: Node, styles: string[], range: EditRange) {
         // console.log('Parsing node',node)
         // Text node
-        if (node.nodeType === 3) {
+        if (node.nodeType === Node.TEXT_NODE) {
             return this.parseTextNode(node, styles, range)
         }
         // Custom node
-        if (Helpers.isCustom(node)) {
+        if (Helpers.isCustom(<HTMLElement>node)) {
             return (<Element>node).outerHTML
         }
         // Blocks and spans

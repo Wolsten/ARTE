@@ -251,7 +251,7 @@ export default class Editor {
         // Create a placeholder to ensure set cursor works
         p.innerText = '\n'
         p = this.editorNode!.appendChild(p)
-        Helpers.setCursor(p, 0)
+        EditRange.setCursorInNode(p, 0)
         this.updateRange()
         this.toolbar.setStates()
         this.updateBuffer()
@@ -351,7 +351,8 @@ export default class Editor {
                 let n = document.createElement(tag)
                 n.innerText = '\n'
                 n = Helpers.insertAfter(n, this.range.blockParent)
-                Helpers.setCursor(n, 0)
+                // Helpers.setCursor(n, 0)
+                this.range.setCursor(n, 0)
                 handled = true
                 // Reset the range which must be done after a delay since this
                 // method was triggered on keydown before added to dom
