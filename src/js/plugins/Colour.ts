@@ -95,7 +95,7 @@ export default class Colours extends ToolbarButton {
      */
     click(): void {
         // Ignore if a modal is active
-        if (this.drawer && this.drawer.active) {
+        if (Modal.active()) {
             return
         }
         if (!this.editor.range || this.editor.range.collapsed) {

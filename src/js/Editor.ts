@@ -278,7 +278,7 @@ export default class Editor {
             //     console.log('key',event.key)
             // }
             // Check if a modal dialogue is shown - ignore key entry?
-            if (this?.modal?.active) {
+            if (Modal.active()) {
                 event.preventDefault()
                 handled = true
             }
@@ -467,7 +467,7 @@ export default class Editor {
 
             const ignore = ['Shift', 'Meta', 'Ctrl']
             // console.log('handle key up event',event)
-            if (ignore.includes(event.key) == false && this.modal?.active == false) {
+            if (ignore.includes(event.key) == false && Modal.active() == false) {
                 this.handleKeyup(event.key, this)
             }
         })
@@ -570,7 +570,7 @@ export default class Editor {
      * Display modal dialogue requesting the filename to download as
      */
     download(): void {
-        if (this?.modal?.active) {
+        if (Modal.active()) {
             return
         }
         const buttons = [
@@ -675,7 +675,7 @@ export default class Editor {
 
 
     clear() {
-        if (this.modal?.active) {
+        if (Modal.active()) {
             return
         }
         const html = '<p>Are you sure you want to clear the editor and start a new document? Any changes will be lost.</p>'
@@ -745,7 +745,7 @@ export default class Editor {
 
     updateRange(): void {
         // console.log('Updating range')
-        if (this.modal?.active) {
+        if (Modal.active()) {
             return
         }
         // const timestamp1 = new Date()
@@ -756,7 +756,7 @@ export default class Editor {
         //     // Return as insertParagraph reinvokes this method
         //     return
         // }
-        //console.log('modal active',this.modal.active())
+        //console.log('modal active',Modal.active())
         this.range = new EditRange(this.editorNode)
         if (this.options.debug && this.debugNode) {
             this.debugNode.innerHTML = this.debugTemplate()

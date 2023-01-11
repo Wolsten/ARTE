@@ -120,8 +120,8 @@ export class Modal {
             }
         }
 
-        console.log('Modal.self', Modal.self)
-        console.log('Modal.confirm', Modal.confirm)
+        // console.log('Modal.self', Modal.self)
+        // console.log('Modal.confirm', Modal.confirm)
     }
 
 

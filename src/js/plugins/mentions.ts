@@ -1,6 +1,6 @@
 import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import * as Icons from '../Icons'
-import { setCursor } from '../helpers'
+import * as Helpers from '../helpers'
 import { Modal, ModalType } from '../Modal'
 import Editor from '../Editor'
 
@@ -26,6 +26,53 @@ export default class Mentions extends ToolbarButton {
     }
 
 
+    /**
+    * Handle mentions button click
+    */
+    click() {
+        if (!this.editor || !this.editor.range || !this.editor.editorNode) {
+            // console.log('No range selected')
+            return
+        }
+        const options = { type: ModalType.Positioned, escapeToCancel: true }
+        this.modal = new Modal('', this.form(), [], options)
+        this.modal.setPosition(this.editor.range, this.editor.editorNode)
+        // Add custom event handling - add keyup to main container
+        // so can detect/filter keystrokes and handle navigation in the
+        // list using arrow keys and tabs
+        this.listContainerElement = this.modal.getElement('ul')
+        if (!this.listContainerElement) {
+            console.error('The mention form is missing the list container element')
+            return
+        }
+        this.listContainerElement.addEventListener('click', (event: MouseEvent) => this.handleListClick(event))
+        // Init list items and selection
+        this.listItemElements = this.listContainerElement.querySelectorAll('li')
+        this.selectedIndex = 0
+        this.highlightItem(false)
+        // Initialise the text input
+        this.inputElement = this.modal.getInputElement('input')
+        if (!this.inputElement) {
+            console.error('Text input missing from mention')
+            return
+        }
+        this.inputElement.value = ''
+        this.inputElement.focus()
+        this.inputElement.addEventListener('keyup', (event: KeyboardEvent) => this.handleKeyUp(event))
+    }
+
+
+
+    /**
+     * Set the disabled state of this button. This one can never be active
+     */
+    setState() {
+        (<HTMLInputElement>this.element).disabled =
+            this.editor?.range?.collapsed == false ||
+            this.editor?.range?.custom !== false
+    }
+
+
 
     /**
      * Generate the list elements for the full list of people
@@ -33,7 +80,7 @@ export default class Mentions extends ToolbarButton {
      * one to be selected (using the "selected" class)
      * Returns list of li's 
      */
-    filterList(userEnteredFilterText: string): string {
+    private filterList(userEnteredFilterText: string): string {
         let html = ''
         this.people.forEach(person => {
             const p = person.toLowerCase()
@@ -50,7 +97,7 @@ export default class Mentions extends ToolbarButton {
     /**
      * Highlight the selected item as a result of navigating through the list
      */
-    highlightItem(scrollSelectedItemIntoView = true) {
+    private highlightItem(scrollSelectedItemIntoView = true) {
         if (!this.listItemElements) {
             console.error('Mentions missing the list elements')
             return
@@ -81,7 +128,7 @@ export default class Mentions extends ToolbarButton {
     /**
      * Handle key down events anywhere in the panel
      */
-    handleKeyUp(event: KeyboardEvent) {
+    private handleKeyUp(event: KeyboardEvent) {
         const key = event.key
         const shiftKey = event.shiftKey
         let navigated = false
@@ -146,7 +193,7 @@ export default class Mentions extends ToolbarButton {
     /**
      * Handle clicking on a list item and insert the clicked value
      */
-    handleListClick(event: Event) {
+    private handleListClick(event: MouseEvent) {
         if (event.target) {
             const element = <HTMLElement>event.target
             const text = element.textContent || ''
@@ -158,12 +205,12 @@ export default class Mentions extends ToolbarButton {
     /**
      * Insert a new person's name in the appropriate position
      */
-    insert(person: string) {
-        if (!this.editor || !this.editor.range || !this.modal) {
+    private insert(person: string) {
+        if (!this.editor || !this.editor.range || !this.editor.range.startContainer || !this.modal) {
             return
         }
         const container = this.editor.range.startContainer
-        const contents = container.textContent || ''
+        const contents = container?.textContent || ''
         let offset = this.editor.range.startOffset
         const before = contents.substring(0, offset)
         let after = contents.substring(offset)
@@ -187,64 +234,23 @@ export default class Mentions extends ToolbarButton {
         this.editor.range.startContainer.textContent = before + person + after
         // Move offset to the end of the newly inserted person
         offset += person.length
-        this.editor.range = setCursor(<Element>container, offset)
+        // this.editor.range = Helpers.setCursor(<Element>container, offset)
+        this.editor.range.setCursor(container, offset)
+
         // Hide the modal
         this.modal.hide()
+
         // UPdate the buffer if supporting buffering
-        this?.editor?.buffer?.update()
+        this.editor.updateBuffer()
     }
 
 
     // @todo - nolonger specified as a callback - add custom handling
-    escape() {
+    private escape() {
         this.insert('')
     }
 
 
-    /**
-     * Handle mentions button click
-     */
-    click() {
-        if (!this.editor || !this.editor.range || !this.editor.editorNode) {
-            // console.log('No range selected')
-            return
-        }
-        const options = { type: ModalType.Positioned, escapeToCancel: true }
-        this.modal = new Modal('', this.form(), [], options)
-        this.modal.setPosition(this.editor.range, this.editor.editorNode)
-        // Add custom event handling - add keyup to main container
-        // so can detect/filter keystrokes and handle navigation in the
-        // list using arrow keys and tabs
-        this.listContainerElement = this.modal.getElement('ul')
-        if (!this.listContainerElement) {
-            console.error('The mention form is missing the list container element')
-            return
-        }
-        this.listContainerElement.addEventListener('keyup', this.handleKeyUp)
-        this.listContainerElement.addEventListener('click', this.handleListClick)
-        // Init list items and selection
-        this.listItemElements = this.listContainerElement.querySelectorAll('li')
-        this.selectedIndex = 0
-        this.highlightItem(false)
-        // Initialise the text input
-        this.inputElement = this.modal.getInputElement('input')
-        if (!this.inputElement) {
-            console.error('Text input mssing from mention')
-            return
-        }
-        this.inputElement.value = ''
-        this.inputElement.focus()
-    }
 
-
-
-    /**
-     * Set the disabled state of this button. This one can never be active
-     */
-    setState() {
-        (<HTMLInputElement>this.element).disabled =
-            this.editor?.range?.collapsed == false ||
-            this.editor?.range?.custom !== false
-    }
 
 }

@@ -89,7 +89,7 @@ class CustomBlock extends ToolbarButton {
      */
     click() {
         // Ignore if a modal is active
-        if (this?.drawer?.active) {
+        if (Modal.active()) {
             return
         }
         const custom = this.editor?.range?.blockParent?.querySelector(this.tag)
@@ -296,7 +296,7 @@ class CustomBlock extends ToolbarButton {
      */
     private edit(element: Element): void {
         // If we already have an active panel - ignore edit clicks
-        if (this.drawer?.active) {
+        if (Modal.active()) {
             return
         }
         this.node = element

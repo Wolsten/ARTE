@@ -53,7 +53,7 @@ export default class Settings extends ToolbarButton {
      */
     click() {
         // Ignore if a modal is active
-        if (this.drawer?.active) {
+        if (Modal.active()) {
             return
         }
         this.show()

@@ -14,6 +14,7 @@ import CustomAction from './plugins/CustomAction'
 import CustomLink from './plugins/CustomLink'
 import CustomImage from './plugins/CustomImage'
 import CustomComment from './plugins/CustomComment'
+import { Modal } from './Modal'
 
 
 export default class Toolbar {
@@ -168,7 +169,7 @@ export default class Toolbar {
                 this.editor.updateRange()
 
                 // Ignore if a modal is active
-                if (this.editor.modal?.active) {
+                if (Modal.active()) {
                     return
                 }
 

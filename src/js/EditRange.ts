@@ -129,5 +129,22 @@ export default class EditRange {
         return false
     }
 
+
+    setCursor(node: HTMLElement, offset: number): EditRange {
+        let range = document.createRange()
+        const selection = window.getSelection()
+        // Check the offset is in range
+        if (node.textContent && offset > node.textContent.length) {
+            offset = 0
+        }
+        range.setStart(node, offset)
+        range.collapse(true)
+        if (selection) {
+            selection.removeAllRanges()
+            selection.addRange(range)
+        }
+        return new EditRange(this.editorNode)
+    }
+
 }
 
