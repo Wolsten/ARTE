@@ -41,7 +41,7 @@ export default class Block extends ToolbarButton {
             case 'H3':
                 super(editor, ToolbarButtonType.BLOCK, tag, 'Heading 3', Icons.h3, group)
                 break
-            case 'BQ':
+            case 'BLOCKQUOTE':
                 super(editor, ToolbarButtonType.BLOCK, tag, 'Blockquote', Icons.bq, group)
                 break
             case 'OL':
@@ -84,9 +84,9 @@ export default class Block extends ToolbarButton {
         }
         this.editor.range.rootNode = newRootNode
 
-        console.warn('new root node', newRootNode)
-        console.log('first parent node', firstParentNode)
-        console.log('end parent node', endParentNode)
+        // console.warn('new root node', newRootNode)
+        // console.log('first parent node', firstParentNode)
+        // console.log('end parent node', endParentNode)
         //
         // Mark the start and end selection points
         Helpers.addMarkers(this.editor.range)

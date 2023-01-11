@@ -19,7 +19,7 @@ import CustomComment from './plugins/CustomComment'
 export default class Toolbar {
 
     defaults: string[][] = [
-        ['BLOCK.H1', 'BLOCK.H2', 'BLOCK.H3', 'BLOCK.P', 'BLOCK.BQ'],
+        ['BLOCK.H1', 'BLOCK.H2', 'BLOCK.H3', 'BLOCK.P', 'BLOCK.BLOCKQUOTE'],
         ['BLOCK.OL', 'BLOCK.UL'],
         ['STYLE.B', 'STYLE.I', 'STYLE.U', 'COLOUR.FOREGROUND', 'COLOUR.BACKGROUND', 'STYLE.CLEAR'],
         ['BUFFER.10'],
@@ -155,16 +155,8 @@ export default class Toolbar {
                 this.editor.shortcuts.push(new Shortcut(button))
             }
 
-            if (button.tag == "H2") {
-                console.warn(button)
-            }
-
             // Add click
             button.element.addEventListener('click', (event: Event) => {
-
-                if (button.tag == "H2") {
-                    debugger
-                }
 
                 if (!button.click) {
                     return

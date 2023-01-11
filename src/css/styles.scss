@@ -516,6 +516,7 @@ body.index-body {
     h3,
     p,
     li,
+    bq,
     blockquote {
         position: relative;
     }
@@ -548,12 +549,13 @@ body.index-body {
         padding: 0;
     }
 
+    bq,
     blockquote {
         background: var(--colour-blockquote-background);
         border-left: 10px solid var(--colour-border);
         color: var(--colour-text);
-        margin: 1.5em 10px;
-        padding: 0.5em 10px;
+        margin: 2rem 2rem;
+        padding: 1rem 1rem;
         font-style: italic;
     }
 

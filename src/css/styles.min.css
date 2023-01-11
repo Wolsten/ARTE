@@ -403,6 +403,7 @@ body.index-body #index-buttons {
 .editor-body h3,
 .editor-body p,
 .editor-body li,
+.editor-body bq,
 .editor-body blockquote {
   position: relative;
 }
@@ -429,12 +430,13 @@ body.index-body #index-buttons {
   margin: 0.4rem 0;
   padding: 0;
 }
+.editor-body bq,
 .editor-body blockquote {
   background: var(--colour-blockquote-background);
   border-left: 10px solid var(--colour-border);
   color: var(--colour-text);
-  margin: 1.5em 10px;
-  padding: 0.5em 10px;
+  margin: 2rem 2rem;
+  padding: 1rem 1rem;
   font-style: italic;
 }
 .editor-body li {
