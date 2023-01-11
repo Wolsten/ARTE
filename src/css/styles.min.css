@@ -799,25 +799,29 @@ form.comment button {
   margin-top: 1rem;
 }
 
-#colour-menu {
+.colours {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  gap: 1rem;
 }
-#colour-menu .colours span {
+.colours button {
   display: inline-block;
   width: 30px;
   height: 30px;
   padding: 0;
   margin: 0;
-  border: var(--colour-border);
+  border: 1px solid transparent;
   z-index: 1;
 }
-#colour-menu .colours span:hover {
+.colours button:hover {
   position: relative;
   cursor: pointer;
   outline: 3px solid var(--colour-text);
   z-index: 100;
+}
+.colours button.colour.white {
+  border: 1px solid var(--colour-border-faint);
 }
 
 arte-image {

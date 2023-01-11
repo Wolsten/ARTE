@@ -129,11 +129,13 @@ export default class Colours extends ToolbarButton {
         this.drawer = new Modal(title, this.form(), buttons, options)
 
         // Add custom click handlers
-        const colours = this.drawer.getElements('span.colour')
+        const colours = this.drawer.getElements('button.colour')
         if (!colours) {
-            console.error('Could not find any colour spans')
+            console.error('Could not find any colour buttons')
             return
         }
+
+        console.warn('range', this.editor.range)
 
         colours.forEach(c => c.addEventListener('click', event => {
 
@@ -162,19 +164,13 @@ export default class Colours extends ToolbarButton {
 
     /**
      * Construct the colour dialogue
-     * @returns 
      */
-    private form() {
+    private form(): string {
         let colours = ''
         for (let i = 0; i < Colours.PALETTE.length; i++) {
-            colours += `<span class="colour" data-index="${i}" style="background-color:${Colours.PALETTE[i]}">&nbsp;</span>`
+            colours += `<button type="button" class="colour ${Colours.PALETTE[i]}" data-index="${i}" style="background-color:${Colours.PALETTE[i]}">&nbsp;</button>`
         }
-        return `
-        <form id="colour-menu">
-            <div class="colours">
-                ${colours}
-            </div>
-        </form>`
+        return `<div class="colours">${colours}</div>`
     }
 
 }

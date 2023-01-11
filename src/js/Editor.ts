@@ -162,7 +162,7 @@ export default class Editor {
             // console.log('mouseup on', event.target)
             // console.log('active element', document.activeElement)
             // Clicked a modal button?
-            if (this?.modal?.active) {
+            if (Modal.active()) {
                 return
                 // Clicked in the editor (but not a custom element which returns a
                 // different active element)
@@ -189,6 +189,7 @@ export default class Editor {
      * Handle resetting of the range and the associated button states
      */
     resetRange() {
+        console.warn('Resetting range')
         this.range = null
         this.toolbar.reset()
     }

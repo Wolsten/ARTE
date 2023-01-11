@@ -239,7 +239,7 @@ export default class Toolbar {
             if (!this.editor.range || this.editor.range.custom) {
                 handled = true
                 if (button.element) {
-                    console.log('Setting state for button', button.tag)
+                    // console.log('Setting state for button', button.tag)
                     // @todo Check this works correctly
                     button.element.setAttribute('disabled', 'disabled')
                     button.element.classList.remove('active')
@@ -268,8 +268,9 @@ export default class Toolbar {
         if (!this.menuItems) return
         this.menuItems.classList.toggle('show')
         if (this.menuItems.classList.contains('show')) {
-            if (!this.editor.range) {
-                this.editor.range = Helpers.restoreSelectedRange(this.editor.range)
+            if (this.editor.range) {
+                this.editor.range.restoreSelection()
+                // this.editor.range = Helpers.restoreSelectedRange(this.editor.range)
                 this.setStates()
             }
         }

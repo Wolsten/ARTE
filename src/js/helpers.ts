@@ -657,15 +657,15 @@ export const setCursor = function (node: HTMLElement, offset: number): EditRange
 /**
  * Restore a previously selected range
  */
-export const restoreSelectedRange = function (range: EditRange): EditRange {
-    const selection = window.getSelection()
-    if (selection) {
-        selection.removeAllRanges()
-        selection.addRange(range)
-    }
-    range = augmentRange(range)
-    return range
-}
+// export const restoreSelectedRange = function (range: EditRange): EditRange {
+//     const selection = window.getSelection()
+//     if (range.base && selection) {
+//         selection.removeAllRanges()
+//         selection.addRange(range.base)
+//     }
+//     range = augmentRange(range)
+//     return range
+// }
 
 /**
  * Find the node containing the start marker

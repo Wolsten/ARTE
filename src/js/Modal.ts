@@ -70,7 +70,7 @@ export class Modal {
     html: string
     buttons: ModalButton[] = []
 
-    active = false
+    // active = false
 
     // Options
     options: ModalOptionsType = {
@@ -136,12 +136,18 @@ export class Modal {
         // Add event listeners
         this.addEventListeners()
         // Flag that is active
-        this.active = true
+        // this.active = true
         // Add the show class and scroll into view
         setTimeout(() => {
             this.modalElement.classList.add('show')
             this.modalElement.scrollIntoView()
         }, 10)
+    }
+
+
+    static active(): boolean {
+        const modal = document.querySelector('.modal-panel')
+        return modal ? true : false
     }
 
 
@@ -179,6 +185,7 @@ export class Modal {
         p.innerHTML = this.template()
         return p
     }
+
 
     template(): string {
         const style = this.styles()
@@ -249,6 +256,10 @@ export class Modal {
      * Set the position for the input dialogue based on current range
      */
     setPosition(range: EditRange, editorNode: HTMLElement) {
+        if (!range.base) {
+            console.error('No range selected')
+            return
+        }
         const container = this.modalElement.querySelector('.modal-panel-container')
         if (!container) {
             console.error('Could not find modal panel container')
@@ -257,16 +268,17 @@ export class Modal {
         let pos
         // If this is not a text node then get the first text node
         // Can happen at the start of a line when backspace to the start
-        if (range.startContainer.nodeType !== 3) {
-            if (range.startContainer.childNodes.length > 0) {
-                const node = range.startContainer.childNodes[0]
+        let node = <Node>range.startContainer
+        if (node.nodeType !== Node.TEXT_NODE) {
+            if (node.childNodes.length > 0) {
+                node = node.childNodes[0]
                 pos = (<Element>node).getBoundingClientRect()
             } else {
                 pos = { x: editorNode.offsetLeft, y: editorNode.offsetTop }
             }
             // Text node
         } else {
-            pos = range.getBoundingClientRect()
+            pos = range.base.getBoundingClientRect()
             //console.log('text node const ',pos)
         }
         // Ensure does not go off-screen
@@ -305,7 +317,7 @@ export class Modal {
         setTimeout(() => {
             if (this.modalElement) {
                 (<HTMLElement>this.modalElement).remove()
-                this.active = false
+                // this.active = false
                 if (this === Modal.self) Modal.self = null
                 if (this === Modal.confirm) Modal.confirm = null
             }

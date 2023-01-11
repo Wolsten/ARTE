@@ -57,6 +57,25 @@ class ToolbarButton {
     // -----------------------------------------------------------------------------
 
 
+    /**
+     * Whether to enable or disable an inline styling or colours button
+     */
+    protected enableOrDisable(): void {
+        this.disabled = false
+        if (this.editor.range) {
+            if (this.editor.range.collapsed ||
+                this.editor.range.rootNode == this.editor.editorNode ||
+                Helpers.isList(this.editor.range.rootNode)) {
+                this.disabled = true
+            }
+        }
+        if (this.disabled) {
+            this.element?.setAttribute('disabled', 'disabled')
+        } else {
+            this.element?.removeAttribute('disabled')
+        }
+    }
+
     protected isActive() {
         return this.element.classList.contains('active')
     }

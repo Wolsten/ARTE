@@ -54,7 +54,7 @@ export default class Style extends ToolbarButton {
                 super(editor, ToolbarButtonType.STYLE, 'CLEAR', 'Clear', Icons.clear, group)
                 this.style = 'CLEAR'
                 break
-            case 'COLOR':
+            case 'COLOUR':
                 super(editor, ToolbarButtonType.STYLE, 'COLOR', '', '', group)
                 break
             case 'BACKGROUND-COLOR':
@@ -129,29 +129,7 @@ export default class Style extends ToolbarButton {
 
 
 
-    // -----------------------------------------------------------------------------
-    // @section Protected methods
-    // -----------------------------------------------------------------------------
 
-
-    /**
-     * Whether to enable or disable an inline styling button
-     */
-    protected enableOrDisable(): void {
-        this.disabled = false
-        if (this.editor.range) {
-            if (this.editor.range.collapsed ||
-                this.editor.range.rootNode == this.editor.editorNode ||
-                Helpers.isList(this.editor.range.rootNode)) {
-                this.disabled = true
-            }
-        }
-        if (this.disabled) {
-            this.element?.setAttribute('disabled', 'disabled')
-        } else {
-            this.element?.removeAttribute('disabled')
-        }
-    }
 
 
 

@@ -1043,18 +1043,19 @@ form.comment {
 // @section colours.js plugin
 // -----------------------------------------------------------------------------
 
-#colour-menu {
+.colours {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    gap: 1rem;
 
-    .colours span {
+    button {
         display: inline-block;
         width: 30px;
         height: 30px;
         padding: 0;
         margin: 0;
-        border: var(--colour-border);
+        border: 1px solid transparent;
         z-index: 1;
 
         &:hover {
@@ -1063,6 +1064,10 @@ form.comment {
             outline: 3px solid var(--colour-text);
             z-index: 100;
         }
+    }
+
+    button.colour.white {
+        border: 1px solid var(--colour-border-faint);
     }
 }
 

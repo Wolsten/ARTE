@@ -43,7 +43,7 @@ export default class EditRange {
 
     augment() {
         if (!this.base) return
-        console.log('augmentRange', this)
+        // console.log('augmentRange', this)
         // First parent node that is a block tag
         const blockParent = Helpers.getParentBlockNode(this.base.commonAncestorContainer)
         this.blockParent = blockParent ? <HTMLElement>blockParent : null
@@ -62,6 +62,17 @@ export default class EditRange {
 
         // Set flag to indicate whether the range is in a custom node
         this.custom = this.startsInCustom()
+    }
+
+
+    restoreSelection() {
+        const selection = window.getSelection()
+        if (selection) {
+            selection.removeAllRanges()
+            if (this.base) {
+                selection.addRange(this.base)
+            }
+        }
     }
 
 
