@@ -305,7 +305,7 @@ export class Modal {
         // since this means they are calling this method too many times
         // The console message is removed in the bundled javascript so the 
         // this call will fail gracefully.
-        if (this.modalElement == null) {
+        if (!this.modalElement) {
             console.warn('Attempt to hide panel that is already hidden')
             return
         }
@@ -314,10 +314,19 @@ export class Modal {
         document.body.removeEventListener('keydown', this.handleKeydown)
         setTimeout(() => {
             if (this.modalElement) {
-                (<HTMLElement>this.modalElement).remove()
+                console.log('Removing modal element')
+
                 // this.active = false
-                if (this === Modal.self) Modal.self = null
-                if (this === Modal.confirm) Modal.confirm = null
+                if (this === Modal.self) {
+                    console.log('Removing own element')
+                    Modal.self.modalElement.remove()
+                    Modal.self = null
+                }
+                if (this === Modal.confirm) {
+                    console.log('Removing confirm element')
+                    Modal.confirm.modalElement.remove()
+                    Modal.confirm = null
+                }
             }
         }, 500)
 
@@ -440,7 +449,7 @@ export class ModalWarning extends Modal {
 
     constructor(title: string, html: string) {
         const buttons = [
-            new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
+            new ModalButton(ModalButtonAction.Cancel, 'Close'),
         ]
         const options = {
             type: ModalType.Overlay,

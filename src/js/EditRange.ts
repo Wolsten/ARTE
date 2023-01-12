@@ -239,5 +239,8 @@ export default class EditRange {
             EditRange.setCursorInNode(node, node.textContent?.length || 0)
         }
     }
+
+
+
 }
 

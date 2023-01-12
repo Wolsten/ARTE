@@ -389,7 +389,7 @@ export default class Editor {
      * Handle delete key. Return true if need to prevent default action
      */
     handleDelete(key: string): boolean {
-        // console.log('key', key)
+        console.log('key', key)
         if (key == 'd') {
             key = 'Delete'
         }
@@ -408,26 +408,34 @@ export default class Editor {
                     // Back spacing into a block containing one or more non-editable blocks?
                     const previous = this.range?.blockParent?.previousElementSibling
                     if (previous) {
+                        console.log('Found custom block')
+                        let found = false
                         previous.childNodes.forEach(child => {
-                            // console.log('Found custom block')
+                            // @todo The following comment is no longer correct - just need to check 
+                            // whether there is a non-editable block in the previous node
                             // Found block, move back to the previous element after a delay
                             // to overcome the default behaviour which is to delete the block
-                            // if ((<HTMLElement>child).contentEditable === "false") {
-                            if ((<HTMLElement>child).getAttribute('contentEditable') === "false") {
-                                setTimeout(() => {
-                                    previous.appendChild(child)
-                                }, 1)
+                            if ((<HTMLElement>child).contentEditable === "false") {
+                                // setTimeout(() => {
+                                //     previous.appendChild(child)
+                                // }, 1)
+                                found = true
                             }
                         })
+
+                        if (found) {
+                            new ModalWarning('Information', html)
+                            return true
+                        }
+
                     }
                     // Forward delete in a none-editable block?
                 } else if (key == 'Delete') {
                     const length = this.range.endContainer?.textContent ? this.range.endContainer.textContent.trim().length : -1
                     if (length === this.range.endOffset) {
-                        const next = (<HTMLElement>this.range.endContainer).nextElementSibling
-                        if (next && next.getAttribute("contenteditable") === 'false') {
-                            const feedback = new ModalWarning('Information', html)
-                            feedback.show()
+                        const next = <HTMLElement>this.range.endContainer?.nextElementSibling
+                        if (next && next.contentEditable === 'false') {
+                            new ModalWarning('Information', html)
                             return true
                         }
                     }
@@ -435,15 +443,9 @@ export default class Editor {
                 // Back spacing or deleting in a multiple selection
             } else {
                 if (this.range.containsCustoms()) {
-                    const feedback = new ModalWarning('Information', html)
-                    feedback.show()
+                    new ModalWarning('Information', html)
                     return true
                 }
-                // const selection = document.getSelection()
-                // if (Helpers.selectionContainsCustoms(this.editorNode, selection)) {
-                //     feedback.show()
-                //     return true
-                // }
             }
         }
         // Reset the range which must be done after a delay since this
@@ -488,11 +490,11 @@ export default class Editor {
         //console.log('key',key)
         // Nav keys
         const navigation = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'End', 'Home']
-        const editor = args[1]
+        const editor = <Editor>args[1]
         // Reset range and toolbar states if navigating within editor
         editor.updateRange()
         if (navigation.includes(key)) {
-            editor.setToolbarStates()
+            editor.toolbar.setStates()
         }
         // console.log('Explicitly updating buffer')
         editor.updateBuffer()
