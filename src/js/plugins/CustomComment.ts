@@ -60,11 +60,9 @@ export default class CustomComment extends CustomBlock {
         }
         // Create and display the modal panel
         buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', () => this.save()))
-        const options: ModalOptionsType = {
-            focusId: 'comment',
-            formClass: 'comment'
-        }
-        this.drawer = new Modal(`${this.editFlag ? 'Edit' : 'Create'} ` + this.label, this.form(), buttons, options)
+        const options: ModalOptionsType = { focusId: 'comment' }
+        const title = (this.editFlag ? 'Edit ' : 'Create ') + this.label
+        this.drawer = new Modal(title, this.form(), buttons, options)
     }
 
 
@@ -89,11 +87,13 @@ export default class CustomComment extends CustomBlock {
             const title = this.resolveLabel()
             resolve = `<button type="button" id="resolve">${title}</button>`
         }
-        return `<div class="form-input">
-                    <textarea id="comment" class="form-control" placeholder="Enter your comment" required>${comment}</textarea>
-                </div>
-                ${timestamps}
-                ${resolve}`
+        return `<div class="arte-comment">
+                    <div class="form-input">
+                        <textarea id="comment" class="form-control" placeholder="Enter your comment" required>${comment}</textarea>
+                    </div>
+                    ${timestamps}
+                    ${resolve}
+                </div>`
     }
 
 
@@ -121,15 +121,8 @@ export default class CustomComment extends CustomBlock {
             this.setAttribute('updated', localTimestamp)
         } else {
             this.setAttribute('created', localTimestamp)
-            this.insert()
+            this.append()
         }
-        // Close the modal
-        // this.drawer.hide()
-        // // Format the saved action
-        // this.format()
-        // // Update the buffer
-        // this.editor.updateBuffer()
-
         this.tidyUp()
     }
 

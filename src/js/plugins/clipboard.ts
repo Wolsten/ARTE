@@ -170,11 +170,11 @@ export default class Clipboard extends ToolbarButton {
      */
     private async paste() {
         const selection = document.getSelection()
-        if (selection && this.prevent(selection) == false) {
+        if (this.editor.range && selection && this.prevent(selection) == false) {
             const text = await navigator.clipboard.readText()
             console.log('pasted text is ', text)
-            let node = document.createTextNode(text)
-            node = Helpers.replaceSelectionWithNode(this.editor, node)
+            const node = document.createTextNode(text)
+            this.editor.range.replaceSelectionWithNode(node)
             this.bufferDelayed()
         }
     }
@@ -185,7 +185,7 @@ export default class Clipboard extends ToolbarButton {
      */
     private pasteHandler(event: ClipboardEvent) {
         const selection = document.getSelection()
-        if (selection && this.prevent(selection) == false && event.clipboardData) {
+        if (this.editor.range && selection && this.prevent(selection) == false && event.clipboardData) {
             // window.clipboardData not recognised by typescript - ignore older browsers
             // const paste = (event.clipboardData || window.clipboardData).getData('text/html');
             const paste = event.clipboardData.getData('text/html');
@@ -197,8 +197,8 @@ export default class Clipboard extends ToolbarButton {
                 console.log('text\n', text)
                 event.preventDefault()
                 // Special handling of paste
-                let node = document.createTextNode(text)
-                node = Helpers.replaceSelectionWithNode(this.editor, node)
+                const node = document.createTextNode(text)
+                this.editor.range.replaceSelectionWithNode(node)
             }
             this.bufferDelayed()
         }

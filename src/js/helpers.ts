@@ -299,74 +299,74 @@ export const getEditorNode = function (node: HTMLElement): HTMLElement {
 /**
  * Insert a new node in the editor in place of the current selection
  */
-export const replaceSelectionWithNode = function (editor: Editor, node: HTMLElement) {
-    if (!editor.range) {
-        console.error('No selection is available to replace with element')
-        return
-    }
-    const parent = editor.range?.startContainer?.parentNode
-    if (!parent) {
-        console.error('Missing parent node')
-        return
-    }
-    // Get any pretext or post text in the current container that is not selected
-    const textContent = editor.range?.startContainer?.textContent
-    let preText = textContent
-        ? textContent.substring(0, editor.range.startOffset)
-        : ''
-    let postText
-    if (editor.range.collapsed) {
-        postText = textContent
-            ? textContent.substring(editor.range.startOffset)
-            : ''
-        // Insert leading and trailing spaces if needed
-        if (preText.charAt(preText.length + 1) != ' ') {
-            preText = preText + ' '
-        }
-        if (postText.charAt(0) != ' ') {
-            postText = ' ' + postText
-        }
-    } else {
-        postText = textContent
-            ? textContent.substring(editor.range.endOffset)
-            : ''
-    }
-    // Insert pretext before the current container
-    if (preText) {
-        parent.insertBefore(document.createTextNode(preText), editor.range.startContainer)
-    }
-    // Insert the node before the current container
-    node = parent.insertBefore(node, editor.range.startContainer)
-    console.warn(node)
-    // Insert post text before the current container
-    if (postText) {
-        parent.insertBefore(document.createTextNode(postText), editor.range.startContainer)
-    }
-    // Remove the pre-existing container
-    (<HTMLElement>editor.range.startContainer).remove()
-    // After delay set the cursor
-    setTimeout(() => {
-        resetCursor(node)
-    }, 10)
-    // return the new node
-    return node
-}
+// export const replaceSelectionWithNode = function (editor: Editor, node: HTMLElement) {
+//     if (!editor.range) {
+//         console.error('No selection is available to replace with element')
+//         return
+//     }
+//     const parent = editor.range?.startContainer?.parentNode
+//     if (!parent) {
+//         console.error('Missing parent node')
+//         return
+//     }
+//     // Get any pretext or post text in the current container that is not selected
+//     const textContent = editor.range?.startContainer?.textContent
+//     let preText = textContent
+//         ? textContent.substring(0, editor.range.startOffset)
+//         : ''
+//     let postText
+//     if (editor.range.collapsed) {
+//         postText = textContent
+//             ? textContent.substring(editor.range.startOffset)
+//             : ''
+//         // Insert leading and trailing spaces if needed
+//         if (preText.charAt(preText.length + 1) != ' ') {
+//             preText = preText + ' '
+//         }
+//         if (postText.charAt(0) != ' ') {
+//             postText = ' ' + postText
+//         }
+//     } else {
+//         postText = textContent
+//             ? textContent.substring(editor.range.endOffset)
+//             : ''
+//     }
+//     // Insert pretext before the current container
+//     if (preText) {
+//         parent.insertBefore(document.createTextNode(preText), editor.range.startContainer)
+//     }
+//     // Insert the node before the current container
+//     node = parent.insertBefore(node, editor.range.startContainer)
+//     console.warn(node)
+//     // Insert post text before the current container
+//     if (postText) {
+//         parent.insertBefore(document.createTextNode(postText), editor.range.startContainer)
+//     }
+//     // Remove the pre-existing container
+//     (<HTMLElement>editor.range.startContainer).remove()
+//     // After delay set the cursor
+//     setTimeout(() => {
+//         resetCursor(node)
+//     }, 10)
+//     // return the new node
+//     return node
+// }
 
 
 /**
  * Reset the cursor after replacing a selection with a new node
  */
-function resetCursor(node: HTMLElement) {
-    if (isCustom(node)) {
-        if (node.nextSibling !== null) {
-            EditRange.setCursorInNode(node.nextSibling, 0)
-        } else if (node.previousSibling !== null) {
-            EditRange.setCursorInNode(node.previousSibling, node.previousSibling.textContent.length)
-        }
-    } else {
-        EditRange.setCursorInNode(node, node.textContent.length)
-    }
-}
+// function resetCursor(node: HTMLElement) {
+//     if (isCustom(node)) {
+//         if (node.nextSibling !== null) {
+//             EditRange.setCursorInNode(node.nextSibling, 0)
+//         } else if (node.previousSibling !== null) {
+//             EditRange.setCursorInNode(node.previousSibling, node.previousSibling.textContent.length)
+//         }
+//     } else {
+//         EditRange.setCursorInNode(node, node.textContent.length)
+//     }
+// }
 
 
 /**

@@ -87,11 +87,9 @@ export default class CustomAction extends CustomBlock {
 
         // Create and display the modal panel
         buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', () => this.save()))
-        const options: ModalOptionsType = {
-            focusId: 'todo',
-            formClass: 'action'
-        }
-        this.drawer = new Modal(`${this.editFlag ? 'Edit' : 'Create'} action`, this.form(), buttons, options)
+        const options: ModalOptionsType = { focusId: 'todo' }
+        const title = (this.editFlag ? 'Edit ' : 'Create ') + this.label
+        this.drawer = new Modal(title, this.form(), buttons, options)
     }
 
 
@@ -104,30 +102,32 @@ export default class CustomAction extends CustomBlock {
         const status = this.getAttribute('status')
         const due = this.getAttribute('due')
         const notes = this.getAttribute('notes')
-        return `<div class="form-input">
-                    <label for="todo">What needs to be done</label>
-                    <textarea id="todo" class="form-control" required>${todo}</textarea>
-                </div>
-                <div class="form-input">
-                    <label for="owners">Owners</label>
-                    <input type="text" id="owners" class="form-control" value="${owners}" required />
-                </div>
-                <div class="form-input">
-                    <label for="due">Due by</label>
-                    <input type="text" id="due" class="form-control" value="${due}"/>
-                </div>
-                <div class="form-input">
-                    <label for="status">Status</label>
-                    <select id="status" class="form-control">
-                        <option value="0" ${status == '0' ? 'selected' : ''}>Open</option>
-                        <option value="1" ${status == '1' ? 'selected' : ''}>Closed - Incomplete</option>
-                        <option value="2" ${status == '2' ? 'selected' : ''}>Closed - Complete</option>
-                    </select>
-                </div>
-                <div class="form-input">
-                    <label for="notes">Notes</label>
-                    <textarea id="notes" class="form-control">${notes}</textarea>
-                </div>`
+        return `<div class="arte-action">
+                    <div class="form-input">
+                            <label for="todo">What needs to be done</label>
+                            <textarea id="todo" class="form-control" required>${todo}</textarea>
+                        </div>
+                        <div class="form-input">
+                            <label for="owners">Owners</label>
+                            <input type="text" id="owners" class="form-control" value="${owners}" required />
+                        </div>
+                        <div class="form-input">
+                            <label for="due">Due by</label>
+                            <input type="text" id="due" class="form-control" value="${due}"/>
+                        </div>
+                        <div class="form-input">
+                            <label for="status">Status</label>
+                            <select id="status" class="form-control">
+                                <option value="0" ${status == '0' ? 'selected' : ''}>Open</option>
+                                <option value="1" ${status == '1' ? 'selected' : ''}>Closed - Incomplete</option>
+                                <option value="2" ${status == '2' ? 'selected' : ''}>Closed - Complete</option>
+                            </select>
+                        </div>
+                        <div class="form-input">
+                            <label for="notes">Notes</label>
+                            <textarea id="notes" class="form-control">${notes}</textarea>
+                        </div>
+                    </div>`
     }
 
 
@@ -148,14 +148,8 @@ export default class CustomAction extends CustomBlock {
             this.setAttribute('updated', localTimestamp)
         } else {
             this.setAttribute('created', localTimestamp)
-            this.insert()
+            this.append()
         }
-        // Close the modal
-        // this.drawer.hide()
-        // // Format the saved action
-        // this.format()
-        // // Update the buffer
-        // this.editor.updateBuffer()
         this.tidyUp()
     }
 

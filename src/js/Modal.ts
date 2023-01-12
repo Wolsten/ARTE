@@ -33,7 +33,6 @@ export type ModalOptionsType = {
     showOnNew?: boolean
     focusId?: string
     confirmIfDirty?: boolean
-    formClass?: string
 }
 
 
@@ -82,7 +81,6 @@ export class Modal {
         showOnNew: true,
         focusId: '',
         confirmIfDirty: true,
-        formClass: ''
     }
 
     // Private props
@@ -200,11 +198,11 @@ export class Modal {
         let buttonsHTML = ''
         this.buttons.forEach((button: ModalButton) => {
             // For confirm "submit" the form to support html5 validation of 'required' attribute
-            const type = button.action == ModalButtonAction.Confirm ? 'submit' : button
+            const type = button.action == ModalButtonAction.Confirm ? 'submit' : 'button'
             buttonsHTML += `<button type="${type}" class="${button.action}">${button.label}</button>`
         })
         if (buttonsHTML != '') buttonsHTML = `<div class="modal-panel-buttons ${centredClass}">${buttonsHTML}</div>`
-        return `<form class="modal-panel-container ${this.options.formClass}" ${style}>
+        return `<form class="modal-panel-container ${style}>
                     ${titleHTML}
                     <div class="modal-panel-body">
                         ${this.html}

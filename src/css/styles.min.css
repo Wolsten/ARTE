@@ -538,6 +538,7 @@ body.index-body #index-buttons {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 1rem;
+  gap: 1rem;
 }
 .modal-panel-body .form-input label {
   font-size: inherit;
@@ -560,15 +561,13 @@ body.index-body #index-buttons {
   background: var(--colour-background);
   border: 1px solid var(--colour-border);
   border-radius: 0.4rem;
-  padding: 0.3rem;
+  padding: 0.5rem 0.8rem;
   color: inherit;
   font-size: inherit;
+  width: 100%;
 }
 .modal-panel-body .form-input .form-control.with-button {
   flex-basis: 95%;
-}
-.modal-panel-body .form-input textarea {
-  width: 100%;
 }
 .modal-panel-body .form-input input[type=radio] {
   flex-grow: 0;
@@ -689,16 +688,16 @@ arte-link button.arte-link:hover {
   background: transparent;
 }
 
-form.arte-link a.link {
+.arte-link a.link {
   position: relative;
   text-decoration: none;
   padding-left: 0;
   color: var(--colour-primary);
 }
-form.arte-link a.link:hover {
+.arte-link a.link:hover {
   border-bottom: 1px var(--colour-primary) solid;
 }
-form.arte-link a.link i {
+.arte-link a.link i {
   position: relative;
   top: 0.1rem;
   color: inherit;
@@ -788,20 +787,20 @@ arte-comment[data-resolved=true] button i {
   color: var(--colour-success);
 }
 
-form.comment textarea {
+.arte-comment textarea {
   min-height: 200px;
 }
-form.comment .timestamps {
+.arte-comment .timestamps {
   display: flex;
   justify-content: space-between;
 }
-form.comment span {
+.arte-comment span {
   display: inline-block;
 }
-form.comment label {
+.arte-comment label {
   font-weight: bold;
 }
-form.comment button {
+.arte-comment button {
   display: block;
   margin-top: 1rem;
 }
@@ -848,6 +847,13 @@ arte-image .caption {
   max-height: 100px;
   height: auto;
   padding: 0.5rem;
+}
+
+.modal-panel-body .options width label {
+  flex-basis: 32%;
+}
+.modal-panel-body .options .form-control {
+  width: auto;
 }
 
 div.editor-debug {

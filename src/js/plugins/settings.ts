@@ -78,7 +78,7 @@ export default class Settings extends ToolbarButton {
 
             inputs.forEach((input) => {
                 input.addEventListener('click', () => this.addCustomEventListener(input))
-                console.log('Adding event listener to', input)
+                // console.log('Adding event listener to', input)
             })
         }
     }
@@ -108,32 +108,32 @@ export default class Settings extends ToolbarButton {
         const theme = this.editor.options.theme
         const explorer = this.editor.options.explorer
         return `<div class="form-input options">
-                <label>Heading numbers</label>
-                <label>
-                    <input name="headingNumbers" value="true" type="radio" class="form-control first" ${headingNumbers ? 'checked' : ''}/> On
-                </label>
-                <label>
-                    <input name="headingNumbers" value="false" type="radio" class="form-control" ${!headingNumbers ? 'checked' : ''}/> Off
-                </label>
-            </div>
-            <div class="form-input options">
-                <label>Theme</label>
-                <label>
-                    <input name="theme" value="theme-light" type="radio" class="form-control first" ${theme == 'theme-light' ? 'checked' : ''}/> Light
-                </label>
-                <label>
-                    <input name="theme" value="theme-dark" type="radio" class="form-control" ${theme == 'theme-dark' ? 'checked' : ''}/> Dark
-                </label>
-            </div>
-            <div class="form-input options">
-                <label>Explorer</label>
-                <label>
-                    <input name="explorer" value="true" type="radio" class="form-control first" ${explorer ? 'checked' : ''}/> Show
-                </label>
-                <label>
-                    <input name="explorer" value="false" type="radio" class="form-control" ${!explorer ? 'checked' : ''}/> Hide
-                </label>
-            </div>`
+                    <label>Heading numbers</label>
+                    <label>
+                        <input name="headingNumbers" value="true" type="radio" class="form-control first" ${headingNumbers ? 'checked' : ''}/> On
+                    </label>
+                    <label>
+                        <input name="headingNumbers" value="false" type="radio" class="form-control" ${!headingNumbers ? 'checked' : ''}/> Off
+                    </label>
+                </div>
+                <div class="form-input options">
+                    <label>Theme</label>
+                    <label>
+                        <input name="theme" value="theme-light" type="radio" class="form-control first" ${theme == 'theme-light' ? 'checked' : ''}/> Light
+                    </label>
+                    <label>
+                        <input name="theme" value="theme-dark" type="radio" class="form-control" ${theme == 'theme-dark' ? 'checked' : ''}/> Dark
+                    </label>
+                </div>
+                <div class="form-input options">
+                    <label>Explorer</label>
+                    <label>
+                        <input name="explorer" value="true" type="radio" class="form-control first" ${explorer ? 'checked' : ''}/> Show
+                    </label>
+                    <label>
+                        <input name="explorer" value="false" type="radio" class="form-control" ${!explorer ? 'checked' : ''}/> Hide
+                    </label>
+                </div>`
     }
 
 

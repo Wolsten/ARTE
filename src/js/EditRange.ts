@@ -148,15 +148,15 @@ export default class EditRange {
     }
 
 
-    static setCursorInNode(node: HTMLElement, offset: number): EditRange {
+    static setCursorInNode(node: HTMLElement | Text, offset: number) {
         let range = document.createRange()
-        const selection = window.getSelection()
         // Check the offset is in range
         if (node.textContent && offset > node.textContent.length) {
             offset = 0
         }
         range.setStart(node, offset)
         range.collapse(true)
+        const selection = window.getSelection()
         if (selection) {
             selection.removeAllRanges()
             selection.addRange(range)
@@ -171,6 +171,73 @@ export default class EditRange {
             return text ? text : ''
         }
         return ''
+    }
+
+
+    replaceSelectionWithNode(node: HTMLElement | Text) {
+        if (!this.base) {
+            console.error('No selection is available to replace with element')
+            return
+        }
+        const parent = this.startContainer?.parentNode
+        if (!parent) {
+            console.error('Missing parent node')
+            return
+        }
+        // Get any pretext or post text in the current container that is not selected
+        const textContent = this.startContainer?.textContent
+        let preText = textContent
+            ? textContent.substring(0, this.startOffset)
+            : ''
+        let postText
+        if (this.collapsed) {
+            postText = textContent
+                ? textContent.substring(this.startOffset)
+                : ''
+            // Insert leading and trailing spaces if needed
+            if (preText.charAt(preText.length + 1) != ' ') {
+                preText = preText + ' '
+            }
+            if (postText.charAt(0) != ' ') {
+                postText = ' ' + postText
+            }
+        } else {
+            postText = textContent
+                ? textContent.substring(this.endOffset)
+                : ''
+        }
+        // Insert pretext before the current container
+        if (preText) {
+            parent.insertBefore(document.createTextNode(preText), this.startContainer)
+        }
+        // Insert the node before the current container
+        node = parent.insertBefore(node, this.startContainer)
+        console.warn(node)
+        // Insert post text before the current container
+        if (postText) {
+            parent.insertBefore(document.createTextNode(postText), this.startContainer)
+        }
+        // Remove the pre-existing container
+        this.startContainer?.remove()
+        // After delay set the cursor
+        setTimeout(() => {
+            this.resetCursor(node)
+        }, 10)
+        // return the new node
+        return node
+    }
+
+
+    resetCursor(node: HTMLElement | Text) {
+        if (node.nodeType == Node.ELEMENT_NODE && Helpers.isCustom(<HTMLElement>node)) {
+            if (node.nextSibling !== null) {
+                EditRange.setCursorInNode(<HTMLElement>node.nextSibling, 0)
+            } else if (node.previousSibling !== null) {
+                EditRange.setCursorInNode(<HTMLElement>node.previousSibling, <HTMLElement>node.previousSibling.textContent.length)
+            }
+        } else {
+            EditRange.setCursorInNode(node, node.textContent?.length || 0)
+        }
     }
 }
 

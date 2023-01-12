@@ -689,6 +689,7 @@ body.index-body {
         display: flex;
         justify-content: flex-start;
         margin-bottom: 1rem;
+        gap: 1rem;
 
         // Common label attributes apply to the left coloum label and
         // input labels for radio and checkbox inputs
@@ -717,17 +718,14 @@ body.index-body {
             background: var(--colour-background);
             border: 1px solid var(--colour-border);
             border-radius: 0.4rem;
-            padding: 0.3rem;
+            padding: 0.5rem 0.8rem;
             color: inherit;
             font-size: inherit;
+            width: 100%;
         }
 
         .form-control.with-button {
             flex-basis: 95%;
-        }
-
-        textarea {
-            width: 100%;
         }
 
         input[type=radio] {
@@ -879,11 +877,9 @@ arte-link {
         border: none;
         background: transparent;
     }
-
-
 }
 
-form.arte-link {
+.arte-link {
     a.link {
         position: relative;
         text-decoration: none;
@@ -1026,7 +1022,7 @@ arte-comment {
     }
 }
 
-form.comment {
+.arte-comment {
     textarea {
         min-height: 200px;
     }
@@ -1108,6 +1104,23 @@ arte-image {
             max-height: 100px;
             height: auto;
             padding: 0.5rem;
+        }
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// @section Settings
+// -----------------------------------------------------------------------------
+
+.modal-panel-body {
+    .options {
+        width label {
+            flex-basis: 32%;
+        }
+
+        .form-control {
+            width: auto;
         }
     }
 }

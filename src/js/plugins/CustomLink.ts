@@ -79,21 +79,23 @@ export default class CustomLink extends CustomBlock {
         if (this.editFlag) {
             openBtn = ` (<a href="${href}" class="link" target="_blank" title="Open link in new tab or window">${Icons.openLink} Open</a>)`
         }
-        return `<div class="form-input">
-                    <label for="href">URL${openBtn}</label>
-                    <input id="href" type="text" class="form-control" placeholder="URL" required value="${href}">
-                </div>
-                <div class="form-input">
-                    <label for="label">Label (optional)</label>
-                    <input id="label" type="text" class="form-control" placeholder="Label" value="${label}">
-                </div>
-                <div class="form-input">
-                    <label for="label">Display option</label>
-                    <select class="form-control" id="display">
-                        <option value="0" ${display == '0' ? 'selected' : ''}>Label only</option>
-                        <option value="1" ${display == '1' ? 'selected' : ''}>Link only</option>
-                        <option value="2" ${display == '2' ? 'selected' : ''}>Label and link</option>
-                    </select>
+        return `<div class="arte-link">
+                    <div class="form-input">
+                        <label for="href">URL${openBtn}</label>
+                        <input id="href" type="text" class="form-control" placeholder="URL" required value="${href}">
+                    </div>
+                    <div class="form-input">
+                        <label for="label">Label (optional)</label>
+                        <input id="label" type="text" class="form-control" placeholder="Label" value="${label}">
+                    </div>
+                    <div class="form-input">
+                        <label for="label">Display option</label>
+                        <select class="form-control" id="display">
+                            <option value="0" ${display == '0' ? 'selected' : ''}>Label only</option>
+                            <option value="1" ${display == '1' ? 'selected' : ''}>Link only</option>
+                            <option value="2" ${display == '2' ? 'selected' : ''}>Label and link</option>
+                        </select>
+                    </div>
                 </div>`
     }
 
@@ -109,13 +111,7 @@ export default class CustomLink extends CustomBlock {
         // console.log('Save changes')'
         this.setAttributes(['display', 'label', 'href'], this.drawer)
         // Check for inserting new
-        if (!this.editFlag) this.insert()
-        // Close the modal
-        // this.drawer.hide()
-        // // Format the saved action
-        // this.format()
-        // // Update the buffer
-        // this.editor.updateBuffer()
+        if (!this.editFlag) this.replace()
         this.tidyUp()
     }
 

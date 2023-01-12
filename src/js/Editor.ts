@@ -1,5 +1,5 @@
 import * as Helpers from './helpers'
-import { Modal, ModalButton, ModalButtonAction, ModalSeverity, ModalType, ModalWarning } from './Modal.js'
+import { Modal, ModalButton, ModalButtonAction, ModalOptionsType, ModalSeverity, ModalType, ModalWarning } from './Modal.js'
 import EditRange from './EditRange'
 import Buffer from './plugins/Buffer'
 import { Options, OptionsType } from './options'
@@ -389,15 +389,16 @@ export default class Editor {
      * Handle delete key. Return true if need to prevent default action
      */
     handleDelete(key: string): boolean {
+        // console.log('key', key)
         if (key == 'd') {
             key = 'Delete'
         }
         //this.updateRange()
         if (this.range) {
 
+            // console.log(this.range)
             const html = `<p>You are attempting to delete one or more active elements, such as comments or links.</p>
                           <p>To delete active elements you need to edit them individually and choose Delete.</p>`
-            const feedback = new ModalWarning('Information', html)
 
             // Single selection
             if (this.range.collapsed) {
@@ -411,7 +412,8 @@ export default class Editor {
                             // console.log('Found custom block')
                             // Found block, move back to the previous element after a delay
                             // to overcome the default behaviour which is to delete the block
-                            if ((<HTMLElement>child).contentEditable === "false") {
+                            // if ((<HTMLElement>child).contentEditable === "false") {
+                            if ((<HTMLElement>child).getAttribute('contentEditable') === "false") {
                                 setTimeout(() => {
                                     previous.appendChild(child)
                                 }, 1)
@@ -424,6 +426,7 @@ export default class Editor {
                     if (length === this.range.endOffset) {
                         const next = (<HTMLElement>this.range.endContainer).nextElementSibling
                         if (next && next.getAttribute("contenteditable") === 'false') {
+                            const feedback = new ModalWarning('Information', html)
                             feedback.show()
                             return true
                         }
@@ -432,6 +435,7 @@ export default class Editor {
                 // Back spacing or deleting in a multiple selection
             } else {
                 if (this.range.containsCustoms()) {
+                    const feedback = new ModalWarning('Information', html)
                     feedback.show()
                     return true
                 }

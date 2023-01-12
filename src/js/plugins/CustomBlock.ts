@@ -287,13 +287,21 @@ class CustomBlock extends ToolbarButton {
      * Insert a new custom element in the editor at the end of the current 
      * range's startContainer
      */
-    protected insert(): void {
+    protected append(): void {
         this.editFlag = false
         if (this.editor?.range?.startContainer?.parentNode) {
             this.node = <HTMLElement>this.editor.range.startContainer.parentNode.appendChild(<Node>this.node)
         }
     }
 
+
+    /**
+     * Replace selection with a new custom element
+     */
+    protected replace(): void {
+        this.editFlag = false
+        this.editor.range?.replaceSelectionWithNode(<HTMLElement>this.node)
+    }
 
 
     // -----------------------------------------------------------------------------

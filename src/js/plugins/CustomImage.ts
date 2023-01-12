@@ -108,19 +108,8 @@ export default class CustomImage extends CustomBlock {
         // console.log('Save changes')
         this.setAttributes(['src', 'caption', 'alt'], this.drawer)
         // Check whether to insert new arte image
-        if (!this.editFlag) this.insert()
-        // this.drawer.hide()
-
+        if (!this.editFlag) this.append()
         this.tidyUp()
-
-        // // Format image and add event handler
-        // this.format()
-        // // Update state
-        // if (this.node) {
-        //     this.editor.range = Helpers.setCursor(this.node, 0)
-        //     this.setState()
-        //     this.editor.updateBuffer()
-        // }
     }
 
 

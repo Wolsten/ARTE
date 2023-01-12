@@ -213,7 +213,7 @@ export default class Mentions extends ToolbarButton {
      * Insert a new person's name in the appropriate position
      */
     private insert(person: string) {
-        if (!this.editor || !this.editor.range || !this.editor.range.startContainer || !this.modal) {
+        if (!this.editor.range || !this.editor.range.startContainer || !this.modal) {
             return
         }
         const container = this.editor.range.startContainer
