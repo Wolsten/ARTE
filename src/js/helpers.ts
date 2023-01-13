@@ -1,8 +1,9 @@
 
-import Editor from './Editor.js'
+
 import EditRange from './EditRange.js'
-// import EditRange from './EditRange.js'
-import { ToolbarButtonType } from './ToolbarButton.js'
+import ToolbarButton, { ToolbarButtonType } from './ToolbarButton.js'
+
+
 
 // -----------------------------------------------------------------------------
 // @section Arrays
@@ -12,7 +13,7 @@ import { ToolbarButtonType } from './ToolbarButton.js'
  * Tests whether two arrays are equal - neither can be empty
  * Returns true if neither empty and all values equal
  */
-export const arraysEqual = function (a: [], b: []): boolean {
+export const arraysEqual = function (a: any[], b: any[]): boolean {
     if (a.length != 0 && b.length != 0 && a.length != b.length) {
         return false
     }
@@ -22,7 +23,7 @@ export const arraysEqual = function (a: [], b: []): boolean {
 /**
  * Check whether array item in a is also a member of b
  */
-export const arraySubset = function (a: [], b: []): boolean {
+export const arraySubset = function (a: any[], b: any[]): boolean {
     return a.every((item, index) => b[index] == item)
 }
 
@@ -89,7 +90,7 @@ export const insertAfter = function (newNode: HTMLElement | null, existingNode: 
  * Insert newNode before existingNode
  * Returns the new node inserted or null if fails
  */
-export const insertBefore = function (newNode: HTMLElement | null, existingNode: HTMLElement | null): HTMLElement | null {
+export const insertBefore = function (newNode: Text | HTMLElement | null, existingNode: Text | HTMLElement | null): Text | HTMLElement | null {
     if (!newNode) {
         console.error('Error in insertAfter.  New node is null')
         return null
@@ -159,8 +160,6 @@ export const isCustom = function (node: HTMLElement): boolean {
         return false
     }
     return tags.custom.includes(node.tagName)
-    // return node.getAttribute('contenteditable') != null && 
-    //        node.getAttribute('contenteditable') == "false"
 }
 
 /**
@@ -169,68 +168,6 @@ export const isCustom = function (node: HTMLElement): boolean {
 export function contains(parent: HTMLElement, child: Node): boolean {
     return parent !== child && parent.contains(child)
 }
-
-/**
- * Check whether the selected range is completely within a custom element
- * Cannot start a selection in a custom block and then select outside of it
- * so do not need to check the end range. Returns the custom element containing 
- * the range or false if not.
- */
-// const rangeStartContainerInCustom = function (range: EditRange): HTMLElement | false {
-//     if (!range) {
-//         console.warn('Error. Passed missing range when looking for a custom node')
-//         return false
-//     }
-//     let element = range.startContainer
-//     if (!element) {
-//         console.warn('Error. Passed missing range when looking for a custom node')
-//         return false
-//     }
-//     while (element && isCustom(element) === false && element.parentNode !== null && element.parentNode.nodeName !== 'DIV') {
-//         element = element.parentElement
-//     }
-//     if (!element) return false
-//     return isCustom(element) ? element : false
-// }
-
-
-// export const selectionContainsCustoms = function (editorNode, selection) {
-//     const customs = editorNode.querySelectorAll('[contenteditable="false"]')
-//     let found = false
-//     for (let i = 0; i < customs.length && found == false; i++) {
-//         if (selection.containsNode(customs[i], true)) {
-//             found = true
-//         }
-//     }
-//     //console.warn({found})
-//     return found
-// }
-
-
-/**
-* Get the inline styles for all nodes in the tree from the lowest to the highest that
-* isn't a block node. In practice these are attached only to SPANs
-* Returns styles separated by semi-colons
-*/
-// export const getInlineStyles = function (node: HTMLElement): string {
-//     if (node == null) {
-//         console.warn('Found null node when getting inline styles')
-//     }
-//     let styles = ''
-//     while (isBlock(node) == false) {
-//         if (node.nodeType === Node.ELEMENT_NODE) {
-//             const inlineStyles = node.getAttribute('style')
-//             if (inlineStyles != null && inlineStyles != '') {
-//                 styles += ';' + inlineStyles
-//             }
-//         }
-//         if (node.parentNode == null) {
-//             console.warn('Error.  Found missing parent node when getting inline styles')
-//         }
-//         node = <HTMLElement>node.parentNode
-//     }
-//     return styles
-// }
 
 
 /**
@@ -256,6 +193,7 @@ export const getParentBlockNode = function (node: Node | null): Node | null {
     return node
 }
 
+
 /**
  * Get the parent editor node (first one with content editable set to true) of a node
  */
@@ -270,111 +208,13 @@ export const getEditorNode = function (node: HTMLElement): HTMLElement {
     return node
 }
 
-/**
- * Get the top parent node for a child node 
- * Returns first node below the stop node (if there is one) 
- * otherwise the stopNode or false if error
- */
-// export const getTopParentNode = function (node: HTMLElement, stopNode: HTMLElement): HTMLElement | false {
-//     if (node == null || stopNode == null) {
-//         console.warn('Error. Passed null node or stopNode to getTopParentNode')
-//     }
-//     let saved = node
-//     while (node != stopNode) {
-//         saved = node
-//         if (node == null) {
-//             console.warn('Error.  Found missing node traversing tree in getParentBlockNode')
-//             return false
-//         }
-//         if (node.parentNode == null) {
-//             console.warn('Error.  Found missing parent node when getting top parent node')
-//             return false
-//         }
-//         node = <HTMLElement>node.parentNode
-//     }
-//     return saved
-// }
-
-
-/**
- * Insert a new node in the editor in place of the current selection
- */
-// export const replaceSelectionWithNode = function (editor: Editor, node: HTMLElement) {
-//     if (!editor.range) {
-//         console.error('No selection is available to replace with element')
-//         return
-//     }
-//     const parent = editor.range?.startContainer?.parentNode
-//     if (!parent) {
-//         console.error('Missing parent node')
-//         return
-//     }
-//     // Get any pretext or post text in the current container that is not selected
-//     const textContent = editor.range?.startContainer?.textContent
-//     let preText = textContent
-//         ? textContent.substring(0, editor.range.startOffset)
-//         : ''
-//     let postText
-//     if (editor.range.collapsed) {
-//         postText = textContent
-//             ? textContent.substring(editor.range.startOffset)
-//             : ''
-//         // Insert leading and trailing spaces if needed
-//         if (preText.charAt(preText.length + 1) != ' ') {
-//             preText = preText + ' '
-//         }
-//         if (postText.charAt(0) != ' ') {
-//             postText = ' ' + postText
-//         }
-//     } else {
-//         postText = textContent
-//             ? textContent.substring(editor.range.endOffset)
-//             : ''
-//     }
-//     // Insert pretext before the current container
-//     if (preText) {
-//         parent.insertBefore(document.createTextNode(preText), editor.range.startContainer)
-//     }
-//     // Insert the node before the current container
-//     node = parent.insertBefore(node, editor.range.startContainer)
-//     console.warn(node)
-//     // Insert post text before the current container
-//     if (postText) {
-//         parent.insertBefore(document.createTextNode(postText), editor.range.startContainer)
-//     }
-//     // Remove the pre-existing container
-//     (<HTMLElement>editor.range.startContainer).remove()
-//     // After delay set the cursor
-//     setTimeout(() => {
-//         resetCursor(node)
-//     }, 10)
-//     // return the new node
-//     return node
-// }
-
-
-/**
- * Reset the cursor after replacing a selection with a new node
- */
-// function resetCursor(node: HTMLElement) {
-//     if (isCustom(node)) {
-//         if (node.nextSibling !== null) {
-//             EditRange.setCursorInNode(node.nextSibling, 0)
-//         } else if (node.previousSibling !== null) {
-//             EditRange.setCursorInNode(node.previousSibling, node.previousSibling.textContent.length)
-//         }
-//     } else {
-//         EditRange.setCursorInNode(node, node.textContent.length)
-//     }
-// }
-
 
 /**
  * Cleans the node, removing any non-supported tags/styles
  * Invokes custom plugin cleaning if defined
- * @param {object[]} buttons array of button objects which have clean methods
+ * The buttons array of button objects which have clean methods
  */
-export const cleanForSaving = function (node: Element, buttons: any[]): void {
+export const cleanForSaving = function (node: HTMLElement, buttons: ToolbarButton[]): void {
 
     // Trim text nodes with CR's
     if (node.nodeType === 3) {
@@ -412,7 +252,7 @@ export const cleanForSaving = function (node: Element, buttons: any[]): void {
     if (buttons.length > 0) {
         // Does it require cleaning?
         const match = buttons.find(
-            button => button.tagName.toUpperCase() === node.tagName
+            button => button.tag.toUpperCase() === node.tagName
         )
         if (match) {
 
@@ -434,15 +274,16 @@ export const cleanForSaving = function (node: Element, buttons: any[]): void {
 
     // Handle child nodes recursively
     node.childNodes.forEach(child => {
-        cleanForSaving(<Element>child, buttons)
+        cleanForSaving(<HTMLElement>child, buttons)
     })
 }
 
+
 /**
  * Remove none-standard styling from the span
- * @param {HTMLElement} span The span which should have at least one style
+ * which should have at least one style
  */
-function cleanStyledSpan(span) {
+function cleanStyledSpan(span: HTMLElement) {
     const style = span.getAttribute('style')
     let newStyle = ''
     // console.log({style})
@@ -460,16 +301,15 @@ function cleanStyledSpan(span) {
     if (newStyle) {
         span.setAttribute('style', newStyle.trim())
         // If no new style but have a style before - must all be go - remove span
-    } else if (style) {
+    } else if (style && span.textContent) {
         const text = document.createTextNode(span.textContent.trim())
         insertBefore(text, span)
         span.remove()
     }
 }
 
-let prettyHtml = ''
 
-function tabs(level) {
+function tabs(level: number) {
     let t = '\n'
     for (let i = 0; i < level; i++) {
         t += '    '
@@ -477,7 +317,8 @@ function tabs(level) {
     return t
 }
 
-function indentTag(node) {
+
+function indentTag(node: HTMLElement) {
     if (isCustom(node)) {
         if (node.nextElementSibling != null && node.nextElementSibling.nodeType === Node.TEXT_NODE) {
             return false
@@ -487,7 +328,14 @@ function indentTag(node) {
     return isBlock(node) || isList(node)
 }
 
-function prettyPrintNode(node, level) {
+
+// -----------------------------------------------------------------------------
+// @section Pretty printing
+// -----------------------------------------------------------------------------
+
+let prettyHtml = ''
+
+function prettyPrintNode(node: HTMLElement, level: number) {
     // Text node?
     if (node.nodeType == 3) {
         const text = node.textContent
@@ -504,11 +352,10 @@ function prettyPrintNode(node, level) {
     } else if (node.nodeType == 1) {
         let indent = false
         if (node.tagName != 'DIV') {
-            const atts = node.attributes
             let tagHtml = node.tagName
-            for (let i = 0; i < atts.length; i++) {
-                const att = atts[i]
-                tagHtml += ` ${att.nodeName}="${att.nodeValue}"`
+            for (let i = 0; i < node.attributes.length; i++) {
+                const attribute = node.attributes[i]
+                tagHtml += ` ${attribute.nodeName}="${attribute.nodeValue}"`
             }
             if (indentTag(node)) {
                 indent = true
@@ -520,7 +367,7 @@ function prettyPrintNode(node, level) {
         }
         // Children
         node.childNodes.forEach(child => {
-            prettyPrintNode(child, level)
+            prettyPrintNode(<HTMLElement>child, level)
         })
         // Closing tag
         if (node.tagName != 'DIV') {
@@ -534,7 +381,9 @@ function prettyPrintNode(node, level) {
     }
 }
 
-export const prettyPrint = function (node) {
+
+
+export const prettyPrint = function (node: HTMLElement): string {
     prettyHtml = ''
     let level = -1
     prettyPrintNode(node, level)
@@ -552,138 +401,51 @@ export const prettyPrint = function (node) {
 export const START_MARKER = '§§'
 export const END_MARKER = '±±'
 
-// Global variables in conjuction with finding marker nodes and resetting 
+// Global variables in conjunction with finding marker nodes and resetting 
 // selections
-let startNode = null
+let startNode: HTMLElement | null = null
 let startOffset = 0
-let endNode = null
+let endNode: HTMLElement | null = null
 let endOffset = 0
 
 
 /**
  * Add start and end marks to the selected text in order to allow reselection at
  * the end of the editing operation
- * @param {Range} range 
  */
-export const addMarkers = function (range) {
+export const addMarkers = function (range: EditRange) {
     // console.log('range',range)
+    if (!range.startContainer || !range.endContainer) {
+        console.error('Missing content when trying to add a marker')
+        return
+    }
+    const startText = range.startContainer?.textContent || ''
+    const endText = range.endContainer?.textContent || ''
     if (range.startContainer == range.endContainer) {
         // console.log('start container matches end container')
         range.startContainer.textContent =
-            range.startContainer.textContent.substring(0, range.startOffset) +
+            startText.substring(0, range.startOffset) +
             START_MARKER +
-            range.startContainer.textContent.substring(range.startOffset, range.endOffset) +
+            startText.substring(range.startOffset, range.endOffset) +
             END_MARKER +
-            range.startContainer.textContent.substring(range.endOffset)
+            startText.substring(range.endOffset)
     } else {
         // console.log('start container does NOT match end container')
         range.startContainer.textContent =
-            range.startContainer.textContent.substring(0, range.startOffset) +
+            startText.substring(0, range.startOffset) +
             START_MARKER +
-            range.startContainer.textContent.substring(range.startOffset)
+            startText.substring(range.startOffset)
         range.endContainer.textContent =
-            range.endContainer.textContent.substring(0, range.endOffset) +
+            endText.substring(0, range.endOffset) +
             END_MARKER +
-            range.endContainer.textContent.substring(range.endOffset)
+            endText.substring(range.endOffset)
     }
 }
-
-// /**
-//  * Add additional properties to the range
-//  * @param {Range} range 
-//  * @returns {object|false} The original range object with additional props or false on error
-//  */
-// function augmentRange(range: EditRange): EditRange | null {
-//     if (!range) {
-//         console.error('Found missing range when augmenting range')
-//         return null
-//     }
-//     // console.log('augmentRange',range)
-//     // First parent node that is a block tag
-//     const blockParent = getParentBlockNode(range.commonAncestorContainer)
-//     if (!blockParent) {
-//         return null
-//     }
-//     range.blockParent = <HTMLElement>blockParent
-//     // First parent node
-//     range.rootNode = range.commonAncestorContainer
-//     if (range.commonAncestorContainer.nodeType === 3) {
-//         if (range.commonAncestorContainer.parentNode == null) {
-//             console.warn('Error.  Found missing parent node when augmenting range')
-//             return null
-//         }
-//         range.rootNode = range.commonAncestorContainer.parentNode
-//     }
-//     // Set flag to indicate whether the range is in a custom node
-//     range.custom = rangeStartContainerInCustom(range)
-//     return range
-// }
-
-
-/**
- * Get the document range or return null if not set
- */
-// export const getRange = function (editorNode: HTMLElement): EditRange | null {
-//     // let sel = window.getSelection()
-//     // // console.log('new selection',sel)
-//     // if (sel?.rangeCount == 1) {
-//     //     let range = <EditRange>sel.getRangeAt(0)
-//     //     // Check if common ancestor is the editor node or contained in the editor node
-//     //     // Ignore all other selectins since they don;t belong to the editor
-//     //     if (range.commonAncestorContainer == editorNode ||
-//     //         contains(editorNode, range.commonAncestorContainer)) {
-//     //         // console.log('New range found')
-//     //         range = augmentRange(range)
-//     //         return range
-//     //     }
-//     // }
-//     const range = new EditRange(editorNode)
-//     return range.base ? range : null
-// }
-
-
-// /**
-//  * Set the cursor in a text node at the specified offset and
-//  * return the new range
-//  */
-// private const setCursor = function (node: HTMLElement, offset: number): EditRange {
-
-//     let range = new EditRange()
-
-//     let range = <EditRange>document.createRange()
-//     const selection = window.getSelection()
-//     // Check the offset is in rangea
-//     if (node.textContent && offset > node.textContent.length) {
-//         offset = 0
-//     }
-//     range.setStart(node, offset)
-//     range.collapse(true)
-//     if (selection) {
-//         selection.removeAllRanges()
-//         selection.addRange(range)
-//     }
-//     const newRange = augmentRange(range)
-//     if (newRange) return newRange
-//     return range
-// }
-
-/**
- * Restore a previously selected range
- */
-// export const restoreSelectedRange = function (range: EditRange): EditRange {
-//     const selection = window.getSelection()
-//     if (range.base && selection) {
-//         selection.removeAllRanges()
-//         selection.addRange(range.base)
-//     }
-//     range = augmentRange(range)
-//     return range
-// }
 
 /**
  * Find the node containing the start marker
  */
-const getStartNode = function (parent: Element): boolean {
+const getStartNode = function (parent: HTMLElement): boolean {
     return findMarkerNode(parent, START_MARKER)
 }
 
@@ -701,9 +463,9 @@ const getEndNode = function (parent: HTMLElement): boolean {
  */
 function findMarkerNode(parent: HTMLElement, marker: string): boolean {
     for (let i = 0; i < parent.childNodes.length; i++) {
-        const child = parent.childNodes[i]
+        const child = <HTMLElement>parent.childNodes[i]
         if (child.nodeType === 1) {
-            if (findMarkerNode(<HTMLElement>child, marker)) {
+            if (findMarkerNode(child, marker)) {
                 return true
             }
         } else if (child.nodeType === 3) {
@@ -729,66 +491,25 @@ function findMarkerNode(parent: HTMLElement, marker: string): boolean {
 
 /**
  * Reset the selection using the start and end markers
- * @param {HTMLElement} editorNode 
- * @returns {Range|false}
  */
-export const resetSelection = function (editorNode) {
+export const resetSelection = function (editorNode: HTMLElement): Range | false {
     if (getStartNode(editorNode) && getEndNode(editorNode)) {
         const range = document.createRange()
         const selection = window.getSelection()
-        range.setStart(startNode, startOffset)
-        if (startNode == endNode && startOffset == endOffset) {
-            range.collapse(true)
-        } else {
-            range.setEnd(endNode, endOffset)
+        if (selection) {
+            range.setStart(<Node>startNode, startOffset)
+            if (startNode == endNode && startOffset == endOffset) {
+                range.collapse(true)
+            } else {
+                range.setEnd(<Node>endNode, endOffset)
+            }
+            selection.removeAllRanges()
+            selection.addRange(range)
+            return range
         }
-        selection.removeAllRanges()
-        selection.addRange(range)
-        return range
     }
     return false
 }
-
-
-// -----------------------------------------------------------------------------
-// @section Modals confirmation dialogues
-// -----------------------------------------------------------------------------
-
-// /**
-//  * Display confirmation dialogue for cancel any edits. Returns as a new modal
-//  */
-// export const modalRequestCancel = function (callback: Function): Modal {
-//     const confirm = new Modal({
-//         type: 'overlay',
-//         severity: 'warning',
-//         title: 'Cancel changes?',
-//         html: 'Do you really want to lose changes?',
-//         buttons: {
-//             cancel: { label: 'No - keep editing' },
-//             confirm: { label: 'Yes - lose changes', callback }
-//         }
-//     })
-//     confirm.show()
-//     return confirm
-// }
-
-// /**
-//  * Display confirmation dialogue for deleting an item
-//  */
-// export const modalRequestDelete = function (label: string, callback: Function): Modal {
-//     const confirm = new Modal({
-//         type: 'overlay',
-//         severity: 'warning',
-//         title: `Delete ${label}?`,
-//         html: `Do you really want to delete this ${label}?`,
-//         buttons: {
-//             cancel: { label: 'No - keep editing' },
-//             confirm: { label: 'Yes - delete', callback }
-//         }
-//     })
-//     confirm.show()
-//     return confirm
-// }
 
 
 // -----------------------------------------------------------------------------
@@ -796,30 +517,26 @@ export const resetSelection = function (editorNode) {
 // -----------------------------------------------------------------------------
 
 /**
- * Generate a randon uid based on the current time
- * @returns {string}
+ * Generate a random uid based on the current time
  */
-export const generateUid = function () {
+export const generateUid = function (): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 /**
  * Smooth out key entry
- * @param {function} fn a callback function
- * @param {number} delay delay in ms before callback triggered
- * @returns 
  */
-export const debounce = function (fn, delay) {
-    let timeOutId
-    return function (...args) {
+export const debounce = function (callback: Function, msBeforeTriggeringCallback: number): Function {
+    let timeOutId: NodeJS.Timeout
+    return function (...args: any[]) {
         // Clear previous timeout if not expired
         if (timeOutId) {
             clearTimeout(timeOutId)
         }
         // Set new timeout
         timeOutId = setTimeout(() => {
-            fn(...args)
-        }, delay)
+            callback(...args)
+        }, msBeforeTriggeringCallback)
     }
 }
 

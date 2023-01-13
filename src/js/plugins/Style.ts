@@ -341,7 +341,7 @@ export default class Style extends ToolbarButton {
 
     /**
      * Split the node into component parts based on the current selection
-     * Returnt he text parts or false if no content found
+     * Return the text parts or false if no content found
      */
     private getTextParts(node: Node, range: EditRange): TextParts | false {
         if (!node.textContent) return false

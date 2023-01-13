@@ -291,12 +291,25 @@ body.index-body #index-buttons {
   display: block;
   padding: 0 0.5rem;
 }
-.editor-sidebar .editor-sidebar-content header h1,
+.editor-sidebar .editor-sidebar-content header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}
 .editor-sidebar .editor-sidebar-content header h2 {
   text-transform: capitalize;
   color: var(--colour-secondary);
   padding: 0;
+  margin: 0;
   font-weight: normal;
+}
+.editor-sidebar .editor-sidebar-content header button {
+  border: none;
+  margin: 0;
+}
+.editor-sidebar .editor-sidebar-content header button i {
+  font-size: 1.4em;
 }
 .editor-sidebar .editor-sidebar-content h1 {
   font-size: 1.1rem;
@@ -325,16 +338,10 @@ body.index-body #index-buttons {
 }
 .editor-sidebar ul.tab-menu a {
   display: inline-block;
-  margin: 0 0.1rem;
+  margin: 0;
   padding: 0.2rem 0.8rem;
   text-decoration: none;
   color: var(--colour-text);
-  border-top: 1px var(--colour-background-hover) solid;
-  border-left: 1px var(--colour-background-hover) solid;
-  border-right: 1px var(--colour-background-hover) solid;
-  border-bottom: 1px var(--colour-background) solid;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
   background-color: var(--colour-background);
   transition: background-color 0.4s ease-in-out;
 }
@@ -343,7 +350,6 @@ body.index-body #index-buttons {
 }
 .editor-sidebar ul.tab-menu a.active {
   background-color: var(--colour-background-active);
-  border-bottom-color: var(--colour-background-active);
   cursor: default;
 }
 .editor-sidebar .tab-content {
@@ -351,7 +357,7 @@ body.index-body #index-buttons {
   border-top: 1px var(--colour-background-active) solid;
   border-bottom: 1px var(--colour-background-active) solid;
   max-height: 700px;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 .editor-sidebar .tab-content .tab-item {
   display: none;
@@ -430,7 +436,6 @@ body.index-body #index-buttons {
   margin: 0.4rem 0;
   padding: 0;
 }
-.editor-body bq,
 .editor-body blockquote {
   background: var(--colour-blockquote-background);
   border-left: 10px solid var(--colour-border);
@@ -732,6 +737,8 @@ arte-link button.arte-link:hover {
 
 arte-action {
   display: block;
+  margin-bottom: 1rem;
+  text-align: right;
 }
 arte-action i {
   font-size: 1.3rem;
@@ -760,9 +767,9 @@ article.action p {
 
 arte-comment {
   display: inline-block;
-  position: relative;
-  top: -0.1rem;
-  right: 0.6rem;
+  position: absolute;
+  top: -0.5rem;
+  right: -1rem;
 }
 arte-comment button {
   border: none;

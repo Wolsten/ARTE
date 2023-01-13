@@ -1,4 +1,5 @@
 import Editor from '../Editor'
+import ToolbarButton from '../ToolbarButton'
 import BufferButton from './BufferButton'
 
 
@@ -19,10 +20,10 @@ export default class Buffer {
 
 
 
-    constructor(editor: Editor, undoButton: BufferButton, redoButton: BufferButton, size: number) {
+    constructor(editor: Editor, undoButton: ToolbarButton, redoButton: ToolbarButton, size: number) {
         this.editor = editor
-        this.undoButton = undoButton
-        this.redoButton = redoButton
+        this.undoButton = <BufferButton>undoButton
+        this.redoButton = <BufferButton>redoButton
         this.size = size > 0 && size <= this.MAX_BUFFER_SIZE ? size : this.MAX_BUFFER_SIZE
     }
 

@@ -1,5 +1,5 @@
 import * as Helpers from './helpers'
-import { Modal, ModalButton, ModalButtonAction, ModalOptionsType, ModalSeverity, ModalType, ModalWarning } from './Modal.js'
+import { Modal, ModalButton, ModalButtonAction, ModalSeverity, ModalType, ModalWarning } from './Modal.js'
 import EditRange from './EditRange'
 import Buffer from './plugins/Buffer'
 import { Options, OptionsType } from './options'
@@ -136,6 +136,21 @@ export default class Editor {
             }
         }
         setTimeout(() => this.updateBuffer(), 100)
+
+        // Testing dom model
+        // const body = document.querySelector('body')
+        // if (body?.hasChildNodes()) {
+        //     console.log('Body has child nodes')
+        //     body.childNodes.forEach(child => {
+        //         const element = <Element>child
+        //         if (element.nodeType === Node.ELEMENT_NODE) {
+        //             const children = element.childElementCount
+        //             const cls = element.getAttribute('class')
+        //             console.log('This ' + element.nodeName + ' has ' + children + ' children and class ' + cls)
+        //         }
+        //     })
+        // }
+
     }
 
 
@@ -294,6 +309,11 @@ export default class Editor {
                 (event.ctrlKey && event.key == 'd'))) {
                 if (this.handleDelete(event.key)) {
                     event.preventDefault()
+                } else {
+                    // Reset the range which must be done after a delay since this
+                    // method was triggered on keydown before added to dom
+                    // Must invoke with arrow function so that the instance context is retained
+                    setTimeout(() => this.updateRange(), 10)
                 }
                 handled = true
             }
@@ -339,7 +359,7 @@ export default class Editor {
         if (this.range === null) {
             return
         }
-        const length = this.range.endContainer.textContent ? this.range.endContainer.textContent.trim().length : -1
+        const length = this.range?.endContainer?.textContent ? this.range.endContainer.textContent.trim().length : -1
         const endLineSelected = length === this.range.endOffset
         let handled = false
         // console.log(`handling enter with customs`, this.range.customs)
@@ -348,18 +368,20 @@ export default class Editor {
                 const emptyTag = this.range.blockParent.innerHTML === '<br>'
                 const listTag = this.range.blockParent.tagName === 'LI'
                 const tag = emptyTag || !listTag ? 'P' : this.range.blockParent.tagName
-                let n = document.createElement(tag)
-                n.innerText = '\n'
-                n = Helpers.insertAfter(n, this.range.blockParent)
-                // Helpers.setCursor(n, 0)
-                this.range.setCursor(n, 0)
-                handled = true
-                // Reset the range which must be done after a delay since this
-                // method was triggered on keydown before added to dom
-                setTimeout(() => {
-                    this.updateRange()
-                    this.toolbar.setStateForButtonType(ToolbarButtonType.BLOCK)
-                }, 10)
+                let node = document.createElement(tag)
+                node.innerText = '\n'
+                const newNode = Helpers.insertAfter(node, this.range.blockParent)
+                if (newNode) {
+                    // Helpers.setCursor(n, 0)
+                    this.range.setCursor(newNode, 0)
+                    handled = true
+                    // Reset the range which must be done after a delay since this
+                    // method was triggered on keydown before added to dom
+                    setTimeout(() => {
+                        this.updateRange()
+                        this.toolbar.setStateForButtonType(ToolbarButtonType.BLOCK)
+                    }, 10)
+                }
                 // Check for handling enter within a parent block element that has a custom node at the end
                 // @todo Multiple custom nodes?
             }
@@ -389,7 +411,7 @@ export default class Editor {
      * Handle delete key. Return true if need to prevent default action
      */
     handleDelete(key: string): boolean {
-        console.log('key', key)
+        // console.log('key', key)
         if (key == 'd') {
             key = 'Delete'
         }
@@ -404,54 +426,52 @@ export default class Editor {
             if (this.range.collapsed) {
                 // Check for back spacing from a single selection point 
                 if (key == 'Backspace' && this.range.startOffset == 0) {
+
+                    // @todo This prevents deletion of inline elements such as links
+                    let previous = <HTMLElement>this.range.endContainer?.previousElementSibling
+                    if (previous?.contentEditable === 'false') {
+                        new ModalWarning('Information', html)
+                        return true
+                    }
+
                     // console.log('backspacing into custom block')
                     // Back spacing into a block containing one or more non-editable blocks?
-                    const previous = this.range?.blockParent?.previousElementSibling
+                    previous = <HTMLElement>this.range?.blockParent?.previousElementSibling
                     if (previous) {
-                        console.log('Found custom block')
+                        // console.log('Found custom block')
                         let found = false
                         previous.childNodes.forEach(child => {
-                            // @todo The following comment is no longer correct - just need to check 
-                            // whether there is a non-editable block in the previous node
-                            // Found block, move back to the previous element after a delay
-                            // to overcome the default behaviour which is to delete the block
-                            if ((<HTMLElement>child).contentEditable === "false") {
-                                // setTimeout(() => {
-                                //     previous.appendChild(child)
-                                // }, 1)
+                            // check whether there is a non-editable block in the previous node
+                            if (!found && (<HTMLElement>child).contentEditable === "false") {
                                 found = true
                             }
                         })
-
                         if (found) {
                             new ModalWarning('Information', html)
                             return true
                         }
-
                     }
                     // Forward delete in a none-editable block?
                 } else if (key == 'Delete') {
-                    const length = this.range.endContainer?.textContent ? this.range.endContainer.textContent.trim().length : -1
-                    if (length === this.range.endOffset) {
-                        const next = <HTMLElement>this.range.endContainer?.nextElementSibling
-                        if (next && next.contentEditable === 'false') {
-                            new ModalWarning('Information', html)
-                            return true
-                        }
+
+                    const next = <HTMLElement>this.range.endContainer?.nextElementSibling
+                    if (next.contentEditable === 'false') {
+                        new ModalWarning('Information', html)
+                        return true
                     }
                 }
                 // Back spacing or deleting in a multiple selection
             } else {
-                if (this.range.containsCustoms()) {
+                if (this.range.containsNonEditableTags) {
                     new ModalWarning('Information', html)
                     return true
                 }
             }
         }
-        // Reset the range which must be done after a delay since this
-        // method was triggered on keydown before added to dom
-        // Must invoke with arrow function so that the instance context is retained
-        setTimeout(() => this.updateRange(), 10)
+        // // Reset the range which must be done after a delay since this
+        // // method was triggered on keydown before added to dom
+        // // Must invoke with arrow function so that the instance context is retained
+        // setTimeout(() => this.updateRange(), 10)
         return false
     }
 
@@ -711,11 +731,11 @@ export default class Editor {
      * Returns the cleaned html data
      */
     getCleanData(pretty = false): string {
-        let node = this.editorNode!.cloneNode(true)
+        const node = <HTMLElement>this.editorNode.cloneNode(true)
         // Get list of buttons with clean methods
         const cleanButtons = this.toolbar.buttons.filter(button => button.clean)
-        Helpers.cleanForSaving(<Element>node, cleanButtons)
-        return pretty ? Helpers.prettyPrint(node) : (<HTMLElement>node).innerHTML
+        Helpers.cleanForSaving(node, cleanButtons)
+        return pretty ? Helpers.prettyPrint(node) : node.innerHTML
     }
 
     /**

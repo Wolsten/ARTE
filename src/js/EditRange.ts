@@ -5,7 +5,7 @@ import * as Helpers from './helpers'
 export default class EditRange {
 
     editorNode: HTMLElement
-    rootNode: Node | null = null
+    rootNode: HTMLElement | null = null
     blockParent: null | HTMLElement = null
     custom: HTMLElement | false = false     // The custom object selected or false
 
@@ -14,11 +14,18 @@ export default class EditRange {
     base: Range | null = null
 
     // Convenience properties with appropriate casting to access base properties
-    startContainer: null | HTMLElement = null
-    endContainer: null | HTMLElement = null
+    startContainer: HTMLElement | null = null
+    endContainer: HTMLElement | null = null
     collapsed: boolean = false
     startOffset = 0
     endOffset = 0
+
+    // Set for single text node selections
+    fullLength = 0
+    selectedText = ''
+
+    // Whether contains any non editable tags
+    containsNonEditableTags = false
 
 
     constructor(editorNode: HTMLElement) {
@@ -49,9 +56,9 @@ export default class EditRange {
         this.blockParent = blockParent ? <HTMLElement>blockParent : null
 
         // First parent node
-        this.rootNode = this.base.commonAncestorContainer
+        this.rootNode = <HTMLElement>this.base.commonAncestorContainer
         if (this.base.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
-            this.rootNode = this.base.commonAncestorContainer.parentNode
+            this.rootNode = <HTMLElement>this.base.commonAncestorContainer.parentNode
         }
 
         this.startContainer = <HTMLElement>this.base.startContainer
@@ -60,8 +67,22 @@ export default class EditRange {
         this.startOffset = this.base.startOffset
         this.endOffset = this.base.endOffset
 
+        // Selected text
+        if (this.startContainer === this.endContainer &&
+            this.startContainer.nodeType === Node.TEXT_NODE) {
+
+            const text = this.startContainer.textContent?.trim() || ''
+            this.fullLength = text.length
+            this.selectedText = text.substring(this.startOffset, this.endOffset)
+        }
+
         // Set flag to indicate whether the range is in a custom node
         this.custom = this.startsInCustom()
+
+        // Set flag as to whether contains any non editable tags
+        this.containsNonEditableTags = this.containsCustoms()
+
+        console.log('containsNonEditableTags', this.containsNonEditableTags)
     }
 
 
@@ -79,26 +100,92 @@ export default class EditRange {
     startsInCustom(): HTMLElement | false {
         if (!this.base) return false
         let node = this.base.startContainer
-        while (Helpers.isCustom(node) === false &&
+        while (Helpers.isCustom(<HTMLElement>node) === false &&
             node.parentNode !== null &&
             node.parentNode.nodeName !== 'DIV') {
             node = node.parentNode
         }
-        return Helpers.isCustom(node) ? <HTMLElement>node : false
+        return Helpers.isCustom(<HTMLElement>node) ? <HTMLElement>node : false
     }
 
+    // console.log('Full text=', this.startContainer.textContent)
 
-    containsCustoms() {
-        if (!this.selection) return false
-        const customs = this.editorNode.querySelectorAll('[contenteditable="false"]')
-        let found = false
-        for (let i = 0; i < customs.length && found == false; i++) {
-            if (this.selection.containsNode(customs[i], true)) {
-                found = true
-            }
+    private containsCustoms(): boolean {
+        // console.log(this.base)
+        // No range
+        if (!this.startContainer || !this.endContainer) return false
+
+        // Single container
+        if (this.selectedText != '' && this.fullLength > 0) {
+
+            // console.warn('range=', this.base)
+            // console.log(this.startContainer.nodeType)
+            // console.log('Full text=', this.startContainer.textContent)
+            // console.log('Full text length', this.fullLength)
+            // console.log('Selected text=', this.selectedText)
+            // console.log('Selected text length=', this.selectedText.length)
+
+            return this.startOffset == 0 && this.endOffset == this.fullLength &&
+                (this.startContainer.previousElementSibling?.getAttribute('contenteditable') === 'false' ||
+                    this.startContainer.nextElementSibling?.getAttribute('contenteditable') === 'false')
         }
-        //console.warn({found})
-        return found
+
+        let node = this.startContainer
+        do {
+
+            // console.log('checking node', node)
+            if (node && node.nodeType == Node.ELEMENT_NODE && node.contentEditable == 'false') {
+                return true
+            }
+            node = <HTMLElement>node.nextElementSibling
+
+        } while (node && node != this.endContainer)
+
+        return false
+
+
+
+
+        // // Single container
+        // if (this.startContainer === this.endContainer) {
+        //     const text = this.startContainer.textContent
+        //     return text !== undefined && text.includes('contenteditable="false"')
+        // }
+        // // Multiple containers
+        // let node = this.startContainer
+        // do {
+        //     if (node.querySelector('[contenteditable="false"]') !== null) {
+        //         return true
+        //     } else {
+        //         node = <HTMLElement>node.nextSibling
+        //     }
+        // } while (node)
+        // return false
+
+        // let found = false
+        // let text = ''
+        // this.rootNode.childNodes.forEach((child) => {
+        //     if (child === this.startContainer) {
+        //         if (child === this.endContainer) {
+        //             text = this.startContainer.textContent?.substring(this.startOffset, this.endOffset)
+        //         }
+        //     })
+
+        // // 
+        // // if ( this.startContainer === this.endContainer ){
+        // return (<HTMLElement>this.rootNode).querySelector('[contenteditable="false"]') !== null
+        // // }
+
+        // if (!this.selection) return false
+        // const customs = this.editorNode.querySelectorAll('[contenteditable="false"]')
+        // let found = false
+        // for (let i = 0; i < customs.length && found == false; i++) {
+        //     if (this.selection.containsNode(customs[i], true)) {
+        //         found = true
+        //     }
+        // }
+        // //console.warn({found})
+        // return found
     }
 
 
@@ -233,7 +320,8 @@ export default class EditRange {
             if (node.nextSibling !== null) {
                 EditRange.setCursorInNode(<HTMLElement>node.nextSibling, 0)
             } else if (node.previousSibling !== null) {
-                EditRange.setCursorInNode(<HTMLElement>node.previousSibling, <HTMLElement>node.previousSibling.textContent.length)
+                const length = node.previousSibling.textContent?.length || 0
+                EditRange.setCursorInNode(<HTMLElement>node.previousSibling, length)
             }
         } else {
             EditRange.setCursorInNode(node, node.textContent?.length || 0)

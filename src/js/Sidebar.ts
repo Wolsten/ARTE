@@ -1,5 +1,6 @@
 import Editor from './Editor'
 import SidebarButton from './SidebarButton'
+import * as Icons from './icons'
 
 
 export default class Sidebar {
@@ -155,10 +156,10 @@ export default class Sidebar {
         })
         const html =
             `<div class="editor-sidebar-content">
-                <header><h1>Explorer</h1></header>
+                <header><h2>Explorer</h2><button class="close">${Icons.close}</button></header>
                 <ul class="tab-menu">${menu}</ul>
                 <div class="tab-content">${content}</div>
-                <button class="close">Close explorer</button>
+                
             </div>`
         return html
     }

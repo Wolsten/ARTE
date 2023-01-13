@@ -122,14 +122,14 @@ export default class Block extends ToolbarButton {
                 }
                 // Start processing once start node found
                 if (startNodeFound && endNodeFound == false) {
-                    // console.log( `%cparse top level node ${node.tagName}`,'background:orange;color:white;padding:0.5rem')
+                    // console.log( `%c parse top level node ${node.tagName}`,'background:orange;color:white;padding:0.5rem')
                     // Check for block (as opposed to list formatting) and start a new fragment
                     if (this.type === ToolbarButtonType.BLOCK) {
                         this.previousFormats = []
                         this.lastNodeAdded = null
                         this.fragmentNode = document.createElement('DIV')
                     }
-                    this.parseNode(<Element>node, { oldFormats: [], newFormats: [] })
+                    this.parseNode(<HTMLElement>node, { oldFormats: [], newFormats: [] })
                     if (this.type === ToolbarButtonType.BLOCK) {
                         // console.log( 'fragment', this.fragmentNode.innerHTML)
                         (<Element>node).outerHTML = this.fragmentNode.innerHTML
@@ -258,8 +258,8 @@ export default class Block extends ToolbarButton {
     /**
      * Recursively parse a node
      */
-    private parseNode(node: Element, formats: Formats) {
-        // console.log( `%cparseNode ${node.tagName}`,'background:green;color:white;padding:0.5rem')
+    private parseNode(node: HTMLElement, formats: Formats) {
+        // console.log( `%c parseNode ${node.tagName}`,'background:green;color:white;padding:0.5rem')
         // console.log( `Inner HTML [${node.innerHTML.trim()}]`)
         // console.log( `node formats on entry`,formats.oldFormats)
         // Define the formats for this node only
@@ -275,9 +275,9 @@ export default class Block extends ToolbarButton {
         }
         // Loop through all child blocks 
         node.childNodes.forEach(child => {
-            if (Helpers.isBlock(child) || Helpers.isList(child)) {
+            if (Helpers.isBlock(child) || Helpers.isList(<HTMLElement>child)) {
                 // console.log(`Moving to child ${child.tagName}`)
-                this.parseNode(child, nodeFormats)
+                this.parseNode(<HTMLElement>child, nodeFormats)
             }
         })
         // console.log(`Finished this branch - processed children`, node.childNodes)
@@ -357,7 +357,7 @@ export default class Block extends ToolbarButton {
      * Save the content of text nodes and protected nodes against the current target node
      * which defaults to be the this.fragmentNode
      */
-    private saveContent(element: Element, formats: Formats): void {
+    private saveContent(element: HTMLElement, formats: Formats): void {
         let n
         let target = this.fragmentNode
         let html = this.getBlockHTML(element)
@@ -391,8 +391,8 @@ export default class Block extends ToolbarButton {
             if (Helpers.arraySubset(this.previousFormats, currentFormats)) {
                 // console.log('saveContent: 2.1 Current formats are a superset of previous formats')
                 for (let i = 0; i < this.previousFormats.length; i++) {
-                    if (target.lastElementChild !== null) {
-                        target = target.lastElementChild
+                    if (target.lastElementChild) {
+                        target = <HTMLElement>target.lastElementChild
                     }
                     // console.log('saveContent: 2.2 New formats superset - moving target to',target.outerHTML)
                 }
@@ -405,7 +405,7 @@ export default class Block extends ToolbarButton {
             // Formatting is the same as previously
         } else if (Helpers.arraysEqual(currentFormats, this.previousFormats)) {
             if (this.lastNodeAdded && this.lastNodeAdded != this.fragmentNode) {
-                target = <Element>this.lastNodeAdded.parentElement
+                target = <HTMLElement>this.lastNodeAdded.parentElement
             }
             n = document.createElement(lastFormat)
             target = target.appendChild(n)
@@ -420,7 +420,7 @@ export default class Block extends ToolbarButton {
                     // Exclude the last format if it is an LI as we need 
                     // to add the LI to the previous list parent
                     if ((index == (currentFormats.length - 1) && format == 'LI') == false) {
-                        target = <Element>target.lastElementChild
+                        target = <HTMLElement>target.lastElementChild
                         // console.log('4.1 Move target node to', target.outerHTML)
                         startIndex++
                     }
@@ -460,22 +460,22 @@ export default class Block extends ToolbarButton {
     /**
      * Returns the html content of a node including its child nodes
      */
-    private getBlockHTML(element: Element): string {
+    private getBlockHTML(element: HTMLElement): string {
         let html = ''
         // Extract all text, inline formats and protected node content from the node
         element.childNodes.forEach((child: ChildNode) => {
-            const el = <Element>child
+            const childElement = <HTMLElement>child
             // Plain text node
-            if (el.nodeType === 3) {
-                let text = el.textContent ? el.textContent : ''
+            if (childElement.nodeType === 3) {
+                let text = childElement.textContent ? childElement.textContent : ''
                 // Trim text nodes with CR's
                 if (text.includes('\n')) {
                     text = text.trim()
                 }
                 html += text
                 // Inline, custom node or line break
-            } else if (Helpers.isStyle(el) || Helpers.isCustom(el) || el.tagName === 'BR') {
-                html += el.outerHTML
+            } else if (Helpers.isStyle(childElement) || Helpers.isCustom(childElement) || childElement.tagName === 'BR') {
+                html += childElement.outerHTML
             }
         })
         return html

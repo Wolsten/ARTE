@@ -7,12 +7,11 @@
 
 <h2>Introduction</h2>
 
-<p>ARTE, pronounced "Arty", is a free, open source and extensible library for implementing WYSIWYG (What You See is What You Get) editors in vanilla javascript that supports active components, such as comments like the one attached to this paragraph. Try clicking the orange balloon to view it. 
+<p>ARTE, pronounced "Arty", is a free, open source and extensible library for implementing WYSIWYG (What You See is What You Get) editors in vanilla javascript that supports active components, such as comments like the one attached to this paragraph. Try clicking the orange balloon to view it.
     <arte-comment id="ksocpcmqdgebjtafp4o" data-comment="This is an example comment" data-created="23/08/2021, 09:01" data-updated="23/08/2021, 09:01" data-resolved="false"></arte-comment>
 </p>
 
-<p>With most editors, generated content is usually passive with no interaction capability. However, in ARTE content can be <span style="font-weight:bold">active</span>, i.e. one is able to interact with it in ways appropriate to that content, for example creating <span style="font-weight:bold">protected</span> content that can be edited in its own right. For example this paragraph has a meeting action associated with it - the sort of thing you might use when writing minutes.
-    <arte-action id="ktvikq1z8hbmksr1wvg" data-status="0" data-todo="A test action" data-owners="Dave and Jill" data-due="15th May 2022" data-created="22/09/2021, 14:00" data-updated="22/09/2021, 14:00" data-notes="Some notes"></arte-action>
+<p>With most editors, generated content is usually passive with no interaction capability. However, in ARTE content can be <span style="font-weight:bold">active</span>, i.e. one is able to interact with it in ways appropriate to that content, for example creating <span style="font-weight:bold">protected</span> content that can be edited in its own right. For example this paragraph has a meeting action associated with it - the sort of thing you might use when writing minutes.<arte-action id="ktvikq1z8hbmksr1wvg" data-status="0" data-todo="A test action" data-owners="Dave and Jill" data-due="15th May 2022" data-created="22/09/2021, 14:00" data-updated="22/09/2021, 14:00" data-notes="Some notes"></arte-action>
 </p>
 
 <p>ARTE supports the following features, all implemented with a consistent plugin model:</p>
@@ -27,7 +26,7 @@
         </ul>
     <li>Inline styles such as italic, bold, underline and text colour. You can also clear all selected styling in one go using the clear button .</li>
     <li>Undo and redo buttons.</li>
-    <li>Clipboard management, including auto-detection of pasting from Miscrosoft Word (as plain text only).</li>
+    <li>Clipboard management, including auto-detection of pasting from Microsoft Word (as plain text only).</li>
     <li>Passive custom elements, such as mentions.</li>
     <li>Active custom elements, such as links, e.g. <arte-link id="ksocpdmqtgebjtafp4o" data-href="https://github.com/Wolsten/ARTE" data-label="the ARTE Repository" data-display="0"></arte-link>, images, comments and actions. Examples of these are provided in the toolbar above. Trying clicking the link to edit it or add a new one using the link button.
 </ol>
