@@ -48,6 +48,13 @@
   font-size: 16px;
 }
 
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+}
+
 button {
   background: var(--colour-background);
   border: 1px solid var(--colour-border);
@@ -447,7 +454,6 @@ body.index-body #index-buttons {
   border: 1px var(--colour-background-active) solid;
   color: var(--colour-text);
   min-height: 300px;
-  max-height: 700px;
   max-width: 21.7cm;
   overflow-y: scroll;
   scroll-behavior: smooth;

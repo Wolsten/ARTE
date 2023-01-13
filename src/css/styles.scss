@@ -126,6 +126,14 @@ $screen-width-small: 600px;
     font-size: 16px;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+}
+
+
 button {
     background: var(--colour-background);
     border: 1px solid var(--colour-border);
@@ -265,7 +273,6 @@ body.index-body {
         color: var(--colour-primary);
         padding: 0 0 0.5rem 0;
     }
-
 }
 
 .editor-toolbar {
@@ -586,9 +593,9 @@ body.index-body {
     background-color: var(--colour-background);
     border: 1px var(--colour-background-active) solid;
     color: var(--colour-text);
-    // Ideally make these options
+    // @todo Ideally make these options
     min-height: 300px;
-    max-height: 700px;
+    // max-height: 700px;
     max-width: 21.7cm;
     overflow-y: scroll;
 
