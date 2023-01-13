@@ -69,12 +69,14 @@ export default class Editor {
             const div = document.createElement('div')
             div.classList.add('editor-debug')
             this.debugNode = Helpers.insertAfter(div, this.mainNode)
+
+            // *** TEST THE MODALS ***
+            // Uncomment the next two lines for development testing
+            // this.testModals('positioned')  // options are 'overlay', 'positioned', 'drawer' and 'full-screen'
+            // return
         }
 
-        // *** TEST THE MODALS ***
-        // Uncomment the next two lines for development testing
-        // this.testModals('positioned')  // options are 'overlay', 'positioned', 'drawer' and 'full-screen'
-        // return
+
 
         // Set up event handling
         this.listenForMouseUpEvents()
@@ -204,7 +206,7 @@ export default class Editor {
      * Handle resetting of the range and the associated button states
      */
     resetRange() {
-        console.warn('Resetting range')
+        // console.warn('Resetting range')
         this.range = null
         this.toolbar.reset()
     }

@@ -142,7 +142,7 @@ export default class Mentions extends ToolbarButton {
         }
 
         if (key == 'Escape') {
-            console.log('escape!')
+            // console.log('escape!')
             this.insert('')
             return
         }

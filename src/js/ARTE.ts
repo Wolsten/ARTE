@@ -26,7 +26,7 @@ if (!target) {
 
     // Define options
     const options = {
-        debug: true,
+        debug: false,
         defaultContent: 'sample.arte',
         people: ['David', 'William', 'Jenny', 'Sally', 'Sarah', 'Susan', 'Brian']
     }

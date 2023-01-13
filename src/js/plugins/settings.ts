@@ -143,9 +143,9 @@ export default class Settings extends ToolbarButton {
             localStorage.setItem('headingNumbers', numbers)
         }
         if (this.editor.options.headingNumbers) {
-            this.editor.editorNode.classList.add('heading-numbers')
+            this.editor.mainNode.classList.add('heading-numbers')
         } else {
-            this.editor.editorNode.classList.remove('heading-numbers')
+            this.editor.mainNode.classList.remove('heading-numbers')
         }
     }
 

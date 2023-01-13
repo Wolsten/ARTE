@@ -172,7 +172,7 @@ export default class Clipboard extends ToolbarButton {
         const selection = document.getSelection()
         if (this.editor.range && selection && this.prevent(selection) == false) {
             const text = await navigator.clipboard.readText()
-            console.log('pasted text is ', text)
+            // console.log('pasted text is ', text)
             const node = document.createTextNode(text)
             this.editor.range.replaceSelectionWithNode(node)
             this.bufferDelayed()
@@ -191,10 +191,10 @@ export default class Clipboard extends ToolbarButton {
             const paste = event.clipboardData.getData('text/html');
             // Detect pasting from Microsoft Office and paste as plain text
             if (this.supported && paste.includes('urn:schemas-microsoft-com:office')) {
-                console.log('Found word data')
+                // console.log('Found word data')
                 // Get plain text
                 const text = event.clipboardData.getData('text/plain');
-                console.log('text\n', text)
+                // console.log('text\n', text)
                 event.preventDefault()
                 // Special handling of paste
                 const node = document.createTextNode(text)

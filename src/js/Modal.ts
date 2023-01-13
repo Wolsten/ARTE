@@ -306,7 +306,7 @@ export class Modal {
         // The console message is removed in the bundled javascript so the 
         // this call will fail gracefully.
         if (!this.modalElement) {
-            console.warn('Attempt to hide panel that is already hidden')
+            // console.warn('Attempt to hide panel that is already hidden')
             return
         }
         this.modalElement.classList.remove('show')
@@ -314,16 +314,16 @@ export class Modal {
         document.body.removeEventListener('keydown', this.handleKeydown)
         setTimeout(() => {
             if (this.modalElement) {
-                console.log('Removing modal element')
+                // console.log('Removing modal element')
 
                 // this.active = false
                 if (this === Modal.self) {
-                    console.log('Removing own element')
+                    // console.log('Removing own element')
                     Modal.self.modalElement.remove()
                     Modal.self = null
                 }
                 if (this === Modal.confirm) {
-                    console.log('Removing confirm element')
+                    // console.log('Removing confirm element')
                     Modal.confirm.modalElement.remove()
                     Modal.confirm = null
                 }

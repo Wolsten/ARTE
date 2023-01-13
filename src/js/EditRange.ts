@@ -82,7 +82,7 @@ export default class EditRange {
         // Set flag as to whether contains any non editable tags
         this.containsNonEditableTags = this.containsCustoms()
 
-        console.log('containsNonEditableTags', this.containsNonEditableTags)
+        // console.log('containsNonEditableTags', this.containsNonEditableTags)
     }
 
 

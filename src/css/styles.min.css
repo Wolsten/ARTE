@@ -285,7 +285,7 @@ body.index-body #index-buttons {
   background-color: var(--colour-background);
   flex-shrink: 0;
   flex-grow: 0;
-  flex-basis: 200px;
+  flex-basis: 250px;
 }
 .editor-sidebar .editor-sidebar-content {
   display: block;
@@ -312,15 +312,19 @@ body.index-body #index-buttons {
   font-size: 1.4em;
 }
 .editor-sidebar .editor-sidebar-content h1 {
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: normal;
 }
 .editor-sidebar .editor-sidebar-content h2 {
-  font-size: 1rem;
+  font-size: 0.9rem;
   padding-left: 0.5rem;
+  font-weight: normal;
 }
 .editor-sidebar .editor-sidebar-content h3 {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   padding-left: 1rem;
+  font-weight: normal;
+  text-transform: uppercase;
 }
 .editor-sidebar .editor-sidebar-content h1 a,
 .editor-sidebar .editor-sidebar-content h2 a,
@@ -382,6 +386,49 @@ body.index-body #index-buttons {
   margin-top: 1rem;
 }
 
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings {
+  counter-reset: h1;
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h1 {
+  counter-reset: h2;
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h2 {
+  counter-reset: h3;
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h3 {
+  counter-reset: h4;
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h4 {
+  counter-reset: h5;
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h5 {
+  counter-reset: h6;
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h1:before {
+  counter-increment: h1;
+  content: counter(h1) ". ";
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h2:before {
+  counter-increment: h2;
+  content: counter(h1) "." counter(h2) " ";
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h3:before {
+  counter-increment: h3;
+  content: counter(h1) "." counter(h2) "." counter(h3) " ";
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h4:before {
+  counter-increment: h4;
+  content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) " ";
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h5:before {
+  counter-increment: h5;
+  content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " ";
+}
+.editor-main.heading-numbers .editor-sidebar-content .tab-item.show.headings h5:before {
+  counter-increment: h6;
+  content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". " counter(h6);
+}
+
 @media screen and (max-width: 600px) {
   .editor-sidebar {
     flex-basis: 50%;
@@ -403,6 +450,7 @@ body.index-body #index-buttons {
   max-height: 700px;
   max-width: 21.7cm;
   overflow-y: scroll;
+  scroll-behavior: smooth;
 }
 .editor-body h1,
 .editor-body h2,
@@ -454,45 +502,46 @@ body.index-body #index-buttons {
 .editor-body button {
   color: var(--colour-text);
 }
-.editor-body.heading-numbers {
+
+.editor-main.heading-numbers .editor-body {
   counter-reset: h1;
 }
-.editor-body.heading-numbers h1 {
+.editor-main.heading-numbers .editor-body h1 {
   counter-reset: h2;
 }
-.editor-body.heading-numbers h2 {
+.editor-main.heading-numbers .editor-body h2 {
   counter-reset: h3;
 }
-.editor-body.heading-numbers h3 {
+.editor-main.heading-numbers .editor-body h3 {
   counter-reset: h4;
 }
-.editor-body.heading-numbers h4 {
+.editor-main.heading-numbers .editor-body h4 {
   counter-reset: h5;
 }
-.editor-body.heading-numbers h5 {
+.editor-main.heading-numbers .editor-body h5 {
   counter-reset: h6;
 }
-.editor-body.heading-numbers h1:before {
+.editor-main.heading-numbers .editor-body h1:before {
   counter-increment: h1;
   content: counter(h1) ". ";
 }
-.editor-body.heading-numbers h2:before {
+.editor-main.heading-numbers .editor-body h2:before {
   counter-increment: h2;
   content: counter(h1) "." counter(h2) " ";
 }
-.editor-body.heading-numbers h3:before {
+.editor-main.heading-numbers .editor-body h3:before {
   counter-increment: h3;
   content: counter(h1) "." counter(h2) "." counter(h3) " ";
 }
-.editor-body.heading-numbers h4:before {
+.editor-main.heading-numbers .editor-body h4:before {
   counter-increment: h4;
   content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) " ";
 }
-.editor-body.heading-numbers h5:before {
+.editor-main.heading-numbers .editor-body h5:before {
   counter-increment: h5;
   content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " ";
 }
-.editor-body.heading-numbers h5:before {
+.editor-main.heading-numbers .editor-body h5:before {
   counter-increment: h6;
   content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". " counter(h6);
 }
