@@ -8,13 +8,11 @@ import Editor from '../Editor'
 
 export default class Settings extends ToolbarButton {
 
-    static readonly TAG = 'SETTINGS' // The HTMLElement tag as inserted in the dom for this custom node
-
     private drawer: Modal | null = null
 
 
     constructor(editor: Editor, group: number) {
-        super(editor, ToolbarButtonType.DETACHED, Settings.TAG, 'Settings', Icons.options, group)
+        super(editor, ToolbarButtonType.DETACHED, 'SETTINGS', 'Settings', Icons.options, group)
     }
 
 
@@ -143,9 +141,9 @@ export default class Settings extends ToolbarButton {
             localStorage.setItem('headingNumbers', numbers)
         }
         if (this.editor.options.headingNumbers) {
-            this.editor.mainNode.classList.add('heading-numbers')
+            this.editor.containerNode.classList.add('heading-numbers')
         } else {
-            this.editor.mainNode.classList.remove('heading-numbers')
+            this.editor.containerNode.classList.remove('heading-numbers')
         }
     }
 
@@ -165,9 +163,9 @@ export default class Settings extends ToolbarButton {
             localStorage.setItem('explorer', explorer)
         }
         if (this.editor.options.explorer) {
-            this.editor.showSidebar()
+            this.editor.sidebar?.show()
         } else {
-            this.editor.hideSidebar()
+            this.editor.sidebar?.hide()
         }
     }
 

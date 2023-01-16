@@ -9,6 +9,7 @@ import BufferButton from './plugins/BufferButton'
 import Clipboard from './plugins/Clipboard'
 import Shortcut from './Shortcut'
 import Mentions from './plugins/Mentions'
+import File from './plugins/file'
 import Settings from './plugins/Settings'
 import CustomAction from './plugins/CustomAction'
 import CustomLink from './plugins/CustomLink'
@@ -21,6 +22,7 @@ export default class Toolbar {
 
 
     defaults: string[][] = [
+        ['FILE'],
         ['BLOCK.H1', 'BLOCK.H2', 'BLOCK.H3', 'BLOCK.P', 'BLOCK.BLOCKQUOTE'],
         ['BLOCK.OL', 'BLOCK.UL'],
         ['STYLE.B', 'STYLE.I', 'STYLE.U', 'COLOUR.FOREGROUND', 'COLOUR.BACKGROUND', 'STYLE.CLEAR'],
@@ -59,7 +61,12 @@ export default class Toolbar {
                 let button: null | ToolbarButton = null
                 let button2: null | ToolbarButton = null
 
+                // console.log('button type', type)
+
                 switch (type.toUpperCase()) {
+                    case 'FILE':
+                        button = new File(editor, index)
+                        break
                     case 'BLOCK':
                         button = new Block(editor, name, index)
                         break

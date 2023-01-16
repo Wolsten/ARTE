@@ -108,13 +108,28 @@
     }
 }
 
+// https://css-tricks.com/snippets/css/prevent-long-urls-from-breaking-out-of-container/
+@mixin dont-break-out () {
+    // These are technically the same, but use both
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    // This is the dangerous one in WebKit, as it breaks things wherever
+    word-break: break-all;
+    // Instead use this non-standard one:
+    word-break: break-word;
+    // Adds a hyphen where the word breaks, if supported (No Blink)
+    hyphens: auto;
+}
+
+
 // -----------------------------------------------------------------------------
 // @section Other variables
 // -----------------------------------------------------------------------------
 
-
 // Screen widths used in media queries cannot use css vars
 $screen-width-small: 600px;
+
 
 // -----------------------------------------------------------------------------
 // @section General
@@ -124,13 +139,6 @@ $screen-width-small: 600px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     box-sizing: border-box;
     font-size: 16px;
-}
-
-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100vh;
 }
 
 
@@ -191,7 +199,7 @@ button:not([disabled]):hover {
 // -----------------------------------------------------------------------------
 
 
-body.index-body {
+body {
 
     background-color: var(--colour-background);
 
@@ -246,10 +254,54 @@ body.index-body {
 
 
 // -----------------------------------------------------------------------------
+// @section Main layout
+// -----------------------------------------------------------------------------
+
+body {
+    position: relative;
+    scroll-behavior: smooth;
+}
+
+.arte-editor {
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start; // Required for enabling sticky behaviour in a flex box
+
+    .editor-toolbar {
+        position: sticky;
+        top: 0rem;
+        width: 100%;
+    }
+
+    .editor-body {
+        max-width: max(50%, 21.7cm);
+        max-height: calc(100vh - 50px);
+    }
+
+    .editor-sidebar {
+        position: sticky;
+        top: 5rem;
+        transform: translateX(200%);
+        transition: transform 300ms;
+    }
+
+    &.show-sidebar .editor-sidebar {
+        transform: translateX(0%);
+    }
+}
+
+
+
+
+
+// -----------------------------------------------------------------------------
 // @section Editor
 // -----------------------------------------------------------------------------
 
-.editor-container {
+.editor-body {
+
     position: relative;
 
     a {
@@ -276,17 +328,17 @@ body.index-body {
 }
 
 .editor-toolbar {
+    z-index: 100;
     padding: 0.5rem;
-    position: sticky;
-    top: 0rem;
+
     background: var(--colour-background);
     border: 1px solid var(--colour-border);
+
 
     section {
         display: flex;
     }
 }
-
 
 
 .editor-toolbar-group {
@@ -347,11 +399,13 @@ body.index-body {
     border-left: 2px var(--colour-border-faint) solid;
 }
 
-.editor-main {
-    display: flex;
-    justify-content: space-evenly;
-    flex-direction: row;
-}
+// .editor-main {
+//     display: flex;
+//     justify-content: space-evenly;
+//     flex-direction: row;
+//     flex-basis: 80%;
+//     flex-grow: 2;
+// }
 
 
 // -----------------------------------------------------------------------------
@@ -359,8 +413,6 @@ body.index-body {
 // -----------------------------------------------------------------------------
 
 .editor-toolbar {
-    position: sticky;
-    z-index: 100;
 
     button {
         border: 1px solid var(--colour-background);
@@ -413,11 +465,11 @@ body.index-body {
     }
 }
 
-.editor-main {
-    display: flex;
-    position: relative;
-    justify-content: center;
-}
+// .editor-main {
+//     display: flex;
+//     position: relative;
+//     justify-content: center;
+// }
 
 
 // -----------------------------------------------------------------------------
@@ -426,14 +478,17 @@ body.index-body {
 
 .editor-sidebar {
 
-    display: block;
     margin: 1rem 0;
     color: var(--colour-text);
     background-color: var(--colour-background);
 
-    flex-shrink: 0;
-    flex-grow: 0;
-    flex-basis: 250px;
+    @include dont-break-out();
+
+    // flex-shrink: 0;
+    // flex-grow: 0;
+    // flex-basis: 250px;
+    // flex-basis: 20%;
+    // flex-grow: 1;
 
     .editor-sidebar-content {
 
@@ -580,23 +635,24 @@ body.index-body {
     }
 }
 
+
 // -----------------------------------------------------------------------------
 // @section Editor body
 // -----------------------------------------------------------------------------
 
 .editor-body {
     position: relative;
-    flex-grow: 1;
     z-index: 1;
+
     padding: 1.4rem 3%;
     margin: 1rem 0;
+
     background-color: var(--colour-background);
     border: 1px var(--colour-background-active) solid;
     color: var(--colour-text);
+
     // @todo Ideally make these options
     min-height: 300px;
-    // max-height: 700px;
-    max-width: 21.7cm;
     overflow-y: scroll;
 
     scroll-behavior: smooth;
@@ -686,9 +742,9 @@ body.index-body {
         background: var(--colour-modal-panel-background);
     }
 
-    &.escape {
-        background: transparent;
-    }
+    // &.escape {
+    //     background: red; //var(--colour-background);
+    // }
 
     &.show .modal-panel-container {
         opacity: 1;
@@ -729,7 +785,7 @@ body.index-body {
         margin-bottom: 1rem;
         gap: 1rem;
 
-        // Common label attributes apply to the left coloum label and
+        // Common label attributes apply to the left colour label and
         // input labels for radio and checkbox inputs
         label {
             font-size: inherit;
@@ -876,7 +932,7 @@ body.index-body {
 .modal-panel-full-screen {
     .modal-panel-container {
         width: 100vw;
-        height: 100vh;
+        // height: 100vh;
         padding: 2rem;
         display: flex;
         flex-direction: column;
@@ -1195,5 +1251,24 @@ div.editor-debug {
             color: var(--colour-debug);
             font-size: 1rem;
         }
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// @section File plugin
+// -----------------------------------------------------------------------------
+
+
+.arte-preview {
+
+    display: flex;
+    justify-content: center;
+
+    textarea {
+        background: var(--colour-background);
+        width: min(100%, 21cm);
+        height: 100vh;
+        padding: 2rem;
     }
 }

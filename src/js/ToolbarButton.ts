@@ -62,7 +62,7 @@ class ToolbarButton {
      */
     protected enableOrDisable(): void {
         this.disabled = false
-        if (this.editor.range) {
+        if (this.editor.range && this.editor.range.rootNode) {
             if (this.editor.range.collapsed ||
                 this.editor.range.rootNode == this.editor.editorNode ||
                 Helpers.isList(this.editor.range.rootNode)) {

@@ -1,5 +1,5 @@
 import * as Helpers from './helpers'
-import { Modal, ModalButton, ModalButtonAction, ModalSeverity, ModalType, ModalWarning } from './Modal.js'
+import { Modal, ModalButton, ModalButtonAction, ModalType, ModalWarning } from './Modal.js'
 import EditRange from './EditRange'
 import Buffer from './plugins/Buffer'
 import { Options, OptionsType } from './options'
@@ -17,16 +17,16 @@ export default class Editor {
     lastKey = ''
 
     range: null | EditRange = null
-    editorNode!: HTMLElement
-    toolbarNode!: HTMLElement
-    mainNode!: HTMLElement
-    debugNode: null | HTMLElement = null
 
+    containerNode!: HTMLElement
+    editorNode!: HTMLElement
     toolbar!: Toolbar
     sidebar!: null | Sidebar
+    // mainNode!: HTMLElement
+    debugNode: null | HTMLElement = null
 
     modal: null | Modal = null
-    preview: Function
+    preview: Function // @todo - can lose once get new toolbar file button working
     update: Function
     handleKeyup: null | Function = null
 
@@ -51,14 +51,18 @@ export default class Editor {
         this.options = new Options(options)
 
         // Add editor html to the dom and get the main nodes
-        target.innerHTML = this.editorTemplate()
-        const mainNode = target.querySelector('.editor-main')
+        target.innerHTML = this.editorTemplate(target)
+        const containerNode = target
+        // const mainNode = target.querySelector('.editor-main')
         const editorNode = target.querySelector('.editor-body')
-        if (!mainNode || !editorNode) {
-            alert('Failed to find editor main or body nodes')
+        // const sidebarNode = target.querySelector('.editor-sidebar')
+        // if (!containerNode || !mainNode || !editorNode) {
+        if (!containerNode || !editorNode) {
+            alert('Failed to find one or more editor nodes')
             return
         }
-        this.mainNode = <HTMLElement>mainNode
+        this.containerNode = containerNode
+        // this.mainNode = <HTMLElement>mainNode
         this.editorNode = <HTMLElement>editorNode
 
         // Create a toolbar (adding to the dom)
@@ -68,15 +72,13 @@ export default class Editor {
         if (this.options.debug) {
             const div = document.createElement('div')
             div.classList.add('editor-debug')
-            this.debugNode = Helpers.insertAfter(div, this.mainNode)
+            this.debugNode = Helpers.insertAfter(div, this.containerNode)
 
             // *** TEST THE MODALS ***
             // Uncomment the next two lines for development testing
             // this.testModals('positioned')  // options are 'overlay', 'positioned', 'drawer' and 'full-screen'
             // return
         }
-
-
 
         // Set up event handling
         this.listenForMouseUpEvents()
@@ -121,8 +123,9 @@ export default class Editor {
         this.toolbar.initialise()
 
         // Optional sidebar
+        this.sidebar = new Sidebar(this)
         if (this.options.explorer && this.toolbar.buttons.find(btn => btn.sidebar !== undefined)) {
-            this.showSidebar()
+            this.sidebar.show()
         }
 
         // Try to ensure that the referenced content is scrolled to a visible area in the middle of the editor. 
@@ -156,15 +159,18 @@ export default class Editor {
     }
 
 
-    showSidebar() {
-        if (!this.sidebar) {
-            this.sidebar = new Sidebar(this)
-        }
-    }
+    // showSidebar() {
+    //     if (!this.sidebar) {
+    //         this.sidebar = new Sidebar(this)
+    //         if (this.options.explorer) {
+    //             this.sidebar.show()
+    //         }
+    //     }
+    // }
 
-    hideSidebar() {
-        this.sidebar?.hide()
-    }
+    // hideSidebar() {
+    //     this.sidebar?.hide()
+    // }
 
 
     // -----------------------------------------------------------------------------
@@ -598,127 +604,127 @@ export default class Editor {
     /**
      * Display modal dialogue requesting the filename to download as
      */
-    download(): void {
-        if (Modal.active()) {
-            return
-        }
-        const buttons = [
-            new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
-            new ModalButton(ModalButtonAction.Confirm, 'Save', this.save),
-        ]
-        const options = {
-            escapeToCancel: true
-        }
-        this.modal = new Modal('Save file', this.saveTemplate(this.filename), buttons, options)
-    }
+    // download(): void {
+    //     if (Modal.active()) {
+    //         return
+    //     }
+    //     const buttons = [
+    //         new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
+    //         new ModalButton(ModalButtonAction.Confirm, 'Save', this.save),
+    //     ]
+    //     const options = {
+    //         escapeToCancel: true
+    //     }
+    //     this.modal = new Modal('Save file', this.saveTemplate(this.filename), buttons, options)
+    // }
 
     /**
      * Add a hidden download button to the dom with the encoded contents of the
      * editor, click it programmatically and then remove
      */
-    save(): void {
-        const fileInput = document.querySelector('form.save #filename')
-        if (!fileInput) {
-            console.error('Could not find file input')
-            return
-        }
-        let filename = (<HTMLInputElement>fileInput).value.trim().toLowerCase()
-        if (filename == '') {
-            const feedback = document.querySelector('form.save .feedback')
-            if (!feedback) {
-                console.error('Could not find feedback placeholder')
-                return
-            }
-            feedback.innerHTML = "You must provide a filename. Click <strong>Cancel</strong> or press the <strong>Escape</strong> key to close this dialogue without saving."
-            return
-        }
-        filename += '.arte'
-        let xml = this.getCleanData()
-        const link = document.createElement('a')
-        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xml))
-        link.setAttribute('download', filename)
-        link.style.display = 'none'
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-    }
+    // save(): void {
+    //     const fileInput = document.querySelector('form.save #filename')
+    //     if (!fileInput) {
+    //         console.error('Could not find file input')
+    //         return
+    //     }
+    //     let filename = (<HTMLInputElement>fileInput).value.trim().toLowerCase()
+    //     if (filename == '') {
+    //         const feedback = document.querySelector('form.save .feedback')
+    //         if (!feedback) {
+    //             console.error('Could not find feedback placeholder')
+    //             return
+    //         }
+    //         feedback.innerHTML = "You must provide a filename. Click <strong>Cancel</strong> or press the <strong>Escape</strong> key to close this dialogue without saving."
+    //         return
+    //     }
+    //     filename += '.arte'
+    //     let xml = this.getCleanData()
+    //     const link = document.createElement('a')
+    //     link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xml))
+    //     link.setAttribute('download', filename)
+    //     link.style.display = 'none'
+    //     document.body.appendChild(link)
+    //     link.click()
+    //     link.remove()
+    // }
 
 
     /**
      * Handle file upload from the upload button defined in the upload method
      */
-    handleFileUpload(input: HTMLInputElement): void {
-        const file = input.files ? input.files[0] : null
-        if (!file) {
-            return
-        }
-        const ext = file.name.slice(-4).toLowerCase()
-        if (ext !== 'arte') {
-            return
-        }
-        this.filename = file.name.slice(0, -5)
-        const reader = new FileReader()
-        reader.onload = (event) => {
-            const content = event?.target?.result
-            if (!content) {
-                console.error()
-                return
-            }
-            this.initEditor(<string>content)
-        }
-        reader.readAsText(file)
-        // Remove the input (avoids multiple event listeners amongst other things)
-        input.remove()
-    }
+    // handleFileUpload(input: HTMLInputElement): void {
+    //     const file = input.files ? input.files[0] : null
+    //     if (!file) {
+    //         return
+    //     }
+    //     const ext = file.name.slice(-4).toLowerCase()
+    //     if (ext !== 'arte') {
+    //         return
+    //     }
+    //     this.filename = file.name.slice(0, -5)
+    //     const reader = new FileReader()
+    //     reader.onload = (event) => {
+    //         const content = event?.target?.result
+    //         if (!content) {
+    //             console.error()
+    //             return
+    //         }
+    //         this.initEditor(<string>content)
+    //     }
+    //     reader.readAsText(file)
+    //     // Remove the input (avoids multiple event listeners amongst other things)
+    //     input.remove()
+    // }
 
     /**
      * Add a hidden file input (if not already done so) and then click it
      * programmatically
      */
-    upload() {
-        let input: HTMLInputElement | null = <HTMLInputElement>document.getElementById('arte-upload')
-        if (!input) {
-            input = <HTMLInputElement>document.createElement('INPUT')
-            if (!input) {
-                console.error('Could not create file input')
-                return
-            }
-        }
-        input.id = 'arte-upload'
-        input.type = 'file'
-        input.style.display = 'none'
-        input.accept = '.arte'
-        //console.log('input', input.outerHTML)
-        input.addEventListener('change', () => this.handleFileUpload(<HTMLInputElement>input), false)
-        document.body.appendChild(input)
-        input.click()
-    }
+    // upload() {
+    //     let input: HTMLInputElement | null = <HTMLInputElement>document.getElementById('arte-upload')
+    //     if (!input) {
+    //         input = <HTMLInputElement>document.createElement('INPUT')
+    //         if (!input) {
+    //             console.error('Could not create file input')
+    //             return
+    //         }
+    //     }
+    //     input.id = 'arte-upload'
+    //     input.type = 'file'
+    //     input.style.display = 'none'
+    //     input.accept = '.arte'
+    //     //console.log('input', input.outerHTML)
+    //     input.addEventListener('change', () => this.handleFileUpload(<HTMLInputElement>input), false)
+    //     document.body.appendChild(input)
+    //     input.click()
+    // }
 
 
-    confirmClear() {
-        if (this.editorNode) this.editorNode.innerHTML = ''
-        // this.filename = 'arte-download'
-        this.modal?.hide()
-        setTimeout(() => this.updateBuffer(), 100)
-    }
+    // confirmClear() {
+    //     if (this.editorNode) this.editorNode.innerHTML = ''
+    //     // this.filename = 'arte-download'
+    //     this.modal?.hide()
+    //     setTimeout(() => this.updateBuffer(), 100)
+    // }
 
 
-    clear() {
-        if (Modal.active()) {
-            return
-        }
-        const html = '<p>Are you sure you want to clear the editor and start a new document? Any changes will be lost.</p>'
-        const options = {
-            escapeToCancel: true,
-            type: ModalType.Overlay,
-            severity: ModalSeverity.Warning
-        }
-        const buttons = [
-            new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
-            new ModalButton(ModalButtonAction.Confirm, 'Yes', this.confirmClear)
-        ]
-        this.modal = new Modal('Start new document?', html, buttons, options)
-    }
+    // public clear() {
+    //     if (Modal.active()) {
+    //         return
+    //     }
+    //     const html = '<p>Are you sure you want to clear the editor and start a new document? Any changes will be lost.</p>'
+    //     const options = {
+    //         escapeToCancel: true,
+    //         type: ModalType.Overlay,
+    //         severity: ModalSeverity.Warning
+    //     }
+    //     const buttons = [
+    //         new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
+    //         new ModalButton(ModalButtonAction.Confirm, 'Yes', this.confirmClear)
+    //     ]
+    //     this.modal = new Modal('Start new document?', html, buttons, options)
+    // }
 
 
 
@@ -748,29 +754,6 @@ export default class Editor {
         this.editorNode!.innerHTML = content
     }
 
-    /**
-     * Get the new range in the editor node and when debugging display this
-     */
-    // updateRangeOLD(): void {
-    //     if (this.modal?.active) {
-    //         return
-    //     }
-    //     // const timestamp1 = new Date()
-    //     // Check for empty editor - in which case insert a new paragraph
-    //     // if ( this.editorNode.innerHTML.trim() == '' ){
-    //     //     console.log('1. inserting paragraph in empty editor')
-    //     //     this.insertParagraph()
-    //     //     // Return as insertParagraph reinvokes this method
-    //     //     return
-    //     // }
-    //     //console.log('modal active',this.modal.active())
-    //     this.range = Helpers.getRange(this.editorNode)
-    //     if (this.options.debug) {
-    //         this.debugTemplate(this.debugNode, this.range)
-    //     }
-    //     // const timestamp2 = new Date()
-    //     // console.log(`START: ${timestamp1.getTime()}\nENDED: ${timestamp2.getTime()}`)
-    // }
 
     updateRange(): void {
         // console.log('Updating range')
@@ -875,34 +858,38 @@ export default class Editor {
     }
 
 
-    private editorTemplate(): string {
-        let classes = ''
+    private editorTemplate(target: HTMLElement): string {
+        // let classes = ''
         if (this.options.headingNumbers) {
-            classes += 'heading-numbers'
+            // classes += 'heading-numbers'
+            target.classList.add('heading-numbers')
         }
-        return `
-            <div class="editor-container">
-                <div class="editor-toolbar">
-                    PLACEHOLDER
-                </div>
-                <div class="editor-main">
-                    <div class="editor-body ${classes}" contenteditable="true"></div>
-                    <!-- Dynamic sidebar goes here --> 
-                </div>
-            </div>`
+        return `<div class="editor-toolbar"></div>
+                <div class="editor-body" contenteditable="true"></div>
+                <div class="editor-sidebar"></div>`
+        // return `
+        //     <div class="editor-container">
+        //         <div class="editor-toolbar">
+        //             PLACEHOLDER
+        //         </div>
+        //         <div class="editor-main">
+        //             <div class="editor-body ${classes}" contenteditable="true"></div>
+        //             <!-- Dynamic sidebar goes here --> 
+        //         </div>
+        //     </div>`
     }
 
-    private saveTemplate(filename = 'arte-download') {
-        //console.log('filename is',filename)
-        return `
-            <form class="save">
-                <p class="advice">Enter the filename without extension. The file will be saved in your <strong>Downloads</strong> folder with the extension <strong>arte</strong>.</>
-                <div class="form-input">
-                    <input type="text" id="filename" title="filename" class="form-control" placeholder="Filename" required value="${filename}"/>
-                </div>
-                <p class="feedback"></p>
-            </form>`
-    }
+    // private saveTemplate(filename = 'arte-download') {
+    //     //console.log('filename is',filename)
+    //     return `
+    //         <form class="save">
+    //             <p class="advice">Enter the filename without extension. The file will be saved in your <strong>Downloads</strong> folder with the extension <strong>arte</strong>.</>
+    //             <div class="form-input">
+    //                 <input type="text" id="filename" title="filename" class="form-control" placeholder="Filename" required value="${filename}"/>
+    //             </div>
+    //             <p class="feedback"></p>
+    //         </form>`
+    // }
 
 
 

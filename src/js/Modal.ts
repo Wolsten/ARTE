@@ -310,8 +310,9 @@ export class Modal {
             return
         }
         this.modalElement.classList.remove('show')
-        // Remove the event listener so don't keep responding to Escape key
-        document.body.removeEventListener('keydown', this.handleKeydown)
+        // // Remove the event listener so don't keep responding to Escape key
+        // console.log('Removing event listener for keydown')
+        // document.body.removeEventListener('keydown', this.handleKeydown)
         setTimeout(() => {
             if (this.modalElement) {
                 // console.log('Removing modal element')
@@ -327,6 +328,9 @@ export class Modal {
                     Modal.confirm.modalElement.remove()
                     Modal.confirm = null
                 }
+
+                // Remove the event listener so don't keep responding to Escape key
+                if (!Modal.active()) document.body.removeEventListener('keydown', this.handleKeydown)
             }
         }, 500)
 
