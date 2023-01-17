@@ -217,13 +217,15 @@ export default class Toolbar {
      * Set the states of all toolbar buttons
      */
     setStates(): void {
-        if (!this.editor.range?.base) {
+        // console.log('setStates', this.editor.range, this.buttons)
+        if (!this.editor.range) {
             this.buttons.forEach(button => {
                 if (button.element) button.element.classList.remove('active')
             })
             return
         }
         this.buttons.forEach(button => {
+            // console.log('setState for button', button.tag)
             this.setState(button)
         })
     }
@@ -244,7 +246,7 @@ export default class Toolbar {
         // If not a detached button all buttons are disabled and 
         // inactive if there is no range or the range is in a custom element
         if (button.type !== ToolbarButtonType.DETACHED) {
-            if (!this.editor.range || this.editor.range.custom) {
+            if (!this.editor.range || this.editor.range.selectionCustoms.length > 0) {
                 handled = true
                 if (button.element) {
                     // console.log('Setting state for button', button.tag)

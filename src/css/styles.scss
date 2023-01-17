@@ -1080,31 +1080,39 @@ article.action {
 
 arte-comment {
     display: inline-block;
-    position: absolute;
-    top: -0.5rem;
-    right: -1rem;
+    // position: absolute;
+    // top: -0.5rem;
+    // right: -1rem;
 
     button {
         border: none;
         background-color: transparent;
+        border-bottom: 2px dashed var(--colour-primary);
 
-        i {
-            font-weight: bold;
-            color: var(--colour-warning);
-            background-color: transparent;
-        }
     }
+
+    i {
+        display: block;
+        position: absolute;
+        top: 0.5rem;
+        right: -0.5rem;
+        font-weight: bold;
+        color: var(--colour-warning);
+        background-color: transparent;
+    }
+
 
     &.custom-selected {
         outline: none;
     }
 
     &[data-resolved="true"] {
-        button i {
+        i {
             color: var(--colour-success);
         }
     }
 }
+
 
 .editor-sidebar {
     .comment-bubble {
@@ -1119,6 +1127,17 @@ arte-comment {
 }
 
 .arte-comment {
+
+    .selected-text {
+        font-style: italic;
+        color: var(--colour-link);
+        margin-bottom: 2rem;
+    }
+
+    .form-input {
+        flex-direction: column;
+    }
+
     textarea {
         min-height: 200px;
     }

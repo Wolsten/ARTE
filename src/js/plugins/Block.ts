@@ -78,13 +78,13 @@ export default class Block extends ToolbarButton {
         const firstParentNode = this.editor.range.topParentNode('start')
         const endParentNode = this.editor.range.topParentNode('end')
 
-        // const newRootNode = Helpers.getTopParentNode(this.editor.range.rootNode, this.editor.editorNode)
+        // const newRootNode = Helpers.getTopParentNode(this.editor.range.firstElementNode, this.editor.editorNode)
         // const firstParentNode = Helpers.getTopParentNode(this.editor.range.startContainer, this.editor.editorNode)
         // const endParentNode = Helpers.getTopParentNode(this.editor.range.endContainer, this.editor.editorNode)
         if (!newRootNode || !firstParentNode || !endParentNode) {
             return
         }
-        this.editor.range.rootNode = newRootNode
+        this.editor.range.firstElementNode = newRootNode
 
         // console.warn('new root node', newRootNode)
         // console.log('first parent node', firstParentNode)
@@ -111,7 +111,7 @@ export default class Block extends ToolbarButton {
             let startNodeFound = false
             let endNodeFound = false
             this.fragmentNode = document.createElement('DIV')
-            this.editor.range.rootNode!.childNodes.forEach(node => {
+            this.editor.range.firstElementNode!.childNodes.forEach(node => {
                 // If find a none-block node then terminate this cycle of the loop
                 // ie. ignore text and comments
                 if (node.nodeType !== 1) {
@@ -169,41 +169,44 @@ export default class Block extends ToolbarButton {
      * Set the disabled and active states of a button
      */
     setState(): void {
+
         // if (this.tag == 'H1') {
         //     console.log('setting block state for', this.tag)
+        //     debugger
         // }
+
         if (this.tag == 'CLEAR') {
-            this.element.disabled = false
             this.element.classList.remove('active')
-        } else {
-            // Use the first parent node to set disabled state
-            let firstParentNode: HTMLElement | false = false
-            if (this.editor.range) {
-                // firstParentNode = Helpers.getParentBlockNode(this.editor.range.startContainer)
-                firstParentNode = this.editor.range.topParentNode('start')
-            }
-            if (!firstParentNode) {
-                return
-            }
-            // if (this.tag == 'H1') {
-            //     console.log('firstParentNode', firstParentNode)
-            // }
-            // The firstParentNode should not be a DIV (the editor) or a custom element
-            this.element.disabled = firstParentNode.nodeName === 'DIV' ||
-                Helpers.isCustom(firstParentNode) ||
-                firstParentNode.nodeName == this.tag
-            //console.log('disabled',btn.element.disabled)
-            // If this is a list type get the list parent
-            if (this.type === ToolbarButtonType.LIST && firstParentNode.tagName === 'LI') {
-                firstParentNode = <HTMLElement>firstParentNode.parentNode
-            }
-            // Do the tag names match?
-            if (firstParentNode.nodeName === this.tag) {
-                this.element.classList.add('active')
-            } else {
-                this.element.classList.remove('active')
-            }
         }
+
+
+        // if (this.tag == 'CLEAR') {
+        //     this.element.disabled = false
+        //     this.element.classList.remove('active')
+        // } else {
+        // Use the first parent node to set disabled state
+        let firstParentNode: HTMLElement | false = false
+        if (this.editor.range) {
+            // firstParentNode = Helpers.getParentBlockNode(this.editor.range.startContainer)
+            firstParentNode = this.editor.range.topParentNode('start')
+        }
+        // The firstParentNode should not be a DIV (the editor) or a custom element
+        this.element.disabled = !firstParentNode ||
+            firstParentNode.nodeName === 'DIV' ||
+            Helpers.isCustom(firstParentNode) ||
+            firstParentNode.nodeName == this.tag
+        //console.log('disabled',btn.element.disabled)
+        // If this is a list type get the list parent
+        if (this.type === ToolbarButtonType.LIST && firstParentNode && firstParentNode.tagName === 'LI') {
+            firstParentNode = firstParentNode ? <HTMLElement>firstParentNode.parentNode : false
+        }
+        // Do the tag names match?
+        if (firstParentNode && firstParentNode.nodeName === this.tag) {
+            this.element.classList.add('active')
+        } else {
+            this.element.classList.remove('active')
+        }
+        // }
     }
 
 

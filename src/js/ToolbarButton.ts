@@ -17,10 +17,10 @@ interface ToolbarButton {
     // Mandatory properties
     editor: Editor
     type: ToolbarButtonType
-    tag: string             // As inserted in the dom. e.g. H1, CUSTOM
-    label: string           // Generally used as the title of the button but could also be displayed
-    icon: string            //  The icon to use
-    group: number           // The group index
+    tag: string                  // As inserted in the dom. e.g. H1, CUSTOM
+    label: string                // Generally used as the title of the button but could also be displayed
+    icon: string                 // The icon to use
+    group: number                // The group index
     element: HTMLInputElement    // The dom element which the button is attached to
     disabled: boolean
 
@@ -62,10 +62,11 @@ class ToolbarButton {
      */
     protected enableOrDisable(): void {
         this.disabled = false
-        if (this.editor.range && this.editor.range.rootNode) {
+        if (this.editor.range?.firstElementNode) {
+
             if (this.editor.range.collapsed ||
-                this.editor.range.rootNode == this.editor.editorNode ||
-                Helpers.isList(this.editor.range.rootNode)) {
+                this.editor.range.firstElementNode == this.editor.editorNode ||
+                Helpers.isList(this.editor.range.firstElementNode)) {
                 this.disabled = true
             }
         }
@@ -74,6 +75,8 @@ class ToolbarButton {
         } else {
             this.element?.removeAttribute('disabled')
         }
+
+        // console.log('button element', this.element)
     }
 
     protected isActive() {

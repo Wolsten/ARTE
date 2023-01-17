@@ -74,6 +74,8 @@ export default class Editor {
             div.classList.add('editor-debug')
             this.debugNode = Helpers.insertAfter(div, this.containerNode)
 
+            Helpers.debugTags()
+
             // *** TEST THE MODALS ***
             // Uncomment the next two lines for development testing
             // this.testModals('positioned')  // options are 'overlay', 'positioned', 'drawer' and 'full-screen'
@@ -87,6 +89,8 @@ export default class Editor {
 
         // Reset currently edited filename
         this.filename = 'arte-download'
+
+
 
         // Initialise the editor content and buffering
         setTimeout(() => this.initEditor(content), 100)
@@ -182,7 +186,7 @@ export default class Editor {
      */
     listenForMouseUpEvents() {
         document.addEventListener('mouseup', event => {
-            // console.log('mouseup on', event.target)
+            console.log('mouseup on', event.target)
             // console.log('active element', document.activeElement)
             // Clicked a modal button?
             if (Modal.active()) {
@@ -212,7 +216,7 @@ export default class Editor {
      * Handle resetting of the range and the associated button states
      */
     resetRange() {
-        // console.warn('Resetting range')
+        console.warn('Resetting range')
         this.range = null
         this.toolbar.reset()
     }
@@ -249,7 +253,7 @@ export default class Editor {
         // }
         this.updateRange()
 
-        if (!this.range?.base) {
+        if (!this.range) {
             // If enter cursor in an empty editor then make this a paragraph
             // rather than raw text
             if (this.editorNode.innerText == '') {
@@ -258,9 +262,9 @@ export default class Editor {
             }
         }
         // Unselect custom blocks and highlight this one if custom 
-        if (this.range?.base) this.highlightCustomNode(this.range.custom)
+        // if (this.range) this.highlightCustomNode(this.range.custom)
 
-        // console.log('Setting state for all buttons')
+        console.log('Setting state for all buttons')
         this.toolbar.setStates()
     }
 
@@ -364,40 +368,37 @@ export default class Editor {
     handleEnter(): void | boolean {
         // Get latest range as debouncing means may not have the latest value when typing
         this.updateRange()
-        if (this.range === null) {
+        if (!this.range) {
             return
         }
-        const length = this.range?.endContainer?.textContent ? this.range.endContainer.textContent.trim().length : -1
-        const endLineSelected = length === this.range.endOffset
+
         let handled = false
+        const endLineSelected = this.range.textNodeLength === this.range.endOffset
+
         // console.log(`handling enter with customs`, this.range.customs)
-        if (this.range?.custom || endLineSelected) {
-            if (this.range.blockParent) {
-                const emptyTag = this.range.blockParent.innerHTML === '<br>'
-                const listTag = this.range.blockParent.tagName === 'LI'
-                const tag = emptyTag || !listTag ? 'P' : this.range.blockParent.tagName
-                let node = document.createElement(tag)
-                node.innerText = '\n'
-                const newNode = Helpers.insertAfter(node, this.range.blockParent)
-                if (newNode) {
-                    // Helpers.setCursor(n, 0)
-                    this.range.setCursor(newNode, 0)
-                    handled = true
-                    // Reset the range which must be done after a delay since this
-                    // method was triggered on keydown before added to dom
-                    setTimeout(() => {
-                        this.updateRange()
-                        this.toolbar.setStateForButtonType(ToolbarButtonType.BLOCK)
-                    }, 10)
-                }
-                // Check for handling enter within a parent block element that has a custom node at the end
-                // @todo Multiple custom nodes?
+        if (this.range.hasBlockCustom() || endLineSelected) {
+            const emptyTag = this.range.firstSupportedBlockParent.innerHTML === '<br>'
+            const listTag = this.range.firstSupportedBlockParent.tagName === 'LI'
+            const tag = emptyTag || !listTag ? 'P' : this.range.firstSupportedBlockParent.tagName
+            let node = document.createElement(tag)
+            node.innerText = '\n'
+            const newNode = Helpers.insertAfter(node, this.range.firstSupportedBlockParent)
+            if (newNode) {
+                // Helpers.setCursor(n, 0)
+                EditRange.setCursor(this.editorNode, newNode, 0)
+                handled = true
+                // Reset the range which must be done after a delay since this
+                // method was triggered on keydown before added to dom
+                setTimeout(() => {
+                    this.updateRange()
+                    this.toolbar.setStateForButtonType(ToolbarButtonType.BLOCK)
+                }, 10)
             }
         }
-        // If any of the immediate child of the block parent are not editable - then move these 
+        // If any of the immediate children of the block parent are not editable - then move these 
         // back to the original block parent since otherwise they will be transferred to the 
         // next block on Enter
-        const parent = this.range.blockParent
+        const parent = this.range.firstSupportedBlockParent
         if (parent) {
             parent.childNodes.forEach(child => {
                 if ((<HTMLElement>child).contentEditable === 'false') {
@@ -406,9 +407,6 @@ export default class Editor {
                     }, 10)
                 }
             })
-        }
-        if (this.range.custom) {
-            this.highlightCustomNode(false)
         }
         return handled
     }
@@ -444,7 +442,7 @@ export default class Editor {
 
                     // console.log('backspacing into custom block')
                     // Back spacing into a block containing one or more non-editable blocks?
-                    previous = <HTMLElement>this.range?.blockParent?.previousElementSibling
+                    previous = <HTMLElement>this.range?.firstSupportedBlockParent?.previousElementSibling
                     if (previous) {
                         // console.log('Found custom block')
                         let found = false
@@ -470,7 +468,7 @@ export default class Editor {
                 }
                 // Back spacing or deleting in a multiple selection
             } else {
-                if (this.range.containsNonEditableTags) {
+                if (this.range.hasCustom()) {
                     new ModalWarning('Information', html)
                     return true
                 }
@@ -768,8 +766,8 @@ export default class Editor {
         //     // Return as insertParagraph reinvokes this method
         //     return
         // }
-        //console.log('modal active',Modal.active())
-        this.range = new EditRange(this.editorNode)
+        console.log('getting new range')
+        this.range = EditRange.get(this.editorNode)
         if (this.options.debug && this.debugNode) {
             this.debugNode.innerHTML = this.debugTemplate()
         }
@@ -779,20 +777,20 @@ export default class Editor {
 
 
 
-    /**
-     * Remove "custom-selected" class from all custom elements and then add to 
-     * any child of the parentNode if it is a custom.
-     */
-    highlightCustomNode(node: HTMLElement | boolean): void {
-        //console.log('node',node)
-        const customs = this.editorNode!.querySelectorAll('[contenteditable=false]')
-        customs.forEach(custom => {
-            custom.classList.remove('custom-selected')
-        })
-        if (node) {
-            (<HTMLElement>node).classList.add('custom-selected')
-        }
-    }
+    // /**
+    //  * Remove "custom-selected" class from all custom elements and then add to 
+    //  * any child of the parentNode if it is a custom.
+    //  */
+    // highlightCustomNode(node: HTMLElement | boolean): void {
+    //     //console.log('node',node)
+    //     const customs = this.editorNode.querySelectorAll('[contenteditable=false]')
+    //     customs.forEach(custom => {
+    //         custom.classList.remove('custom-selected')
+    //     })
+    //     if (node) {
+    //         (<HTMLElement>node).classList.add('custom-selected')
+    //     }
+    // }
 
 
     // -----------------------------------------------------------------------------
@@ -827,8 +825,8 @@ export default class Editor {
         if (!this.range || !this.range?.base) {
             return '<p>No range selected</p>'
         }
-        const rootNode = this.range.rootNode?.nodeName || 'Missing'
-        const blockParent = this.range.blockParent?.tagName || 'Missing'
+        const rootNode = this.range.firstElementNode?.nodeName || 'Missing'
+        const blockParent = this.range.firstSupportedBlockParent?.tagName || 'Missing'
         const commonAncestor = this.range.base.commonAncestorContainer.nodeName
             ? this.range.base.commonAncestorContainer.nodeName
             : this.range.base.commonAncestorContainer.textContent
@@ -838,16 +836,15 @@ export default class Editor {
         const endContainer = this.range.base.endContainer.nodeName
             ? this.range.base.endContainer.nodeName
             : this.range.base.endContainer.textContent
-        const custom = this.range.custom
-            ? this.range.custom.tagName
-            : 'false'
+        const custom = this.range.getSelectionCustom()
+        const customTag = custom ? custom.tagName : 'false'
         return `<h5>Selection info:</h5>
                 <div class="col">
                     <label>Block parent</label><span>${blockParent}</span>
                     <label>commonAncestorC</label><span>${commonAncestor}</span>
                     <label>rootNode</label><span>${rootNode}</span>
                     <label>collapsed</label><span>${this.range.base.collapsed}</span>
-                    <label>custom</label><span>${custom}</span>
+                    <label>custom</label><span>${customTag}</span>
                 </div>
                 <div class="col">
                     <label>startC</label><span>${startContainer}</span>

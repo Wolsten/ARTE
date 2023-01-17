@@ -1,6 +1,6 @@
 import ToolbarButton, { ToolbarButtonType } from '../ToolbarButton'
 import * as Icons from '../Icons'
-import * as Helpers from '../helpers'
+import EditRange from '../EditRange'
 import { Modal, ModalType } from '../Modal'
 import Editor from '../Editor'
 
@@ -69,7 +69,7 @@ export default class Mentions extends ToolbarButton {
     setState() {
         (<HTMLInputElement>this.element).disabled =
             this.editor?.range?.collapsed == false ||
-            this.editor?.range?.custom !== false
+            this.editor?.range?.hasSelectionCustom() !== false
     }
 
 
@@ -241,8 +241,7 @@ export default class Mentions extends ToolbarButton {
         this.editor.range.startContainer.textContent = before + person + after
         // Move offset to the end of the newly inserted person
         offset += person.length
-        // this.editor.range = Helpers.setCursor(<Element>container, offset)
-        this.editor.range.setCursor(container, offset)
+        EditRange.setCursor(this.editor.editorNode, container, offset)
 
         // Hide the modal
         this.modal.hide()

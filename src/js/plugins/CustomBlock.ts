@@ -78,7 +78,7 @@ class CustomBlock extends ToolbarButton {
         const customs = this.editor.editorNode?.querySelectorAll(this.tag)
         if (customs) {
             customs.forEach((custom: Element) => {
-                this.node = custom
+                this.node = <HTMLElement>custom
                 this.format()
             })
         }
@@ -89,12 +89,12 @@ class CustomBlock extends ToolbarButton {
      * Mandatory button click function
      */
     click() {
-        // Ignore if a modal is active
-        if (Modal.active()) {
+        if (Modal.active() || !this.editor.range) {
             return
         }
-        const custom = this.editor?.range?.blockParent?.querySelector(this.tag)
+        const custom = this.editor.range.getCustomWithTag(this.tag)
         if (custom) {
+            // console.log('custom', custom)
             this.edit(custom)
         } else {
             this.editFlag = false
@@ -123,7 +123,7 @@ class CustomBlock extends ToolbarButton {
                 if (!button.parentNode) {
                     console.error(`Could not find ${this.label} node`)
                 } else {
-                    this.edit(<Element>button.parentNode)
+                    this.edit(<HTMLElement>button.parentNode)
                 }
             }))
         }
@@ -194,8 +194,8 @@ class CustomBlock extends ToolbarButton {
         //console.warn('custom setState edt.range',edt.range)
         this.disabled = false
         if (!this.editor.range ||
-            this.editor.range.rootNode == this.editor.editorNode ||
-            Helpers.isBlock(this.editor.range.rootNode) == false) {
+            this.editor.range.firstElementNode == this.editor.editorNode ||
+            Helpers.isBlock(this.editor.range.firstElementNode) == false) {
             this.disabled = true
         }
 
@@ -207,7 +207,7 @@ class CustomBlock extends ToolbarButton {
             this.element.classList.add('active')
 
             // // If we have a range containing a custom element then make the button active
-            // const custom = this.editor.range?.blockParent?.querySelector(this.tag)
+            // const custom = this.editor.range?.firstSupportedBlockParent?.querySelector(this.tag)
             // if (custom) {
             //     this.element.classList.add('active')
             // } else {
@@ -309,8 +309,8 @@ class CustomBlock extends ToolbarButton {
     // -----------------------------------------------------------------------------
 
     /**
-     * Edit an existing comment node by extracting the data from the node and displaying
-     * the edit form. Sets the comment node to be edited
+     * Edit an existing custom node by extracting the data from the node and displaying
+     * the edit form. Sets the custom node to be edited
      */
     private edit(element: HTMLElement): void {
         // If we already have an active panel - ignore edit clicks

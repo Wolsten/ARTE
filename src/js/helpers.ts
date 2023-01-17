@@ -162,33 +162,21 @@ export const isCustom = function (node: HTMLElement): boolean {
     return tags.custom.includes(node.tagName)
 }
 
-/**
- * Return true if child is not the parent but contains the parent
- */
-export function contains(parent: HTMLElement, child: Node): boolean {
-    return parent !== child && parent.contains(child)
-}
+// /**
+//  * Return true if child is not the parent but contains the parent
+//  */
+// export function contains(parent: HTMLElement, child: Node): boolean {
+//     return parent !== child && parent.contains(child)
+// }
 
 
 /**
- * Get the parent block node or return the block if the node itself is a block
- * Returns parent block node or null if error occurs
+ * Get the first "supported" block node, may be the node passed in
+ * or could be the editor itself (a DIV)
  */
-export const getParentBlockNode = function (node: Node | null): Node | null {
-    if (!node) {
-        console.warn('Error. Passed null node to getParentBlockNode')
-        return null
-    }
-    // console.log('getParentBlockNode',node)
-    // Keep going up the tree while the node is not a block node
-    // (the editor is a block node - a DIV)
+export const getParentBlockNode = function (node: Node): Node {
     while (isBlock(node) == false) {
-        if (node.parentNode == null) {
-            console.warn('Error. Found missing parent node when getting parent block node')
-            return null
-        }
-        node = node.parentNode
-        // console.log('node',node)
+        node = <Node>node.parentNode
     }
     return node
 }

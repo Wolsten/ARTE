@@ -69,25 +69,16 @@ export default class Style extends ToolbarButton {
 
 
     click(): void {
-        if (!this.editor.range?.rootNode) return
-        // Adjust rootNode if required
-        if (Helpers.isBlock(this.editor.range.rootNode) == false) {
-            const newRootNode = Helpers.getParentBlockNode(this.editor.range.rootNode)
-            if (newRootNode) {
-                this.editor.range.rootNode = newRootNode
-            }
-        }
+        if (!this.editor.range) return
+
         // Set newStyle, newValue and action
         this.setStyleProps()
         // Initialise phase detection and parse the root node
         this.phase = new Phase(this.editor.range, false)
-        if (!this.phase.status) {
-            console.error('Something went wrong starting to apply the styling')
-            return
-        }
-        const html = this.parseNode(this.editor.range.rootNode, [], this.editor.range)
-        // console.log('html',html)
-        Helpers.replaceNode(this.editor.range.rootNode, this.editor.range.rootNode.nodeName, html)
+        const html = this.parseNode(this.editor.range.firstSupportedBlockParent, [], this.editor.range)
+        Helpers.replaceNode(this.editor.range.firstSupportedBlockParent, this.editor.range.firstSupportedBlockParent.nodeName, html)
+        // const html = this.parseNode(this.editor.range.firstElementNode, [], this.editor.range)
+        // Helpers.replaceNode(this.editor.range.firstElementNode, this.editor.range.firstElementNode.nodeName, html)
         // Reset the selection
         Helpers.resetSelection(this.editor.editorNode)
         this.editor.updateRange()
@@ -101,18 +92,12 @@ export default class Style extends ToolbarButton {
      * Set the disabled and active states of a button
      */
     setState(): void {
-        if (!this.element) {
-            console.error('Missing button element for button', this.tag)
-            return
-        }
+        // console.log('setting style state for', this.tag)
 
-        // console.log('setting style state')
         if (this.tag == 'CLEAR') {
             this.element.classList.remove('active')
         }
 
-        // The rootNode should not be the editor or list container - (implying 
-        // multiple blocks selected) 
         this.enableOrDisable()
 
         // Check whether the computed style matches the btn
@@ -168,7 +153,7 @@ export default class Style extends ToolbarButton {
 
 
     /**
-     * Split the style sype property into newStyle:newValue parts and set the action
+     * Split the style type property into newStyle:newValue parts and set the action
      */
     private setStyleProps() {
         const styleParts = this.style.split(':')
@@ -388,7 +373,7 @@ export default class Style extends ToolbarButton {
         // colour is added
         let items = []
         let values = []
-        let newStyles = ''
+        // let newStyles = ''
         for (let i = 0; i < styles.length; i++) {
             const parts = styles[i].split(':')
             items.push(parts[0].trim())

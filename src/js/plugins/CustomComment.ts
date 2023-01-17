@@ -1,12 +1,13 @@
 /**
- * Add comments to paragraphs
+ * Add comments within text
  * 
  * File format:
- *   <ARTE-COMMENT id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false"></arte-comment>
+ *   Paragraph text <ARTE-COMMENT id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false">target text</arte-comment> more paragraph text
  * 
  * Editor format:
  *   <ARTE-COMMENT id ="id" data-comment="comment" data-created="date" data-updated="date" data-resolved="true|false" contenteditable="false">
- *      <button type="button" title="edit this comment"><i>icon</i></button>
+ *      <button type="button" title="edit this comment">target text</button>
+ *      <i>icon</i>
  *   </ARTE-COMMENT>
  * 
  * Sidebar format:
@@ -25,10 +26,14 @@ import { Modal, ModalButton, ModalButtonAction, ModalOptionsType } from '../Moda
 import SidebarButton from '../SidebarButton'
 import Editor from '../Editor'
 import CustomBlock from './CustomBlock'
+import BufferButton from './BufferButton'
 
 
 
 export default class CustomComment extends CustomBlock {
+
+
+    target = ''
 
     constructor(editor: Editor, group: number) {
         super(editor, 'ARTE-COMMENT', 'Comment', Icons.comment, group)
@@ -39,11 +44,18 @@ export default class CustomComment extends CustomBlock {
      * Show the custom dialogue for new creation or editing
      */
     show(): void {
+        // if (!this.editor.range) {
+        //     console.warn('No selection to add comment to')
+        //     return
+        // }
         const buttons = [
             new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
         ]
         if (this.editFlag) {
             buttons.push(new ModalButton(ModalButtonAction.Delete, 'Delete', () => this.handleDelete(), 'comment'))
+        } else if (!this.editor.range?.selectedText) {
+            // No selection
+            return
         } else {
             // Initialise an action as saved to file
             this.node = document.createElement(this.tag)
@@ -57,13 +69,34 @@ export default class CustomComment extends CustomBlock {
             this.setAttribute('created', '')
             this.setAttribute('updated', '')
             this.setAttribute('resolved', 'false')
+            this.setAttribute('resolved', this.editor.range.selectedText)
         }
         // Create and display the modal panel
         buttons.push(new ModalButton(ModalButtonAction.Confirm, 'Save', () => this.save()))
         const options: ModalOptionsType = { focusId: 'comment' }
         const title = (this.editFlag ? 'Edit ' : 'Create ') + this.label
         this.drawer = new Modal(title, this.form(), buttons, options)
+
+        const resolveButton = this.drawer.getInputElement('button#resolve')
+        if (resolveButton) {
+            resolveButton.addEventListener('click', () => this.handleResolvebutton(resolveButton))
+        }
     }
+
+
+    handleResolvebutton(button: HTMLElement) {
+
+        const resolved = this.getAttribute('resolved')
+        console.log('Handling resolve button with resolve set to ', resolved)
+        if (resolved == 'true') {
+            this.setAttribute('resolved', 'false')
+        } else {
+            this.setAttribute('resolved', 'true')
+        }
+        console.log('Handling resolve button with resolve NOW set to ', resolved)
+        button.innerHTML = this.resolveLabel()
+    }
+
 
 
     /**
@@ -74,6 +107,7 @@ export default class CustomComment extends CustomBlock {
         const created = this.getAttribute('created')
         const updated = this.getAttribute('updated')
         const comment = this.getAttribute('comment')
+        const target = this.getAttribute('target')
         let timestamps = ''
         let resolve = ''
         if (created != '') {
@@ -88,7 +122,10 @@ export default class CustomComment extends CustomBlock {
             resolve = `<button type="button" id="resolve">${title}</button>`
         }
         return `<div class="arte-comment">
-                    <div class="form-input">
+                    <label>Text targeted by comment</label>
+                    <p class="selected-text">${target}</p>
+                    <div class="form-input"> 
+                        <label for="comment">Comment</label>
                         <textarea id="comment" class="form-control" placeholder="Enter your comment" required>${comment}</textarea>
                     </div>
                     ${timestamps}
@@ -121,7 +158,8 @@ export default class CustomComment extends CustomBlock {
             this.setAttribute('updated', localTimestamp)
         } else {
             this.setAttribute('created', localTimestamp)
-            this.append()
+            // this.append()
+            this.replace()
         }
         this.tidyUp()
     }
@@ -130,10 +168,15 @@ export default class CustomComment extends CustomBlock {
     /**
      * Template for how the action is presented in the editor
      */
+    // template(): string {
+    //     return `<button type="button" title="edit this comment">
+    //                 <i>${Icons.comment}</i>
+    //             </button>`
+    // }
+
     template(): string {
-        return `<button type="button" title="edit this comment">
-                    <i>${Icons.comment}</i>
-                </button>`
+        const target = this.getAttribute('target')
+        return `<button type="button" title="edit this comment">${target}</button><i>${Icons.comment}</i>`
     }
 
 

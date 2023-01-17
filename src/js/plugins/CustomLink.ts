@@ -34,6 +34,10 @@ export default class CustomLink extends CustomBlock {
      * Show the custom dialogue for new creation or editing
      */
     show(): void {
+        if (!this.editor.range) {
+            console.warn('No selection to add link to')
+            return
+        }
         const buttons = [
             new ModalButton(ModalButtonAction.Cancel, 'Cancel'),
         ]
@@ -46,7 +50,8 @@ export default class CustomLink extends CustomBlock {
                 console.error(`Failed to create new ${this.label}`)
                 return
             }
-            const selectedText = this.editor.range?.getSelectedText() || ''
+            // const selectedText = this.editor.range?.getSelectedText() || ''
+            const selectedText = this.editor.range.selectedText
             const href = selectedText.includes('http') ? selectedText : ''
             const label = href ? '' : selectedText
             this.node.id = Helpers.generateUid()

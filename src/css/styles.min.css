@@ -826,15 +826,17 @@ article.action p {
 
 arte-comment {
   display: inline-block;
-  position: absolute;
-  top: -0.5rem;
-  right: -1rem;
 }
 arte-comment button {
   border: none;
   background-color: transparent;
+  border-bottom: 2px dashed var(--colour-primary);
 }
-arte-comment button i {
+arte-comment i {
+  display: block;
+  position: absolute;
+  top: 0.5rem;
+  right: -0.5rem;
   font-weight: bold;
   color: var(--colour-warning);
   background-color: transparent;
@@ -842,7 +844,7 @@ arte-comment button i {
 arte-comment.custom-selected {
   outline: none;
 }
-arte-comment[data-resolved=true] button i {
+arte-comment[data-resolved=true] i {
   color: var(--colour-success);
 }
 
@@ -853,6 +855,14 @@ arte-comment[data-resolved=true] button i {
   color: var(--colour-success);
 }
 
+.arte-comment .selected-text {
+  font-style: italic;
+  color: var(--colour-link);
+  margin-bottom: 2rem;
+}
+.arte-comment .form-input {
+  flex-direction: column;
+}
 .arte-comment textarea {
   min-height: 200px;
 }

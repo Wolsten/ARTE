@@ -1,29 +1,20 @@
 import * as Helpers from './helpers.js'
-import EditRange from '../EditRange'
+import EditRange from './EditRange'
 
 
 export default class Phase {
 
-
     startContainer: Node
     endContainer: Node
     phase = 'pre'
-    status = false
 
 
     constructor(range: EditRange, block: boolean) {
         this.startContainer = range.startContainer
         this.endContainer = range.endContainer
-        this.status = true
         if (block) {
-            const startContainer = Helpers.getParentBlockNode(this.startContainer)
-            const endContainer = Helpers.getParentBlockNode(this.startContainer)
-            if (startContainer && endContainer) {
-                this.startContainer = startContainer
-                this.endContainer = endContainer
-            } else {
-                this.status = false
-            }
+            this.startContainer = Helpers.getParentBlockNode(this.startContainer)
+            this.endContainer = Helpers.getParentBlockNode(this.endContainer)
         }
     }
 
@@ -51,16 +42,6 @@ export default class Phase {
         }
         // console.log('Node',node, 'New phase =',phase)
     }
-
-
-    // /**
-    //  * Return the current phase
-    //  * @returns {string}
-    //  */
-    // get():string {
-    //     return this.phase
-    // }
-
 
 
     /**
